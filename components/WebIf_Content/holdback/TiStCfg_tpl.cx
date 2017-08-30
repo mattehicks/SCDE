@@ -1,0 +1,108 @@
+﻿//##################################################################################################
+//###  Function: Callback for Time-Stamp-Configuration (cgi resource) 
+//###  ESP 8266EX SOC Activities ...
+//###  (C) EcSUHA
+//###  Maik Schulze, Sandfuhren 4, 38448 Wolfsburg, Germany
+//###  MSchulze780@GMAIL.COM
+//###  EcSUHA - ECONOMIC SURVEILLANCE AND HOME AUTOMATION - WWW.EcSUHA.DE
+//##################################################################################################
+#include "ProjectConfig.h"
+
+
+
+#include "c_types.h"
+#include <string.h>
+#include <osapi.h>
+#include "user_interface.h"
+#include "mem.h"
+#include "sntp.h"
+#include "SCDED.h"
+#include "espmissingincludes.h"
+#include "SCDE.h"
+#include "ip_addr.h"
+
+//#include "CGI_TiStCfg.h"
+#include "CGI_NoAuthErr.h"
+#include "CGI_NotFoundErr.h"
+
+
+
+#include "TiStCfg_tpl.h"
+
+
+
+/*
+ *--------------------------------------------------------------------------------------------------
+ *FName: TiStCfg_tpl
+ * Desc: Template %X% replacement Code for the TimeService.htm Page
+ * Info: WARNING: CHECK BUFFERSIZE
+ * Para: WebIF_HTTPDConnSlotData_t *conn -> ptr to connection slot
+ *       char *token -> ptr to string which contains the token to replace
+ *       void **arg -> ???
+ * Rets: -/-
+ *--------------------------------------------------------------------------------------------------
+ */
+void ICACHE_FLASH_ATTR 
+TiStCfg_tpl(WebIF_HTTPDConnSlotData_t *conn, char *token, void **arg) 
+{
+  char buff[400];
+  if (token==NULL) return;
+
+  switch(token[0])
+	{
+
+//--------------------------------------------------------------------------------------------------
+
+	case '?':				// '?' -> Device Name requested!
+	{
+	// get Devicename from current Service AP settings
+	struct softap_config softap_config;
+	wifi_softap_get_config (&softap_config);
+
+	os_strcpy(buff,
+		(char*) &softap_config.ssid);
+	}
+	break;
+
+//--------------------------------------------------------------------------------------------------
+/*
+	case 'A':				// 'A(A-C)' -> Get NTP Servername (0-2)
+	os_strcpy(buff,
+		sntp_getservername((((uint8_t) token[1] -1) & 0b00000111))); // A=0;B=1;C=2
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	case 'B':				// 'B' -> Get current timezone
+	os_sprintf(buff,
+		"%d",
+		SysCfgRamFlashMirrored->NTTimezone);
+	// normalerweise -> sntp_get_timezone
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	case 'C':				// 'C' -> Get real time for timezone from device (char* to TEXT)
+	{
+	uint32 current_stamp;
+
+	current_stamp =
+		sntp_get_current_timestamp();
+
+	os_strcpy(buff, 
+		sntp_get_real_time(current_stamp) );
+	}
+	break;
+
+//--------------------------------------------------------------------------------------------------
+*/
+	default:				// Not found? Zero terminate!
+	buff[0] = 0;
+	break;
+
+//--------------------------------------------------------------------------------------------------
+	}
+
+  SCDED_Send(conn, buff, -1);
+}
+
