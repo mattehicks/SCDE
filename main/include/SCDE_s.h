@@ -565,6 +565,7 @@ struct Common_Definition_s {
 
   int Common_CtrlRegA;		// Common Control Reg A (enum Common_CtrlRegA from WEBIF.h)
 
+  xSemaphoreHandle def_mux; // 
 
   bulkUpdateReadings_t *bulkUpdateReadings;
   STAILQ_HEAD (stailhead6, reading_s) headReadings;	// Link to assigned Attributes

@@ -205,6 +205,9 @@ Define_CommandFn (const uint8_t *args
 
   // prepare default fields in definition
 
+  // create semaphore for definition access
+  NewCommon_Definition->def_mux = xSemaphoreCreateMutex();
+
   // copy ptr to associated module
   NewCommon_Definition->module = Module;
 

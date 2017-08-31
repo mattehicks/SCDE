@@ -636,6 +636,11 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
 
 // ------------------------------------------------------------------------------------------------
 
+//  xSemaphoreTake(ESP32_I2C_Master_Definition->def_mux
+//    ,portMAX_DELAY);
+
+// ------------------------------------------------------------------------------------------------
+
   // store FD to Definition. Will than be processed in global loop ... -> THIS MODULE USES NO FD
   ESP32_I2C_Master_Definition->common.fd = -1;
 
