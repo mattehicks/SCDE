@@ -48,9 +48,8 @@ static SCDEFn_t* SCDEFn;
   const uint8_t helpDetailTexta[] = "Usagebwrebwerb: Define <name> <type> <options>, to Define a device";	// CommandHelp, Len
 
 
-providedByCommand_t Define_ProvidedByCommand =
-  {
-   "define"					// Command-Name of command -> should be same name as libfilename.so !
+providedByCommand_t Define_ProvidedByCommand = {
+  "define"					// Command-Name of command -> should be same name as libfilename.so !
   ,6						// length of cmd
   ,Define_InitializeCommandFn			// Initialize Fn
   ,Define_CommandFn				// the Fn code
@@ -58,7 +57,7 @@ providedByCommand_t Define_ProvidedByCommand =
   ,sizeof(helpTexta)
   ,&helpDetailTexta
   ,sizeof(helpDetailTexta)
-  };
+};
 
 //(const uint8_t *) "Usage: Define <name> <type> <options>, to Define a device",57);	// CommandHelp, Len
 
@@ -73,7 +72,7 @@ providedByCommand_t Define_ProvidedByCommand =
  */
 int 
 Define_InitializeCommandFn(SCDERoot_t* SCDERootptr)
-  {
+{
 
   // make data root locally available
   SCDERoot = SCDERootptr;
@@ -90,7 +89,7 @@ Define_InitializeCommandFn(SCDERoot_t* SCDERootptr)
 
   return 0;
 
-  }
+}
 
 
 
@@ -129,13 +128,13 @@ Define_CommandFn (const uint8_t *args
   int i = 0;
 
   // seek to next space !'\32'
-  while( (i < argsLen) && (*typeName != ' ') ) {i++;typeName++;}
+  while( (i < argsLen) && (*typeName != ' ') ) {i++; typeName++;}
 
   // length of Name
   size_t nameLen = i;
 
   // seek to start position of Type-Name '\32'
-  while( (i < argsLen) && (*typeName == ' ') ) {i++;typeName++;}
+  while( (i < argsLen) && (*typeName == ' ') ) {i++; typeName++;}
 
   // set start of possible Definition
   const uint8_t *definition = typeName;
@@ -144,13 +143,13 @@ Define_CommandFn (const uint8_t *args
   int j = 0;
 
   // seek to next space !'\32'
-  while( (i < argsLen) && (*definition != ' ') ) {i++,j++;definition++;}
+  while( (i < argsLen) && (*definition != ' ') ) {i++, j++; definition++;}
 
   // length of Type-Name
   size_t typeNameLen = j;
 
   // start position of Definition
-  while( (i < argsLen) && (*definition == ' ') ) {i++;definition++;}
+  while( (i < argsLen) && (*definition == ' ') ) {i++; definition++;}
 
   // length of Type-Name
   size_t definitionLen = argsLen - i;
@@ -158,21 +157,21 @@ Define_CommandFn (const uint8_t *args
   // veryfy lengths > 0, definition 0 allowed
   if ( (nameLen) == 0 || (typeNameLen == 0) ) {
 
-	// alloc mem for retMsg
-	strTextMultiple_t *retMsg =
-		 malloc(sizeof(strTextMultiple_t));
+    // alloc mem for retMsg
+    strTextMultiple_t *retMsg =
+      malloc(sizeof(strTextMultiple_t));
 
-	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
-				,"Could not interpret command '%.*s'! Usage: Define <name> <type-name> <type dependent arguments>"
-			   	,argsLen
-				,args);
+    // response with error text
+    retMsg->strTextLen = asprintf(&retMsg->strText
+      ,"Could not interpret command '%.*s'! Usage: Define <name> <type-name> <type dependent arguments>"
+      ,argsLen
+      ,args);
 
-	// insert retMsg in stail-queue
-	STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+    // insert retMsg in stail-queue
+    STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
 
-	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-	return headRetMsgMultiple;
+    // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+    return headRetMsgMultiple;
 
   }
 
@@ -189,16 +188,15 @@ Define_CommandFn (const uint8_t *args
 
    // get the module ptr by name
    Module_t* Module = SCDEFn->GetLoadedModulePtrByNameFn(typeName
-		   , typeNameLen);
+    ,typeNameLen);
 
   // do we need to reload Module?
   if (!Module) // NOT FUNCTIONAL!
-	Module = SCDEFn->CommandReloadModuleFn(typeName
-		   , typeNameLen);
+    Module = SCDEFn->CommandReloadModuleFn(typeName, typeNameLen);
 
   // alloc mem for modul specific definition structure (Common_Definition_t + X)
   Common_Definition_t *NewCommon_Definition
-	= malloc(Module->ProvidedByModule->SizeOfDefinition);
+    = malloc(Module->ProvidedByModule->SizeOfDefinition);
 
   // zero the struct
   memset(NewCommon_Definition, 0, Module->ProvidedByModule->SizeOfDefinition);
@@ -217,10 +215,10 @@ Define_CommandFn (const uint8_t *args
   STAILQ_INSERT_HEAD(&SCDERoot->HeadCommon_Definitions, NewCommon_Definition, entries);
 
   printf("Defined Name:%.*s TypeName:%.*s\n"
-		,NewCommon_Definition->nameLen
-  		,NewCommon_Definition->name
-  		,NewCommon_Definition->module->ProvidedByModule->typeNameLen
-		,NewCommon_Definition->module->ProvidedByModule->typeName);
+    ,NewCommon_Definition->nameLen
+    ,NewCommon_Definition->name
+    ,NewCommon_Definition->module->ProvidedByModule->typeNameLen
+    ,NewCommon_Definition->module->ProvidedByModule->typeName);
 
   // store Definition string in Defp->Definition
   NewCommon_Definition->definition = malloc(definitionLen);
@@ -232,46 +230,38 @@ Define_CommandFn (const uint8_t *args
 
   // do we need initial state? or NULL ? store initial state
   NewCommon_Definition->stateLen =
-	asprintf((char**)&NewCommon_Definition->state, "???");
+    asprintf((char**)&NewCommon_Definition->state, "???");
 
   // init stailq readings
   STAILQ_INIT(&NewCommon_Definition->headReadings);
 
-
-
-
-
-
-
-
-
-
-
   // DefineFn assigned by module ?
   if (Module->ProvidedByModule->DefineFn) {
 
-	printf("Calling DefineFN for Name:%.*s TypeName:%.*s Definition:%.*s cnt:%d state:%.*s\n"
-		,NewCommon_Definition->nameLen
-		,NewCommon_Definition->name
-		,NewCommon_Definition->module->ProvidedByModule->typeNameLen
-		,NewCommon_Definition->module->ProvidedByModule->typeName
-		,NewCommon_Definition->definitionLen
-		,NewCommon_Definition->definition
-  	 	,NewCommon_Definition->nr
-		,NewCommon_Definition->stateLen
-		,NewCommon_Definition->state);
+    printf("Calling DefineFN for Name:%.*s TypeName:%.*s Definition:%.*s cnt:%d state:%.*s\n"
+      ,NewCommon_Definition->nameLen
+      ,NewCommon_Definition->name
+      ,NewCommon_Definition->module->ProvidedByModule->typeNameLen
+      ,NewCommon_Definition->module->ProvidedByModule->typeName
+      ,NewCommon_Definition->definitionLen
+      ,NewCommon_Definition->definition
+      ,NewCommon_Definition->nr
+      ,NewCommon_Definition->stateLen
+      ,NewCommon_Definition->state);
 
-	// execute DefineFn and get error msg
-	strTextMultiple_t *retMsg = 
-		Module->ProvidedByModule->DefineFn(NewCommon_Definition);
+    // execute DefineFn and maybe get an error msg
+    strTextMultiple_t *retMsg = 
+      Module->ProvidedByModule->DefineFn(NewCommon_Definition);
 
-	// got an error msg?
-	if (retMsg) {
+    // got an error msg?
+    if (retMsg) {
 
-		// insert retMsg in stail-queue
-		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-	}
+      // insert retMsg in stail-queue
+      STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+    }
+	  
   }
+	
 /*
   // DefineFn NOT assigned by module
   else	{
@@ -302,7 +292,7 @@ Define_CommandFn (const uint8_t *args
 //	printf("Got error from DefineFN %s \n"
 //			  ,retMsg.strText);
 
-	printf("Got error from DefineFN!\n");
+    printf("Got error from DefineFN!\n");
 
 	//Log 1, "Define $def: $ret";
 //	DefineDefinition(Name);	//Define $defs{$name};                            # Veto
@@ -314,25 +304,5 @@ Define_CommandFn (const uint8_t *args
   return headRetMsgMultiple;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
