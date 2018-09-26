@@ -48,7 +48,7 @@ typedef struct xMultipleString_s xMultipleString_t;
  */
 struct strText_s {
 
-  uint8_t *strText;				// ptr to allocated mem filled with text
+  char *strText;				// ptr to allocated mem filled with text
   size_t strTextLen;				// length of the text
 
 };
@@ -63,7 +63,7 @@ struct strTextMultiple_s {
 
   STAILQ_ENTRY(strTextMultiple_s) entries;	// Link to next strTextMultiple
 
-  uint8_t *strText;				// ptr to allocated mem filled with text
+  char *strText; 				// ptr to allocated mem filled with text
   size_t strTextLen;				// length of the text
 
 };

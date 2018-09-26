@@ -1,4 +1,4 @@
-c_timeutils.o: /home/maikschulze/esp/SCDE/main/./c_timeutils.c \
+c_timeutils.o: /home/maikschulze/esp/SCDE/main/c_timeutils.c \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/newlib.h \
@@ -12,6 +12,7 @@ c_timeutils.o: /home/maikschulze/esp/SCDE/main/./c_timeutils.c \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_types.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/lock.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdint.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_intsup.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdio.h \
@@ -46,6 +47,8 @@ c_timeutils.o: /home/maikschulze/esp/SCDE/main/./c_timeutils.c \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h:
 
+/home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h:
+
 /home/maikschulze/esp/esp-idf/components/newlib/include/stdint.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_intsup.h:
@@ -59,3 +62,4 @@ c_timeutils.o: /home/maikschulze/esp/SCDE/main/./c_timeutils.c \
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/reent.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h:
+/home/maikschulze/esp/SCDE/main/./c_timeutils.c:

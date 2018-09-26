@@ -29,11 +29,11 @@
 
 
 #include "esp_attr.h"
-#include "esp_deep_sleep.h"
+#include "esp_sleep.h"
 //#include "esp_err.h" bug mit assert
 #include "esp_event.h"
 #include "esp_event_loop.h"
-#include "esp_heap_alloc_caps.h"
+#include "esp_heap_caps.h"
 #include "esp_intr.h"
 #include "esp_ipc.h"
 #include "esp_ssc.h"
@@ -42,7 +42,7 @@
 #include "esp_wifi.h"
 #include "esp_types.h"
 #include "esp_wifi_types.h"
-#include "heap_alloc_caps.h"
+//#include "heap_alloc_caps.h"
 
 #include "esp_log.h"
 

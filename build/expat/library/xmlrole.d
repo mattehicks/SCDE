@@ -18,3 +18,4 @@ library/xmlrole.o: \
 /home/maikschulze/esp/esp-idf/components/expat/include/expat/xmltok.h:
 
 /home/maikschulze/esp/esp-idf/components/expat/include/expat/ascii.h:
+/home/maikschulze/esp/esp-idf/components/expat/library/xmlrole.c:

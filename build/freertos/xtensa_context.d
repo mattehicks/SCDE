@@ -1,5 +1,5 @@
 xtensa_context.o: \
- /home/maikschulze/esp/esp-idf/components/freertos/./xtensa_context.S \
+ /home/maikschulze/esp/esp-idf/components/freertos/xtensa_context.S \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_rtos.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/coreasm.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core.h \
@@ -12,7 +12,6 @@ xtensa_context.o: \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/specreg.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/corebits.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/system.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/simcall.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOSConfig.h \
  /home/maikschulze/esp/SCDE/build/include/sdkconfig.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_config.h \
@@ -46,8 +45,6 @@ xtensa_context.o: \
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/system.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/simcall.h:
-
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOSConfig.h:
 
 /home/maikschulze/esp/SCDE/build/include/sdkconfig.h:
@@ -63,3 +60,4 @@ xtensa_context.o: \
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_rtos.h:
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_context.h:
+/home/maikschulze/esp/esp-idf/components/freertos/./xtensa_context.S:

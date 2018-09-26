@@ -1,5 +1,5 @@
 libtelnet.o: \
- /home/maikschulze/esp/SCDE/components/Telnet_Module/./libtelnet.c \
+ /home/maikschulze/esp/SCDE/components/Telnet_Module/libtelnet.c \
  /home/maikschulze/esp/esp-idf/components/newlib/include/config.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/ieeefp.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/features.h \
@@ -21,6 +21,7 @@ libtelnet.o: \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdio.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/types.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/errno.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/errno.h \
@@ -68,6 +69,8 @@ libtelnet.o: \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h:
 
+/home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h:
+
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/errno.h:
@@ -75,3 +78,4 @@ libtelnet.o: \
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/errno.h:
 
 /home/maikschulze/esp/SCDE/components/Telnet_Module/include/libtelnet.h:
+/home/maikschulze/esp/SCDE/components/Telnet_Module/./libtelnet.c:

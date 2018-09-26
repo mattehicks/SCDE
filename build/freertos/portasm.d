@@ -1,4 +1,4 @@
-portasm.o: /home/maikschulze/esp/esp-idf/components/freertos/./portasm.S \
+portasm.o: /home/maikschulze/esp/esp-idf/components/freertos/portasm.S \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_rtos.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/coreasm.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core.h \
@@ -11,7 +11,6 @@ portasm.o: /home/maikschulze/esp/esp-idf/components/freertos/./portasm.S \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/specreg.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/corebits.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/system.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/simcall.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOSConfig.h \
  /home/maikschulze/esp/SCDE/build/include/sdkconfig.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_config.h \
@@ -44,8 +43,6 @@ portasm.o: /home/maikschulze/esp/esp-idf/components/freertos/./portasm.S \
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/system.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/simcall.h:
-
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOSConfig.h:
 
 /home/maikschulze/esp/SCDE/build/include/sdkconfig.h:
@@ -59,3 +56,4 @@ portasm.o: /home/maikschulze/esp/esp-idf/components/freertos/./portasm.S \
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_timer.h:
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_rtos.h:
+/home/maikschulze/esp/esp-idf/components/freertos/./portasm.S:

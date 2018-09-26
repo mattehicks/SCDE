@@ -1,5 +1,5 @@
 xtensa_intr_asm.o: \
- /home/maikschulze/esp/esp-idf/components/freertos/./xtensa_intr_asm.S \
+ /home/maikschulze/esp/esp-idf/components/freertos/xtensa_intr_asm.S \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/hal.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/xtensa-versions.h \
@@ -51,3 +51,4 @@ xtensa_intr_asm.o: \
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_config.h:
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_context.h:
+/home/maikschulze/esp/esp-idf/components/freertos/./xtensa_intr_asm.S:

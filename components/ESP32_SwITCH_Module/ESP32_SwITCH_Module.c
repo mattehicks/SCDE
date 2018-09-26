@@ -693,32 +693,51 @@ ESP32_SwITCH_Define(Common_Definition_t *Common_Definition)
 
 
 
+/*
+
+In file included from /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_reg.h:20:0,
+                 from /home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h:19,
+                 from /home/maikschulze/esp/SCDE/components/ESP32_SwITCH_Module/./ESP32_SwITCH_Module.c:701:
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h: In function 'ESP32_SwITCH_Define':
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h:43:34: error: invalid storage class for function 'DPORT_REG_READ'
+ static inline uint32_t IRAM_ATTR DPORT_REG_READ(uint32_t reg)
+*/
 
 
+//#include "soc/dport_reg.h"
+
+//#include "driver/periph_ctrl.h"
+//#include "soc/dport_reg.h"
 
 
-
-#include "driver/periph_ctrl.h"
-
-#include "driver/gpio.h"
+//#include "driver/gpio.h"
 //#include "driver/pcnt.h"
 
 
-#include "esp_attr.h"
-#include "esp_log.h"
-#include "soc/gpio_sig_map.h"
+//#include "esp_attr.h"
+//#include "esp_log.h"
+//#include "soc/gpio_sig_map.h"
 
 
 //esp_err_t pcnt_set_pin(pcnt_unit_t unit, pcnt_channel_t channel, int pulse_io, int ctrl_io)
 
 
-
+/*
+In file included from /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_reg.h:20:0,
+                 from /home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h:19,
+                 from /home/maikschulze/esp/SCDE/components/ESP32_SwITCH_Module/./ESP32_SwITCH_Module.c:707:
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h: In function 'ESP32_SwITCH_Define':
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h:43:34: error: invalid storage class for function 'DPORT_REG_READ'
+ static inline uint32_t IRAM_ATTR DPORT_REG_READ(uint32_t reg)
+  */
 
 
 
   // enable the PWM (LED-Controller)
-  SET_PERI_REG_MASK(DPORT_PERIP_CLK_EN_REG, DPORT_LEDC_CLK_EN);
-  CLEAR_PERI_REG_MASK(DPORT_PERIP_RST_EN_REG, DPORT_LEDC_RST);
+//  DPORT_SET_PERI_REG_MASK(DPORT_PERIP_CLK_EN_REG, DPORT_LEDC_CLK_EN);
+//  DPORT_CLEAR_PERI_REG_MASK(DPORT_PERIP_RST_EN_REG, DPORT_LEDC_RST);
+//x    DPORT_SET_PERI_REG_MASK(DPORT_PERIP_CLK_EN_REG,DPORT_LEDC_CLK_EN);
+//x   DPORT_CLEAR_PERI_REG_MASK(DPORT_PERIP_RST_EN_REG, DPORT_LEDC_RST);
 
 
 

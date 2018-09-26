@@ -59,7 +59,7 @@
 #include "esp_types.h"
 #include "esp_wifi_types.h"
 #include "esp_log.h"
-#include "heap_alloc_caps.h"
+//#include "heap_alloc_caps.h"
 
 #include "sdkconfig.h"
 

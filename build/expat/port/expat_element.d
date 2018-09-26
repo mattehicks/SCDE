@@ -16,6 +16,7 @@ port/expat_element.o: \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/lock.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/types.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdlib.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/stdlib.h \
@@ -57,6 +58,8 @@ port/expat_element.o: \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h:
 
+/home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h:
+
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/stdlib.h:
@@ -72,3 +75,4 @@ port/expat_element.o: \
 /home/maikschulze/esp/esp-idf/components/expat/include/expat/expat.h:
 
 /home/maikschulze/esp/esp-idf/components/expat/include/expat/expat_external.h:
+/home/maikschulze/esp/esp-idf/components/expat/port/expat_element.c:

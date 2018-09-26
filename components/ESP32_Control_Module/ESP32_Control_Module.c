@@ -1963,7 +1963,7 @@ ESP32_Control_Set(Common_Definition_t* Common_Definition
   if (affectedReadings & ( SCDE_R_WiFi_Country ) ) {
 
 	// Set new WiFi country
-	esp_wifi_set_country(country);
+	esp_wifi_set_country(&country);
 
   }
 
@@ -2510,7 +2510,7 @@ ESP32_Control_Set(Common_Definition_t* Common_Definition
 
 	#if SCDEH_DBG >= 5
 	printf("&WiFi_Country=%s"
-		,SCDE_GetDesc(wifiCountry, country));
+		,SCDE_GetDesc(wifiCountry, &country));
 	#endif
 
 
@@ -2519,7 +2519,7 @@ ESP32_Control_Set(Common_Definition_t* Common_Definition
 
 	readingValueTextLen = asprintf((char **) &readingValueText
 		,"%s"
-		,SCDE_GetDesc(wifiCountry, country));
+		,SCDE_GetDesc(wifiCountry, &country));
 
 	SCDEFn->readingsBulkUpdateFn(Common_Definition
 		,readingNameText

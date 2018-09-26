@@ -51,7 +51,7 @@
 #include "esp_wifi.h"
 #include "esp_types.h"
 #include "esp_wifi_types.h"
-#include "heap_alloc_caps.h"
+#include "esp_heap_alloc_caps.h"
 
 #include "esp_log.h"
 
@@ -545,8 +545,8 @@ InitA()
   cfgRet.strText = NULL;
 
   // get initial config-filename from value of attribute (global->configfile)
-  strText_t defName = {(uint8_t*) "global", 6};
-  strText_t attrName = {(uint8_t*) "configfile", 10};
+  strText_t defName = {(char*) "global", 6};
+  strText_t attrName = {(char*) "configfile", 10};
   strText_t *valueName =
 //	GetAttrValTextByDefTextAttrText( {(uint8_t*) "global", 6}, {(uint8_t*) "configfile", 10});
 	GetAttrValTextByDefTextAttrText(&defName, &attrName);
@@ -600,7 +600,7 @@ InitA()
 	// else continuing adding the ret-msgs ...
 	else {
 		// Reallocate memory to new size
-		cfgRet.strText = (uint8_t *) realloc(cfgRet.strText
+		cfgRet.strText = (char *) realloc(cfgRet.strText
 			,cfgRet.strTextLen + retMsg->strTextLen);
 
 		// add command-part to allocated memory
@@ -654,9 +654,9 @@ InitA()
 	,cfgRet.strText);
 
 
-  strText_t defName = {(uint8_t*) "global", 6};
+  strText_t defName = {(char *) "global", 6};
 
-  strText_t attrName = {(uint8_t*) "motd", 4};
+  strText_t attrName = {(char *) "motd", 4};
 
 //  SetAttrValByDefTextAttrTextValText({"global", 6}, {"motd", 10}, motdAttrVal);
 //  SetAttrValByDefTextAttrTextValText(&defName, &attrName, motdAttrVal);
@@ -697,8 +697,8 @@ InitA()
 // -------------------------------------------------------------------------------------------------
 
   // try to get the port (for telnet) from value of attribute (global->port)
-  strText_t defNameGlobal = {(uint8_t*) "global", 6};
-  strText_t attrNamePort = {(uint8_t*) "port", 4};
+  strText_t defNameGlobal = {(char *) "global", 6};
+  strText_t attrNamePort = {(char *) "port", 4};
   strText_t *valueNamePort =
 //	GetAttrValTextByDefTextAttrText( {(uint8_t*) "global", 6}, {(uint8_t*) "port", 4});
 	GetAttrValTextByDefTextAttrText(&defNameGlobal, &attrNamePort);

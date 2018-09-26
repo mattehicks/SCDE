@@ -1,5 +1,5 @@
 xtensa_init.o: \
- /home/maikschulze/esp/esp-idf/components/freertos/./xtensa_init.c \
+ /home/maikschulze/esp/esp-idf/components/freertos/xtensa_init.c \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_rtos.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/hal.h \
@@ -9,7 +9,6 @@ xtensa_init.o: \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/tie.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/corebits.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/system.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/simcall.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOSConfig.h \
  /home/maikschulze/esp/SCDE/build/include/sdkconfig.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_config.h \
@@ -33,9 +32,13 @@ xtensa_init.o: \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdint.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_intsup.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/soc/soc.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/soc.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/esp_assert.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/platform_include/assert.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/assert.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_timer.h \
- /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_rtos.h
+ /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_rtos.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/esp_clk.h
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_rtos.h:
 
@@ -54,8 +57,6 @@ xtensa_init.o: \
 /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/corebits.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/system.h:
-
-/home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/simcall.h:
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOSConfig.h:
 
@@ -103,8 +104,17 @@ xtensa_init.o: \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_intsup.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/soc/soc.h:
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/soc.h:
+
+/home/maikschulze/esp/esp-idf/components/esp32/include/esp_assert.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/platform_include/assert.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/assert.h:
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_timer.h:
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_rtos.h:
+
+/home/maikschulze/esp/esp-idf/components/esp32/include/esp_clk.h:
+/home/maikschulze/esp/esp-idf/components/freertos/./xtensa_init.c:

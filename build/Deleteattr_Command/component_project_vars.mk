@@ -1,6 +1,7 @@
 # Automatically generated build file. Do not edit.
-COMPONENT_INCLUDES += $(PROJECT_PATH)/components/Deleteattr_Command/include $(PROJECT_PATH)/components/Deleteattr_Command/../../main/include
-COMPONENT_LDFLAGS += -lDeleteattr_Command
+COMPONENT_INCLUDES += $(PROJECT_PATH)/components/Deleteattr_Command/include $(PROJECT_PATH)/main/include
+COMPONENT_LDFLAGS += -L$(BUILD_DIR_BASE)/Deleteattr_Command -lDeleteattr_Command
 COMPONENT_LINKER_DEPS += 
 COMPONENT_SUBMODULES += 
-Deleteattr_Command-build: 
+COMPONENT_LIBRARIES += Deleteattr_Command
+component-Deleteattr_Command-build: 

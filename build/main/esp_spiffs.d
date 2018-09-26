@@ -1,4 +1,4 @@
-esp_spiffs.o: /home/maikschulze/esp/SCDE/main/./esp_spiffs.c \
+esp_spiffs.o: /home/maikschulze/esp/SCDE/main/esp_spiffs.c \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdlib.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/ieeefp.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h \
@@ -20,6 +20,7 @@ esp_spiffs.o: /home/maikschulze/esp/SCDE/main/./esp_spiffs.c \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdio.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/types.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/string.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/string.h \
@@ -28,12 +29,13 @@ esp_spiffs.o: /home/maikschulze/esp/SCDE/main/./esp_spiffs.c \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdint.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_intsup.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h \
- /home/maikschulze/esp/SCDE/main/./esp_spiffs.h \
+ /home/maikschulze/esp/SCDE/main/esp_spiffs.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_attr.h \
  /home/maikschulze/esp/esp-idf/components/spi_flash/include/esp_spi_flash.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_err.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/assert.h \
- /home/maikschulze/esp/SCDE/build/include/sdkconfig.h
+ /home/maikschulze/esp/esp-idf/components/newlib/platform_include/assert.h \
+ /home/maikschulze/esp/SCDE/build/include/sdkconfig.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/assert.h
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/stdlib.h:
 
@@ -77,6 +79,8 @@ esp_spiffs.o: /home/maikschulze/esp/SCDE/main/./esp_spiffs.c \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h:
 
+/home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h:
+
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/string.h:
@@ -93,7 +97,7 @@ esp_spiffs.o: /home/maikschulze/esp/SCDE/main/./esp_spiffs.c \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h:
 
-/home/maikschulze/esp/SCDE/main/./esp_spiffs.h:
+/home/maikschulze/esp/SCDE/main/esp_spiffs.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_attr.h:
 
@@ -101,6 +105,9 @@ esp_spiffs.o: /home/maikschulze/esp/SCDE/main/./esp_spiffs.c \
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_err.h:
 
-/home/maikschulze/esp/esp-idf/components/newlib/include/assert.h:
+/home/maikschulze/esp/esp-idf/components/newlib/platform_include/assert.h:
 
 /home/maikschulze/esp/SCDE/build/include/sdkconfig.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/assert.h:
+/home/maikschulze/esp/SCDE/main/./esp_spiffs.c:

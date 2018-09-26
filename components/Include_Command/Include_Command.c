@@ -254,11 +254,11 @@ Include_CommandFn (const uint8_t *argsText
   ptr = strtok(string, delimiter);
 
   // loop through the rows
-  while(ptr != NULL) {
+  while (ptr != NULL) {
 
 	// temp
 	strTextMultiple_t partialCmdRow;
-	partialCmdRow.strText = (uint8_t *) ptr;
+	partialCmdRow.strText = (char *) ptr;
 	partialCmdRow.strTextLen = (size_t) strlen(ptr);
 
 //looping rows input, now in partialCmdRow
@@ -270,7 +270,7 @@ Include_CommandFn (const uint8_t *argsText
 		if (!rebuiltCmdRow.strText) {
 
 			// init memory allocation for new command row
-			rebuiltCmdRow.strText = (uint8_t *) malloc(partialCmdRow.strTextLen);
+			rebuiltCmdRow.strText = (char *) malloc(partialCmdRow.strTextLen);
 
 			// copy command to allocated memory
 			memcpy(rebuiltCmdRow.strText
@@ -285,7 +285,7 @@ Include_CommandFn (const uint8_t *argsText
 		else {
 
 			// Reallocate memory to new size
-			rebuiltCmdRow.strText = (uint8_t *) realloc(rebuiltCmdRow.strText
+			rebuiltCmdRow.strText = (char *) realloc(rebuiltCmdRow.strText
 				,rebuiltCmdRow.strTextLen + partialCmdRow.strTextLen);
 
 			// add command-part to allocated memory
@@ -308,7 +308,7 @@ Include_CommandFn (const uint8_t *argsText
 
 			// call the AnalyzeCommandChainFn, if retMsg != NULL -> got ret Msgs entries
 			struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
-				SCDEFn->AnalyzeCommandChainFn(rebuiltCmdRow.strText, rebuiltCmdRow.strTextLen);
+				SCDEFn->AnalyzeCommandChainFn((const uint8_t *) rebuiltCmdRow.strText, rebuiltCmdRow.strTextLen);
 
 			// retMsgMultiple stailq filled from Fn ? -> get the entries till empty
 			while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
