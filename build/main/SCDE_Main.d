@@ -72,7 +72,9 @@ SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/io_mux_reg.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_sig_map.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h \
+ /home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h \
  /home/maikschulze/esp/esp-idf/components/driver/include/driver/touch_pad.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h \
@@ -90,6 +92,7 @@ SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
  /home/maikschulze/esp/esp-idf/components/newlib/include/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/fcntl.h \
@@ -149,6 +152,7 @@ SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_dport_access.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/api.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/netbuf.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/sys.h \
@@ -161,13 +165,6 @@ SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
  /home/maikschulze/esp/SCDE/main/include/SCDE.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h \
  /home/maikschulze/esp/SCDE/main/include/scde_task.h \
- /home/maikschulze/esp/esp-idf/components/spi_flash/include/esp_spi_flash.h \
- /home/maikschulze/esp/esp-idf/components/spi_flash/include/esp_partition.h \
- /home/maikschulze/esp/esp-idf/components/spi_flash/include/esp_spi_flash.h \
- /home/maikschulze/esp/SCDE/main/spiffs/spiffs.h \
- /home/maikschulze/esp/SCDE/main/spiffs/spiffs_config.h \
- /home/maikschulze/esp/SCDE/main/esp_spiffs.h \
- /home/maikschulze/esp/SCDE/main/ESP32_Platform_SPIFFS.h \
  /home/maikschulze/esp/esp-idf/components/heap/include/esp_heap_alloc_caps.h \
  /home/maikschulze/esp/SCDE/main/include/logging.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/apps/sntp/sntp.h \
@@ -319,7 +316,11 @@ SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h:
 
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h:
+
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h:
 
 /home/maikschulze/esp/esp-idf/components/driver/include/driver/touch_pad.h:
 
@@ -354,6 +355,8 @@ SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
 /home/maikschulze/esp/esp-idf/components/newlib/include/machine/time.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h:
 
@@ -473,6 +476,8 @@ SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
 
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h:
 
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h:
+
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/api.h:
 
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/netbuf.h:
@@ -496,20 +501,6 @@ SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h:
 
 /home/maikschulze/esp/SCDE/main/include/scde_task.h:
-
-/home/maikschulze/esp/esp-idf/components/spi_flash/include/esp_spi_flash.h:
-
-/home/maikschulze/esp/esp-idf/components/spi_flash/include/esp_partition.h:
-
-/home/maikschulze/esp/esp-idf/components/spi_flash/include/esp_spi_flash.h:
-
-/home/maikschulze/esp/SCDE/main/spiffs/spiffs.h:
-
-/home/maikschulze/esp/SCDE/main/spiffs/spiffs_config.h:
-
-/home/maikschulze/esp/SCDE/main/esp_spiffs.h:
-
-/home/maikschulze/esp/SCDE/main/ESP32_Platform_SPIFFS.h:
 
 /home/maikschulze/esp/esp-idf/components/heap/include/esp_heap_alloc_caps.h:
 

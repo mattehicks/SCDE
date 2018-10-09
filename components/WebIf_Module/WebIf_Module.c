@@ -3317,7 +3317,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 		sha1_init(&s);
 		sha1_write(&s, buff, strlen(buff));
 		// base-encode the 20 byte sha1 result
-		base64_encode(20, sha1_result(&s), sizeof(buff), buff);
+		xbase64_encode(20, sha1_result(&s), sizeof(buff), buff);
 
 		//Reply with the right headers.
 		SCDED_StartRespHeader(conn, 101);

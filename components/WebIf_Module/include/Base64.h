@@ -2,5 +2,5 @@
 #define BASE64_H
 
 int mybase64_decode(size_t in_len, const char *in, size_t out_len, unsigned char *out);
-int base64_encode(size_t in_len, const unsigned char *in, size_t out_len, char *out);
+int xbase64_encode(size_t in_len, const unsigned char *in, size_t out_len, char *out);
 #endif

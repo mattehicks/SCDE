@@ -12,7 +12,7 @@
 #include <esp_wifi.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <spiffs.h>
+//#include <spiffs.h>
 
 #include "lwip/err.h"
 #include "lwip/arch.h"

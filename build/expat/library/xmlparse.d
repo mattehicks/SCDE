@@ -27,6 +27,7 @@ library/xmlparse.o: \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/expat/include/expat/expat_config.h \
  /home/maikschulze/esp/esp-idf/components/expat/include/expat/ascii.h \
@@ -90,6 +91,8 @@ library/xmlparse.o: \
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h:
 

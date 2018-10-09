@@ -68,7 +68,9 @@ xtensa_overlay_os_hook.o: \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/io_mux_reg.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_sig_map.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h \
+ /home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h \
  /home/maikschulze/esp/esp-idf/components/driver/include/driver/touch_pad.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h \
@@ -213,7 +215,11 @@ xtensa_overlay_os_hook.o: \
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h:
 
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h:
+
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h:
 
 /home/maikschulze/esp/esp-idf/components/driver/include/driver/touch_pad.h:
 

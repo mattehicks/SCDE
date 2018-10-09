@@ -29,6 +29,7 @@ libcoap/src/address.o: \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/fcntl.h \
@@ -55,7 +56,9 @@ libcoap/src/address.o: \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_sig_map.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_attr.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h \
+ /home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h \
  /home/maikschulze/esp/esp-idf/components/driver/include/driver/touch_pad.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h \
@@ -173,6 +176,8 @@ libcoap/src/address.o: \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h:
 
+/home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h:
+
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/time.h:
@@ -225,7 +230,11 @@ libcoap/src/address.o: \
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_attr.h:
 
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h:
+
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h:
 
 /home/maikschulze/esp/esp-idf/components/driver/include/driver/touch_pad.h:
 

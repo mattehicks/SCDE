@@ -17,7 +17,7 @@ Archive member included to satisfy reference by file (symbol)
 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
                               /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o) (bootloader_common_ota_select_valid)
 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
-                              /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o) (esp_partition_table_basic_verify)
+                              /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o) (esp_partition_table_verify)
 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
                               /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o) (esp_image_load)
 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
@@ -30,6 +30,8 @@ Archive member included to satisfy reference by file (symbol)
                               /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o) (esp_cpu_in_ocd_debug_mode)
 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
                               /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o) (rtc_vddsdio_get_config)
+/home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(gpio_periph.o)
+                              /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o) (GPIO_PIN_MUX_REG)
 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
                               /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o) (rtc_clk_slow_freq_get)
 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
@@ -51,7 +53,7 @@ Discarded input sections
  .data          0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
  .bss           0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
  .xt.lit        0x0000000000000000       0x18 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
- .xt.prop       0x0000000000000000       0xe4 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
+ .xt.prop       0x0000000000000000       0xb4 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
  COMMON         0x0000000000000000        0x4 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
  .text          0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
  .data          0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
@@ -72,7 +74,7 @@ Discarded input sections
  .data          0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
  .bss           0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
  .xt.lit        0x0000000000000000       0x40 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
- .xt.prop       0x0000000000000000      0x564 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+ .xt.prop       0x0000000000000000      0x57c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
  .literal.bootloader_flash_write
                 0x0000000000000000       0x40 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
  .literal.bootloader_flash_erase_sector
@@ -98,10 +100,14 @@ Discarded input sections
                 0x0000000000000000        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
  .literal.read_status_8b_rdsr
                 0x0000000000000000        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+ .literal.write_status_8b_xmc25qu64a
+                0x0000000000000000       0x18 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+ .literal.read_status_8b_xmc25qu64a
+                0x0000000000000000       0x14 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
  .literal.enable_qio_mode
-                0x0000000000000000       0x30 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+                0x0000000000000000       0x60 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
  .literal.bootloader_enable_qio_mode
-                0x0000000000000000       0x2c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+                0x0000000000000000       0x50 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
  .text          0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
  .data          0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
  .bss           0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
@@ -117,35 +123,39 @@ Discarded input sections
                 0x0000000000000000       0x13 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
  .text.read_status_8b_rdsr
                 0x0000000000000000       0x15 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+ .text.write_status_8b_xmc25qu64a
+                0x0000000000000000       0x42 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+ .text.read_status_8b_xmc25qu64a
+                0x0000000000000000       0x3a /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
  .rodata.str1.4
-                0x0000000000000000       0xdb /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+                0x0000000000000000      0x236 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
  .text.enable_qio_mode
-                0x0000000000000000       0x84 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+                0x0000000000000000       0xda /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
  .text.bootloader_enable_qio_mode
-                0x0000000000000000       0xf4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+                0x0000000000000000      0x13c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
  .rodata.chip_data
-                0x0000000000000000       0x5a /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
- .xt.lit        0x0000000000000000       0x50 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
- .xt.prop       0x0000000000000000      0x2a0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+                0x0000000000000000       0x6c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+ .xt.lit        0x0000000000000000       0x60 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+ .xt.prop       0x0000000000000000      0x30c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
  .literal.bootloader_common_check_long_hold_gpio
-                0x0000000000000000       0x24 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+                0x0000000000000000       0x28 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
  .literal.bootloader_common_label_search
                 0x0000000000000000       0x18 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
  .literal.bootloader_common_erase_part_type_data
-                0x0000000000000000       0x60 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+                0x0000000000000000       0x6c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
  .text          0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
  .data          0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
  .bss           0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
  .text.bootloader_common_check_long_hold_gpio
-                0x0000000000000000       0x94 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+                0x0000000000000000       0xac /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
  .rodata.str1.4
-                0x0000000000000000      0x112 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+                0x0000000000000000      0x146 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
  .text.bootloader_common_label_search
                 0x0000000000000000       0xac /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
  .text.bootloader_common_erase_part_type_data
-                0x0000000000000000      0x126 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+                0x0000000000000000      0x142 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
  .xt.lit        0x0000000000000000       0x28 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
- .xt.prop       0x0000000000000000      0x2a0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+ .xt.prop       0x0000000000000000      0x2ac /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
  .text          0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
  .data          0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
  .bss           0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
@@ -159,8 +169,8 @@ Discarded input sections
  .rodata        0x0000000000000000        0x8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
  .text.esp_image_verify_bootloader
                 0x0000000000000000       0x32 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
- .xt.lit        0x0000000000000000       0x50 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
- .xt.prop       0x0000000000000000      0x6a8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+ .xt.lit        0x0000000000000000       0x58 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+ .xt.prop       0x0000000000000000      0x768 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
  .text          0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
  .data          0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
  .bss           0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
@@ -262,6 +272,12 @@ Discarded input sections
                 0x0000000000000000      0x344 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
  .xt.lit        0x0000000000000000       0x18 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
  .xt.prop       0x0000000000000000       0xfc /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+ .text          0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(gpio_periph.o)
+ .data          0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(gpio_periph.o)
+ .bss           0x0000000000000000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(gpio_periph.o)
+ .rodata.GPIO_PIN_MUX_REG
+                0x0000000000000000       0xa0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(gpio_periph.o)
+ .xt.prop       0x0000000000000000        0xc /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(gpio_periph.o)
  .literal.rtc_clk_32k_bootstrap
                 0x0000000000000000       0x34 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
  .literal.rtc_clk_32k_enabled
@@ -331,7 +347,8 @@ Memory Configuration
 
 Name             Origin             Length             Attributes
 dport0_seg       0x000000003ff00000 0x0000000000000010 rw
-iram_seg         0x0000000040078000 0x0000000000008000 xrw
+iram_loader_seg  0x0000000040078000 0x0000000000008000 xrw
+iram_seg         0x0000000040080000 0x0000000000010000 xrw
 dram_seg         0x000000003fff0000 0x0000000000010000 rw
 *default*        0x0000000000000000 0xffffffffffffffff
 
@@ -349,11 +366,675 @@ LOAD /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.
 LOAD /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcov.a
 END GROUP
 
-.iram1.text     0x0000000040078000        0x0
+.iram_loader.text
+                0x0000000040078000     0x2614
                 0x0000000040078000                . = ALIGN (0x10)
+                0x0000000040078000                _stext = .
+                0x0000000040078000                _text_start = ABSOLUTE (.)
+ *(.stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
+ *(.iram1 .iram1.*)
+ .iram1.literal
+                0x0000000040078000       0x40 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                         0x5c (size before relaxing)
+ .iram1.literal
+                0x0000000040078040       0x1c /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
+                                         0x30 (size before relaxing)
+ .literal.esp_log_early_timestamp
+                0x000000004007805c        0x8 /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
+ .literal       0x0000000040078064        0x8 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
+ .literal.spi_to_esp_err
+                0x000000004007806c        0x8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+ .literal.bootloader_flash_read_allow_decrypt
+                0x0000000040078074       0x2c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+                                         0x3c (size before relaxing)
+ .literal.bootloader_flash_read_no_decrypt
+                0x00000000400780a0        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+                                         0x14 (size before relaxing)
+ .literal.bootloader_mmap
+                0x00000000400780a0       0x1c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+                                         0x5c (size before relaxing)
+ .literal.bootloader_munmap
+                0x00000000400780bc        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+                                         0x14 (size before relaxing)
+ .literal.bootloader_flash_read
+                0x00000000400780c0        0xc /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+                                         0x30 (size before relaxing)
+ .literal.bootloader_fill_random
+                0x00000000400780cc        0x8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
+ .literal.bootloader_random_enable
+                0x00000000400780d4       0x78 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
+ .literal.bootloader_random_disable
+                0x000000004007814c       0x1c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
+                                         0x4c (size before relaxing)
+ .literal.log_invalid_app_partition
+                0x0000000040078168       0x14 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                         0x2c (size before relaxing)
+ .literal.try_load_partition
+                0x000000004007817c        0x8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                         0x20 (size before relaxing)
+ .literal.set_cache_and_start_app
+                0x0000000040078184       0x14 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                         0x4c (size before relaxing)
+ .literal.unpack_load_app
+                0x0000000040078198       0x24 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                         0x54 (size before relaxing)
+ .literal.load_image
+                0x00000000400781bc        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                         0x18 (size before relaxing)
+ .literal.bootloader_utility_load_partition_table
+                0x00000000400781c0       0x4c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                         0xa8 (size before relaxing)
+ .literal.bootloader_utility_get_selected_boot_partition
+                0x000000004007820c       0x38 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                         0xac (size before relaxing)
+ .literal.bootloader_utility_load_boot_image
+                0x0000000040078244       0x14 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                         0x70 (size before relaxing)
+ .literal.bootloader_sha256_start
+                0x0000000040078258        0x8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+ .literal.bootloader_sha256_data
+                0x0000000040078260       0x20 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+                                         0x30 (size before relaxing)
+ .literal.bootloader_sha256_finish
+                0x0000000040078280       0x18 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+                                         0x4c (size before relaxing)
+ .literal.should_map
+                0x0000000040078298        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0x10 (size before relaxing)
+ .literal.verify_image_header
+                0x0000000040078298       0x14 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0x2c (size before relaxing)
+ .literal.verify_segment_header
+                0x00000000400782ac        0xc /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0x28 (size before relaxing)
+ .literal.debug_log_hash
+                0x00000000400782b8        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0x10 (size before relaxing)
+ .literal.verify_checksum
+                0x00000000400782bc        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0x1c (size before relaxing)
+ .literal.process_segment_data
+                0x00000000400782c0        0x8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0x24 (size before relaxing)
+ .literal.verify_simple_hash
+                0x00000000400782c8       0x10 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0x3c (size before relaxing)
+ .literal.should_load
+                0x00000000400782d8       0x18 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0x34 (size before relaxing)
+ .literal.process_segment
+                0x00000000400782f0       0x1c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0x60 (size before relaxing)
+ .literal.esp_image_load
+                0x000000004007830c       0x1c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0x94 (size before relaxing)
+ .literal.esp_partition_table_verify
+                0x0000000040078328       0x34 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
+                                         0x68 (size before relaxing)
+ .literal.esp_rom_spiflash_read_status
+                0x000000004007835c        0xc /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+                                         0x14 (size before relaxing)
+ .literal.esp_rom_spiflash_wait_idle
+                0x0000000040078368        0x8 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+                                          0xc (size before relaxing)
+ .literal.esp_rom_spiflash_read_data
+                0x0000000040078370       0x10 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+                                         0x18 (size before relaxing)
+ .literal.esp_rom_spiflash_read_statushigh
+                0x0000000040078380        0x4 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+                                          0xc (size before relaxing)
+ .literal.esp_rom_spiflash_write_status
+                0x0000000040078384        0x0 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+                                         0x14 (size before relaxing)
+ .literal.esp_rom_spiflash_unlock
+                0x0000000040078384        0xc /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+                                         0x28 (size before relaxing)
+ .literal.esp_rom_spiflash_read
+                0x0000000040078390       0x38 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+                                         0x5c (size before relaxing)
+ .iram1         0x00000000400783c8      0x22b /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+ *fill*         0x00000000400785f3        0x1 
+ .iram1         0x00000000400785f4      0x11a /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
+                0x00000000400785f4                esp_cpu_stall
+                0x0000000040078688                esp_cpu_unstall
+                0x00000000400786dc                esp_cpu_reset
+                0x0000000040078700                esp_cpu_in_ocd_debug_mode
+ *fill*         0x000000004007870e        0x0 
+ *liblog.a:(.literal .text .literal.* .text.*)
+ *fill*         0x000000004007870e        0x2 
+ .text.esp_log_early_timestamp
+                0x0000000040078710       0x1f /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
+                0x0000000040078710                esp_log_timestamp
+                0x0000000040078710                esp_log_early_timestamp
+ *fill*         0x000000004007872f        0x0 
+ *libgcc.a:(.literal .text .literal.* .text.*)
+ *fill*         0x000000004007872f        0x1 
+ .text          0x0000000040078730       0x26 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
+                0x0000000040078730                __bswapsi2
+ *fill*         0x0000000040078756        0x0 
+ *fill*         0x0000000040078756        0x2 
+ .text          0x0000000040078758      0x281 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
+                0x0000000040078758                __udivdi3
+ *libbootloader_support.a:bootloader_flash.*(.literal .text .literal.* .text.*)
+ *fill*         0x00000000400789d9        0x3 
+ .text.spi_to_esp_err
+                0x00000000400789dc       0x22 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+ *fill*         0x00000000400789fe        0x2 
+ .text.bootloader_flash_read_allow_decrypt
+                0x0000000040078a00       0xaf /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+                                         0xb7 (size before relaxing)
+ *fill*         0x0000000040078aaf        0x1 
+ .text.bootloader_flash_read_no_decrypt
+                0x0000000040078ab0       0x32 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+                                         0x36 (size before relaxing)
+ *fill*         0x0000000040078ae2        0x2 
+ .text.bootloader_mmap
+                0x0000000040078ae4       0xc7 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+                                         0xd3 (size before relaxing)
+                0x0000000040078ae4                bootloader_mmap
+ *fill*         0x0000000040078bab        0x1 
+ .text.bootloader_munmap
+                0x0000000040078bac       0x36 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+                0x0000000040078bac                bootloader_munmap
+ *fill*         0x0000000040078be2        0x2 
+ .text.bootloader_flash_read
+                0x0000000040078be4       0x86 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+                0x0000000040078be4                bootloader_flash_read
+ *fill*         0x0000000040078c6a        0x0 
+ *fill*         0x0000000040078c6a        0x0 
+ *fill*         0x0000000040078c6a        0x0 
+ *fill*         0x0000000040078c6a        0x0 
+ *fill*         0x0000000040078c6a        0x0 
+ *fill*         0x0000000040078c6a        0x0 
+ *libbootloader_support.a:bootloader_random.*(.literal .text .literal.* .text.*)
+ *fill*         0x0000000040078c6a        0x2 
+ .text.bootloader_fill_random
+                0x0000000040078c6c       0x59 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
+                0x0000000040078c6c                bootloader_fill_random
+ *fill*         0x0000000040078cc5        0x3 
+ .text.bootloader_random_enable
+                0x0000000040078cc8      0x1d5 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
+                0x0000000040078cc8                bootloader_random_enable
+ *fill*         0x0000000040078e9d        0x3 
+ .text.bootloader_random_disable
+                0x0000000040078ea0      0x11c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
+                0x0000000040078ea0                bootloader_random_disable
+ *fill*         0x0000000040078fbc        0x0 
+ *fill*         0x0000000040078fbc        0x0 
+ *fill*         0x0000000040078fbc        0x0 
+ *libbootloader_support.a:bootloader_utility.*(.literal .text .literal.* .text.*)
+ .text.log_invalid_app_partition
+                0x0000000040078fbc       0x57 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                         0x5b (size before relaxing)
+ *fill*         0x0000000040079013        0x1 
+ .text.try_load_partition
+                0x0000000040079014       0x44 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                         0x4c (size before relaxing)
+ .text.set_cache_and_start_app
+                0x0000000040079058       0xed /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                         0xf9 (size before relaxing)
+ *fill*         0x0000000040079145        0x3 
+ .text.unpack_load_app
+                0x0000000040079148       0xf4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                        0x104 (size before relaxing)
+ .text.load_image
+                0x000000004007923c       0x1e /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                         0x26 (size before relaxing)
+ *fill*         0x000000004007925a        0x2 
+ .text.bootloader_utility_load_partition_table
+                0x000000004007925c      0x19c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                        0x1c8 (size before relaxing)
+                0x000000004007925c                bootloader_utility_load_partition_table
+ .text.bootloader_utility_get_selected_boot_partition
+                0x00000000400793f8      0x1ac /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                        0x1c4 (size before relaxing)
+                0x00000000400793f8                bootloader_utility_get_selected_boot_partition
+ .text.bootloader_utility_load_boot_image
+                0x00000000400795a4      0x103 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                        0x12b (size before relaxing)
+                0x00000000400795a4                bootloader_utility_load_boot_image
+ *fill*         0x00000000400796a7        0x1 
+ .text.index_to_partition
+                0x00000000400796a8       0x48 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+ *fill*         0x00000000400796f0        0x0 
+ *fill*         0x00000000400796f0        0x0 
+ *fill*         0x00000000400796f0        0x0 
+ *libbootloader_support.a:bootloader_sha.*(.literal .text .literal.* .text.*)
+ .text.bootloader_sha256_start
+                0x00000000400796f0       0x12 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+                0x00000000400796f0                bootloader_sha256_start
+ *fill*         0x0000000040079702        0x2 
+ .text.bootloader_sha256_data
+                0x0000000040079704       0xa1 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+                                         0xa9 (size before relaxing)
+                0x0000000040079704                bootloader_sha256_data
+ *fill*         0x00000000400797a5        0x3 
+ .text.bootloader_sha256_finish
+                0x00000000400797a8       0xdc /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+                                         0xf0 (size before relaxing)
+                0x00000000400797a8                bootloader_sha256_finish
+ *fill*         0x0000000040079884        0x0 
+ *fill*         0x0000000040079884        0x0 
+ *fill*         0x0000000040079884        0x0 
+ *libbootloader_support.a:efuse.*(.literal .text .literal.* .text.*)
+ *libbootloader_support.a:esp_image_format.*(.literal .text .literal.* .text.*)
+ .text.should_map
+                0x0000000040079884       0x30 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+ .text.verify_image_header
+                0x00000000400798b4       0x7e /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+ *fill*         0x0000000040079932        0x2 
+ .text.verify_segment_header
+                0x0000000040079934       0x71 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0x79 (size before relaxing)
+ *fill*         0x00000000400799a5        0x3 
+ .text.debug_log_hash
+                0x00000000400799a8       0x6e /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+ *fill*         0x0000000040079a16        0x2 
+ .text.verify_checksum
+                0x0000000040079a18       0x8b /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0x8f (size before relaxing)
+ *fill*         0x0000000040079aa3        0x1 
+ .text.process_segment_data
+                0x0000000040079aa4       0xa4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0xb0 (size before relaxing)
+ .text.verify_simple_hash
+                0x0000000040079b48       0x69 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0x80 (size before relaxing)
+ *fill*         0x0000000040079bb1        0x3 
+ .text.should_load
+                0x0000000040079bb4       0x74 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                         0x7c (size before relaxing)
+ .text.process_segment
+                0x0000000040079c28      0x136 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                        0x142 (size before relaxing)
+ *fill*         0x0000000040079d5e        0x2 
+ .text.esp_image_load
+                0x0000000040079d60      0x28e /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                        0x2b2 (size before relaxing)
+                0x0000000040079d60                esp_image_load
+ *fill*         0x0000000040079fee        0x0 
+ *fill*         0x0000000040079fee        0x0 
+ *fill*         0x0000000040079fee        0x0 
+ *fill*         0x0000000040079fee        0x0 
+ *fill*         0x0000000040079fee        0x0 
+ *libbootloader_support.a:flash_encrypt.*(.literal .text .literal.* .text.*)
+ *libbootloader_support.a:flash_partitions.*(.literal .text .literal.* .text.*)
+ *fill*         0x0000000040079fee        0x2 
+ .text.esp_partition_table_verify
+                0x0000000040079ff0      0x15f /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
+                                        0x16b (size before relaxing)
+                0x0000000040079ff0                esp_partition_table_verify
+ *fill*         0x000000004007a14f        0x0 
+ *libbootloader_support.a:secure_boot.*(.literal .text .literal.* .text.*)
+ *libbootloader_support.a:secure_boot_signatures.*(.literal .text .literal.* .text.*)
+ *libmicro-ecc.a:*.*(.literal .text .literal.* .text.*)
+ *libspi_flash.a:*.*(.literal .text .literal.* .text.*)
+ *fill*         0x000000004007a14f        0x1 
+ .text.esp_rom_spiflash_read_status
+                0x000000004007a150       0x61 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+                0x000000004007a150                esp_rom_spiflash_read_status
+ *fill*         0x000000004007a1b1        0x3 
+ .text.esp_rom_spiflash_wait_idle
+                0x000000004007a1b4       0x32 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+                0x000000004007a1b4                esp_rom_spiflash_wait_idle
+ *fill*         0x000000004007a1e6        0x2 
+ .text.esp_rom_spiflash_read_data
+                0x000000004007a1e8       0xe2 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+ *fill*         0x000000004007a2ca        0x2 
+ .text.esp_rom_spiflash_read_statushigh
+                0x000000004007a2cc       0x21 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+                0x000000004007a2cc                esp_rom_spiflash_read_statushigh
+ *fill*         0x000000004007a2ed        0x3 
+ .text.esp_rom_spiflash_write_status
+                0x000000004007a2f0       0x34 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+                                         0x38 (size before relaxing)
+                0x000000004007a2f0                esp_rom_spiflash_write_status
+ .text.esp_rom_spiflash_unlock
+                0x000000004007a324       0x6a /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+                                         0x7e (size before relaxing)
+                0x000000004007a324                esp_rom_spiflash_unlock
+ *fill*         0x000000004007a38e        0x2 
+ .text.esp_rom_spiflash_read
+                0x000000004007a390      0x284 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+                0x000000004007a390                esp_rom_spiflash_read
+ *fill*         0x000000004007a614        0x0 
+ *fill*         0x000000004007a614        0x0 
+ *fill*         0x000000004007a614        0x0 
+ *fill*         0x000000004007a614        0x0 
+ *fill*         0x000000004007a614        0x0 
+ *fill*         0x000000004007a614        0x0 
+ *(.fini.literal)
+ *(.fini)
+ *(.gnu.version)
+                0x000000004007a614                _text_end = ABSOLUTE (.)
+                0x000000004007a614                _etext = .
+
+.iram.text      0x0000000040080000     0x1952
+                0x0000000040080000                . = ALIGN (0x10)
  *(.entry.text)
  *(.init.literal)
  *(.init)
+                0x0000000040080000                _stext = .
+                0x0000000040080000                _text_start = ABSOLUTE (.)
+ *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
+ .literal.selected_boot_partition
+                0x0000000040080000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
+                                          0x4 (size before relaxing)
+ .literal.select_partition_number
+                0x0000000040080000        0xc /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
+                                         0x18 (size before relaxing)
+ .literal.call_start_cpu0
+                0x000000004008000c        0x4 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
+                                         0x10 (size before relaxing)
+ .literal.wdt_reset_cpu0_info_enable
+                0x0000000040080010        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+ .literal.wdt_reset_info_dump
+                0x0000000040080014       0x80 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                         0xd8 (size before relaxing)
+ .literal.print_flash_info
+                0x0000000040080094       0x60 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                         0xa4 (size before relaxing)
+ .literal.vddsdio_configure
+                0x00000000400800f4        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                          0xc (size before relaxing)
+ .literal.uart_console_configure
+                0x00000000400800f8       0x14 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                         0x18 (size before relaxing)
+ .literal.wdt_reset_check
+                0x000000004008010c        0xc /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                         0x30 (size before relaxing)
+ .literal.update_flash_config
+                0x0000000040080118       0x20 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+ .literal.bootloader_main
+                0x0000000040080138       0x2c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                         0x8c (size before relaxing)
+ .literal.__assert_func
+                0x0000000040080164        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                         0x10 (size before relaxing)
+ .literal.bootloader_init
+                0x0000000040080168       0x48 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                         0x74 (size before relaxing)
+ .literal.bootloader_clock_configure
+                0x00000000400801b0        0xc /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
+                                         0x20 (size before relaxing)
+ .literal.execute_flash_command
+                0x00000000400801bc       0x38 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+                                         0x3c (size before relaxing)
+ .literal.bootloader_read_flash_id
+                0x00000000400801f4        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+                                          0x8 (size before relaxing)
+ .literal.bootloader_common_ota_select_crc
+                0x00000000400801f8        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+ .literal.bootloader_common_ota_select_valid
+                0x00000000400801fc        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+                                          0x4 (size before relaxing)
+ .literal.rtc_vddsdio_get_config
+                0x00000000400801fc       0x2c /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+                                         0x30 (size before relaxing)
+ .literal.rtc_vddsdio_set_config
+                0x0000000040080228        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+                                          0x8 (size before relaxing)
+ .literal.rtc_clk_32k_enable_internal
+                0x0000000040080228       0x14 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+ .literal.rtc_clk_32k_enable
+                0x000000004008023c        0x4 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                          0xc (size before relaxing)
+ .literal.rtc_clk_8m_enable
+                0x0000000040080240        0xc /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0x10 (size before relaxing)
+ .literal.rtc_clk_8m_enabled
+                0x000000004008024c        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                          0x4 (size before relaxing)
+ .literal.rtc_clk_8md256_enabled
+                0x000000004008024c        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                          0x4 (size before relaxing)
+ .literal.rtc_clk_xtal_freq_estimate
+                0x000000004008024c       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0x4c (size before relaxing)
+ .literal.rtc_clk_slow_freq_set
+                0x000000004008026c        0x4 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                          0xc (size before relaxing)
+ .literal.rtc_clk_slow_freq_get
+                0x0000000040080270        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                          0x4 (size before relaxing)
+ .literal.rtc_clk_fast_freq_set
+                0x0000000040080270        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                          0xc (size before relaxing)
+ .literal.rtc_clk_fast_freq_get
+                0x0000000040080270        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                          0x4 (size before relaxing)
+ .literal.rtc_clk_bbpll_set
+                0x0000000040080270       0x10 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0x38 (size before relaxing)
+ .literal.rtc_clk_xtal_freq_get
+                0x0000000040080280        0x8 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0x1c (size before relaxing)
+ .literal.rtc_clk_cpu_freq_get
+                0x0000000040080288       0x14 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0x28 (size before relaxing)
+ .literal.rtc_clk_cpu_freq_value
+                0x000000004008029c       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0x2c (size before relaxing)
+ .literal.rtc_clk_xtal_freq_update
+                0x00000000400802bc        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                          0x8 (size before relaxing)
+ .literal.rtc_clk_apb_freq_update
+                0x00000000400802bc        0x4 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                          0x8 (size before relaxing)
+ .literal.rtc_clk_cpu_freq_set
+                0x00000000400802c0       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0x78 (size before relaxing)
+ .literal.rtc_clk_apb_freq_get
+                0x00000000400802e0        0x8 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0x14 (size before relaxing)
+ .literal.rtc_clk_init
+                0x00000000400802e8       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0x94 (size before relaxing)
+ .literal.rtc_clk_cal_internal
+                0x0000000040080308       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
+                                         0x3c (size before relaxing)
+ .literal.rtc_clk_cal_ratio
+                0x0000000040080328        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
+                                          0x8 (size before relaxing)
+ .literal.rtc_clk_wait_for_slow_cycle
+                0x0000000040080328        0x8 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
+                                         0x20 (size before relaxing)
+ .text.selected_boot_partition
+                0x0000000040080330        0xc /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
+                                         0x10 (size before relaxing)
+ .text.select_partition_number
+                0x000000004008033c       0x30 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
+                                         0x34 (size before relaxing)
+ .text.call_start_cpu0
+                0x000000004008036c       0x2a /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
+                                         0x32 (size before relaxing)
+                0x000000004008036c                call_start_cpu0
+ *fill*         0x0000000040080396        0x2 
+ .text.wdt_reset_cpu0_info_enable
+                0x0000000040080398       0x27 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+ *fill*         0x00000000400803bf        0x1 
+ .text.wdt_reset_info_dump
+                0x00000000400803c0      0x1ae /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                        0x1da (size before relaxing)
+ *fill*         0x000000004008056e        0x2 
+ .text.print_flash_info
+                0x0000000040080570      0x162 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                        0x176 (size before relaxing)
+ *fill*         0x00000000400806d2        0x2 
+ .text.vddsdio_configure
+                0x00000000400806d4       0x33 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                         0x37 (size before relaxing)
+ *fill*         0x0000000040080707        0x1 
+ .text.uart_console_configure
+                0x0000000040080708       0x36 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                         0x3a (size before relaxing)
+ *fill*         0x000000004008073e        0x2 
+ .text.wdt_reset_check
+                0x0000000040080740       0xa2 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                         0xae (size before relaxing)
+ *fill*         0x00000000400807e2        0x2 
+ .text.update_flash_config
+                0x00000000400807e4       0x68 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+ .text.bootloader_main
+                0x000000004008084c       0xe8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                        0x11c (size before relaxing)
+ .text.__assert_func
+                0x0000000040080934       0x1f /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                         0x23 (size before relaxing)
+                0x0000000040080934                __assert_func
+ *fill*         0x0000000040080953        0x1 
+ .text.bootloader_init
+                0x0000000040080954      0x12a /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                        0x136 (size before relaxing)
+                0x0000000040080954                bootloader_init
+ *fill*         0x0000000040080a7e        0x2 
+ .text.bootloader_clock_configure
+                0x0000000040080a80       0x76 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
+                                         0x82 (size before relaxing)
+                0x0000000040080a80                bootloader_clock_configure
+ *fill*         0x0000000040080af6        0x2 
+ .text.execute_flash_command
+                0x0000000040080af8      0x190 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+ .text.bootloader_read_flash_id
+                0x0000000040080c88       0x27 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+                                         0x2b (size before relaxing)
+                0x0000000040080c88                bootloader_read_flash_id
+ *fill*         0x0000000040080caf        0x1 
+ .text.bootloader_common_ota_select_crc
+                0x0000000040080cb0       0x14 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+                0x0000000040080cb0                bootloader_common_ota_select_crc
+ .text.bootloader_common_ota_select_valid
+                0x0000000040080cc4       0x20 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+                                         0x24 (size before relaxing)
+                0x0000000040080cc4                bootloader_common_ota_select_valid
+ .text.rtc_vddsdio_get_config
+                0x0000000040080ce4      0x104 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+                0x0000000040080ce4                rtc_vddsdio_get_config
+ .text.rtc_vddsdio_set_config
+                0x0000000040080de8       0x46 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+                0x0000000040080de8                rtc_vddsdio_set_config
+ *fill*         0x0000000040080e2e        0x2 
+ .text.rtc_clk_32k_enable_internal
+                0x0000000040080e30       0x81 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+ *fill*         0x0000000040080eb1        0x3 
+ .text.rtc_clk_32k_enable
+                0x0000000040080eb4       0x2d /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                0x0000000040080eb4                rtc_clk_32k_enable
+ *fill*         0x0000000040080ee1        0x3 
+ .text.rtc_clk_8m_enable
+                0x0000000040080ee4       0x9d /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                0x0000000040080ee4                rtc_clk_8m_enable
+ *fill*         0x0000000040080f81        0x3 
+ .text.rtc_clk_8m_enabled
+                0x0000000040080f84       0x19 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                0x0000000040080f84                rtc_clk_8m_enabled
+ *fill*         0x0000000040080f9d        0x3 
+ .text.rtc_clk_8md256_enabled
+                0x0000000040080fa0       0x1a /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                0x0000000040080fa0                rtc_clk_8md256_enabled
+ *fill*         0x0000000040080fba        0x2 
+ .text.rtc_clk_xtal_freq_estimate
+                0x0000000040080fbc       0xa6 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0xb2 (size before relaxing)
+ *fill*         0x0000000040081062        0x2 
+ .text.rtc_clk_slow_freq_set
+                0x0000000040081064       0x48 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                0x0000000040081064                rtc_clk_slow_freq_set
+ .text.rtc_clk_slow_freq_get
+                0x00000000400810ac       0x10 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                0x00000000400810ac                rtc_clk_slow_freq_get
+ .text.rtc_clk_fast_freq_set
+                0x00000000400810bc       0x2a /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                0x00000000400810bc                rtc_clk_fast_freq_set
+ *fill*         0x00000000400810e6        0x2 
+ .text.rtc_clk_fast_freq_get
+                0x00000000400810e8       0x10 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                0x00000000400810e8                rtc_clk_fast_freq_get
+ .text.rtc_clk_bbpll_set
+                0x00000000400810f8      0x170 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                        0x178 (size before relaxing)
+                0x00000000400810f8                rtc_clk_bbpll_set
+ .text.rtc_clk_xtal_freq_get
+                0x0000000040081268       0x38 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0x3c (size before relaxing)
+                0x0000000040081268                rtc_get_xtal
+                0x0000000040081268                rtc_clk_xtal_freq_get
+ .text.rtc_clk_cpu_freq_get
+                0x00000000400812a0       0x88 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0x94 (size before relaxing)
+                0x00000000400812a0                rtc_clk_cpu_freq_get
+ .text.rtc_clk_cpu_freq_value
+                0x0000000040081328       0x44 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0x48 (size before relaxing)
+                0x0000000040081328                rtc_clk_cpu_freq_value
+ .text.rtc_clk_xtal_freq_update
+                0x000000004008136c       0x12 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0x16 (size before relaxing)
+                0x000000004008136c                rtc_clk_xtal_freq_update
+ *fill*         0x000000004008137e        0x2 
+ .text.rtc_clk_apb_freq_update
+                0x0000000040081380       0x13 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                         0x16 (size before relaxing)
+                0x0000000040081380                rtc_clk_apb_freq_update
+ *fill*         0x0000000040081393        0x1 
+ .text.rtc_clk_cpu_freq_set
+                0x0000000040081394      0x1bc /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                        0x1d0 (size before relaxing)
+                0x0000000040081394                rtc_clk_cpu_freq_set
+ .text.rtc_clk_apb_freq_get
+                0x0000000040081550       0x2a /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                0x0000000040081550                rtc_clk_apb_freq_get
+ *fill*         0x000000004008157a        0x2 
+ .text.rtc_clk_init
+                0x000000004008157c      0x182 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                                        0x1ba (size before relaxing)
+                0x000000004008157c                rtc_clk_init
+ *fill*         0x00000000400816fe        0x2 
+ .text.rtc_clk_cal_internal
+                0x0000000040081700      0x180 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
+ .text.rtc_clk_cal_ratio
+                0x0000000040081880       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
+                                         0x24 (size before relaxing)
+                0x0000000040081880                rtc_clk_cal_ratio
+ .text.rtc_clk_wait_for_slow_cycle
+                0x00000000400818a0       0x79 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
+                0x00000000400818a0                rtc_clk_wait_for_slow_cycle
+ *fill*         0x0000000040081919        0x0 
+ *fill*         0x0000000040081919        0x0 
+ *fill*         0x0000000040081919        0x0 
+ *fill*         0x0000000040081919        0x0 
+ *fill*         0x0000000040081919        0x0 
+ *fill*         0x0000000040081919        0x0 
+ *fill*         0x0000000040081919        0x0 
+ *fill*         0x0000000040081919        0x0 
+ *fill*         0x0000000040081919        0x0 
+ *fill*         0x0000000040081919        0x0 
+ *fill*         0x0000000040081919        0x0 
+ *fill*         0x0000000040081919        0x0 
+ *fill*         0x0000000040081919        0x3 
+ .text.clk_val_is_valid
+                0x000000004008191c       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+ .text.reg_val_to_clk_val
+                0x000000004008193c        0x8 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+ .text.clk_val_to_reg_val
+                0x0000000040081944        0xe /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+ *fill*         0x0000000040081952        0x0 
+ *fill*         0x0000000040081952        0x0 
+ *fill*         0x0000000040081952        0x0 
+ *fill*         0x0000000040081952        0x0 
+ *fill*         0x0000000040081952        0x0 
+ *fill*         0x0000000040081952        0x0 
+ *fill*         0x0000000040081952        0x0 
+ *fill*         0x0000000040081952        0x0 
+ *fill*         0x0000000040081952        0x0 
+ *fill*         0x0000000040081952        0x0 
+ *fill*         0x0000000040081952        0x0 
+ *(.iram .iram.*)
+ *(.fini.literal)
+ *(.fini)
+ *(.gnu.version)
+                0x0000000040081952                _text_end = ABSOLUTE (.)
+                0x0000000040081952                _etext = .
 
 .dram0.bss      0x000000003fff0000       0x18
                 0x000000003fff0000                . = ALIGN (0x8)
@@ -401,7 +1082,7 @@ END GROUP
  *(.jcr)
                 0x000000003fff001c                _data_end = ABSOLUTE (.)
 
-.dram0.rodata   0x000000003fff001c     0x16cc
+.dram0.rodata   0x000000003fff001c     0x1e2c
                 0x000000003fff001c                _rodata_start = ABSOLUTE (.)
  *(.rodata)
  .rodata        0x000000003fff001c       0x14 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
@@ -411,743 +1092,99 @@ END GROUP
                 0x000000003fff0038       0x3b /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
  *fill*         0x000000003fff0073        0x1 
  .rodata.str1.4
-                0x000000003fff0074      0x422 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                        0x42a (size before relaxing)
- *fill*         0x000000003fff0496        0x2 
- .rodata.__func__$4357
-                0x000000003fff0498       0x10 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                0x000000003fff0074      0x6ca /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                        0x6d2 (size before relaxing)
+ *fill*         0x000000003fff073e        0x2 
+ .rodata.__func__$4362
+                0x000000003fff0740       0x10 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
  .rodata.str1.4
-                0x000000003fff04a8      0x5a5 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                        0x5ad (size before relaxing)
- *fill*         0x000000003fff0a4d        0x3 
+                0x000000003fff0750      0x8ad /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                        0x8b5 (size before relaxing)
+ *fill*         0x000000003fff0ffd        0x3 
  .rodata.str1.4
-                0x000000003fff0a50      0x28e /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
- *fill*         0x000000003fff0cde        0x2 
+                0x000000003fff1000      0x2f2 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+ *fill*         0x000000003fff12f2        0x2 
  .rodata.str1.4
-                0x000000003fff0ce0      0x163 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
- *fill*         0x000000003fff0e43        0x1 
+                0x000000003fff12f4      0x19b /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
+ *fill*         0x000000003fff148f        0x1 
  .rodata.str1.4
-                0x000000003fff0e44      0x45a /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                        0x49a (size before relaxing)
- *fill*         0x000000003fff129e        0x2 
+                0x000000003fff1490      0x56e /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                        0x5ae (size before relaxing)
+ *fill*         0x000000003fff19fe        0x2 
  .rodata.str1.4
-                0x000000003fff12a0       0xd0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+                0x000000003fff1a00       0xd0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
  .rodata.padding$3047
-                0x000000003fff1370       0x40 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+                0x000000003fff1ad0       0x40 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
  .rodata.__func__$3043
-                0x000000003fff13b0       0x19 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
- *fill*         0x000000003fff13c9        0x3 
+                0x000000003fff1b10       0x19 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+ *fill*         0x000000003fff1b29        0x3 
  .rodata.__func__$3023
-                0x000000003fff13cc       0x17 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
- *fill*         0x000000003fff13e3        0x1 
+                0x000000003fff1b2c       0x17 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+ *fill*         0x000000003fff1b43        0x1 
  .rodata.str1.4
-                0x000000003fff13e4      0x25c /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                0x000000003fff1b44      0x25c /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
                                         0x259 (size before relaxing)
  .rodata.rtc_clk_xtal_freq_estimate
-                0x000000003fff1640       0x64 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                0x000000003fff1da0       0x64 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
  .rodata.rtc_clk_cpu_freq_value
-                0x000000003fff16a4       0x14 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                0x000000003fff1e04       0x14 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
  .rodata.__func__$2844
-                0x000000003fff16b8       0x17 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
- *fill*         0x000000003fff16cf        0x1 
+                0x000000003fff1e18       0x17 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+ *fill*         0x000000003fff1e2f        0x1 
  .rodata.__func__$2829
-                0x000000003fff16d0       0x15 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                0x000000003fff1e30       0x15 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
  *(.gnu.linkonce.r.*)
  *(.rodata1)
-                0x000000003fff16e5                __XT_EXCEPTION_TABLE_ = ABSOLUTE (.)
+                0x000000003fff1e45                __XT_EXCEPTION_TABLE_ = ABSOLUTE (.)
  *(.xt_except_table)
  *(.gcc_except_table)
  *(.gnu.linkonce.e.*)
  *(.gnu.version_r)
  *(.eh_frame)
-                0x000000003fff16e8                . = ((. + 0x3) & 0xfffffffffffffffc)
- *fill*         0x000000003fff16e5        0x3 
-                0x000000003fff16e8                __init_array_start = ABSOLUTE (.)
- *crtbegin.o(.ctors)
- *(EXCLUDE_FILE(*crtend.o) .ctors)
+                0x000000003fff1e48                . = ((. + 0x3) & 0xfffffffffffffffc)
+ *fill*         0x000000003fff1e45        0x3 
+                0x000000003fff1e48                __init_array_start = ABSOLUTE (.)
+ *crtbegin.*(.ctors)
+ *(EXCLUDE_FILE(*crtend.*) .ctors)
  *(SORT(.ctors.*))
  *(.ctors)
-                0x000000003fff16e8                __init_array_end = ABSOLUTE (.)
- *crtbegin.o(.dtors)
- *(EXCLUDE_FILE(*crtend.o) .dtors)
+                0x000000003fff1e48                __init_array_end = ABSOLUTE (.)
+ *crtbegin.*(.dtors)
+ *(EXCLUDE_FILE(*crtend.*) .dtors)
  *(SORT(.dtors.*))
  *(.dtors)
-                0x000000003fff16e8                __XT_EXCEPTION_DESCS_ = ABSOLUTE (.)
+                0x000000003fff1e48                __XT_EXCEPTION_DESCS_ = ABSOLUTE (.)
  *(.xt_except_desc)
  *(.gnu.linkonce.h.*)
-                0x000000003fff16e8                __XT_EXCEPTION_DESCS_END__ = ABSOLUTE (.)
+                0x000000003fff1e48                __XT_EXCEPTION_DESCS_END__ = ABSOLUTE (.)
  *(.xt_except_desc_end)
  *(.dynamic)
  *(.gnu.version_d)
-                0x000000003fff16e8                _rodata_end = ABSOLUTE (.)
-                0x000000003fff16e8                _lit4_start = ABSOLUTE (.)
+                0x000000003fff1e48                _rodata_end = ABSOLUTE (.)
+                0x000000003fff1e48                _lit4_start = ABSOLUTE (.)
  *(*.lit4)
  *(.lit4.*)
  *(.gnu.linkonce.lit4.*)
-                0x000000003fff16e8                _lit4_end = ABSOLUTE (.)
-                0x000000003fff16e8                . = ALIGN (0x4)
-                0x000000003fff16e8                _heap_start = ABSOLUTE (.)
-
-.iram.text      0x0000000040078000     0x3a96
-                0x0000000040078000                _stext = .
-                0x0000000040078000                _text_start = ABSOLUTE (.)
- *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
- .literal.selected_boot_partition
-                0x0000000040078000        0x0 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
-                                          0x4 (size before relaxing)
- .literal.select_image
-                0x0000000040078000       0x10 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
-                                         0x20 (size before relaxing)
- .literal.call_start_cpu0
-                0x0000000040078010        0x0 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
-                                          0xc (size before relaxing)
- .literal.wdt_reset_cpu0_info_enable
-                0x0000000040078010        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
- .literal.wdt_reset_info_dump
-                0x0000000040078014       0x5c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                         0x6c (size before relaxing)
- .literal.print_flash_info
-                0x0000000040078070       0x4c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                         0x68 (size before relaxing)
- .literal.vddsdio_configure
-                0x00000000400780bc        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                          0xc (size before relaxing)
- .literal.uart_console_configure
-                0x00000000400780c0       0x14 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                         0x18 (size before relaxing)
- .literal.wdt_reset_check
-                0x00000000400780d4        0xc /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                         0x30 (size before relaxing)
- .literal.update_flash_config
-                0x00000000400780e0       0x20 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
- .literal.bootloader_main
-                0x0000000040078100       0x2c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                         0x8c (size before relaxing)
- .literal.__assert_func
-                0x000000004007812c        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                         0x10 (size before relaxing)
- .literal.bootloader_init
-                0x0000000040078130       0x48 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                         0x74 (size before relaxing)
- .literal.bootloader_clock_configure
-                0x0000000040078178        0xc /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
-                                         0x20 (size before relaxing)
- .literal.bootloader_fill_random
-                0x0000000040078184        0x8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
- .literal.bootloader_random_enable
-                0x000000004007818c       0x74 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
-                                         0x78 (size before relaxing)
- .literal.bootloader_random_disable
-                0x0000000040078200       0x1c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
-                                         0x4c (size before relaxing)
- .literal.log_invalid_app_partition
-                0x000000004007821c       0x14 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                         0x2c (size before relaxing)
- .literal.try_load_partition
-                0x0000000040078230        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                         0x14 (size before relaxing)
- .literal.set_cache_and_start_app
-                0x0000000040078234        0xc /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                         0x30 (size before relaxing)
- .literal.unpack_load_app
-                0x0000000040078240       0x1c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                         0x34 (size before relaxing)
- .literal.bootloader_utility_load_partition_table
-                0x000000004007825c       0x40 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                         0x84 (size before relaxing)
- .literal.bootloader_utility_get_selected_boot_partition
-                0x000000004007829c       0x18 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                         0x70 (size before relaxing)
- .literal.bootloader_utility_load_boot_image
-                0x00000000400782b4        0xc /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                         0x4c (size before relaxing)
- .literal.bootloader_utility_load_image
-                0x00000000400782c0        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                         0x18 (size before relaxing)
- .literal.spi_to_esp_err
-                0x00000000400782c4        0x8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
- .literal.bootloader_flash_read_allow_decrypt
-                0x00000000400782cc       0x10 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
-                                         0x30 (size before relaxing)
- .literal.bootloader_flash_read_no_decrypt
-                0x00000000400782dc        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
-                                         0x14 (size before relaxing)
- .literal.bootloader_mmap
-                0x00000000400782dc       0x14 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
-                                         0x50 (size before relaxing)
- .literal.bootloader_munmap
-                0x00000000400782f0        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
-                                         0x14 (size before relaxing)
- .literal.bootloader_flash_read
-                0x00000000400782f0        0xc /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
-                                         0x30 (size before relaxing)
- .literal.execute_flash_command
-                0x00000000400782fc       0x24 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
-                                         0x3c (size before relaxing)
- .literal.bootloader_read_flash_id
-                0x0000000040078320        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
-                                          0x8 (size before relaxing)
- .literal.bootloader_common_ota_select_crc
-                0x0000000040078324        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
- .literal.bootloader_common_ota_select_valid
-                0x0000000040078328        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
-                                          0x4 (size before relaxing)
- .literal.esp_partition_table_basic_verify
-                0x0000000040078328       0x30 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
-                                         0x5c (size before relaxing)
- .literal.should_map
-                0x0000000040078358        0x0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                         0x10 (size before relaxing)
- .literal.verify_image_header
-                0x0000000040078358       0x14 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                         0x2c (size before relaxing)
- .literal.verify_segment_header
-                0x000000004007836c        0x8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                         0x28 (size before relaxing)
- .literal.verify_checksum
-                0x0000000040078374        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                         0x1c (size before relaxing)
- .literal.process_segment_data
-                0x0000000040078378        0x8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                         0x24 (size before relaxing)
- .literal.verify_simple_hash
-                0x0000000040078380        0x4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                         0x2c (size before relaxing)
- .literal.should_load
-                0x0000000040078384        0x8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                         0x18 (size before relaxing)
- .literal.process_segment
-                0x000000004007838c       0x1c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                         0x60 (size before relaxing)
- .literal.esp_image_load
-                0x00000000400783a8       0x14 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                         0x7c (size before relaxing)
- .literal.bootloader_sha256_start
-                0x00000000400783bc        0x8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
- .literal.bootloader_sha256_data
-                0x00000000400783c4       0x20 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
-                                         0x30 (size before relaxing)
- .literal.bootloader_sha256_finish
-                0x00000000400783e4       0x18 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
-                                         0x4c (size before relaxing)
- .literal.esp_log_early_timestamp
-                0x00000000400783fc        0x8 /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
- .literal.esp_rom_spiflash_read_status
-                0x0000000040078404        0xc /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
-                                         0x14 (size before relaxing)
- .literal.esp_rom_spiflash_wait_idle
-                0x0000000040078410        0x8 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
-                                          0xc (size before relaxing)
- .literal.esp_rom_spiflash_read_data
-                0x0000000040078418        0xc /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
-                                         0x18 (size before relaxing)
- .literal.esp_rom_spiflash_read_statushigh
-                0x0000000040078424        0x4 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
-                                          0xc (size before relaxing)
- .literal.esp_rom_spiflash_write_status
-                0x0000000040078428        0x0 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
-                                         0x14 (size before relaxing)
- .literal.esp_rom_spiflash_unlock
-                0x0000000040078428        0xc /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
-                                         0x28 (size before relaxing)
- .literal.esp_rom_spiflash_read
-                0x0000000040078434       0x38 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
-                                         0x5c (size before relaxing)
- .literal.rtc_vddsdio_get_config
-                0x000000004007846c       0x24 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
-                                         0x30 (size before relaxing)
- .literal.rtc_vddsdio_set_config
-                0x0000000040078490        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
-                                          0x8 (size before relaxing)
- .literal.rtc_clk_32k_enable_internal
-                0x0000000040078490       0x10 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x14 (size before relaxing)
- .literal.rtc_clk_32k_enable
-                0x00000000400784a0        0x4 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                          0xc (size before relaxing)
- .literal.rtc_clk_8m_enable
-                0x00000000400784a4        0xc /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x10 (size before relaxing)
- .literal.rtc_clk_8m_enabled
-                0x00000000400784b0        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                          0x4 (size before relaxing)
- .literal.rtc_clk_8md256_enabled
-                0x00000000400784b0        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                          0x4 (size before relaxing)
- .literal.rtc_clk_xtal_freq_estimate
-                0x00000000400784b0       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x4c (size before relaxing)
- .literal.rtc_clk_slow_freq_set
-                0x00000000400784d0        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                          0xc (size before relaxing)
- .literal.rtc_clk_slow_freq_get
-                0x00000000400784d0        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                          0x4 (size before relaxing)
- .literal.rtc_clk_fast_freq_set
-                0x00000000400784d0        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                          0xc (size before relaxing)
- .literal.rtc_clk_fast_freq_get
-                0x00000000400784d0        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                          0x4 (size before relaxing)
- .literal.rtc_clk_bbpll_set
-                0x00000000400784d0       0x10 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x38 (size before relaxing)
- .literal.rtc_clk_xtal_freq_get
-                0x00000000400784e0        0x8 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x1c (size before relaxing)
- .literal.rtc_clk_cpu_freq_get
-                0x00000000400784e8       0x14 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x28 (size before relaxing)
- .literal.rtc_clk_cpu_freq_value
-                0x00000000400784fc       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x2c (size before relaxing)
- .literal.rtc_clk_xtal_freq_update
-                0x000000004007851c        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                          0x8 (size before relaxing)
- .literal.rtc_clk_apb_freq_update
-                0x000000004007851c        0x4 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                          0x8 (size before relaxing)
- .literal.rtc_clk_cpu_freq_set
-                0x0000000040078520       0x1c /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x78 (size before relaxing)
- .literal.rtc_clk_apb_freq_get
-                0x000000004007853c        0x8 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x14 (size before relaxing)
- .literal.rtc_clk_init
-                0x0000000040078544       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x94 (size before relaxing)
- .literal.rtc_clk_cal_internal
-                0x0000000040078564       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
-                                         0x3c (size before relaxing)
- .literal.rtc_clk_cal_ratio
-                0x0000000040078584        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
-                                          0x8 (size before relaxing)
- .literal.rtc_clk_wait_for_slow_cycle
-                0x0000000040078584        0x8 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
-                                         0x20 (size before relaxing)
- .literal       0x000000004007858c        0x4 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
-                                          0x8 (size before relaxing)
- .iram1.literal
-                0x0000000040078590       0x2c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                         0x5c (size before relaxing)
- .iram1.literal
-                0x00000000400785bc       0x14 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
-                                         0x30 (size before relaxing)
- .text.selected_boot_partition
-                0x00000000400785d0        0xc /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
-                                         0x10 (size before relaxing)
- .text.select_image
-                0x00000000400785dc       0x52 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
-                                         0x5a (size before relaxing)
- *fill*         0x000000004007862e        0x2 
- .text.call_start_cpu0
-                0x0000000040078630       0x18 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
-                                         0x20 (size before relaxing)
-                0x0000000040078630                call_start_cpu0
- .text.wdt_reset_cpu0_info_enable
-                0x0000000040078648       0x27 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
- *fill*         0x000000004007866f        0x1 
- .text.wdt_reset_info_dump
-                0x0000000040078670       0xe6 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
- *fill*         0x0000000040078756        0x2 
- .text.print_flash_info
-                0x0000000040078758       0xf6 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
- *fill*         0x000000004007884e        0x2 
- .text.vddsdio_configure
-                0x0000000040078850       0x33 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                         0x37 (size before relaxing)
- *fill*         0x0000000040078883        0x1 
- .text.uart_console_configure
-                0x0000000040078884       0x36 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                         0x3a (size before relaxing)
- *fill*         0x00000000400788ba        0x2 
- .text.wdt_reset_check
-                0x00000000400788bc       0xa2 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                         0xae (size before relaxing)
- *fill*         0x000000004007895e        0x2 
- .text.update_flash_config
-                0x0000000040078960       0x68 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
- .text.bootloader_main
-                0x00000000400789c8       0xe8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                        0x11c (size before relaxing)
- .text.__assert_func
-                0x0000000040078ab0       0x1f /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                         0x23 (size before relaxing)
-                0x0000000040078ab0                __assert_func
- *fill*         0x0000000040078acf        0x1 
- .text.bootloader_init
-                0x0000000040078ad0      0x12a /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                        0x136 (size before relaxing)
-                0x0000000040078ad0                bootloader_init
- *fill*         0x0000000040078bfa        0x2 
- .text.bootloader_clock_configure
-                0x0000000040078bfc       0x76 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
-                                         0x82 (size before relaxing)
-                0x0000000040078bfc                bootloader_clock_configure
- *fill*         0x0000000040078c72        0x2 
- .text.bootloader_fill_random
-                0x0000000040078c74       0x59 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
-                0x0000000040078c74                bootloader_fill_random
- *fill*         0x0000000040078ccd        0x3 
- .text.bootloader_random_enable
-                0x0000000040078cd0      0x1d5 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
-                0x0000000040078cd0                bootloader_random_enable
- *fill*         0x0000000040078ea5        0x3 
- .text.bootloader_random_disable
-                0x0000000040078ea8      0x11c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
-                0x0000000040078ea8                bootloader_random_disable
- .text.log_invalid_app_partition
-                0x0000000040078fc4       0x57 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                         0x5b (size before relaxing)
- *fill*         0x000000004007901b        0x1 
- .text.try_load_partition
-                0x000000004007901c       0x34 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                         0x38 (size before relaxing)
- .text.set_cache_and_start_app
-                0x0000000040079050       0xcf /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
- *fill*         0x000000004007911f        0x1 
- .text.unpack_load_app
-                0x0000000040079120       0xb2 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                         0xb6 (size before relaxing)
- *fill*         0x00000000400791d2        0x2 
- .text.bootloader_utility_load_partition_table
-                0x00000000400791d4      0x15c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                        0x178 (size before relaxing)
-                0x00000000400791d4                bootloader_utility_load_partition_table
- .text.bootloader_utility_get_selected_boot_partition
-                0x0000000040079330      0x140 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                        0x14c (size before relaxing)
-                0x0000000040079330                bootloader_utility_get_selected_boot_partition
- .text.bootloader_utility_load_boot_image
-                0x0000000040079470       0xc9 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                         0xe9 (size before relaxing)
-                0x0000000040079470                bootloader_utility_load_boot_image
- *fill*         0x0000000040079539        0x3 
- .text.bootloader_utility_load_image
-                0x000000004007953c       0x20 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                         0x28 (size before relaxing)
-                0x000000004007953c                bootloader_utility_load_image
- .text.spi_to_esp_err
-                0x000000004007955c       0x22 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
- *fill*         0x000000004007957e        0x2 
- .text.bootloader_flash_read_allow_decrypt
-                0x0000000040079580       0x97 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
-                                         0x9b (size before relaxing)
- *fill*         0x0000000040079617        0x1 
- .text.bootloader_flash_read_no_decrypt
-                0x0000000040079618       0x32 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
-                                         0x36 (size before relaxing)
- *fill*         0x000000004007964a        0x2 
- .text.bootloader_mmap
-                0x000000004007964c       0xb1 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
-                                         0xb9 (size before relaxing)
-                0x000000004007964c                bootloader_mmap
- *fill*         0x00000000400796fd        0x3 
- .text.bootloader_munmap
-                0x0000000040079700       0x36 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
-                0x0000000040079700                bootloader_munmap
- *fill*         0x0000000040079736        0x2 
- .text.bootloader_flash_read
-                0x0000000040079738       0x86 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
-                0x0000000040079738                bootloader_flash_read
- *fill*         0x00000000400797be        0x2 
- .text.execute_flash_command
-                0x00000000400797c0      0x190 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
- .text.bootloader_read_flash_id
-                0x0000000040079950       0x27 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
-                                         0x2b (size before relaxing)
-                0x0000000040079950                bootloader_read_flash_id
- *fill*         0x0000000040079977        0x1 
- .text.bootloader_common_ota_select_crc
-                0x0000000040079978       0x14 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
-                0x0000000040079978                bootloader_common_ota_select_crc
- .text.bootloader_common_ota_select_valid
-                0x000000004007998c       0x20 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
-                                         0x24 (size before relaxing)
-                0x000000004007998c                bootloader_common_ota_select_valid
- .text.esp_partition_table_basic_verify
-                0x00000000400799ac      0x143 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
-                                        0x14f (size before relaxing)
-                0x00000000400799ac                esp_partition_table_basic_verify
- *fill*         0x0000000040079aef        0x1 
- .text.should_map
-                0x0000000040079af0       0x30 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
- .text.verify_image_header
-                0x0000000040079b20       0x7e /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
- *fill*         0x0000000040079b9e        0x2 
- .text.verify_segment_header
-                0x0000000040079ba0       0x71 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                         0x79 (size before relaxing)
- *fill*         0x0000000040079c11        0x3 
- .text.verify_checksum
-                0x0000000040079c14       0x87 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                         0x8f (size before relaxing)
- *fill*         0x0000000040079c9b        0x1 
- .text.process_segment_data
-                0x0000000040079c9c       0xa4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                         0xb0 (size before relaxing)
- .text.verify_simple_hash
-                0x0000000040079d40       0x5b /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                         0x6a (size before relaxing)
- *fill*         0x0000000040079d9b        0x1 
- .text.should_load
-                0x0000000040079d9c       0x44 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                         0x48 (size before relaxing)
- .text.process_segment
-                0x0000000040079de0      0x13a /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                        0x146 (size before relaxing)
- *fill*         0x0000000040079f1a        0x2 
- .text.esp_image_load
-                0x0000000040079f1c      0x256 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                        0x272 (size before relaxing)
-                0x0000000040079f1c                esp_image_load
- *fill*         0x000000004007a172        0x2 
- .text.bootloader_sha256_start
-                0x000000004007a174       0x12 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
-                0x000000004007a174                bootloader_sha256_start
- *fill*         0x000000004007a186        0x2 
- .text.bootloader_sha256_data
-                0x000000004007a188       0xa1 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
-                                         0xa9 (size before relaxing)
-                0x000000004007a188                bootloader_sha256_data
- *fill*         0x000000004007a229        0x3 
- .text.bootloader_sha256_finish
-                0x000000004007a22c       0xdc /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
-                                         0xf0 (size before relaxing)
-                0x000000004007a22c                bootloader_sha256_finish
- .text.esp_log_early_timestamp
-                0x000000004007a308       0x1f /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
-                0x000000004007a308                esp_log_timestamp
-                0x000000004007a308                esp_log_early_timestamp
- *fill*         0x000000004007a327        0x1 
- .text.esp_rom_spiflash_read_status
-                0x000000004007a328       0x61 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
-                0x000000004007a328                esp_rom_spiflash_read_status
- *fill*         0x000000004007a389        0x3 
- .text.esp_rom_spiflash_wait_idle
-                0x000000004007a38c       0x32 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
-                0x000000004007a38c                esp_rom_spiflash_wait_idle
- *fill*         0x000000004007a3be        0x2 
- .text.esp_rom_spiflash_read_data
-                0x000000004007a3c0       0xe2 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
- *fill*         0x000000004007a4a2        0x2 
- .text.esp_rom_spiflash_read_statushigh
-                0x000000004007a4a4       0x21 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
-                0x000000004007a4a4                esp_rom_spiflash_read_statushigh
- *fill*         0x000000004007a4c5        0x3 
- .text.esp_rom_spiflash_write_status
-                0x000000004007a4c8       0x34 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
-                                         0x38 (size before relaxing)
-                0x000000004007a4c8                esp_rom_spiflash_write_status
- .text.esp_rom_spiflash_unlock
-                0x000000004007a4fc       0x6a /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
-                                         0x7e (size before relaxing)
-                0x000000004007a4fc                esp_rom_spiflash_unlock
- *fill*         0x000000004007a566        0x2 
- .text.esp_rom_spiflash_read
-                0x000000004007a568      0x284 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
-                0x000000004007a568                esp_rom_spiflash_read
- .text.rtc_vddsdio_get_config
-                0x000000004007a7ec      0x104 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
-                0x000000004007a7ec                rtc_vddsdio_get_config
- .text.rtc_vddsdio_set_config
-                0x000000004007a8f0       0x46 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
-                0x000000004007a8f0                rtc_vddsdio_set_config
- *fill*         0x000000004007a936        0x2 
- .text.rtc_clk_32k_enable_internal
-                0x000000004007a938       0x81 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
- *fill*         0x000000004007a9b9        0x3 
- .text.rtc_clk_32k_enable
-                0x000000004007a9bc       0x2d /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                0x000000004007a9bc                rtc_clk_32k_enable
- *fill*         0x000000004007a9e9        0x3 
- .text.rtc_clk_8m_enable
-                0x000000004007a9ec       0x9d /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                0x000000004007a9ec                rtc_clk_8m_enable
- *fill*         0x000000004007aa89        0x3 
- .text.rtc_clk_8m_enabled
-                0x000000004007aa8c       0x19 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                0x000000004007aa8c                rtc_clk_8m_enabled
- *fill*         0x000000004007aaa5        0x3 
- .text.rtc_clk_8md256_enabled
-                0x000000004007aaa8       0x1a /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                0x000000004007aaa8                rtc_clk_8md256_enabled
- *fill*         0x000000004007aac2        0x2 
- .text.rtc_clk_xtal_freq_estimate
-                0x000000004007aac4       0xa6 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0xb2 (size before relaxing)
- *fill*         0x000000004007ab6a        0x2 
- .text.rtc_clk_slow_freq_set
-                0x000000004007ab6c       0x48 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                0x000000004007ab6c                rtc_clk_slow_freq_set
- .text.rtc_clk_slow_freq_get
-                0x000000004007abb4       0x10 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                0x000000004007abb4                rtc_clk_slow_freq_get
- .text.rtc_clk_fast_freq_set
-                0x000000004007abc4       0x2a /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                0x000000004007abc4                rtc_clk_fast_freq_set
- *fill*         0x000000004007abee        0x2 
- .text.rtc_clk_fast_freq_get
-                0x000000004007abf0       0x10 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                0x000000004007abf0                rtc_clk_fast_freq_get
- .text.rtc_clk_bbpll_set
-                0x000000004007ac00      0x170 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                        0x178 (size before relaxing)
-                0x000000004007ac00                rtc_clk_bbpll_set
- .text.rtc_clk_xtal_freq_get
-                0x000000004007ad70       0x38 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x3c (size before relaxing)
-                0x000000004007ad70                rtc_get_xtal
-                0x000000004007ad70                rtc_clk_xtal_freq_get
- .text.rtc_clk_cpu_freq_get
-                0x000000004007ada8       0x88 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x94 (size before relaxing)
-                0x000000004007ada8                rtc_clk_cpu_freq_get
- .text.rtc_clk_cpu_freq_value
-                0x000000004007ae30       0x44 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x48 (size before relaxing)
-                0x000000004007ae30                rtc_clk_cpu_freq_value
- .text.rtc_clk_xtal_freq_update
-                0x000000004007ae74       0x12 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x16 (size before relaxing)
-                0x000000004007ae74                rtc_clk_xtal_freq_update
- *fill*         0x000000004007ae86        0x2 
- .text.rtc_clk_apb_freq_update
-                0x000000004007ae88       0x13 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                         0x16 (size before relaxing)
-                0x000000004007ae88                rtc_clk_apb_freq_update
- *fill*         0x000000004007ae9b        0x1 
- .text.rtc_clk_cpu_freq_set
-                0x000000004007ae9c      0x1bc /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                        0x1d0 (size before relaxing)
-                0x000000004007ae9c                rtc_clk_cpu_freq_set
- .text.rtc_clk_apb_freq_get
-                0x000000004007b058       0x2a /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                0x000000004007b058                rtc_clk_apb_freq_get
- *fill*         0x000000004007b082        0x2 
- .text.rtc_clk_init
-                0x000000004007b084      0x182 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
-                                        0x1ba (size before relaxing)
-                0x000000004007b084                rtc_clk_init
- *fill*         0x000000004007b206        0x2 
- .text.rtc_clk_cal_internal
-                0x000000004007b208      0x180 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
- .text.rtc_clk_cal_ratio
-                0x000000004007b388       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
-                                         0x24 (size before relaxing)
-                0x000000004007b388                rtc_clk_cal_ratio
- .text.rtc_clk_wait_for_slow_cycle
-                0x000000004007b3a8       0x79 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
-                0x000000004007b3a8                rtc_clk_wait_for_slow_cycle
- *fill*         0x000000004007b421        0x3 
- .text          0x000000004007b424       0x26 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
-                0x000000004007b424                __bswapsi2
- *fill*         0x000000004007b44a        0x0 
- *fill*         0x000000004007b44a        0x0 
- *fill*         0x000000004007b44a        0x0 
- *fill*         0x000000004007b44a        0x0 
- *fill*         0x000000004007b44a        0x0 
- *fill*         0x000000004007b44a        0x0 
- *fill*         0x000000004007b44a        0x0 
- *fill*         0x000000004007b44a        0x0 
- *fill*         0x000000004007b44a        0x0 
- *fill*         0x000000004007b44a        0x0 
- *fill*         0x000000004007b44a        0x0 
- *fill*         0x000000004007b44a        0x2 
- .text.index_to_partition
-                0x000000004007b44c       0x48 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- *fill*         0x000000004007b494        0x0 
- .text.clk_val_is_valid
-                0x000000004007b494       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
- .text.reg_val_to_clk_val
-                0x000000004007b4b4        0x8 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
- .text.clk_val_to_reg_val
-                0x000000004007b4bc        0xe /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
- *fill*         0x000000004007b4ca        0x0 
- *fill*         0x000000004007b4ca        0x0 
- *fill*         0x000000004007b4ca        0x0 
- *fill*         0x000000004007b4ca        0x0 
- *fill*         0x000000004007b4ca        0x0 
- *fill*         0x000000004007b4ca        0x0 
- *fill*         0x000000004007b4ca        0x0 
- *fill*         0x000000004007b4ca        0x0 
- *fill*         0x000000004007b4ca        0x0 
- *fill*         0x000000004007b4ca        0x0 
- *fill*         0x000000004007b4ca        0x0 
- *fill*         0x000000004007b4ca        0x0 
- *fill*         0x000000004007b4ca        0x2 
- .text          0x000000004007b4cc      0x281 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
-                0x000000004007b4cc                __udivdi3
- *(.iram1 .iram1.*)
- *fill*         0x000000004007b74d        0x3 
- .iram1         0x000000004007b750      0x22b /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
- *fill*         0x000000004007b97b        0x1 
- .iram1         0x000000004007b97c      0x11a /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
-                0x000000004007b97c                esp_cpu_stall
-                0x000000004007ba10                esp_cpu_unstall
-                0x000000004007ba64                esp_cpu_reset
-                0x000000004007ba88                esp_cpu_in_ocd_debug_mode
- *fill*         0x000000004007ba96        0x0 
- *fill*         0x000000004007ba96        0x0 
- *(.fini.literal)
- *(.fini)
- *(.gnu.version)
-                0x000000004007ba96                _text_end = ABSOLUTE (.)
-                0x000000004007ba96                _etext = .
+                0x000000003fff1e48                _lit4_end = ABSOLUTE (.)
+                0x000000003fff1e48                . = ALIGN (0x4)
+                0x000000003fff1e48                _heap_start = ABSOLUTE (.)
                 [!provide]                        PROVIDE (abort, 0x4000bba4)
-                [!provide]                        PROVIDE (__absvdi2, 0x4006387c)
-                [!provide]                        PROVIDE (__absvsi2, 0x40063868)
                 [!provide]                        PROVIDE (Add2SelfBigHex256, 0x40015b7c)
                 [!provide]                        PROVIDE (AddBigHex256, 0x40015b28)
                 [!provide]                        PROVIDE (AddBigHexModP256, 0x40015c98)
-                [!provide]                        PROVIDE (__adddf3, 0x40002590)
                 [!provide]                        PROVIDE (AddP256, 0x40015c74)
                 [!provide]                        PROVIDE (AddPdiv2_256, 0x40015ce0)
-                [!provide]                        PROVIDE (__addsf3, 0x400020e8)
-                [!provide]                        PROVIDE (__addvdi3, 0x40002cbc)
-                [!provide]                        PROVIDE (__addvsi3, 0x40002c98)
                 [!provide]                        PROVIDE (aes_128_cbc_decrypt, 0x4005cc7c)
                 [!provide]                        PROVIDE (aes_128_cbc_encrypt, 0x4005cc18)
                 [!provide]                        PROVIDE (aes_unwrap, 0x4005ccf0)
                 [!provide]                        PROVIDE (app_gpio_arg, 0x3ffe003c)
                 [!provide]                        PROVIDE (app_gpio_handler, 0x3ffe0040)
-                [!provide]                        PROVIDE (__ashldi3, 0x4000c818)
-                [!provide]                        PROVIDE (__ashrdi3, 0x4000c830)
                 [!provide]                        PROVIDE (base64_decode, 0x4005ced8)
                 [!provide]                        PROVIDE (base64_encode, 0x4005cdbc)
                 [!provide]                        PROVIDE (BasePoint_x_256, 0x3ff97488)
                 [!provide]                        PROVIDE (BasePoint_y_256, 0x3ff97468)
                 [!provide]                        PROVIDE (bigHexInversion256, 0x400168f0)
                 [!provide]                        PROVIDE (bigHexP256, 0x3ff973bc)
-                [!provide]                        PROVIDE (__bswapdi2, 0x400649c4)
-                [!provide]                        PROVIDE (__bswapsi2, 0x4006499c)
                 [!provide]                        PROVIDE (btdm_r_ble_bt_handler_tab_p_get, 0x40019b0c)
                 [!provide]                        PROVIDE (btdm_r_btdm_option_data_p_get, 0x40010004)
                 [!provide]                        PROVIDE (btdm_r_btdm_rom_version_get, 0x40010078)
@@ -1170,11 +1207,6 @@ END GROUP
                 [!provide]                        PROVIDE (_calloc_r, 0x4000bbf8)
                 [!provide]                        PROVIDE (__clear_cache, 0x40063860)
                 [!provide]                        PROVIDE (_close_r, 0x4000bd3c)
-                [!provide]                        PROVIDE (__clrsbdi2, 0x40064a38)
-                [!provide]                        PROVIDE (__clrsbsi2, 0x40064a20)
-                [!provide]                        PROVIDE (__clzdi2, 0x4000ca50)
-                [!provide]                        PROVIDE (__clzsi2, 0x4000c7e8)
-                [!provide]                        PROVIDE (__cmpdi2, 0x40063820)
                 [!provide]                        PROVIDE (co_default_bdaddr, 0x3ffae704)
                 [!provide]                        PROVIDE (co_null_bdaddr, 0x3ffb80e0)
                 [!provide]                        PROVIDE (co_sca2ppm, 0x3ff971e8)
@@ -1186,8 +1218,6 @@ END GROUP
                 [!provide]                        PROVIDE (crc8_le, 0x4005d0e0)
                 [!provide]                        PROVIDE (_ctype_, 0x3ff96354)
                 0x000000003ff96350                PROVIDE (__ctype_ptr__, 0x3ff96350)
-                [!provide]                        PROVIDE (__ctzdi2, 0x4000ca64)
-                [!provide]                        PROVIDE (__ctzsi2, 0x4000c7f0)
                 [!provide]                        PROVIDE (_data_end_rom, 0x4000d5c8)
                 [!provide]                        PROVIDE (_data_end_btdm_rom, 0x4000d4f8)
                 [!provide]                        PROVIDE (_data_start_rom, 0x4000d4f8)
@@ -1220,49 +1250,21 @@ END GROUP
                 [!provide]                        PROVIDE (dh_group2_prime, 0x3ff9ad22)
                 [!provide]                        PROVIDE (dh_group5_generator, 0x3ff9ad21)
                 [!provide]                        PROVIDE (dh_group5_prime, 0x3ff9ac61)
-                [!provide]                        PROVIDE (__divdc3, 0x40064460)
-                [!provide]                        PROVIDE (__divdf3, 0x40002954)
-                [!provide]                        PROVIDE (__divdi3, 0x4000ca84)
-                [!provide]                        PROVIDE (__divsc3, 0x40064200)
-                [!provide]                        PROVIDE (__divsf3, 0x4000234c)
-                [!provide]                        PROVIDE (__divsi3, 0x4000c7b8)
                 0x000000003ffae290                PROVIDE (g_rom_spiflash_dummy_len_plus, 0x3ffae290)
                 [!provide]                        PROVIDE (ecc_env, 0x3ffb8d60)
                 [!provide]                        PROVIDE (ecc_Jacobian_InfinityPoint256, 0x3ff972e8)
                 [!provide]                        PROVIDE (em_buf_env, 0x3ffb8d74)
                 [!provide]                        PROVIDE (environ, 0x3ffae0b4)
-                [!provide]                        PROVIDE (__eqdf2, 0x400636a8)
-                [!provide]                        PROVIDE (__eqsf2, 0x40063374)
                 [!provide]                        PROVIDE (esp_crc8, 0x4005d144)
                 [!provide]                        PROVIDE (_etext, 0x4000d66c)
                 [!provide]                        PROVIDE (ets_readySet_, 0x3ffe01f0)
                 [!provide]                        PROVIDE (ets_startup_callback, 0x3ffe0404)
                 [!provide]                        PROVIDE (exc_cause_table, 0x3ff991d0)
                 [!provide]                        PROVIDE (_exit_r, 0x4000bd28)
-                [!provide]                        PROVIDE (__extendsfdf2, 0x40002c34)
-                [!provide]                        PROVIDE (__ffsdi2, 0x4000ca2c)
-                [!provide]                        PROVIDE (__ffssi2, 0x4000c804)
-                [!provide]                        PROVIDE (__fixdfdi, 0x40002ac4)
-                [!provide]                        PROVIDE (__fixdfsi, 0x40002a78)
-                [!provide]                        PROVIDE (__fixsfdi, 0x4000244c)
-                [!provide]                        PROVIDE (__fixsfsi, 0x4000240c)
-                [!provide]                        PROVIDE (__fixunsdfsi, 0x40002b30)
-                [!provide]                        PROVIDE (__fixunssfdi, 0x40002504)
-                [!provide]                        PROVIDE (__fixunssfsi, 0x400024ac)
-                [!provide]                        PROVIDE (__floatdidf, 0x4000c988)
-                [!provide]                        PROVIDE (__floatdisf, 0x4000c8c0)
-                [!provide]                        PROVIDE (__floatsidf, 0x4000c944)
-                [!provide]                        PROVIDE (__floatsisf, 0x4000c870)
-                [!provide]                        PROVIDE (__floatundidf, 0x4000c978)
-                [!provide]                        PROVIDE (__floatundisf, 0x4000c8b0)
-                [!provide]                        PROVIDE (__floatunsidf, 0x4000c938)
-                [!provide]                        PROVIDE (__floatunsisf, 0x4000c864)
                 [!provide]                        PROVIDE (free, 0x4000beb8)
                 [!provide]                        PROVIDE (_free_r, 0x4000bbcc)
                 [!provide]                        PROVIDE (_fstat_r, 0x4000bccc)
                 [!provide]                        PROVIDE (__gcc_bcmp, 0x40064a70)
-                [!provide]                        PROVIDE (__gedf2, 0x40063768)
-                [!provide]                        PROVIDE (__gesf2, 0x4006340c)
                 [!provide]                        PROVIDE (_getpid_r, 0x4000bcfc)
                 [!provide]                        PROVIDE (__getreent, 0x4000be8c)
                 [!provide]                        PROVIDE (_gettimeofday_r, 0x4000bc58)
@@ -1272,8 +1274,6 @@ END GROUP
                 [!provide]                        PROVIDE (_global_impure_ptr, 0x3ffae0b0)
                 [!provide]                        PROVIDE (g_phyFuns_instance, 0x3ffae0c4)
                 0x000000003ffae270                PROVIDE (g_rom_flashchip, 0x3ffae270)
-                [!provide]                        PROVIDE (__gtdf2, 0x400636dc)
-                [!provide]                        PROVIDE (__gtsf2, 0x400633a0)
                 [!provide]                        PROVIDE (gTxMsg, 0x3ffe0050)
                 [!provide]                        PROVIDE (hci_cmd_desc_root_tab, 0x3ff976d4)
                 [!provide]                        PROVIDE (hci_cmd_desc_tab_ctrl_bb, 0x3ff97b70)
@@ -1319,8 +1319,6 @@ END GROUP
                 [!provide]                        PROVIDE (ld_pcm_settings_dft, 0x3ff98a0c)
                 [!provide]                        PROVIDE (ld_sched_params, 0x3ffb96c0)
                 [!provide]                        PROVIDE (ld_sync_train_channels, 0x3ff98a3c)
-                [!provide]                        PROVIDE (__ledf2, 0x40063704)
-                [!provide]                        PROVIDE (__lesf2, 0x400633c0)
                 [!provide]                        PROVIDE (_link_r, 0x4000bc9c)
                 [!provide]                        PROVIDE (llc_default_handler, 0x3ff98b3c)
                 [!provide]                        PROVIDE (llc_default_state_tab_p_get, 0x40046058)
@@ -1342,6 +1340,7 @@ END GROUP
                 [!provide]                        PROVIDE (lld_evt_elt_wait_get, 0x400468e4)
                 [!provide]                        PROVIDE (lld_evt_get_next_free_slot, 0x4004692c)
                 [!provide]                        PROVIDE (lld_pdu_adv_pk_desc_tab, 0x3ff98c70)
+                [!provide]                        PROVIDE (lld_pdu_tx_flush_list, 0x4004a760)
                 [!provide]                        PROVIDE (lld_pdu_llcp_pk_desc_tab, 0x3ff98b68)
                 [!provide]                        PROVIDE (lld_pdu_pack, 0x4004ab14)
                 [!provide]                        PROVIDE (LLM_AA_CT1, 0x3ff98d8a)
@@ -1373,9 +1372,6 @@ END GROUP
                 [!provide]                        PROVIDE (_lock_try_acquire, 0x4000be3c)
                 [!provide]                        PROVIDE (_lock_try_acquire_recursive, 0x4000be50)
                 [!provide]                        PROVIDE (_lseek_r, 0x4000bd8c)
-                [!provide]                        PROVIDE (__lshrdi3, 0x4000c84c)
-                [!provide]                        PROVIDE (__ltdf2, 0x40063790)
-                [!provide]                        PROVIDE (__ltsf2, 0x4006342c)
                 [!provide]                        PROVIDE (malloc, 0x4000bea0)
                 [!provide]                        PROVIDE (_malloc_r, 0x4000bbb4)
                 [!provide]                        PROVIDE (maxSecretKey_256, 0x3ff97448)
@@ -1385,43 +1381,19 @@ END GROUP
                 0x000000004005da9c                PROVIDE (MD5Update, 0x4005da9c)
                 [!provide]                        PROVIDE (md5_vector, 0x4005db80)
                 0x00000000400095a4                PROVIDE (mmu_init, 0x400095a4)
-                [!provide]                        PROVIDE (__moddi3, 0x4000cd4c)
-                [!provide]                        PROVIDE (__modsi3, 0x4000c7c0)
                 [!provide]                        PROVIDE (__month_lengths, 0x3ff9609c)
-                [!provide]                        PROVIDE (__muldc3, 0x40063bf4)
-                [!provide]                        PROVIDE (__muldf3, 0x4006358c)
-                [!provide]                        PROVIDE (__muldi3, 0x4000c9fc)
-                [!provide]                        PROVIDE (__mulsc3, 0x40063934)
-                [!provide]                        PROVIDE (__mulsf3, 0x400632c8)
-                [!provide]                        PROVIDE (__mulsi3, 0x4000c7b0)
                 [!provide]                        PROVIDE (MultiplyBigHexByUint32_256, 0x40016214)
                 [!provide]                        PROVIDE (MultiplyBigHexModP256, 0x400160b8)
                 [!provide]                        PROVIDE (MultiplyByU32ModP256, 0x40015fdc)
                 [!provide]                        PROVIDE (multofup, 0x4000ab8c)
-                [!provide]                        PROVIDE (__mulvdi3, 0x40002d78)
-                [!provide]                        PROVIDE (__mulvsi3, 0x40002d60)
                 [!provide]                        PROVIDE (mz_adler32, 0x4005edbc)
                 [!provide]                        PROVIDE (mz_crc32, 0x4005ee88)
                 [!provide]                        PROVIDE (mz_free, 0x4005eed4)
-                [!provide]                        PROVIDE (__nedf2, 0x400636a8)
-                [!provide]                        PROVIDE (__negdf2, 0x400634a0)
-                [!provide]                        PROVIDE (__negdi2, 0x4000ca14)
-                [!provide]                        PROVIDE (__negsf2, 0x400020c0)
-                [!provide]                        PROVIDE (__negvdi2, 0x40002e98)
-                [!provide]                        PROVIDE (__negvsi2, 0x40002e78)
-                [!provide]                        PROVIDE (__nesf2, 0x40063374)
                 [!provide]                        PROVIDE (notEqual256, 0x40015b04)
-                [!provide]                        PROVIDE (__nsau_data, 0x3ff96544)
                 [!provide]                        PROVIDE (one_bits, 0x3ff971f8)
                 [!provide]                        PROVIDE (_open_r, 0x4000bd54)
-                [!provide]                        PROVIDE (__paritysi2, 0x40002f3c)
                 [!provide]                        PROVIDE (pbkdf2_sha1, 0x40060ba4)
                 [!provide]                        PROVIDE (phy_get_romfuncs, 0x40004100)
-                [!provide]                        PROVIDE (__popcountdi2, 0x40002ef8)
-                [!provide]                        PROVIDE (__popcountsi2, 0x40002ed0)
-                [!provide]                        PROVIDE (__popcount_tab, 0x3ff96544)
-                [!provide]                        PROVIDE (__powidf2, 0x400638d4)
-                [!provide]                        PROVIDE (__powisf2, 0x4006389c)
                 [!provide]                        PROVIDE (_Pri_4_HandlerAddress, 0x3ffe0648)
                 [!provide]                        PROVIDE (_Pri_5_HandlerAddress, 0x3ffe064c)
                 [!provide]                        PROVIDE (r_btdm_option_data, 0x3ffae6e0)
@@ -1465,6 +1437,9 @@ END GROUP
                 [!provide]                        PROVIDE (r_E21, 0x40010968)
                 [!provide]                        PROVIDE (r_E22, 0x400109b4)
                 [!provide]                        PROVIDE (r_E3, 0x40010a58)
+                [!provide]                        PROVIDE (lm_n192_mod_mul, 0x40011dc0)
+                [!provide]                        PROVIDE (lm_n192_mod_add, 0x40011e9c)
+                [!provide]                        PROVIDE (lm_n192_mod_sub, 0x40011eec)
                 [!provide]                        PROVIDE (r_ea_alarm_clear, 0x40015ab4)
                 [!provide]                        PROVIDE (r_ea_alarm_set, 0x40015a10)
                 [!provide]                        PROVIDE (_read_r, 0x4000bda8)
@@ -1494,6 +1469,7 @@ END GROUP
                 [!provide]                        PROVIDE (r_ecc_gen_new_secret_key, 0x400170e4)
                 [!provide]                        PROVIDE (r_ecc_get_debug_Keys, 0x40017224)
                 [!provide]                        PROVIDE (r_ecc_init, 0x40016dbc)
+                [!provide]                        PROVIDE (ecc_point_multiplication_uint8_256, 0x40016804)
                 [!provide]                        PROVIDE (RecvBuff, 0x3ffe009c)
                 [!provide]                        PROVIDE (r_em_buf_init, 0x4001729c)
                 [!provide]                        PROVIDE (r_em_buf_rx_buff_addr_get, 0x400173e8)
@@ -1792,6 +1768,14 @@ END GROUP
                 [!provide]                        PROVIDE (r_lc_util_get_offset_clkn, 0x4002f51c)
                 [!provide]                        PROVIDE (r_lc_util_set_loc_trans_coll, 0x4002f500)
                 [!provide]                        PROVIDE (r_lc_version, 0x40020a30)
+                [!provide]                        PROVIDE (lc_set_encap_pdu_data_p192, 0x4002e4c8)
+                [!provide]                        PROVIDE (lc_set_encap_pdu_data_p256, 0x4002e454)
+                [!provide]                        PROVIDE (lm_get_auth_method, 0x40023420)
+                [!provide]                        PROVIDE (lmp_accepted_ext_handler, 0x40027290)
+                [!provide]                        PROVIDE (lmp_not_accepted_ext_handler, 0x40029c54)
+                [!provide]                        PROVIDE (lmp_clk_adj_handler, 0x40027468)
+                [!provide]                        PROVIDE (lmp_clk_adj_ack_handler, 0x400274f4)
+                [!provide]                        PROVIDE (lm_get_auth_method, 0x40023420)
                 [!provide]                        PROVIDE (lmp_accepted_ext_handler, 0x40027290)
                 [!provide]                        PROVIDE (lmp_not_accepted_ext_handler, 0x40029c54)
                 [!provide]                        PROVIDE (lmp_clk_adj_handler, 0x40027468)
@@ -1879,7 +1863,14 @@ END GROUP
                 [!provide]                        PROVIDE (ld_acl_tx_packet_type_select, 0x4002fb40)
                 [!provide]                        PROVIDE (ld_acl_sched, 0x40033268)
                 [!provide]                        PROVIDE (ld_acl_sniff_sched, 0x4003340c)
+                [!provide]                        PROVIDE (ld_acl_rx, 0x4003274c)
+                [!provide]                        PROVIDE (ld_acl_tx, 0x4002ffdc)
+                [!provide]                        PROVIDE (ld_acl_rx_sync, 0x4002fbec)
+                [!provide]                        PROVIDE (ld_acl_rx_sync2, 0x4002fd8c)
+                [!provide]                        PROVIDE (ld_acl_rx_no_sync, 0x4002fe78)
+                [!provide]                        PROVIDE (ld_sco_modify, 0x40031778)
                 [!provide]                        PROVIDE (lm_cmd_cmp_send, 0x40051838)
+                [!provide]                        PROVIDE (ld_sco_frm_cbk, 0x400349dc)
                 [!provide]                        PROVIDE (r_ld_acl_active_hop_types_get, 0x40036e10)
                 [!provide]                        PROVIDE (r_ld_acl_afh_confirm, 0x40036d40)
                 [!provide]                        PROVIDE (r_ld_acl_afh_prepare, 0x40036c84)
@@ -2535,15 +2526,11 @@ END GROUP
                 [!provide]                        PROVIDE (start_tb_console, 0x4005a980)
                 [!provide]                        PROVIDE (_stat_r, 0x4000bcb4)
                 [!provide]                        PROVIDE (_stext, 0x40000560)
-                [!provide]                        PROVIDE (__subdf3, 0x400026e4)
-                [!provide]                        PROVIDE (__subsf3, 0x400021d0)
                 [!provide]                        PROVIDE (SubtractBigHex256, 0x40015bcc)
                 [!provide]                        PROVIDE (SubtractBigHexMod256, 0x40015e8c)
                 [!provide]                        PROVIDE (SubtractBigHexUint32_256, 0x40015f8c)
                 [!provide]                        PROVIDE (SubtractFromSelfBigHex256, 0x40015c20)
                 [!provide]                        PROVIDE (SubtractFromSelfBigHexSign256, 0x40015dc8)
-                [!provide]                        PROVIDE (__subvdi3, 0x40002d20)
-                [!provide]                        PROVIDE (__subvsi3, 0x40002cf8)
                 [!provide]                        PROVIDE (sw_to_hw, 0x3ffb8d40)
                 [!provide]                        PROVIDE (syscall_table_ptr_app, 0x3ffae020)
                 [!provide]                        PROVIDE (syscall_table_ptr_pro, 0x3ffae024)
@@ -2561,20 +2548,9 @@ END GROUP
                 [!provide]                        PROVIDE (tinfl_decompress, 0x4005ef30)
                 [!provide]                        PROVIDE (tinfl_decompress_mem_to_callback, 0x40060090)
                 [!provide]                        PROVIDE (tinfl_decompress_mem_to_mem, 0x40060050)
-                [!provide]                        PROVIDE (__truncdfsf2, 0x40002b90)
                 [!provide]                        PROVIDE (_tzname, 0x3ffae030)
                 [!provide]                        PROVIDE (UartDev, 0x3ffe019c)
-                [!provide]                        PROVIDE (__ucmpdi2, 0x40063840)
-                [!provide]                        PROVIDE (__udivdi3, 0x4000cff8)
-                [!provide]                        PROVIDE (__udivmoddi4, 0x40064ab0)
-                [!provide]                        PROVIDE (__udivsi3, 0x4000c7c8)
-                [!provide]                        PROVIDE (__udiv_w_sdiv, 0x40064aa8)
-                [!provide]                        PROVIDE (__umoddi3, 0x4000d280)
-                [!provide]                        PROVIDE (__umodsi3, 0x4000c7d0)
-                [!provide]                        PROVIDE (__umulsidi3, 0x4000c7d8)
                 [!provide]                        PROVIDE (_unlink_r, 0x4000bc84)
-                [!provide]                        PROVIDE (__unorddf2, 0x400637f4)
-                [!provide]                        PROVIDE (__unordsf2, 0x40063478)
                 [!provide]                        PROVIDE (user_code_start, 0x3ffe0400)
                 [!provide]                        PROVIDE (veryBigHexP256, 0x3ff9736c)
                 [!provide]                        PROVIDE (__wctomb, 0x3ff96540)
@@ -2953,91 +2929,93 @@ END GROUP
                 0x0000000040008550                PROVIDE (ets_update_cpu_frequency, 0x40008550)
 OUTPUT(/home/maikschulze/esp/SCDE/build/bootloader/bootloader.elf elf32-xtensa-le)
 
-.debug_frame    0x0000000000000000      0xdd8
+.debug_frame    0x0000000000000000      0xe20
  .debug_frame   0x0000000000000000       0x58 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
  .debug_frame   0x0000000000000058      0x118 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
  .debug_frame   0x0000000000000170       0x28 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
  .debug_frame   0x0000000000000198       0x58 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
  .debug_frame   0x00000000000001f0       0xe8 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
  .debug_frame   0x00000000000002d8       0xd0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
- .debug_frame   0x00000000000003a8      0x100 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
- .debug_frame   0x00000000000004a8       0x88 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
- .debug_frame   0x0000000000000530       0x28 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
- .debug_frame   0x0000000000000558      0x100 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
- .debug_frame   0x0000000000000658       0x58 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
- .debug_frame   0x00000000000006b0       0x70 /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
- .debug_frame   0x0000000000000720      0x208 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
- .debug_frame   0x0000000000000928       0x70 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
- .debug_frame   0x0000000000000998       0x58 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
- .debug_frame   0x00000000000009f0      0x2e0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
- .debug_frame   0x0000000000000cd0       0xb8 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
- .debug_frame   0x0000000000000d88       0x28 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
- .debug_frame   0x0000000000000db0       0x28 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
+ .debug_frame   0x00000000000003a8      0x130 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+ .debug_frame   0x00000000000004d8       0x88 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+ .debug_frame   0x0000000000000560       0x28 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
+ .debug_frame   0x0000000000000588      0x118 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+ .debug_frame   0x00000000000006a0       0x58 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+ .debug_frame   0x00000000000006f8       0x70 /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
+ .debug_frame   0x0000000000000768      0x208 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+ .debug_frame   0x0000000000000970       0x70 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
+ .debug_frame   0x00000000000009e0       0x58 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+ .debug_frame   0x0000000000000a38      0x2e0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+ .debug_frame   0x0000000000000d18       0xb8 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
+ .debug_frame   0x0000000000000dd0       0x28 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
+ .debug_frame   0x0000000000000df8       0x28 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
 
-.debug_info     0x0000000000000000     0xc316
- .debug_info    0x0000000000000000      0x50d /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
- .debug_info    0x000000000000050d     0x1583 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
- .debug_info    0x0000000000001a90      0x27e /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
- .debug_info    0x0000000000001d0e      0x1fe /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
- .debug_info    0x0000000000001f0c     0x13d3 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
- .debug_info    0x00000000000032df      0xbfa /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
- .debug_info    0x0000000000003ed9     0x298f /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
- .debug_info    0x0000000000006868      0x769 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
- .debug_info    0x0000000000006fd1      0x526 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
- .debug_info    0x00000000000074f7     0x1291 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
- .debug_info    0x0000000000008788      0x44d /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
- .debug_info    0x0000000000008bd5      0x900 /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
- .debug_info    0x00000000000094d5      0xaf5 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
- .debug_info    0x0000000000009fca      0x118 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
- .debug_info    0x000000000000a0e2      0x339 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
- .debug_info    0x000000000000a41b     0x14bc /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
- .debug_info    0x000000000000b8d7      0x3aa /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
- .debug_info    0x000000000000bc81       0xcd /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
- .debug_info    0x000000000000bd4e      0x5c8 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
+.debug_info     0x0000000000000000     0xcc7a
+ .debug_info    0x0000000000000000      0x350 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
+ .debug_info    0x0000000000000350     0x1808 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+ .debug_info    0x0000000000001b58      0x27e /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
+ .debug_info    0x0000000000001dd6      0x1fe /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
+ .debug_info    0x0000000000001fd4     0x16a6 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+ .debug_info    0x000000000000367a      0xc5e /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+ .debug_info    0x00000000000042d8     0x2c07 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+ .debug_info    0x0000000000006edf      0x7c5 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+ .debug_info    0x00000000000076a4      0x557 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
+ .debug_info    0x0000000000007bfb     0x145c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+ .debug_info    0x0000000000009057      0x44d /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+ .debug_info    0x00000000000094a4      0x900 /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
+ .debug_info    0x0000000000009da4      0xaf5 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+ .debug_info    0x000000000000a899      0x118 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
+ .debug_info    0x000000000000a9b1      0x339 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+ .debug_info    0x000000000000acea       0x95 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(gpio_periph.o)
+ .debug_info    0x000000000000ad7f     0x14bc /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+ .debug_info    0x000000000000c23b      0x3aa /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
+ .debug_info    0x000000000000c5e5       0xcd /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
+ .debug_info    0x000000000000c6b2      0x5c8 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
 
-.debug_abbrev   0x0000000000000000     0x2444
- .debug_abbrev  0x0000000000000000      0x18c /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
- .debug_abbrev  0x000000000000018c      0x416 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
- .debug_abbrev  0x00000000000005a2      0x108 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
- .debug_abbrev  0x00000000000006aa      0x107 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
- .debug_abbrev  0x00000000000007b1      0x38d /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
- .debug_abbrev  0x0000000000000b3e      0x22f /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
- .debug_abbrev  0x0000000000000d6d      0x331 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
- .debug_abbrev  0x000000000000109e      0x18d /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
- .debug_abbrev  0x000000000000122b      0x17b /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
- .debug_abbrev  0x00000000000013a6      0x2a4 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
- .debug_abbrev  0x000000000000164a      0x17d /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
- .debug_abbrev  0x00000000000017c7      0x1f3 /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
- .debug_abbrev  0x00000000000019ba      0x22e /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
- .debug_abbrev  0x0000000000001be8       0x96 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
- .debug_abbrev  0x0000000000001c7e      0x135 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
- .debug_abbrev  0x0000000000001db3      0x358 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
- .debug_abbrev  0x000000000000210b      0x17a /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
- .debug_abbrev  0x0000000000002285       0x60 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
- .debug_abbrev  0x00000000000022e5      0x15f /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
+.debug_abbrev   0x0000000000000000     0x24e0
+ .debug_abbrev  0x0000000000000000      0x168 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
+ .debug_abbrev  0x0000000000000168      0x416 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+ .debug_abbrev  0x000000000000057e      0x108 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
+ .debug_abbrev  0x0000000000000686      0x107 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
+ .debug_abbrev  0x000000000000078d      0x374 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+ .debug_abbrev  0x0000000000000b01      0x22f /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+ .debug_abbrev  0x0000000000000d30      0x38e /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+ .debug_abbrev  0x00000000000010be      0x19e /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+ .debug_abbrev  0x000000000000125c      0x16c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
+ .debug_abbrev  0x00000000000013c8      0x2c3 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+ .debug_abbrev  0x000000000000168b      0x17d /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+ .debug_abbrev  0x0000000000001808      0x1f3 /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
+ .debug_abbrev  0x00000000000019fb      0x22e /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+ .debug_abbrev  0x0000000000001c29       0x96 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
+ .debug_abbrev  0x0000000000001cbf      0x135 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+ .debug_abbrev  0x0000000000001df4       0x5b /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(gpio_periph.o)
+ .debug_abbrev  0x0000000000001e4f      0x358 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+ .debug_abbrev  0x00000000000021a7      0x17a /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
+ .debug_abbrev  0x0000000000002321       0x60 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
+ .debug_abbrev  0x0000000000002381      0x15f /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
 
-.debug_loc      0x0000000000000000     0x5114
- .debug_loc     0x0000000000000000       0xb6 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
- .debug_loc     0x00000000000000b6      0x761 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
- .debug_loc     0x0000000000000817       0x3d /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
- .debug_loc     0x0000000000000854       0x45 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
- .debug_loc     0x0000000000000899      0x875 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
- .debug_loc     0x000000000000110e      0x638 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
- .debug_loc     0x0000000000001746      0x232 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
- .debug_loc     0x0000000000001978      0x2cd /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
- .debug_loc     0x0000000000001c45      0x1b6 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
- .debug_loc     0x0000000000001dfb      0xac1 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
- .debug_loc     0x00000000000028bc      0x135 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
- .debug_loc     0x00000000000029f1      0x4ad /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
- .debug_loc     0x0000000000002e9e      0xa20 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
- .debug_loc     0x00000000000038be       0x13 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
- .debug_loc     0x00000000000038d1      0x245 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
- .debug_loc     0x0000000000003b16      0xa18 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
- .debug_loc     0x000000000000452e      0x1dd /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
- .debug_loc     0x000000000000470b       0x21 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
- .debug_loc     0x000000000000472c      0x9e8 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
+.debug_loc      0x0000000000000000     0x512f
+ .debug_loc     0x0000000000000000       0x79 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
+ .debug_loc     0x0000000000000079      0x77b /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+ .debug_loc     0x00000000000007f4       0x3d /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
+ .debug_loc     0x0000000000000831       0x45 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
+ .debug_loc     0x0000000000000876      0x867 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+ .debug_loc     0x00000000000010dd      0x638 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+ .debug_loc     0x0000000000001715      0x213 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+ .debug_loc     0x0000000000001928      0x2cd /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+ .debug_loc     0x0000000000001bf5      0x1ca /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
+ .debug_loc     0x0000000000001dbf      0xb18 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+ .debug_loc     0x00000000000028d7      0x135 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+ .debug_loc     0x0000000000002a0c      0x4ad /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
+ .debug_loc     0x0000000000002eb9      0xa20 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+ .debug_loc     0x00000000000038d9       0x13 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
+ .debug_loc     0x00000000000038ec      0x245 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+ .debug_loc     0x0000000000003b31      0xa18 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+ .debug_loc     0x0000000000004549      0x1dd /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
+ .debug_loc     0x0000000000004726       0x21 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
+ .debug_loc     0x0000000000004747      0x9e8 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
 
-.debug_aranges  0x0000000000000000      0x600
+.debug_aranges  0x0000000000000000      0x630
  .debug_aranges
                 0x0000000000000000       0x30 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
  .debug_aranges
@@ -3051,111 +3029,116 @@ OUTPUT(/home/maikschulze/esp/SCDE/build/bootloader/bootloader.elf elf32-xtensa-l
  .debug_aranges
                 0x0000000000000150       0x58 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
  .debug_aranges
-                0x00000000000001a8       0x68 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+                0x00000000000001a8       0x78 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
  .debug_aranges
-                0x0000000000000210       0x40 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+                0x0000000000000220       0x40 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
  .debug_aranges
-                0x0000000000000250       0x20 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
+                0x0000000000000260       0x20 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
  .debug_aranges
-                0x0000000000000270       0x68 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                0x0000000000000280       0x70 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
  .debug_aranges
-                0x00000000000002d8       0x30 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+                0x00000000000002f0       0x30 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
  .debug_aranges
-                0x0000000000000308       0x38 /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
+                0x0000000000000320       0x38 /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
  .debug_aranges
-                0x0000000000000340       0xc0 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+                0x0000000000000358       0xc0 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
  .debug_aranges
-                0x0000000000000400       0x38 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
+                0x0000000000000418       0x38 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
  .debug_aranges
-                0x0000000000000438       0x30 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+                0x0000000000000450       0x30 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
  .debug_aranges
-                0x0000000000000468      0x108 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+                0x0000000000000480       0x18 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(gpio_periph.o)
  .debug_aranges
-                0x0000000000000570       0x50 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
+                0x0000000000000498      0x108 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
  .debug_aranges
-                0x00000000000005c0       0x20 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
+                0x00000000000005a0       0x50 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
  .debug_aranges
-                0x00000000000005e0       0x20 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
+                0x00000000000005f0       0x20 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
+ .debug_aranges
+                0x0000000000000610       0x20 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
 
-.debug_ranges   0x0000000000000000      0x600
+.debug_ranges   0x0000000000000000      0x630
  .debug_ranges  0x0000000000000000       0x20 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
  .debug_ranges  0x0000000000000020       0x60 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
  .debug_ranges  0x0000000000000080       0x10 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
  .debug_ranges  0x0000000000000090       0x20 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
  .debug_ranges  0x00000000000000b0       0x68 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
  .debug_ranges  0x0000000000000118       0x48 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
- .debug_ranges  0x0000000000000160       0x58 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
- .debug_ranges  0x00000000000001b8       0x78 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
- .debug_ranges  0x0000000000000230       0x58 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
- .debug_ranges  0x0000000000000288       0x70 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
- .debug_ranges  0x00000000000002f8       0x20 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
- .debug_ranges  0x0000000000000318       0x28 /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
- .debug_ranges  0x0000000000000340       0xb0 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
- .debug_ranges  0x00000000000003f0       0x28 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
- .debug_ranges  0x0000000000000418       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
- .debug_ranges  0x0000000000000438      0x128 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
- .debug_ranges  0x0000000000000560       0x40 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
- .debug_ranges  0x00000000000005a0       0x60 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
+ .debug_ranges  0x0000000000000160       0x68 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+ .debug_ranges  0x00000000000001c8       0x78 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+ .debug_ranges  0x0000000000000240       0x58 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
+ .debug_ranges  0x0000000000000298       0x90 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+ .debug_ranges  0x0000000000000328       0x20 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+ .debug_ranges  0x0000000000000348       0x28 /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
+ .debug_ranges  0x0000000000000370       0xb0 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+ .debug_ranges  0x0000000000000420       0x28 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
+ .debug_ranges  0x0000000000000448       0x20 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+ .debug_ranges  0x0000000000000468      0x128 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+ .debug_ranges  0x0000000000000590       0x40 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
+ .debug_ranges  0x00000000000005d0       0x60 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
 
-.debug_line     0x0000000000000000     0x64f0
- .debug_line    0x0000000000000000      0x387 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
- .debug_line    0x0000000000000387      0x97f /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
- .debug_line    0x0000000000000d06      0x200 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
- .debug_line    0x0000000000000f06      0x39e /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
- .debug_line    0x00000000000012a4      0x8ff /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
- .debug_line    0x0000000000001ba3      0x58c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
- .debug_line    0x000000000000212f      0x4fc /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
- .debug_line    0x000000000000262b      0x569 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
- .debug_line    0x0000000000002b94      0x354 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
- .debug_line    0x0000000000002ee8      0xa68 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
- .debug_line    0x0000000000003950      0x3d7 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
- .debug_line    0x0000000000003d27      0x4f2 /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
- .debug_line    0x0000000000004219      0xada /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
- .debug_line    0x0000000000004cf3      0x19a /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
- .debug_line    0x0000000000004e8d      0x3de /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
- .debug_line    0x000000000000526b      0xcc6 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
- .debug_line    0x0000000000005f31      0x3a8 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
- .debug_line    0x00000000000062d9       0x89 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
- .debug_line    0x0000000000006362      0x18e /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
+.debug_line     0x0000000000000000     0x68fe
+ .debug_line    0x0000000000000000      0x362 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
+ .debug_line    0x0000000000000362      0x9f7 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+ .debug_line    0x0000000000000d59      0x200 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
+ .debug_line    0x0000000000000f59      0x39e /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
+ .debug_line    0x00000000000012f7      0x9bf /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+ .debug_line    0x0000000000001cb6      0x59f /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+ .debug_line    0x0000000000002255      0x59c /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+ .debug_line    0x00000000000027f1      0x5d1 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+ .debug_line    0x0000000000002dc2      0x366 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
+ .debug_line    0x0000000000003128      0xb2d /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+ .debug_line    0x0000000000003c55      0x3d7 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+ .debug_line    0x000000000000402c      0x4f2 /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
+ .debug_line    0x000000000000451e      0xada /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+ .debug_line    0x0000000000004ff8      0x19a /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
+ .debug_line    0x0000000000005192      0x3de /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+ .debug_line    0x0000000000005570      0x109 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(gpio_periph.o)
+ .debug_line    0x0000000000005679      0xcc6 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+ .debug_line    0x000000000000633f      0x3a8 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
+ .debug_line    0x00000000000066e7       0x89 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
+ .debug_line    0x0000000000006770      0x18e /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
 
-.debug_str      0x0000000000000000     0x41ff
- .debug_str     0x0000000000000000      0x46f /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
-                                        0x500 (size before relaxing)
- .debug_str     0x000000000000046f      0x84a /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
-                                        0xb36 (size before relaxing)
- .debug_str     0x0000000000000cb9      0x238 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
-                                        0x38c (size before relaxing)
- .debug_str     0x0000000000000ef1       0xad /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
-                                        0x235 (size before relaxing)
- .debug_str     0x0000000000000f9e      0x2df /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
-                                        0x913 (size before relaxing)
- .debug_str     0x000000000000127d      0x226 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
-                                        0x575 (size before relaxing)
- .debug_str     0x00000000000014a3     0x184f /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
-                                       0x1b76 (size before relaxing)
- .debug_str     0x0000000000002cf2      0x243 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
-                                        0x579 (size before relaxing)
- .debug_str     0x0000000000002f35       0xba /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
+.debug_str      0x0000000000000000     0x4299
+ .debug_str     0x0000000000000000      0x364 /home/maikschulze/esp/SCDE/build/bootloader/main/libmain.a(bootloader_start.o)
                                         0x3c8 (size before relaxing)
- .debug_str     0x0000000000002fef      0x272 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
-                                        0x9f7 (size before relaxing)
- .debug_str     0x0000000000003261       0xf3 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
+ .debug_str     0x0000000000000364      0x8e0 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_init.o)
+                                        0xb36 (size before relaxing)
+ .debug_str     0x0000000000000c44      0x238 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_clock.o)
+                                        0x38c (size before relaxing)
+ .debug_str     0x0000000000000e7c       0xad /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_random.o)
+                                        0x235 (size before relaxing)
+ .debug_str     0x0000000000000f29      0x33f /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_utility.o)
+                                        0x8f3 (size before relaxing)
+ .debug_str     0x0000000000001268      0x226 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_flash.o)
+                                        0x575 (size before relaxing)
+ .debug_str     0x000000000000148e     0x1884 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_qio_mode.o)
+                                       0x1bb7 (size before relaxing)
+ .debug_str     0x0000000000002d12      0x254 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_common.o)
+                                        0x584 (size before relaxing)
+ .debug_str     0x0000000000002f66       0xba /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(flash_partitions.o)
+                                        0x3c2 (size before relaxing)
+ .debug_str     0x0000000000003020      0x293 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(esp_image_format.o)
+                                        0xa24 (size before relaxing)
+ .debug_str     0x00000000000032b3       0xf3 /home/maikschulze/esp/SCDE/build/bootloader/bootloader_support/libbootloader_support.a(bootloader_sha.o)
                                         0x2bd (size before relaxing)
- .debug_str     0x0000000000003354      0x18b /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
+ .debug_str     0x00000000000033a6      0x18b /home/maikschulze/esp/SCDE/build/bootloader/log/liblog.a(log.o)
                                         0x347 (size before relaxing)
- .debug_str     0x00000000000034df      0x36d /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
+ .debug_str     0x0000000000003531      0x36d /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
                                         0x752 (size before relaxing)
- .debug_str     0x000000000000384c       0x71 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
+ .debug_str     0x000000000000389e       0x71 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
                                         0x17d (size before relaxing)
- .debug_str     0x00000000000038bd       0xba /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+ .debug_str     0x000000000000390f       0xc1 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
                                         0x246 (size before relaxing)
- .debug_str     0x0000000000003977      0x534 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
+ .debug_str     0x00000000000039d0       0x41 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(gpio_periph.o)
+                                        0x147 (size before relaxing)
+ .debug_str     0x0000000000003a11      0x534 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
                                         0x965 (size before relaxing)
- .debug_str     0x0000000000003eab      0x140 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
+ .debug_str     0x0000000000003f45      0x140 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
                                         0x382 (size before relaxing)
- .debug_str     0x0000000000003feb      0x138 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
+ .debug_str     0x0000000000004085      0x138 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
                                         0x1de (size before relaxing)
- .debug_str     0x0000000000004123       0xdc /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
+ .debug_str     0x00000000000041bd       0xdc /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_udivdi3.o)
                                         0x258 (size before relaxing)
 
 .comment        0x0000000000000000       0x3a
@@ -3175,6 +3158,7 @@ OUTPUT(/home/maikschulze/esp/SCDE/build/bootloader/bootloader.elf elf32-xtensa-l
  .comment       0x000000000000003a       0x3b /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
  .comment       0x000000000000003a       0x3b /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
  .comment       0x000000000000003a       0x3b /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+ .comment       0x000000000000003a       0x3b /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(gpio_periph.o)
  .comment       0x000000000000003a       0x3b /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
  .comment       0x000000000000003a       0x3b /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
  .comment       0x000000000000003a       0x3b /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)
@@ -3196,6 +3180,7 @@ OUTPUT(/home/maikschulze/esp/SCDE/build/bootloader/bootloader.elf elf32-xtensa-l
  .xtensa.info   0x0000000000000038        0x0 /home/maikschulze/esp/SCDE/build/bootloader/spi_flash/libspi_flash.a(spi_flash_rom_patch.o)
  .xtensa.info   0x0000000000000038        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(cpu_util.o)
  .xtensa.info   0x0000000000000038        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_init.o)
+ .xtensa.info   0x0000000000000038        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(gpio_periph.o)
  .xtensa.info   0x0000000000000038        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_clk.o)
  .xtensa.info   0x0000000000000038        0x0 /home/maikschulze/esp/SCDE/build/bootloader/soc/libsoc.a(rtc_time.o)
  .xtensa.info   0x0000000000000038        0x0 /home/maikschulze/esp/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/5.2.0/libgcc.a(_bswapsi2.o)

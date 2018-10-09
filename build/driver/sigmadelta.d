@@ -49,6 +49,7 @@ sigmadelta.o: \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/corebits.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/xtruntime-core-state.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/xtruntime-frames.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h \
  /home/maikschulze/esp/esp-idf/components/driver/include/driver/sigmadelta.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_types.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_sd_struct.h \
@@ -60,7 +61,9 @@ sigmadelta.o: \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/io_mux_reg.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_sig_map.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h \
+ /home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h
 
 /home/maikschulze/esp/esp-idf/components/log/include/esp_log.h:
 
@@ -160,6 +163,8 @@ sigmadelta.o: \
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/xtruntime-frames.h:
 
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h:
+
 /home/maikschulze/esp/esp-idf/components/driver/include/driver/sigmadelta.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_types.h:
@@ -182,5 +187,9 @@ sigmadelta.o: \
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h:
 
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h:
+
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h:
 /home/maikschulze/esp/esp-idf/components/driver/./sigmadelta.c:

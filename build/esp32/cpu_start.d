@@ -66,8 +66,11 @@ cpu_start.o: /home/maikschulze/esp/esp-idf/components/esp32/cpu_start.c \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/rtc_io_reg.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_sig_map.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h \
+ /home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/rtc_gpio_channel.h \
+ /home/maikschulze/esp/esp-idf/components/soc/include/soc/rtc_periph.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOS.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOSConfig.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_config.h \
@@ -115,6 +118,7 @@ cpu_start.o: /home/maikschulze/esp/esp-idf/components/esp32/cpu_start.c \
  /home/maikschulze/esp/esp-idf/components/newlib/include/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/fcntl.h \
@@ -298,9 +302,15 @@ cpu_start.o: /home/maikschulze/esp/esp-idf/components/esp32/cpu_start.c \
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h:
 
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h:
+
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h:
 
+/home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h:
+
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/rtc_gpio_channel.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/include/soc/rtc_periph.h:
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOS.h:
 
@@ -395,6 +405,8 @@ cpu_start.o: /home/maikschulze/esp/esp-idf/components/esp32/cpu_start.c \
 /home/maikschulze/esp/esp-idf/components/newlib/include/machine/time.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h:
 

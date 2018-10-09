@@ -10,6 +10,7 @@ bootloader_start.o: \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_attr.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_reg.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/soc.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/spi_flash.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/spi_reg.h \
  /home/maikschulze/esp/esp-idf/components/bootloader_support/include_priv/bootloader_config.h \
@@ -40,6 +41,8 @@ bootloader_start.o: \
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_reg.h:
 
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/soc.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/rom/spi_flash.h:
 

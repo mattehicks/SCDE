@@ -7,6 +7,7 @@ spi_flash_rom_patch.o: \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_attr.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_reg.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/soc.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/spi_flash.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/spi_reg.h \
  /home/maikschulze/esp/SCDE/build/bootloader/../include/sdkconfig.h
@@ -24,6 +25,8 @@ spi_flash_rom_patch.o: \
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_reg.h:
 
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/soc.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/rom/spi_flash.h:
 

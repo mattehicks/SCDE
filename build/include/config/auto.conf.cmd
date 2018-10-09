@@ -6,6 +6,7 @@ deps_config := \
 	/home/maikschulze/esp/esp-idf/components/esp32/Kconfig \
 	/home/maikschulze/esp/esp-idf/components/esp_adc_cal/Kconfig \
 	/home/maikschulze/esp/esp-idf/components/esp_http_client/Kconfig \
+	/home/maikschulze/esp/esp-idf/components/espfs/Kconfig \
 	/home/maikschulze/esp/esp-idf/components/ethernet/Kconfig \
 	/home/maikschulze/esp/esp-idf/components/fatfs/Kconfig \
 	/home/maikschulze/esp/esp-idf/components/freertos/Kconfig \
@@ -17,6 +18,7 @@ deps_config := \
 	/home/maikschulze/esp/esp-idf/components/openssl/Kconfig \
 	/home/maikschulze/esp/esp-idf/components/pthread/Kconfig \
 	/home/maikschulze/esp/esp-idf/components/spi_flash/Kconfig \
+	/home/maikschulze/esp/esp-idf/components/spiffs/Kconfig \
 	/home/maikschulze/esp/esp-idf/components/tcpip_adapter/Kconfig \
 	/home/maikschulze/esp/esp-idf/components/vfs/Kconfig \
 	/home/maikschulze/esp/esp-idf/components/wear_levelling/Kconfig \
@@ -29,5 +31,8 @@ deps_config := \
 include/config/auto.conf: \
 	$(deps_config)
 
+ifneq "$(IDF_CMAKE)" "n"
+include/config/auto.conf: FORCE
+endif
 
 $(deps_config): ;

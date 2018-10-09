@@ -102,7 +102,7 @@ void base64encode(const unsigned char in[3], unsigned char out[4], int count)
 
 
 int ICACHE_FLASH_ATTR
-base64_encode(size_t in_len, const unsigned char *in, size_t out_len, char *out)
+xbase64_encode(size_t in_len, const unsigned char *in, size_t out_len, char *out)
 {
   unsigned ii, io;
   uint32_t v;

@@ -19,6 +19,7 @@ src/vfs_fat.o: \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/stdlib.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/alloca.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/types.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h \
@@ -81,7 +82,9 @@ src/vfs_fat.o: \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/io_mux_reg.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_sig_map.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h \
+ /home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h \
  /home/maikschulze/esp/esp-idf/components/driver/include/driver/touch_pad.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h \
@@ -142,6 +145,8 @@ src/vfs_fat.o: \
 /home/maikschulze/esp/esp-idf/components/newlib/include/alloca.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h:
 
@@ -267,7 +272,11 @@ src/vfs_fat.o: \
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h:
 
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h:
+
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h:
 
 /home/maikschulze/esp/esp-idf/components/driver/include/driver/touch_pad.h:
 

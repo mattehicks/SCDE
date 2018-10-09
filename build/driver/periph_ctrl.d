@@ -71,7 +71,9 @@ periph_ctrl.o: \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/io_mux_reg.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_sig_map.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h \
+ /home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h \
  /home/maikschulze/esp/esp-idf/components/driver/include/driver/touch_pad.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/touch_channel.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/semphr.h \
@@ -80,7 +82,8 @@ periph_ctrl.o: \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_dport_access.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h \
- /home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h
+ /home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_types.h:
 
@@ -224,7 +227,11 @@ periph_ctrl.o: \
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h:
 
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h:
+
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h:
 
 /home/maikschulze/esp/esp-idf/components/driver/include/driver/touch_pad.h:
 
@@ -243,4 +250,6 @@ periph_ctrl.o: \
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h:
 
 /home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h:
 /home/maikschulze/esp/esp-idf/components/driver/./periph_ctrl.c:

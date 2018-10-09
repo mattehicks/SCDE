@@ -25,6 +25,7 @@ esp_spiffs.o: /home/maikschulze/esp/SCDE/main/esp_spiffs.c \
  /home/maikschulze/esp/esp-idf/components/newlib/include/string.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/string.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdint.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_intsup.h \
@@ -88,6 +89,8 @@ esp_spiffs.o: /home/maikschulze/esp/SCDE/main/esp_spiffs.c \
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/string.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h:
 

@@ -76,7 +76,9 @@ i2c.o: /home/maikschulze/esp/esp-idf/components/driver/i2c.c \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/io_mux_reg.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_sig_map.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h \
+ /home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h \
  /home/maikschulze/esp/esp-idf/components/driver/include/driver/touch_pad.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/touch_channel.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/semphr.h \
@@ -93,7 +95,8 @@ i2c.o: /home/maikschulze/esp/esp-idf/components/driver/i2c.c \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/i2c_struct.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/i2c_reg.h \
  /home/maikschulze/esp/esp-idf/components/driver/include/driver/i2c.h \
- /home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h
+ /home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/string.h:
 
@@ -249,7 +252,11 @@ i2c.o: /home/maikschulze/esp/esp-idf/components/driver/i2c.c \
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h:
 
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h:
+
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h:
 
 /home/maikschulze/esp/esp-idf/components/driver/include/driver/touch_pad.h:
 
@@ -284,4 +291,6 @@ i2c.o: /home/maikschulze/esp/esp-idf/components/driver/i2c.c \
 /home/maikschulze/esp/esp-idf/components/driver/include/driver/i2c.h:
 
 /home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h:
 /home/maikschulze/esp/esp-idf/components/driver/./i2c.c:

@@ -35,6 +35,7 @@ emac_main.o: \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_attr.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_reg.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/soc.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_reg.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_dport_access.h \
@@ -66,6 +67,7 @@ emac_main.o: \
  /home/maikschulze/esp/esp-idf/components/newlib/include/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/fcntl.h \
@@ -82,6 +84,7 @@ emac_main.o: \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/rtc_io_reg.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_sig_map.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h \
+ /home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h \
  /home/maikschulze/esp/esp-idf/components/driver/include/driver/touch_pad.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h \
@@ -129,6 +132,7 @@ emac_main.o: \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_pm.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp32/pm.h \
  /home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h \
  /home/maikschulze/esp/esp-idf/components/ethernet/emac_common.h \
  /home/maikschulze/esp/esp-idf/components/ethernet/emac_dev.h \
  /home/maikschulze/esp/esp-idf/components/ethernet/emac_desc.h \
@@ -206,6 +210,8 @@ emac_main.o: \
 
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/soc.h:
 
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h:
+
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_reg.h:
 
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h:
@@ -268,6 +274,8 @@ emac_main.o: \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h:
 
+/home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h:
+
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/time.h:
@@ -299,6 +307,8 @@ emac_main.o: \
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_sig_map.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_intr_alloc.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h:
 
 /home/maikschulze/esp/esp-idf/components/driver/include/driver/touch_pad.h:
 
@@ -393,6 +403,8 @@ emac_main.o: \
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp32/pm.h:
 
 /home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h:
 
 /home/maikschulze/esp/esp-idf/components/ethernet/emac_common.h:
 

@@ -563,9 +563,14 @@ InitA()
 			,(char*) valueName->strText);
 
   // call command include to process the initial config-file
+//war  struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
+//	AnalyzeCommandChain(includeCommandArgs.strText, includeCommandArgs.strTextLen);
   struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
-	AnalyzeCommandChain(includeCommandArgs.strText, includeCommandArgs.strTextLen);
+	AnalyzeCommandChain((uint8_t*)includeCommandArgs.strText, (const size_t) includeCommandArgs.strTextLen);
 //??	AnalyzeCommand(includeCommandArgs.strText, includeCommandArgs.strTextLen);
+
+//const uint8_t *args
+//		, const size_t argsLen)
 
   // free value from Fn GetAttrValTextByDefTextAttrText
   if (valueName) {
@@ -715,9 +720,14 @@ InitA()
 		,(char*) valueNamePort->strText);
 
 	// call command include to process the initial config-file
+//war	struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
+//		AnalyzeCommandChain(defTelnetCommandArgs.strText, defTelnetCommandArgs.strTextLen);
+
 	struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
-		AnalyzeCommandChain(defTelnetCommandArgs.strText, defTelnetCommandArgs.strTextLen);
-//??		AnalyzeCommand(defTelnetCommand.strText, defTelnetCommand.strTextLen);
+		AnalyzeCommandChain((uint8_t*)defTelnetCommandArgs.strText,(const size_t) defTelnetCommandArgs.strTextLen);
+
+
+//	AnalyzeCommandChain((uint8_t*)includeCommandArgs.strText, (const size_t) 
 
 	free(defTelnetCommandArgs.strText);
 

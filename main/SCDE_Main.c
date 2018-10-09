@@ -59,11 +59,11 @@
 
 
 
-#include "esp_spi_flash.h"
-#include "esp_partition.h"
-#include "spiffs.h"
-#include "esp_spiffs.h"
-#include "ESP32_Platform_SPIFFS.h"
+//#include "esp_spi_flash.h"
+//#include "esp_partition.h"
+//#include "spiffs.h"
+//#include "esp_spiffs.h"
+//#include "ESP32_Platform_SPIFFS.h"
 
 
 
@@ -1147,7 +1147,18 @@ app_main(void)
 
  // LOGD("Free IRAM: %d",  xPortGetFreeHeapSizeTagged(MALLOC_CAP_32BIT));
 
-  nvs_flash_init();
+
+
+  //Initialize NVS
+  esp_err_t ret = nvs_flash_init();
+  if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    ESP_ERROR_CHECK(nvs_flash_erase());
+    ret = nvs_flash_init();
+  }
+  ESP_ERROR_CHECK(ret);
+
+
+ // nvs_flash_init();
 
   system_init();
 
@@ -1160,7 +1171,7 @@ app_main(void)
 
 
   // mount the SPIFFS, make VFS useable ...
-  ESP32_Platform_MountSPIFFS();
+//  ESP32_Platform_MountSPIFFS();
 
   ESP_LOGI(TAG, "... VFS accessible\r\n");
 
@@ -1192,8 +1203,8 @@ app_main(void)
 
 
   // Set adress of EspFs binary
-  espFsInit(&_binary_x_img_start);
-  espFsInit(&_binary_espfs_img_start);
+//  espFsInit(&_binary_x_img_start);
+//  espFsInit(&_binary_espfs_img_start);
 // espFsInit(&TAG);
 
 // -------------------------------------------------------------------------------------------------
@@ -1606,10 +1617,13 @@ fprintf(file, "Hello!");
 
 
 
-  char tag[] = "test_memory_vfs()";
-  printf("Memory test starting...\n");
+ // char tag[] = "test_memory_vfs()";
+ // printf("Memory test starting...\n");
 
-  int ret;
+ // int ret;
+
+
+
 /*
   // fill the SPIFFS cfg struct 
   ConfigSPIFFS();
@@ -1654,13 +1668,13 @@ fprintf(file, "Hello!");
   }
 */
 
-  char fname[] = "/data/makerfilex.cfg";    //myfile";
+ // char fname[] = "/data/makerfilex.cfg";    //myfile";
 
 //  SPIFFS_RegisterVFS("/data", &fs);
 
 //  ESP_LOGI(tag, "vfs registered");
 
-
+/*
   FILE* file = fopen(fname, "w");
   if (file <= NULL) {
 
@@ -1749,7 +1763,7 @@ fprintf(file, "Hello!");
 
   printf("Memory test complete!\n");
 
-
+*/
 
 
 

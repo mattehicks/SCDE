@@ -45,10 +45,12 @@ sdmmc_host.o: \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/gpio.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_attr.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_reg.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h \
  /home/maikschulze/esp/esp-idf/components/driver/include/driver/gpio.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_types.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_struct.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/rtc_io_reg.h \
+ /home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h \
  /home/maikschulze/esp/esp-idf/components/driver/include/driver/sdmmc_host.h \
  /home/maikschulze/esp/esp-idf/components/driver/include/driver/sdmmc_types.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOS.h \
@@ -89,6 +91,7 @@ sdmmc_host.o: \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_dport_access.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h \
  /home/maikschulze/esp/esp-idf/components/driver/sdmmc_private.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/queue.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/semphr.h \
@@ -184,6 +187,8 @@ sdmmc_host.o: \
 
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_reg.h:
 
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_pins.h:
+
 /home/maikschulze/esp/esp-idf/components/driver/include/driver/gpio.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_types.h:
@@ -191,6 +196,8 @@ sdmmc_host.o: \
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/gpio_struct.h:
 
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/rtc_io_reg.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/include/soc/gpio_periph.h:
 
 /home/maikschulze/esp/esp-idf/components/driver/include/driver/sdmmc_host.h:
 
@@ -271,6 +278,8 @@ sdmmc_host.o: \
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_dport_access.h:
 
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h:
 
 /home/maikschulze/esp/esp-idf/components/driver/sdmmc_private.h:
 
