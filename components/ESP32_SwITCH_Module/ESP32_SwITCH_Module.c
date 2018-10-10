@@ -133,28 +133,28 @@ SelectAData ESP32_SwITCH_DisEna[] = {  //ID, Text MAX CGI LEN BEACHTEN!!!
   {0,"Disabled"},
   {1,"Enabled"}, 
   {0, NULL}
-  };
+};
 
 // ESP32_SwITCH_SET_IDLE_LV -> 'IDLE_LV' -> Low|High
 SelectAData ESP32_SwITCH_LoHi[] = {  //ID, Text MAX CGI LEN BEACHTEN!!!
   {0,"Low"},
   {1,"High"}, 
   {0, NULL}
-  };
+};
 
 // ESP32_SwITCH_SET_BLOCK -> 'PWM_BLOCK'-> High_Speed|Low_Speed
 SelectAData ESP32_SwITCH_PWM_BLOCK[] = {  //ID, Text MAX CGI LEN BEACHTEN!!!
   {0,"High_Speed"},
   {1,"Low_Speed"},
   {0, NULL}
-  };
+};
 
 // ESP32_SwITCH_SET_TICK_SOURCE -> 'TICK_SOURCE'-> REF|APB_SLOW
 SelectAData ESP32_SwITCH_TICK_SOURCE[] = {  //ID, Text MAX CGI LEN BEACHTEN!!!
   {0,"REF"},
   {1,"APB_SLOW"}, 
   {0, NULL}
-  };
+};
 
 
 
@@ -190,7 +190,7 @@ enum ESP32_SwITCH_SET_IK {				// Bit #XX for debugging
   , ESP32_SwITCH_SET_SIG_OUT_EN				// Bit #14 'SIG_OUT_EN' ->
   , ESP32_SwITCH_SET_IDLE_LV				// Bit #15 'IDLE_LV' ->
 
-  , ESP32_SwITCH_SET_RESOLUTION			// Bit #16 'RESOLUTION' -> 
+  , ESP32_SwITCH_SET_RESOLUTION				// Bit #16 'RESOLUTION' -> 
   , ESP32_SwITCH_SET_TICK_SOURCE			// Bit #17 'TICK_SOURCE' ->
   , ESP32_SwITCH_SET_FREQ_HZ				// Bit #18 'FREQ_HZ' ->
 
