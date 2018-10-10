@@ -1,0 +1,81 @@
+<html>
+
+<head>
+<title>%?%</title>
+<link rel="stylesheet" href="../Style.css" type="text/css">
+
+<script type="text/javascript" src="../WiFi/140medley.min.js"></script>
+<script type="text/javascript" src="../JS/SwITCH.js"></script>
+<script type="text/javascript" src="../JS/ClIMA.js"></script>
+<script type="text/javascript" src="../JS/ADC.js"></script>
+<script language="javascript" src="../JS/rss.js"></script>
+
+<script type="text/javascript">
+var xhr=j();
+window.onload=function(e) 
+{
+  SwITCH(1,%LSFN%);
+  ClIMA(1,1);
+  ADC(1,1);
+};
+</script>
+
+</head>
+
+<body>
+<div id="alles">
+
+<div id="header">
+<l><a href="http://www.ecsuha.de"><img name="EcSUHA" src="../Images/Ecsuha.gif" width="360" height="66" alt=""></a></l>
+<h1>%?%</h1>
+<p>... or as we call it [%!%]<br>
+<p>Embedded Features: %=%<br>Welcome to the New Age of Living</p>
+</div>
+
+<div id="kopfzeile">
+<p><strong>Welcome to the Userinterface of CoNTROL 8S-1C-1ADC. You can now make your customisations including Firmware Update.</strong></p>
+</div>
+
+<div id="menu"><ul>%$%</ul>
+
+<div class="chan">
+<div id="chan_head"></div>
+<div id="chan_items"></div>
+</div>
+<script type="text/javascript">
+  getRSS("http://ecsuha.de/news/rss/1");
+</script>
+</div>
+
+<div id="content">
+<div id="content2">
+<h1>(S)wITCH Feature Control</h1>
+
+<div id="SwITCH"></div>
+
+</div>
+
+<div id="content2">
+<h1>(C)lIMA Feature Control</h1>
+
+<div id="ClIMA"></div>
+
+</div>
+
+
+<div id="content2">
+<h1>(ADC) Feature Control</h1>
+
+<div id="ADC"></div>
+
+</div>
+
+	<h2>&nbsp;</h2>
+
+</div>
+
+%_%
+
+</div>
+</body>
+</html>

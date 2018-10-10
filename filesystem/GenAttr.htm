@@ -1,0 +1,305 @@
+<html>
+<head>
+<title>%DNA%</title>
+
+<link rel="stylesheet" href="Style.css" type="text/css">
+
+<script language="javascript" src="../JS/rss.js"></script>
+
+</head>
+
+<body>
+<div id="alles">
+
+<div id="header">
+<l><a href="http://www.ecsuha.de"><img name="EcSUHA" src="../Images/Ecsuha.gif" width="360" height="66" alt=""></a></l>
+<h1>%?%</h1>
+<p>... or as we call it [%!%]<br>
+<p>Embedded Features: %=%<br>Welcome to the New Age of Living</p>
+</div>
+
+<div id="kopfzeile">
+<p><strong>Welcome to the Userinterface of CoNTROL 8S-1C-1ADC. You can now make your customisations including Firmware Update.</strong></p>
+</div>
+
+<div id="menu"><ul>%$%</ul>
+
+<div class="chan">
+<div id="chan_head"></div>
+<div id="chan_items"></div>
+</div>
+<script type="text/javascript">
+  getRSS("http://ecsuha.de/news/rss/1");
+</script>
+</div>
+
+<div id="content">
+<div id="content2">
+<h1>Device Configuration</h1>
+
+<h2>Use Device Configuration for customizing Device Operation and Behavior</h2>
+
+<hr>
+
+<h2>Generic Device Configuration:</h2>
+<p>%A%</p>
+
+<hr>
+
+<h2>Devices Communication Engine Configuration:</h2>
+<p>%K%</p>
+
+<hr>
+
+<h2>Devices Resource Security Configuration:</h2>
+<h3>Activate Basic Authorization for Station Connections on</h3>
+<p>%L%</p>
+
+<h2>&nbsp;</h2>
+
+<div class="CSSTab" style="width:700px;">
+
+<table>
+
+<thead>
+<tr>
+	<th colspan="7">Please choose passwords that will protect the resources if enabled</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+	<form method="post" action="GenAttr.cgi">
+	<td colspan="2">Infrastructure Password</td>
+	<td colspan="3"><input name="C" type="text" value="%M%" size="15" maxlength="15"></td>
+	<td colspan="2"><input type="submit" name="XA" value="Store"></td>
+	</form>
+</tr>
+
+<tr>
+	<form method="post" action="GenAttr.cgi">
+	<td colspan="2">Device Specific Password</td>
+	<td colspan="3"><input name="C" type="text" value="%N%" size="15" maxlength="15"></td>
+	<td colspan="2"><input type="submit" name="XB" value="Store"></td>
+	</form>
+</tr>
+
+</tbody>
+
+<tfoot>
+<tr>
+	<th colspan="7">The security settings will NOT apply when accessing from Service AP !</th>
+</tr>
+</tfoot>
+
+</table>
+
+</div>
+
+<h2>&nbsp;</h2>
+<hr>
+<h2>&nbsp;</h2>
+
+<div class="CSSTab" style="width:700px;height:800px;">
+
+<table>
+
+<tr>
+	<th colspan="7">(S)witch Feature Hardware</th>
+</tr>
+
+<tr>
+	<td colspan="3" style="text-align:left;">%B%</td>
+	<td colspan="4">Choose your PWM X (CYCLEMASK).<br>On / Off will configure a PWM with 2 Steps.<br>In this case PWM has no function. 4,8,16,32,64,128,256 Steps will configure PWM Dimmer with 4,8,16,32,64,128,256 Steps.</td>
+</tr>
+
+<tr>
+	<th colspan="3">PWM allows the use of the Special Feature Connector, Phase Cutting requires a Device with Zero Cross Detection on PCB !</th>
+	<td colspan="4">%C%</td>
+</tr>
+
+<tr>
+	<th colspan="7">When using Phase Cutting ALL Switches MUST be on same Phase !</th>
+</tr>
+
+<tr>
+	<td colspan="7"> </td>
+</tr>
+
+<tr>
+	<th colspan="4">Custom Switch.X NAME</th>
+	<th>Min</th>
+	<th>Max</th>
+	<th> </th>
+</tr>
+
+<tr>
+	<td colspan="4">%HA%</td>
+	<form method="post" action="GenAttr.cgi">
+	<td><input name="MIA" type="text" value="%IA%" size="3" maxlength="3"></td>
+	<td><input name="MXA" type="text" value="%JA%" size="3" maxlength="3"></td>
+	<td><input type="submit" name="S1" value="Store"></td>
+	</form>
+</tr>
+
+<tr>
+	<td colspan="4">%HB%</td>
+	<form method="post" action="GenAttr.cgi">
+	<td><input name="MIA" type="text" value="%IB%" size="3" maxlength="3"></td>
+	<td><input name="MXA" type="text" value="%JB%" size="3" maxlength="3"></td>
+	<td><input type="submit" name="S1" value="Store"></td>
+	</form>
+</tr>
+
+<tr>
+	<td colspan="4">%HC%</td>
+	<form method="post" action="GenAttr.cgi">
+	<td><input name="MIA" type="text" value="%IC%" size="3" maxlength="3"></td>
+	<td><input name="MXA" type="text" value="%JC%" size="3" maxlength="3"></td>
+	<td><input type="submit" name="S1" value="Store"></td>
+	</form>
+</tr>
+
+<tr>
+	<td colspan="4">%HD%</td>
+	<form method="post" action="GenAttr.cgi">
+	<td><input name="MIA" type="text" value="%ID%" size="3" maxlength="3"></td>
+	<td><input name="MXA" type="text" value="%JD%" size="3" maxlength="3"></td>
+	<td><input type="submit" name="S1" value="Store"></td>
+	</form>
+</tr>
+
+<tr>
+	<td colspan="4">%HE%</td>
+	<form method="post" action="GenAttr.cgi">
+	<td><input name="MIA" type="text" value="%IE%" size="3" maxlength="3"></td>
+	<td><input name="MXA" type="text" value="%JE%" size="3" maxlength="3"></td>
+	<td><input type="submit" name="S1" value="Store"></td>
+	</form>
+</tr>
+
+<tr>
+	<td colspan="4">%HF%</td>
+	<form method="post" action="GenAttr.cgi">
+	<td><input name="MIA" type="text" value="%IF%" size="3" maxlength="3"></td>
+	<td><input name="MXA" type="text" value="%JF%" size="3" maxlength="3"></td>
+	<td><input type="submit" name="S1" value="Store"></td>
+	</form>
+</tr>
+
+<tr>
+	<td colspan="4">%HG%</td>
+	<form method="post" action="GenAttr.cgi">
+	<td><input name="MIA" type="text" value="%IG%" size="3" maxlength="3"></td>
+	<td><input name="MXA" type="text" value="%JG%" size="3" maxlength="3"></td>
+	<td><input type="submit" name="S1" value="Store"></td>
+	</form>
+</tr>
+
+<tr>
+	<td colspan="4">%HH%</td>
+	<form method="post" action="GenAttr.cgi">
+	<td><input name="MIA" type="text" value="%IH%" size="3" maxlength="3"></td>
+	<td><input name="MXA" type="text" value="%JH%" size="3" maxlength="3"></td>
+	<td><input type="submit" name="S1" value="Store"></td>
+	</form>
+</tr>
+
+<tr>
+	<th colspan="7">Manipulate Min and Max value limits, if needed, and Store!</th>
+</tr>
+
+</table>
+
+</div>
+
+<h2>&nbsp;</h2>
+
+<div class="CSSTab" style="width:700px;height:250px;">
+
+<table>
+
+<tr>
+	<th colspan="7">(C)lima Feature Hardware</th>
+</tr>
+
+<tr>
+	<td rowspan="2" colspan="3" style="text-align:left;">%D%</td>
+	<td colspan="4">Poll interval for Clima Data:</td>
+</tr>
+
+<tr>
+	<form method="post" action="GenAttr.cgi">
+	<td colspan="2"><input name="A" type="number" value="%E%" min="3" max="9999">Seconds</td>
+	<td colspan="2"><input type="submit" name="X5" value="Set Intervall"></td>
+	</form>
+</tr>
+
+<tr>
+	<th colspan="7">Choose Not Connected, before changing Hardware !</th>
+</tr>
+
+</table>
+
+</div>
+
+<h2>&nbsp;</h2>
+
+<div class="CSSTab" style="width:700px;height:250px;">
+
+<table>
+
+<tr>
+	<th colspan="7">(ADC) Feature Hardware Configuration</th>
+</tr>
+
+<tr>
+	<td rowspan="2" colspan="3" style="text-align:left;">%F%</td>
+	<td colspan="4">Poll interval for ADC Data:</td>
+</tr>
+
+<tr>
+	<form method="post" action="GenAttr.cgi">
+	<td colspan="2"><input name="B" type="number" value="%G%" min="3" max="9999">Seconds</td>
+	<td colspan="2"><input type="submit" name="X7" value="Set Intervall"></td>
+	</form>
+</tr>
+
+<tr>
+	<th colspan="7">Choose Not Connected, before changing Hardware !</th>
+</tr>
+
+</table>
+
+</div>
+
+<h2>&nbsp;</h2>
+
+<form name="F2" method="post" action="GenAttr.cgi">
+Adjust MIN  value:
+<input name="AI" type="text" id="AI" style="border: none" onChange="this.form.submit()" value="%AI%" size="4" maxlength="4">	
+Adjust MAX value: 
+<input name="AX" type="text" id="AX" style="border: none" onChange="this.form.submit()" value="%AX%" size="4" maxlength="4">
+Oversampling:
+<input name="AO" type="text" id="AO" style="border: none" onChange="this.form.submit()" value="%AO%" size="4" maxlength="4">
+</form>
+   
+<hr>
+
+<form name="F3" method="post" action="GenAttr.cgi">
+Cutomized Name for xxx.1:<input name="SN" type="text" id="SN" style="border: none" onChange="this.form.submit()" value="%SN%" size="31" maxlength="31">
+</form>
+
+
+
+</div>
+
+  <h2>&nbsp;</h2>
+
+</div>
+
+%_%
+
+</div>
+</body>
+</html>

@@ -1202,10 +1202,123 @@ app_main(void)
 
 
 
-  // Set adress of EspFs binary
-//  espFsInit(&_binary_x_img_start);
-//  espFsInit(&_binary_espfs_img_start);
-// espFsInit(&TAG);
+
+
+
+#include "esp_err.h"
+#include "esp_log.h"
+#include "esp_spiffs.h"
+
+
+
+  // initialize SPIFFS at path ??? 
+   ESP_LOGI(TAG, "Initializing SPIFFS");
+    
+  esp_vfs_spiffs_conf_t conf = {
+    .base_path = "/spiffs",
+    .partition_label = NULL,
+    .max_files = 5,
+    .format_if_mount_failed = true
+  };
+
+  // register SPIFFS
+  //esp_err_t ret = esp_vfs_spiffs_register(&conf);
+  ret = esp_vfs_spiffs_register(&conf);
+  if (ret != ESP_OK) {
+    if (ret == ESP_FAIL) {
+      ESP_LOGE(TAG, "Failed to mount or format filesystem");
+    } else if (ret == ESP_ERR_NOT_FOUND) {
+      ESP_LOGE(TAG, "Failed to find SPIFFS partition");
+    } else {
+      ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
+    }
+    return;
+  }
+
+  // get SPIFFS infos
+  size_t total = 0, used = 0;
+  ret = esp_spiffs_info(NULL, &total, &used);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to get SPIFFS partition information (%s)", esp_err_to_name(ret));
+  } else {
+    ESP_LOGI(TAG, "Partition size: total: %d, used: %d", total, used);
+  }
+
+
+
+
+
+
+
+
+
+
+   // Use POSIX and C standard library functions to work with files.
+    // First create a file.
+    ESP_LOGI(TAG, "Opening file");
+    FILE* f = fopen("/spiffs/hello.txt", "w");
+    if (f == NULL) {
+        ESP_LOGE(TAG, "Failed to open file for writing");
+        return;
+    }
+    fprintf(f, "Hello World!\n");
+    fclose(f);
+    ESP_LOGI(TAG, "File written");
+
+    // Check if destination file exists before renaming
+    struct stat st;
+    if (stat("/spiffs/foo.txt", &st) == 0) {
+        // Delete it if it exists
+        unlink("/spiffs/foo.txt");
+    }
+
+    // Rename original file
+    ESP_LOGI(TAG, "Renaming file");
+    if (rename("/spiffs/hello.txt", "/spiffs/foo.txt") != 0) {
+        ESP_LOGE(TAG, "Rename failed");
+        return;
+    }
+
+    // Open renamed file for reading
+    ESP_LOGI(TAG, "Reading file");
+    f = fopen("/spiffs/foo.txt", "r");
+    if (f == NULL) {
+        ESP_LOGE(TAG, "Failed to open file for reading");
+        return;
+    }
+    char line[64];
+    fgets(line, sizeof(line), f);
+    fclose(f);
+    // strip newline
+    char* pos = strchr(line, '\n');
+    if (pos) {
+        *pos = '\0';
+    }
+    ESP_LOGI(TAG, "Read from file: '%s'", line);
+
+
+
+
+
+   // Open renamed file for reading
+    ESP_LOGI(TAG, "Reading Makerfile");
+    f = fopen("/spiffs/makerfile.cfg", "r");
+    if (f == NULL) {
+        ESP_LOGE(TAG, "Failed to open file for reading");
+        return;
+    }
+    char line2[64];
+    fgets(line2, sizeof(line2), f);
+    fclose(f);
+    // strip newline
+    char* pos2 = strchr(line2, '\n');
+    if (pos2) {
+        *pos2 = '\0';
+    }
+    ESP_LOGI(TAG, "Read from Makerfile: '%s'", line2);
+
+
+
 
 // -------------------------------------------------------------------------------------------------
 
@@ -1571,9 +1684,6 @@ app_main(void)
 			 , NULL
 			 , 0);
 
-
-
-
  /*
   xTaskCreate(SelectQueryTask
 	,(const char *)"SelQuery"
@@ -1582,212 +1692,22 @@ app_main(void)
 	,4
 	,NULL);
 */
+
+
   // Test of logging
   Log("HCTRL",16,"MainFn Reached\n");
 
-
-
-
-
-
-
-
-
-
-
-
-/*
- // Perform the tests on the VFS
-    registerTestVFS("/data");
-//    ESP_LOGI(tag, "vfs registered");
-
-    FILE *file = fopen("/data/x", "w");
-
-    if (file == NULL) {
- //   	ESP_LOGE(tag, "failed to open file");
-//    	return 0;
-    }
-
-
-fprintf(file, "Hello!");
-*/
-
-
-
-
-
-
- // char tag[] = "test_memory_vfs()";
- // printf("Memory test starting...\n");
-
- // int ret;
-
-
-
-/*
-  // fill the SPIFFS cfg struct 
-  ConfigSPIFFS();
-
-  // mount the filesystem
-  ESP_LOGI(tag, "Mounting SPIFFS");
-
-//  bool forceFormat = true;
-  bool forceFormat = false;
-
-  // mount the SPIFFS
-  ret = SPIFFS_mount(&fs
-      ,&cfg
-      ,spiffs_work_buf
-      ,spiffs_fds
-      ,sizeof (spiffs_fds)
-      ,spiffs_cache_buf
-      ,sizeof (spiffs_cache_buf)
-      ,NULL);
-
-  if (ret != SPIFFS_OK || forceFormat) {
-      ESP_LOGI(tag, "Mounting SPIFFS failed with result=%i", ret);
-
-
-      ESP_LOGI(tag, "Unmounting SPIFFS...");
-      SPIFFS_unmount(&fs);
-
-
-      ESP_LOGI(tag, "Formatting SPIFFS...");
-      ret = SPIFFS_format(&fs);
-      ESP_LOGI(tag, "   result=%i", ret);
-
-      ESP_LOGI(tag, "Mounting SPIFFS...");
-      ret = SPIFFS_mount(&fs, &cfg, spiffs_work_buf, spiffs_fds, sizeof(spiffs_fds), spiffs_cache_buf, sizeof(spiffs_cache_buf), NULL);
-
-      ESP_LOGI(tag, "   result=%i", ret);
-  }
-
-  else if (ret == SPIFFS_OK) {
-
-      ESP_LOGI(tag, "SPIFFS mounted");
-  }
-*/
-
- // char fname[] = "/data/makerfilex.cfg";    //myfile";
-
-//  SPIFFS_RegisterVFS("/data", &fs);
-
-//  ESP_LOGI(tag, "vfs registered");
-
-/*
-  FILE* file = fopen(fname, "w");
-  if (file <= NULL) {
-
-      ESP_LOGE(tag, "failed to open file '%s'. result=0x%X",fname, (uint32_t)file);
-
-      return 0;
-  }
-
-  else {
-	int nbytes;
-
-
-      ESP_LOGE(tag, "Opened file '%s'. file=0x%X", fname, (uint32_t)file);
-
-      char teststring[]="Hello!";
-      nbytes = fwrite(teststring, 1, 6, file);
-
-      if(nbytes==-1) {
-          ESP_LOGE(tag, "Failed to write to file. result=%i", nbytes);
-      }
- 
-      else {
-
-          ESP_LOGI(tag, "Wrote %i bytes to file from buffer at 0x%X", nbytes, (uint32_t)teststring);
-
-          //ret = fflush(file);
-          //ESP_LOGI(tag, "fflush=%i", ret);
-
-          ret = fclose(file);
-          ESP_LOGI(tag, "fclose=%i", ret);
-	}
-
-
-
- char   fname2[] = "/data/makerfile.cfg";    //myfile";
-          FILE* file2 = fopen(fname2, "r+");
-
-          if (file2 > NULL){
-          //ret = fseek(file2, 0, SEEK_SET);
-          //ESP_LOGI(tag, "fseek=%i", ret);
-
-          char *buf;
-          buf = (char*)malloc(64);
-          memset(buf, 0, 64);
-
-          ESP_LOGI(tag, "Attempting to read 6 bytes from file 0x%X into buffer at 0x%X.", (uint32_t)file2, (uint32_t)buf);
-          nbytes = fread(buf,1,6,file2);
-          ESP_LOGI(tag, "Read %i bytes from file 0x%X into buffer at 0x%X: '%s', ", nbytes, (uint32_t)file2, (uint32_t)buf, buf);
-          fclose(file2);
-          free(buf);
-      }
-
-      else {
-
-          ESP_LOGE(tag, "Failed to open file!");
-      }
-
-
-
-
-          FILE* file3 = fopen(fname, "r");
-
-          if (file3 > NULL){
-          //ret = fseek(file2, 0, SEEK_SET);
-          //ESP_LOGI(tag, "fseek=%i", ret);
-
-          char *buf;
-          buf = (char*)malloc(64);
-          memset(buf, 0, 64);
-
-          ESP_LOGI(tag, "Attempting to read 6 bytes from file 0x%X into buffer at 0x%X.", (uint32_t)file3, (uint32_t)buf);
-          nbytes = fread(buf,1,6,file3);
-          ESP_LOGI(tag, "Read %i bytes from file 0x%X into buffer at 0x%X: '%s', ", nbytes, (uint32_t)file3, (uint32_t)buf, buf);
-          fclose(file3);
-          free(buf);
-      }
-
-      else {
-
-          ESP_LOGE(tag, "Failed to open file!");
-      }
-
-
-    }
-  //}
-
-  printf("Memory test complete!\n");
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT);
-   int level = 0;
 
-    while (true) {
-        gpio_set_level(GPIO_NUM_4, level);
-        level = !level;
-        vTaskDelay(300 / portTICK_PERIOD_MS);
-    }
+  int level = 0;
 
-    return 0;
+  while (true) {
+    gpio_set_level(GPIO_NUM_4, level);
+    level = !level;
+    vTaskDelay(300 / portTICK_PERIOD_MS);
+  }
+
+  return 0;
+
 }
 

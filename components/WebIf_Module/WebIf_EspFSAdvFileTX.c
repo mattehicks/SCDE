@@ -45,7 +45,8 @@ typedef void (* TplCallback)(WebIf_HTTPDConnSlotData_t *conn, char *token, void 
 
 // Storage for token processing from file
 typedef struct {
-  EspFsFile *file;
+//  EspFsFile *file;
+  FILE* file;
   void *tplArg;
   char token[64];	// max allowed len for replacement-token!
   int tokenPos;
@@ -57,7 +58,7 @@ typedef struct {
 
 
 
-/**
+/** Neu: WebIF_AdvFileTX ?
  * --------------------------------------------------------------------------------------------------
  *  FName: WebIF_EspFSAdvFileTX
  *  Desc: Connector to let SCDED use the espfs filesystem to serve the files,
@@ -85,7 +86,8 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 	// inform cgi (NULL) about clean up
 	((TplCallback)(conn->PCArg))(conn, NULL, &tpd->tplArg);
 
-	espFsClose(tpd->file);
+//	espFsClose(tpd->file);
+        fclose(tpd->file);
 
 	// free memory reserved for template processing
 	free(tpd);
@@ -120,14 +122,16 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 	// Option to use alternative file from filesystem	
 	if (conn->AltFSFile != NULL) {
 
-		tpd->file = espFsOpen(conn->AltFSFile);
+//		tpd->file = espFsOpen(conn->AltFSFile);
+                tpd->file = fopen(conn->AltFSFile, "r");
 
 		}
 
 	else	{
 
 		// standard use conn->url as requested file
-		tpd->file = espFsOpen(conn->url);
+//		tpd->file = espFsOpen(conn->url);
+                tpd->file = fopen(conn->url, "r");
 
 		}
 
@@ -174,7 +178,8 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 		CurrTXBufFree = MaxFsReadBlockSize;
 
 	// read till next % (>=1), or max CurrTXBufFree len
-	len = espFsRead(tpd->file, buff, CurrTXBufFree);
+//	len = espFsRead(tpd->file, buff, CurrTXBufFree);
+	len = fread(buff, CurrTXBufFree, 1, tpd->file);
 
  	# if WebIF_EspFSAdvFileTX_DBG >= 4	
  	os_printf("|read:%d, max:%d,TX>"
@@ -287,7 +292,8 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 		((TplCallback)(conn->PCArg))(conn, NULL, &tpd->tplArg);
 
 		// We're done.
-		espFsClose(tpd->file);
+//		espFsClose(tpd->file);
+		fclose(tpd->file);
 
 		// free memory for template processing data
 		free(tpd);

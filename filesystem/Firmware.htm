@@ -1,0 +1,204 @@
+<html>
+<head>
+<title>%?%</title>
+
+<link rel="stylesheet" href="Style.css" type="text/css">
+
+<script type="text/javascript" src="WiFi/140medley.min.js"></script>
+<script language="javascript" src="../JS/rss.js"></script>
+
+<script type="text/javascript">
+var xhr=j();
+var currROM="";
+
+function createInputForRom(rom)
+	{
+	if (rom.V=="") return;
+	var div=document.createElement("div");
+	div.id="romdiv";
+
+	var milestone=document.createElement("div");	//Entwicklungsstadium (Software) wiki
+	mVal=(rom.M*-32);
+	milestone.className="Fwicon";
+	milestone.style.backgroundPosition="0px "+mVal+"px";
+
+	var target=document.createElement("div"); //war encrypt
+	tVal=(rom.T*-32);
+	target.className="Fwicon";
+	target.style.backgroundPosition="-32px "+tVal+"px";
+
+
+	var input=document.createElement("input");
+	input.type="radio";
+	input.name="Version";
+	input.value="B"+rom.B+"V"+rom.V;
+	if (currROM==input.value) input.checked="1";
+	input.id="opt-"+rom.V;
+
+	var label=document.createElement("label");
+	label.htmlFor="opt-"+rom.V;
+	label.textContent="(Build:"+rom.B+") Version:"+rom.V+" Comment:"+rom.C;
+
+	div.appendChild(input);
+	div.appendChild(milestone);
+	div.appendChild(target);
+	div.appendChild(label);
+	return div;
+	}
+
+function getSelectedROM()
+	{
+	var e=document.forms.romform.elements;
+	for (var i=0; i<e.length; i++)
+		{
+		if (e[i].type=="radio" && e[i].checked) return e[i].value;
+		}
+	return currROM;
+}
+
+function scanROMs()
+{
+	xhr.open("GET", "Firmware.jso");
+	xhr.onreadystatechange=function()
+		{
+		if (xhr.readyState==4 && xhr.status>=200 && xhr.status<300)
+			{
+			var data=JSON.parse(xhr.responseText);
+			currROM=getSelectedROM();
+
+			var US = document.getElementById("FWInfo");
+			US.innerHTML="Installed is Firmware Version: "
+				+ data.result.VMajor
+				+ "."
+				+ data.result.VMinor
+				+ ", Build: "
+				+ data.result.Build;
+
+			var US = document.getElementById("FChipID");
+			US.innerHTML="Detected SPI-Flash-Chip-ID: "
+				+ data.result.FChipID;
+
+			var US = document.getElementById("BP");
+			US.innerHTML="Active booted Partition: "
+				+ data.result.Partition;
+
+			var US = document.getElementById("UpdS");
+			if (data.result.UpdStatus=="0") US.innerHTML="Update procedure not started !";
+			if (data.result.UpdStatus=="1") US.innerHTML="Getting server IP by DNS lookup ...";
+			if (data.result.UpdStatus=="2") US.innerHTML="Connecting to Update-Server ...";
+			if (data.result.UpdStatus=="3") US.innerHTML="Connected. Requesting available Versions ...";
+			if (data.result.UpdStatus=="4") US.innerHTML="Information requested. Waiting for response ...";
+			if (data.result.UpdStatus=="5")
+				{
+				US.innerHTML="Information received. Listed are available Versions ...";
+
+				var No = document.getElementById("Ntce");
+				No.innerHTML="Please choose your favorite Firmware Version and Type.";
+				
+				if (currROM!="")
+					{
+					$("#Pdiv").innerHTML="";
+					var Pdiv=document.createElement("div");
+					Pdiv.id="Fldiv";
+
+					var input=document.createElement("input");
+					input.type="submit";
+					input.name="FLASH";
+					input.value="FLASH NOW !";
+
+					Pdiv.appendChild(input);
+
+					$("#Pdiv").appendChild(Pdiv);
+					}
+				}
+			if (data.result.UpdStatus=="6") US.innerHTML="Got your selection. Now preparing the installation";
+			if (data.result.UpdStatus=="7") US.innerHTML="NOW DOWNLOADING + FLASHING !!!";
+
+			if (data.result.UpdStatus=="9") US.innerHTML="Error: Could not get IP by DNS lookup !!!";
+			if (data.result.UpdStatus=="10") US.innerHTML="Error: Parsing failed ! Unexpected content !!!";
+			if (data.result.UpdStatus=="11") US.innerHTML="Error: Timeout !!! Server not responding !!!";
+			if (data.result.UpdStatus=="12") US.innerHTML="Error: SDK func System Upgrade reports error !!!";
+			if (data.result.UpdStatus=="13") US.innerHTML="Error: SDK func reports System Update done, but failed !!!";
+			if (data.result.UpdStatus=="14") US.innerHTML="Error: Timeout !!! No response from User !!!";
+
+			if (data.result.UpdStatus=="5" && data.result.ROMs.length>0)
+				{
+				$("#roms").innerHTML="";
+				for (var i=0; i<data.result.ROMs.length; i++)
+					{
+					//if (data.result.ROMs[i].essid=="" && data.result.ROMs[i].rssi==0) continue;
+					$("#roms").appendChild(createInputForRom(data.result.ROMs[i]));
+					}
+				//window.setTimeout(scanROMs, 8000);
+				}
+			//else
+				//{
+				window.setTimeout(scanROMs, 4000);
+				//}
+			}
+		}
+	xhr.send();
+}
+
+window.onload=function(e)
+{
+  scanROMs();
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="alles">
+
+<div id="header">
+<l><a href="http://www.ecsuha.de"><img name="EcSUHA" src="../Images/Ecsuha.gif" width="360" height="66" alt=""></a></l>
+<h1>%?%</h1>
+<p>... or as we call it [%!%]<br>
+<p>Embedded Features: %=%<br>Welcome to the New Age of Living</p>
+</div>
+
+<div id="kopfzeile">
+<p><strong>Welcome to the Userinterface of CoNTROL 8S-1C-1ADC. You can now make your customisations including Firmware Update.</strong></p>
+</div>
+
+<div id="menu"><ul>%$%</ul>
+
+<div class="chan">
+<div id="chan_head"></div>
+<div id="chan_items"></div>
+</div>
+<script type="text/javascript">
+  getRSS("http://ecsuha.de/news/rss/1");
+</script>
+</div>
+
+<div id="content">
+	<h1>Firmware Update</h1>
+	<h2>EcSUHA may release Firmware Updates to improve stability and add new features.</h2>
+	<hr>
+	<h1>Flash relevant Device Information</h1>
+	<h2 id="FWInfo">&nbsp;</h2>
+	<h2 id="FChipID">&nbsp;</h2>
+	<h2 id="BP">&nbsp;</h2>
+	<hr>
+	<h1>Update Task Status Information</h1>
+	<h2 id="UpdS">%A%</h2>
+	<form name="romform" action="Firmware.cgi" method="post">
+	<h2 id="Ntce">&nbsp;</h2>
+	<br>Visit our Product Forum for detailed information about the Features.</br>
+	<div id="roms"></div>
+	<h2>- FLASHING DIFFERENT MAJOR.MINOR ERASES SETTINGS (FACTORY RESET) !</h2>
+	<h2>- DIFFERENT BUILD, BUT SAME MAJOR.MINOR WILL KEEP SETTINGS !</h2>
+	<h2>- IN SPECIAL CASES, FLASHING A ROM MAY SOFT-BRICK YOUR DEVICE !</h2>
+	<div id="Pdiv"></div></form>
+	<h2>&nbsp;</h2>
+
+</div>
+
+%_%
+
+</div>
+</body>
+</html>

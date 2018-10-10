@@ -1,0 +1,279 @@
+<html>
+<head>
+<title>%?%</title>
+
+<link rel="stylesheet" href="Style.css" type="text/css">
+
+<script type="text/javascript" src="WiFi/140medley.min.js"></script>
+<script language="javascript" src="../JS/rss.js"></script>
+
+<script type="text/javascript">
+
+var xhr=j();
+
+
+
+window.onload=function(e)
+  {
+  var div = document.getElementById("SoCHWCfg");
+  div.timeStamp=-1;
+
+  Update();
+  };
+
+
+
+// form value transmit func
+function AJAXPost(formId)
+  {
+
+  var elem = document.getElementById(formId);
+
+  var params = elem.name + "=" + encodeURIComponent(elem.value);
+
+  if (window.XMLHttpRequest)
+
+	{
+
+	// code for IE7+, Firefox, Chrome, Opera, Safari
+	TXxmlhttp = new XMLHttpRequest();
+
+	}
+
+  else
+	{ 
+
+	// code for IE6, IE5
+	TXxmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+
+	}
+
+  TXxmlhttp.open("POST","SoCHWCfg.cgi",true);
+
+  TXxmlhttp.send(params);
+
+  return TXxmlhttp.responseText;
+
+  }
+
+
+
+// repeated polling, depends on TiSt for longpoll
+function RptPoll()
+  {
+
+  var div = document.getElementById("SoCHWCfg");
+
+  if (div.timeStamp == "0")
+
+	{
+
+	setTimeout(Update, 5000);
+
+	}
+
+  else
+
+	{
+
+	Update();
+
+	}
+  }
+
+
+
+// poll func to get datas to the tables
+function Update()
+  {
+
+  var div = document.getElementById("SoCHWCfg");
+
+  RXxmlhttp = new XMLHttpRequest();
+  RXxmlhttp.timeout = 40000;
+  RXxmlhttp.ontimeout = function () {RXxmlhttp.abort();}
+  RXxmlhttp.open("POST","SoCHWCfg.jso",true);
+
+  if (div.timeStamp != -1)
+
+	{
+
+	RXxmlhttp.send("TIST=" + encodeURIComponent(div.timeStamp));
+
+	}
+
+  else 
+
+	{
+
+	RXxmlhttp.send();
+
+	}
+
+  RXxmlhttp.onreadystatechange=function()
+
+	{
+
+	if (RXxmlhttp.readyState == 4 && RXxmlhttp.status >= 200 && RXxmlhttp.status < 300)
+
+		{
+
+		var data = JSON.parse(RXxmlhttp.responseText);
+
+		// update
+		var A = document.getElementById('A');
+		if ( (!A.hasFocus) && ( typeof data.STATUS.SDK !== 'undefined') ) 
+			A.innerHTML = "SDK: " + data.STATUS.SDK;
+
+		var B = document.getElementById('B');
+		if ( (!B.hasFocus) && ( typeof data.STATUS.Chip_ID !== 'undefined') )
+			B.innerHTML = "Chip-ID: " + data.STATUS.Chip_ID;
+
+		var C = document.getElementById('C');
+		if ( (!C.hasFocus) && ( typeof data.STATUS.Boot !== 'undefined') )
+			C.innerHTML = "Boot: " + data.STATUS.Boot;
+
+		var D = document.getElementById('D');
+		if ( (!D.hasFocus) && ( typeof data.STATUS.FW !== 'undefined') )
+			D.innerHTML = "Firmware: " + data.STATUS.FW;
+
+		var E = document.getElementById('E');
+		if ( (!E.hasFocus) && ( typeof data.STATUS.Boot_Partition !== 'undefined') )
+			E.innerHTML = "Partition: " + data.STATUS.Boot_Partition;
+
+		var F = document.getElementById('F');
+		if ( (!F.hasFocus) && ( typeof data.STATUS.Flash_Chip_ID !== 'undefined') )
+			F.innerHTML = "Flash-Chip-ID: " + data.STATUS.Flash_Chip_ID;
+
+		var G = document.getElementById('G');
+		if ( (!G.hasFocus) && ( typeof data.STATUS.Reset_Info !== 'undefined') )
+			G.innerHTML = data.STATUS.Reset_Info;
+
+		var H = document.getElementById('H');
+		if ( (!H.hasFocus) && ( typeof data.STATUS.Uptime !== 'undefined') )
+			H.innerHTML = "Uptime: " + data.STATUS.Uptime;
+	
+		// LP time stamp !
+		div.timeStamp = (data.STATUS.TiSt);
+
+		var AkTIST = new Date();
+		var DevTIST = new Date(data.STATUS.TiSt * 1000);
+
+		var Info = document.getElementById("Info");
+		Info.innerHTML="Local Time: " + 
+			AkTIST.toLocaleTimeString('de-AT') +
+			" - Device Time-Stamp: "+ DevTIST.toLocaleTimeString('de-AT') +
+			" - Device RAM: " + data.STATUS.Mem + " Bytes";
+
+		setTimeout(RptPoll, 500);
+
+		}
+	}
+  }
+
+</script>
+</head>
+
+<body>
+<div id="alles">
+
+<div id="header">
+<l><a href="http://www.ecsuha.de"><img name="EcSUHA" src="../Images/Ecsuha.gif" width="360" height="66" alt=""></a></l>
+<h1>%?%</h1>
+<p>... or as we call it [%!%]<br>
+<p>Embedded Features: %=%<br>Welcome to the New Age of Living</p>
+</div>
+
+<div id="kopfzeile">
+<p><strong>Welcome to the Userinterface of CoNTROL 8S-1C-1ADC. You can now make your customisations including Firmware Update.</strong></p>
+</div>
+
+<div id="menu"><ul>%$%</ul>
+
+<div class="chan">
+<div id="chan_head"></div>
+<div id="chan_items"></div>
+</div>
+<script type="text/javascript">
+  getRSS("http://ecsuha.de/news/rss/1");
+</script>
+</div>
+
+<div id="content">
+<h1 id="SoCHWCfg">System on Chip Hardware Configuration</h1>
+<h2>Here Experts can get Essential Information about the SoC Hardware and Environment. Included are options for device / system factory reset.</h2>
+
+<hr>
+
+<h2 ID="Info">Status:</h2>
+
+<hr>
+
+<h2>Remote System on Chip Hardware restart</h2>
+<input type="submit" name="SoCHW_Restart" id="Z" value="SoCHW_Restart" onclick="AJAXPost('Z')">
+<h2>THIS IS NOT EQUIVALENT WITH A COLD BOOT.<br>IT WILL NOT ERASE VALUES STORED IN BACKUP-RAM !</h2>
+<h2 id="H">Uptime: </h2>
+
+<hr>
+
+<h2>System on Chip - General Options:</h2>
+<p>%H%</p>
+<p>&nbsp;</p>
+
+<hr>
+
+<h2>Advanced Device Information - for Service and Maintainance</h2>
+<p ID="A">SDK: %A%</p>
+<p ID="B">Chip-ID: %B%</p>
+<p ID="C">Boot: V 1.%C%</p>
+<p ID="D">Firmware: %D%</p>
+<p ID="E">Partition: %E%</p>
+<p ID="F">Flash-Chip-ID: %F%</p>
+
+<hr>
+
+<h2>System Start, Restart Information - for Problem Analysis</h2>
+<h2 id="G">%G%</h2>
+<p>List of reasons:</br>
+0 - normal startup by power on</br>
+1 - hardware watchdog reset</br>
+2 - exception reset</br>
+3 - software watchdog reset</br>
+4 - restart by firmware</br>
+5 - wakeup from deep sleep</p>
+<h2>UpTime: ???</h2>
+
+<hr>
+
+<h2>System on Chip Hardware - Factory Reset SCDE (the Smart-Connected-Device-Engine) only, and restart with initial values</h2>
+<input type="submit" name="SoCHW_Factory_Reset_SCDE" id="Y" value="SoCHW_Factory_Reset_SCDE" onclick="AJAXPost('Y')">
+<h2>THIS WILL ERASE MOST OF YOUR CUSTOMIZATIONS !</h2>
+
+<hr>
+
+<h2>System on Chip Hardware - Factory-Reset CAPI (Chip Interface API) only, and restart with initial values</h2>
+<input type="submit" name="SoCHW_Factory_Reset_CAPI" id="X" value="SoCHW_Factory_Reset_CAPI" onclick="AJAXPost('X')">
+
+<h2>THIS WILL ERASE MAINLY ALL WIRELESS LAN SETTINGS (INCLUDING PASSWORDS) - USE SERVICE ACCESS POINT TO ACCESS DEVICE AFTER REBOOT !</h2>
+
+<hr>
+
+<h2>System on Chip Hardware - Factory-Reset, and restart with initial values</h2>
+
+<input type="submit" name="SoCHW_Factory_Reset" id="Z" value="SoCHW_Factory_Reset" onclick="AJAXPost('Z')">
+
+<h2>THIS WILL ERASE ALL WIRELESS SETTINGS AND CUSTOMIZATIONS - USE SERVICE ACCESS POINT TO ACCESS DEVICE AFTER REBOOT !</h2>
+
+<hr>
+
+<h2>If you sell this device: It is recommended to execute command 'SoCHW_Factory_Reset' to wipe security & privacy relevant information !</h2>
+
+<h2>&nbsp;</h2>
+
+</div>
+
+%_%
+
+</div>
+</body>
+</html>

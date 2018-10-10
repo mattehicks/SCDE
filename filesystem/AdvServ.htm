@@ -1,0 +1,181 @@
+<html>
+<head>
+<title>%?%</title>
+
+<link rel="stylesheet" href="Style.css" type="text/css">
+
+<script language="javascript" src="../JS/rss.js"></script>
+
+</head>
+
+<body>
+<div id="alles">
+
+<div id="header">
+<l><a href="http://www.ecsuha.de"><img name="EcSUHA" src="../Images/Ecsuha.gif" width="360" height="66" alt=""></a></l>
+<h1>%?%</h1>
+<p>... or as we call it [%!%]<br>
+<p>Embedded Features: %=%<br>Welcome to the New Age of Living</p>
+</div>
+
+<div id="kopfzeile">
+<p><strong>Welcome to the Userinterface of CoNTROL 8S-1C-1ADC. You can now make your customisations including Firmware Update.</strong></p>
+</div>
+
+<div id="menu"><ul>%$%</ul>
+
+<div class="chan">
+<div id="chan_head"></div>
+<div id="chan_items"></div>
+</div>
+<script type="text/javascript">
+  getRSS("http://ecsuha.de/news/rss/1");
+</script>
+</div>
+
+<div id="content">
+<div id="content2">
+<h1>Advanced Services Configuration</h1>
+<h2>Advanced Service #1 - The Smart-Connected-Device-Engine Event-TX (Transmit), to embed this Device in your Smart Home Infrastructure (HoME CoNTROL / FHEM / DIY)</h2>
+
+<hr>
+
+<h2>SCD-Engine Event-TX - General Options:</h2>
+<p>%H%</p>
+<p>&nbsp;</p>
+
+<h2>SCD-Engine Event-TX - Request Header Field Options:</h2>
+<p>%P%</p>
+<p>&nbsp;</p>
+
+<div class="CSSTab" style="width:700px;height:450px;">
+
+<table>
+
+<thead>
+<tr>
+	<th colspan="7">Network Parameters for SCD-Engine Event TX (Transmit)</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+	<form name="F1" method="post" action="AdvServ.cgi">
+	<td colspan="3">IP-Adress of Destination:</td>
+	<td><input name="D" type="number" value="%D%" min="0" max="255" style="width:60px;"></td>
+	<td><input name="E" type="number" value="%E%" min="0" max="255" style="width:60px;"></td>
+	<td><input name="F" type="number" value="%F%" min="0" max="255" style="width:60px;"></td>
+	<td><input name="G" type="number" value="%G%" min="0" max="255" style="width:60px;"></td>
+</tr>
+
+<tr>
+	<td colspan="2">Used Port at Destination:</td>
+	<td colspan="2"><input name="B" type="number" value="%B%" min="0" max="65535"></td>
+	<td rowspan="2" colspan="3"><input type="submit" name="X2" value="Set Network Parameters"></td>
+</tr>
+
+<tr>
+	<td colspan="2">Used Port at this Device:</td>
+	<td colspan="2"><input name="A" type="number" value="%A%" min="0" max="65535"></td>
+</tr>
+	</FORM>
+
+<tr>
+	<th colspan="7">Domain Name to adress Home Automation System Server at Destination</th>
+</tr>
+
+<tr>
+	<form name="F2" method="post" action="AdvServ.cgi">
+	<td>Destination Domain Name:</td>
+	<td colspan="4"><input name="C" type="text" value="%C%" size="36" maxlength="63"></td>
+	<td colspan="2"><input type="submit" name="X3" value="Set Domain"></td>
+	</form>
+</tr>
+</tbody>
+
+<tfoot>
+<tr>
+	<th colspan="7">Visit our Product Forums if help is needed ...</th>
+</tr>
+</tfoot>
+
+</table>
+
+</div>
+
+<h2>&nbsp;</h2>
+
+<h2>Advanced Service #2 - MQTT Client - to embed this Device in your MQTT Protocol based Infrastructure</h2>
+
+<h2>MQTT Client - General Options:</h2>
+<p>%O%</p>
+<p>&nbsp;</p>
+<h2>(Effective after next boot)</h2>
+
+<div class="CSSTab" style="width:700px;height:450px;">
+
+<table>
+
+<thead>
+<tr>
+	<th colspan="7">Network Parameters for MQTT Protocol Connection</th>
+</tr>
+</thead>
+
+<tbody>
+
+	<form name="F3" method="post" action="AdvServ.cgi">
+<tr>
+	<td colspan="2">User Name:</td>
+	<td colspan="5"><input name="M" type="text" value="%M%" size="31" maxlength="31"></td>
+</tr>
+
+<tr>
+	<td colspan="2">Password:</td>
+	<td colspan="5"><input name="N" type="text" value="%N%" size="31" maxlength="31"></td>
+</tr>
+
+<tr>
+	<td colspan="2">Keep Alive in Secounds:</td>
+	<td colspan="2"><input name="L" type="number" value="%L%" min="10" max="3600"></td>
+	<td colspan="3"></td>
+</tr>
+
+<tr>
+	<td colspan="2">Broker Domain Name:</td>
+	<td colspan="5"><input name="K" type="text" value="%K%" size="36" maxlength="63"></td>
+</tr>
+
+<tr>
+	<td colspan="2">Used Port at Destination:</td>
+	<td colspan="2"><input name="J" type="number" value="%J%" min="0" max="65535"></td>
+	<td rowspan="2" colspan="3"><input type="submit" name="X5" value="Set Network Parameters"></td>
+</tr>
+
+<tr>
+	<td colspan="2">Used Port at this Device:</td>
+	<td colspan="2"><input name="I" type="number" value="%I%" min="0" max="65535"></td>
+</tr>
+	</form>
+
+</tbody>
+
+<tfoot>
+<tr>
+	<th colspan="7">Visit our Product Forums if help is needed ...</th>
+</tr>
+</tfoot>
+
+</table>
+</div>
+
+
+</div>
+
+</div>
+
+%_%
+
+</div>
+</body>
+</html>

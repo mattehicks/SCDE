@@ -35,7 +35,7 @@
 
 //#define WebIF_EspFSStdFileTX_DBG 5
 
-/**
+/**  NEU: WebIF_StdFileTX ?
  * -------------------------------------------------------------------------------------------------
  *  FName: WebIF_EspFSStdFileTX
  *  Desc: WebIf ESP Filesystem standard file transmit - connector to let the WebIf use the
@@ -48,7 +48,8 @@ int ICACHE_FLASH_ATTR
 WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn) 
   {
 
-  EspFsFile *file = conn->PCData;
+//EspFsFile *file = conn->PCData;
+  FILE* file = conn->PCData;
 
   int len;
 
@@ -57,7 +58,8 @@ WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn)
   // Connection aborted? Clean up.
   if (conn->conn == NULL) {
 
-	espFsClose(file);
+//	espFsClose(file);
+        fclose(file);
 
 	return HTTPD_CGI_DISCONNECT_CONN;
 
@@ -84,7 +86,8 @@ WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn)
   // First call to this cgi. Open the file so we can read it, start response ...
   if (file == NULL) {
 
-	file = espFsOpen(conn->url);
+//	file = espFsOpen(conn->url);
+	file = fopen(conn->url, "r");
 
 	if (file == NULL) {
 
@@ -131,7 +134,8 @@ WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn)
 	if (CurrTXBufFree > MaxFsReadBlockSize) 
 		CurrTXBufFree = MaxFsReadBlockSize;
 
-	len = espFsRead(file, buff, CurrTXBufFree);
+//	len = espFsRead(file, buff, CurrTXBufFree);
+	len = fread(buff, CurrTXBufFree, 1, file);
 
  	# if WebIF_EspFSStdFileTX_DBG >= 4	
  	os_printf("|read:%d, max:%d,TX>"
@@ -153,7 +157,8 @@ WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn)
 	if (len == 0) {
 
 		// We're done.
-		espFsClose(file);
+//		espFsClose(file);
+		fclose(file);
 
 		# if WebIF_EspFSStdFileTX_DBG >= 4	
  		os_printf("|FS read done>");

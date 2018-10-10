@@ -1,0 +1,142 @@
+<html>
+<head>
+<title>%?%</title>
+
+<link rel="stylesheet" href="../Style.css" type="text/css">
+
+<script language="javascript" src="../JS/rss.js"></script>
+<script type="text/javascript" src="140medley.min.js"></script>
+
+<script type="text/javascript">
+var xhr=j();
+var currAp="%A1%";
+
+function createInputForAp(ap) {
+	if (ap.essid=="" && ap.rssi==0) return;
+	var div=document.createElement("div");
+	div.id="apdiv";
+
+	var rssi=document.createElement("div");
+	var rssiVal="0";
+	if (ap.rssi>"160") rssiVal="-32";
+	if (ap.rssi>"173") rssiVal="-64";
+	if (ap.rssi>"186") rssiVal="-96";
+	if (ap.rssi>"199") rssiVal="-128";
+	rssi.className="RFicon";
+	rssi.style.backgroundPosition="0px "+rssiVal+"px";
+
+	var encrypt=document.createElement("div");
+	encVal=(ap.authmode*-32);
+	encrypt.className="RFicon";
+	encrypt.style.backgroundPosition="-32px "+encVal+"px";
+
+	var hidden=document.createElement("div");
+	hidVal=(ap.is_hidden*-32);
+	hidden.className="RFicon";
+	hidden.style.backgroundPosition="-64px "+hidVal+"px";
+
+	var input=document.createElement("input");
+	input.type="radio";
+	input.name="essid";
+	input.value=ap.essid;
+	if (currAp==ap.essid) input.checked="1";
+	input.id="opt-"+ap.essid;
+
+	var label=document.createElement("label");
+	label.htmlFor="opt-"+ap.essid;
+	label.textContent=ap.essid+" - BSSID:"+ap.bssid+" Channel:"+ap.channel;
+
+	div.appendChild(input);
+	div.appendChild(rssi);
+	div.appendChild(encrypt);
+	div.appendChild(hidden);
+	div.appendChild(label);
+
+	return div;
+}
+function getSelectedEssid() {
+	var e=document.forms.wifiform.elements;
+	for (var i=0; i<e.length; i++) {
+		if (e[i].type=="radio" && e[i].checked) return e[i].value;
+	}
+	return currAp;
+}
+
+
+function scanAPs() {
+	xhr.open("GET", "WiFiScan.jso");
+	xhr.onreadystatechange=function() {
+		if (xhr.readyState==4 && xhr.status>=200 && xhr.status<300) {
+			var data=JSON.parse(xhr.responseText);
+			currAp=getSelectedEssid();
+			if (data.result.inProgress=="0" && data.result.APs.length>1) {
+				$("#aps").innerHTML="";
+				for (var i=0; i<data.result.APs.length; i++) {
+					if (data.result.APs[i].essid=="" && data.result.APs[i].rssi==0) continue;
+					$("#aps").appendChild(createInputForAp(data.result.APs[i]));
+				}
+				window.setTimeout(scanAPs, 20000);
+			} else {
+				window.setTimeout(scanAPs, 1000);
+			}
+		}
+	}
+	xhr.send();
+}
+
+
+window.onload=function(e) {
+	scanAPs();
+};
+</script>
+
+</head>
+
+<body>
+<div id="alles">
+
+<div id="header">
+<l><a href="http://www.ecsuha.de"><img name="EcSUHA" src="../Images/Ecsuha.gif" width="360" height="66" alt=""></a></l>
+<h1>%?%</h1>
+<p>... or as we call it [%!%]<br>
+<p>Embedded Features: %=%<br>Welcome to the New Age of Living</p>
+</div>
+
+<div id="kopfzeile">
+<p><strong>Welcome to the Userinterface of CoNTROL 8S-1C-1ADC. You can now make your customisations including Firmware Update.</strong></p>
+</div>
+
+<div id="menu"><ul>%$%</ul>
+
+<div class="chan">
+<div id="chan_head"></div>
+<div id="chan_items"></div>
+</div>
+<script type="text/javascript">
+  getRSS("http://ecsuha.de/news/rss/1");
+</script>
+</div>
+
+<div id="content">
+<h1>Wireless LAN Station Quick Connect</h1>
+<h2>The Devices Station Mode is currently: %B%</h2>
+<h2>%C%</h2>
+
+<form name="wifiform" action="Connect.cgi" method="post">
+<h2>To connect to your Wireless Local Area Network Station please select one of the detected networks...</h2>
+<div id="aps">Scanning your Infrastructure ...</div>
+<h2>Wireless Local Area Network Password, if applicable:<h2/>
+<input type="text" name="PASS" val="%A2%">
+<br>
+<br>
+<input type="submit" name="X1" value="Connect to the selected Network!">
+</form> 
+
+	<h2>&nbsp;</h2>
+</div>
+
+%_%
+
+</div>
+</body>
+</html>
