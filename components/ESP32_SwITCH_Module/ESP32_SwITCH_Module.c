@@ -1,17 +1,17 @@
 ﻿/* #################################################################################################
  *
- *      Name: ESP32_SwITCH Module
- *  Function: This is used to set up GPIOs as a switch with the goal to control switching hardware
- *            (relay, ...). The GPIO switching is Hardware PWM driven (for ESP32 SOC only). 
- *            Module for use with SCDE (Smart Connected Device Engine) only !
+ *  ESP32_SwITCH Module for SCDE (Smart Connected Device Engine)
  *
- *  ESP 8266EX & ESP32 SoC Activities ...
- *  HoME CoNTROL & Smart Connected Device Engine Activities ...
- *  Copyright by EcSUHA
+ *  SwITCH -> SwITCH Feature.
+ *  It is used to drive GPIOs as a switch (on/off/pwm) with the goal to control hardware (Relay,
+ *  LED-Controller, Smart Socket, ...). The ESP32 SoC GPIO will be connected to the PWM-Hardware.
+ *  The PWM-Hardware is used and controlled by this Module. This is hardware PWM/switching.
  *
  *  Created by Maik Schulze, Sandfuhren 4, 38448 Wolfsburg, Germany for EcSUHA.de 
  *
  *  MSchulze780@GMAIL.COM
+ *  Copyright by EcSUHA
+ *
  *  EcSUHA - ECONOMIC SURVEILLANCE AND HOME AUTOMATION - WWW.EcSUHA.DE
  * #################################################################################################
  *
