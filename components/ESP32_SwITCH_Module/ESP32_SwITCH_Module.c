@@ -166,7 +166,7 @@ SelectAData ESP32_SwITCH_TICK_SOURCE[] = {  //ID, Text MAX CGI LEN BEACHTEN!!!
  */
 enum ESP32_SwITCH_SET_IK {				// Bit #XX for debugging
 
-  // S0 calculation configuration
+  // PWM Hardware configuration
     ESP32_SwITCH_SET_ON		= 0			// Bit #00 'ON'  -> 
   , ESP32_SwITCH_SET_OFF				// Bit #01 'OFF'  -> 
 
