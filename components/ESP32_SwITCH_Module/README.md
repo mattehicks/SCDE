@@ -9,6 +9,7 @@ The PWM-Hardware is used and controlled by this Module. This is hardware PWM/swi
 - _Module -> intended for use with SCDE (Smart Connected Device Engine) only !
 
 
+
 Created by Maik Schulze, Sandfuhren 4, 38448 Wolfsburg, Germany, for EcSUHA.de
 
 MSchulze780@GMAIL.COM
@@ -22,6 +23,7 @@ This is part of
 - HoME CoNTROL & Smart Connected Device Engine Activities ...
  
 EcSUHA - ECONOMIC SURVEILLANCE AND HOME AUTOMATION - WWW.EcSUHA.DE
+   
    
    
   HELP-STRINGS:
