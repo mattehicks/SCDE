@@ -11,13 +11,18 @@ The PWM-Hardware is used and controlled by this Module. This is hardware PWM/swi
 _Module -> intended for use with SCDE (Smart Connected Device Engine) only !
 
 
-ESP 8266EX & ESP32 SoC Activities ...
-HoME CoNTROL & Smart Connected Device Engine Activities ...
-Copyright by EcSUHA
- 
-Created by Maik Schulze, Sandfuhren 4, 38448 Wolfsburg, Germany for EcSUHA.de 
- 
+Created by Maik Schulze, Sandfuhren 4, 38448 Wolfsburg, Germany, for EcSUHA.de
+
 MSchulze780@GMAIL.COM
+
+Copyright by EcSUHA
+
+This is part of
+
+- ESP 8266EX & ESP32 SoC Activities ...
+
+- HoME CoNTROL & Smart Connected Device Engine Activities ...
+ 
 EcSUHA - ECONOMIC SURVEILLANCE AND HOME AUTOMATION - WWW.EcSUHA.DE
    
    
