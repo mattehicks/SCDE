@@ -544,10 +544,8 @@ InitA()
 
   // Goal: include the config file (574-581)
 	
-  // for building our summary of ret-msg from cfg file including (starts empty)
-  strText_t cfgRet;
-  cfgRet.strText = NULL;
-  cfgRet.strTextLen = 0;
+  // for building the summary of ret-msg from cfg file including (starts empty)
+  strText_t cfgRet = {NULL, 0};
 	
   // get initial config-filename from value of attribute (global->configfile)
   strText_t defName = {(char*) "global", 6};
@@ -586,6 +584,9 @@ InitA()
 
   // if entries from retMsgMultiple add "configfile:" text to cfgRet
   if (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+	  
+	cc   strText_t includeCommandArgs;
+	  
 		// if starting: build text header and start adding first ret-msg ...
 	if (!cfgRet.strText) {
 
