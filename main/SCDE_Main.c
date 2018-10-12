@@ -1324,25 +1324,25 @@ app_main(void)
 
   // embedded commands A-Z
 
-  // Activate Attr as SCDE built-in Command
-  extern providedByCommand_t Attr_ProvidedByCommand;
-  CommandActivateCommand(&Attr_ProvidedByCommand);
-
   // Activate Add as SCDE built-in Command
   extern providedByCommand_t Add_ProvidedByCommand;
   CommandActivateCommand(&Add_ProvidedByCommand);
+
+  // Activate Attr as SCDE built-in Command
+  extern providedByCommand_t Attr_ProvidedByCommand;
+  CommandActivateCommand(&Attr_ProvidedByCommand);
 
   // Activate Define as SCDE built-in Command
   extern providedByCommand_t Define_ProvidedByCommand;
   CommandActivateCommand(&Define_ProvidedByCommand);
 
-  // Activate Delete as SCDE built-in Command
-  extern providedByCommand_t Delete_ProvidedByCommand;
-  CommandActivateCommand(&Delete_ProvidedByCommand);
-
   // Activate Deleteattr as SCDE built-in Command
   extern providedByCommand_t Deleteattr_ProvidedByCommand;
   CommandActivateCommand(&Deleteattr_ProvidedByCommand);
+
+  // Activate Delete as SCDE built-in Command
+  extern providedByCommand_t Delete_ProvidedByCommand;
+  CommandActivateCommand(&Delete_ProvidedByCommand);
 
   // Activate Help as SCDE built-in Command
   extern providedByCommand_t Help_ProvidedByCommand;
@@ -1355,6 +1355,14 @@ app_main(void)
   // Activate List as SCDE built-in Command
   extern providedByCommand_t List_ProvidedByCommand;
   CommandActivateCommand(&List_ProvidedByCommand);
+
+  // Activate Rereadcfg as SCDE built-in Command
+  extern providedByCommand_t Rereadcfg_ProvidedByCommand;
+  CommandActivateCommand(&Rereadcfg_ProvidedByCommand);
+
+  // Activate Save as SCDE built-in Command
+  extern providedByCommand_t Save_ProvidedByCommand;
+  CommandActivateCommand(&Save_ProvidedByCommand);
 
   // Activate Set as SCDE built-in Command
   extern providedByCommand_t Set_ProvidedByCommand;
