@@ -1,8 +1,12 @@
 # SCDE
 Smart Connected Device Engine - Generation 2
 
+A tool and a firmware for makers to set up IoT Devices
 
-Commands
+IoT Devices setup is stores in the maker.cfg
+IoT Devices state is stores in the state.cfg
+
+Embedded Commands
 Add
 Attr
 Define
@@ -21,39 +25,42 @@ Global
 Telnet
 
 Modules
-ESP32_BH1750
-ESP32_Control
-ESP32_I2C_Master
-ESP32_S0
-ESP32_SwITCH
+ESP32_BH1750       Experimental
+ESP32_Control      To control the ESP32
+ESP32_I2C_Master   Experimental
+ESP32_S0           For S0 counting
+ESP32_SwITCH       For switchig and PWM with internal ESP32 hardware
 
 
 
+Created by Maik Schulze, Sandfuhren 4, 38448 Wolfsburg, Germany, for EcSUHA.de
+
+MSchulze780@GMAIL.COM
+
+Copyright by EcSUHA
+
+This is part of
+
+- ESP 8266EX & ESP32 SoC Activities ...
+
+- HoME CoNTROL & Smart Connected Device Engine Activities ...
+ 
+EcSUHA - ECONOMIC SURVEILLANCE AND HOME AUTOMATION - WWW.EcSUHA.DE
+
+
+
+CMD to build the SPIFFS image:
+./mkspiffs -c filesystem/ -b 4096 -p 256 -s 0x100000 spiffs.bin
+
+CMD to flash the SPIFFS Image:
+esptool --chip esp32 --port /dev/ttyUSB0 --baud 115200 write_flash -z 0x110000 spiffs.bin
+
+CMD to build and flash SCDE
+make flash
+
+CMD to flash the partition table:
+make partition_table
+
+CMD to make changes to ESP32 IDF
 make menuconfig
 
-Make and flash the example.
-
-make all && make flash
-
-
-Prepare SPIFFS image
-
-It is not required to prepare the image, as the spiffs will be automatically formated on first use, but it might be convenient.
-
-SFPIFFS image can be prepared on host and flashed to ESP32.
-
-NEW: Tested and works under Linux, Windows and Mac OS
-
-Copy the files to be included on spiffs into components/spiffs_image/image/ directory. Subdirectories can also be added.
-
-Execute:
-
-make makefs
-
-to create spiffs image in build directory without flashing to ESP32
-
-Execute:
-
-make flashfs
-
-to create spiffs image in build directory and flash it to ESP32
