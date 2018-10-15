@@ -172,10 +172,23 @@ Include_CommandFn (const uint8_t *argsText
 
 */
 
+
+/*
   // !! correct to default LOG Fn!
   printf("Including %.*s\n"
 	,fileNameTextLen
 	,fileNameText);
+*/
+
+
+  SCDEFn->Log3Fn(Include_ProvidedByCommand.commandNameText //Common_Definition->name
+		,Include_ProvidedByCommand.commandNameTextLen  					 //Common_Definition->nameLen
+		,1
+		,"Including %.*s.cfg\n"
+		,fileNameTextLen
+		,fileNameText);
+
+
 
 
 /*
@@ -205,39 +218,35 @@ Include_CommandFn (const uint8_t *argsText
 
 
 
-  char string[] = 
-/*
-	"attr esp32ctrl otto maik\r\n"
-	"attr esp32c otto maik//\r\n"
-	"addthis\r\n"
-	"attr esp32cl otto maik\r\n"
-	"hallo maik\r\n";
-*/
-// makerfile
-//	"define MyTelnet Telnet 23\r\n"
-	"define MyWebIF WebIf 80\r\n"
-	"define ESP32Ctrl esp32_control\r\n"
-	"attr ESP32Ctrl room Testraum\r\n"
+  // Open the configfile or statefile for reading
+  char *fileName;
+  asprintf(&fileName
+		,"/spiffs/%.*s.cfg"
+		,fileNameTextLen
+		,fileNameText);
 
-	"define SSR.1.at.GPIO.13 esp32_SwITCH GPIO=13&BLOCK=High_Speed&CHANNEL=0&TIMER=0&TICK_SOURCE=REF&RESOLUTION=8&FREQ_HZ=16&SIG_OUT_EN=Enabled&IDLE_LV=Low&HPOINT=0&DUTY=55\r\n"
-//	"define SSR.2.at.GPIO.12 esp32_SwITCH GPIO=12&BLOCK=Low_Speed&CHANNEL=0&TIMER=0&TICK_SOURCE=REF&RESOLUTION=8&FREQ_HZ=16&SIG_OUT_EN=Enabled&IDLE_LV=Low&HPOINT=0&DUTY=55\r\n"
-//	"define SSR.3.at.GPIO.14 esp32_SwITCH GPIO=14&BLOCK=High_Speed&CHANNEL=1&TIMER=1&TICK_SOURCE=REF&RESOLUTION=8&FREQ_HZ=16&SIG_OUT_EN=Enabled&IDLE_LV=Low&HPOINT=0&DUTY=55\r\n"
-//	"define SSR.4.at.GPIO.27 esp32_SwITCH GPIO=27&BLOCK=High_Speed&CHANNEL=2&TIMER=1&TICK_SOURCE=REF&RESOLUTION=8&FREQ_HZ=16&SIG_OUT_EN=Enabled&IDLE_LV=Low&HPOINT=0&DUTY=55\r\n"
-//	"define SSR.5.at.GPIO.26 esp32_SwITCH GPIO=26&BLOCK=High_Speed&CHANNEL=3&TIMER=2&TICK_SOURCE=REF&RESOLUTION=8&FREQ_HZ=16&SIG_OUT_EN=Enabled&IDLE_LV=Low&HPOINT=0&DUTY=55\r\n"
-//	"define SSR.6.at.GPIO.25 esp32_SwITCH GPIO=25&BLOCK=High_Speed&CHANNEL=4&TIMER=2&TICK_SOURCE=REF&RESOLUTION=8&FREQ_HZ=16&SIG_OUT_EN=Enabled&IDLE_LV=Low&HPOINT=0&DUTY=55\r\n"
+  FILE *f;
+	f = fopen(fileName, "r");
+	if (f == NULL) {
+		SCDEFn->Log3Fn(Include_ProvidedByCommand.commandNameText //Common_Definition->name
+			,Include_ProvidedByCommand.commandNameTextLen  					 //Common_Definition->nameLen
+			,1
+			,"Failed to open file %.*s.cfg for reading!\n"
+			,fileNameTextLen
+			,fileNameText);
+	//	return; HOW TO EXIT ???????
+	}
 
-	"define i2c ESP32_I2C_Master GPIO=25&BLOCK=High_Speed&CHANNEL=4&TIMER=2&TICK_SOURCE=REF&RESOLUTION=8&FREQ_HZ=16&SIG_OUT_EN=Enabled&IDLE_LV=Low&HPOINT=0&DUTY=55\r\n"
+  free(fileName);
 
-	;// the end
 
 
   char delimiter[] = "\r\n";
-  char *ptr;
+ 
 
 
   // backup old configuration file, for reconstruction
-  strText_t oldCfgFile;
-  oldCfgFile = SCDERoot->currCfgFile;
+  strText_t oldCfgFile = SCDERoot->currCfgFile;
 
   // set temporary to filename from include arg
   SCDERoot->currCfgFile.strText = fileNameText;
@@ -250,106 +259,106 @@ Include_CommandFn (const uint8_t *argsText
   strTextMultiple_t rebuiltCmdRow;
   rebuiltCmdRow.strText = NULL;
 
-  // initialize strtok, start with first line
-  ptr = strtok(string, delimiter);
+//  // initialize strtok, start with first line in text file
+//  char *ptr;
+//  ptr = strtok(string, delimiter);
 
-  // loop through the rows
-  while (ptr != NULL) {
+	char line [100+1];
+	while (fgets(line, sizeof(line),f) != NULL) {
 
-	// temp
-	strTextMultiple_t partialCmdRow;
-	partialCmdRow.strText = (char *) ptr;
-	partialCmdRow.strTextLen = (size_t) strlen(ptr);
+		char *ptr = &line;
 
-//looping rows input, now in partialCmdRow
+		// init partialCmdRow processing (line may contain multiple commands) 
+		strTextMultiple_t partialCmdRow;
+		partialCmdRow.strText = (char *) ptr;
+		partialCmdRow.strTextLen = (size_t) strlen(ptr);
 
-	// process if not an empty line ?
-	if (partialCmdRow.strTextLen) {
+		// loop through partialCmdRow till strTextLen > 0
+		if (partialCmdRow.strTextLen) {
 
-		// if starting with new command row part ...
-		if (!rebuiltCmdRow.strText) {
+			// if starting with new command row part ...
+			if (!rebuiltCmdRow.strText) {
 
-			// init memory allocation for new command row
-			rebuiltCmdRow.strText = (char *) malloc(partialCmdRow.strTextLen);
+				// init memory allocation for new command row
+				rebuiltCmdRow.strText = (char *) malloc(partialCmdRow.strTextLen);
 
-			// copy command to allocated memory
-			memcpy(rebuiltCmdRow.strText
-				,partialCmdRow.strText
-				,partialCmdRow.strTextLen);
+				// copy command to allocated memory
+				memcpy(rebuiltCmdRow.strText
+					,partialCmdRow.strText
+					,partialCmdRow.strTextLen);
 
-			// init length
-			rebuiltCmdRow.strTextLen = partialCmdRow.strTextLen;
-		}
-
-		// continuing a command row with an part ...
-		else {
-
-			// Reallocate memory to new size
-			rebuiltCmdRow.strText = (char *) realloc(rebuiltCmdRow.strText
-				,rebuiltCmdRow.strTextLen + partialCmdRow.strTextLen);
-
-			// add command-part to allocated memory
-			memcpy(rebuiltCmdRow.strText + rebuiltCmdRow.strTextLen
-				,partialCmdRow.strText
-				,partialCmdRow.strTextLen);
-
-			// save new length
-			rebuiltCmdRow.strTextLen += partialCmdRow.strTextLen;
-		
-		}
-
-		// not ending with //? -> execute
-		if ( (rebuiltCmdRow.strTextLen < 2) ||
-			(memcmp(rebuiltCmdRow.strText + rebuiltCmdRow.strTextLen - 2, "//", 2)) ) {
-
-			printf("rebuiltCmdRow: %.*s\n"
-				,rebuiltCmdRow.strTextLen
-				,rebuiltCmdRow.strText);
-
-			// call the AnalyzeCommandChainFn, if retMsg != NULL -> got ret Msgs entries
-			struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
-				SCDEFn->AnalyzeCommandChainFn((const uint8_t *) rebuiltCmdRow.strText, rebuiltCmdRow.strTextLen);
-
-			// retMsgMultiple stailq filled from Fn ? -> get the entries till empty
-			while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
-
-				// for the retMsg elements
-				strTextMultiple_t *retMsg =
-					STAILQ_FIRST(&headRetMsgMultipleFromFn);
-
-				printf("AddingRetMsg: %.*s\n"
-					,retMsg->strTextLen
-					,retMsg->strText);
-
-				// first remove this entry
-				STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
-
-				// then insert retMsg in stail-queue
-				STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+				// init length
+				rebuiltCmdRow.strTextLen = partialCmdRow.strTextLen;
 
 			}
 
-			// release memory for next cycle
-			free(rebuiltCmdRow.strText);
-			rebuiltCmdRow.strText = NULL;
+			// continuing a command row with an part ...
+			else {
 
-			// break, if the global quit-flag is set
-			if (SCDERoot->globalCtrlRegA & F_RECEIVED_QUIT) break;
+				// Reallocate memory to new size
+				rebuiltCmdRow.strText = (char *) realloc(rebuiltCmdRow.strText
+					,rebuiltCmdRow.strTextLen + partialCmdRow.strTextLen);
+
+				// add command-part to allocated memory
+				memcpy(rebuiltCmdRow.strText + rebuiltCmdRow.strTextLen
+					,partialCmdRow.strText
+					,partialCmdRow.strTextLen);
+
+				// save new length
+				rebuiltCmdRow.strTextLen += partialCmdRow.strTextLen;
+		
+			}
+
+			// not ending with //? -> execute
+			if ( (rebuiltCmdRow.strTextLen < 2) ||
+				(memcmp(rebuiltCmdRow.strText + rebuiltCmdRow.strTextLen - 2, "//", 2)) ) {
+
+				printf("rebuiltCmdRowFromFile: %.*s\n"
+					,rebuiltCmdRow.strTextLen
+					,rebuiltCmdRow.strText);
+
+				// call the AnalyzeCommandChainFn, if retMsg != NULL -> got ret Msgs entries
+				struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
+					SCDEFn->AnalyzeCommandChainFn((const uint8_t *) rebuiltCmdRow.strText,
+						rebuiltCmdRow.strTextLen);
+
+				// retMsgMultiple stailq filled from Fn ? -> get the entries till empty
+				while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+
+					// for the retMsg elements
+					strTextMultiple_t *retMsg =
+						STAILQ_FIRST(&headRetMsgMultipleFromFn);
+
+					printf("AddingRetMsg: %.*s\n"
+						,retMsg->strTextLen
+						,retMsg->strText);
+
+					// first remove this entry
+					STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
+
+					// then insert retMsg in stail-queue
+					STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+				}
+
+				// release memory for next cycle
+				free(rebuiltCmdRow.strText);
+				rebuiltCmdRow.strText = NULL;
+
+				// break, if the global quit-flag is set
+				if (SCDERoot->globalCtrlRegA & F_RECEIVED_QUIT) break;
 	
-  		}
+			}
 
 
-		// ending with //? -> more to come, sub 2 chars (//)
-		else {
+			// ending with //? -> more to come, sub 2 chars (//)
+			else {
 
-			rebuiltCmdRow.strTextLen -= 2;
+				rebuiltCmdRow.strTextLen -= 2;
+
+			}
 
 		}
-
-	}
-
-	// set pointer to beginning of next line
- 	ptr = strtok(NULL, delimiter);
 
   }
 
@@ -359,9 +368,8 @@ Include_CommandFn (const uint8_t *argsText
   // rebuilt current cfg file
   SCDERoot->currCfgFile = oldCfgFile;
 
-
-  // close file handle
-//  fclose(fp);
+  // close file
+  fclose(f);
 
   // return STAILQ head, queue stores multiple retMsg entries, if NULL -> no retMsg-entry
   return headRetMsgMultiple;

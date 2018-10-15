@@ -1251,7 +1251,7 @@ app_main(void)
 
 
 
-
+/*
 
    // Use POSIX and C standard library functions to work with files.
     // First create a file.
@@ -1317,7 +1317,7 @@ app_main(void)
     }
     ESP_LOGI(TAG, "Read from Makerfile: '%s'", line2);
 
-
+*/
 
 
 // -------------------------------------------------------------------------------------------------
@@ -1390,7 +1390,7 @@ app_main(void)
   extern ProvidedByModule_t ESP32_BH1750_ProvidedByModule;
   CommandActivateModule(&ESP32_BH1750_ProvidedByModule);
 
-  // Activate ESP32Control as SCDE built-in Module
+  // Activate ESP32_Control as SCDE built-in Module
   extern ProvidedByModule_t ESP32_Control_ProvidedByModule;
   CommandActivateModule(&ESP32_Control_ProvidedByModule);
 

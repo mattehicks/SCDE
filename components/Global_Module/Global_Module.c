@@ -214,7 +214,8 @@ Global_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
   SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global verbose 3", 21);
   SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global logfile -", 21);
 
-  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global configfile testfile", 31);
+  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global configfile maker", 32);
+  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global statefile state", 31);
   SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global port 1234", 21);
 
 // -------------------------------------------------------------------------------------------

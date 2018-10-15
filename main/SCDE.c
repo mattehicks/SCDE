@@ -540,133 +540,93 @@ InitA()
 
 // Zeile 570 , Initialisierung ...
 	
-  const char cfgErrMsg[] = "Messages collected while initializing FHEM:";
-
-  // Goal: include the config file (574-581)
 	
-  // for building the summary of ret-msg from cfg file including (starts empty)
+  // for building the summary of ret-msg from cfg + state file including (starts empty)
   strText_t cfgRet = {NULL, 0};
-	
-  // get initial config-filename from value of attribute (global->configfile)
-  strText_t defName = {(char*) "global", 6};
-  strText_t attrName = {(char*) "configfile", 10};
-  strText_t *valueName = GetAttrValTextByDefTextAttrText(&defName, &attrName);
 
 // -------------------------------------------------------------------------------------------------
 
-  // create the args to execute the initial 'include cfg' command
-  strText_t includeCommandArgs;
+  // get attribute configfile value (global->configfile)
+  strText_t attrCfgFNDefName = {(char*) "global", 6};
+  strText_t attrCfgFNAttrName = {(char*) "configfile", 10};
+  strText_t *attrCfgFNValueName =
+		GetAttrValTextByDefTextAttrText(&attrCfgFNDefName, &attrCfgFNAttrName);
 
-  includeCommandArgs.strTextLen =
-	asprintf((char**) &includeCommandArgs.strText
+// -------------------------------------------------------------------------------------------------
+
+  // create the args to execute the 'include configfile' command
+  strText_t incCFIncludeCommandArgs;
+
+  incCFIncludeCommandArgs.strTextLen =
+	asprintf((char**) &incCFIncludeCommandArgs.strText
 		,"include %.*s"
-		,(int) valueName->strTextLen
-		,(char*) valueName->strText);
+		,(int) attrCfgFNValueName->strTextLen
+		,(char*) attrCfgFNValueName->strText);
 
   // call command include to process the initial config-file
-  struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
-	AnalyzeCommandChain((uint8_t*)includeCommandArgs.strText, (const size_t) includeCommandArgs.strTextLen);
-//??	AnalyzeCommand(includeCommandArgs.strText, includeCommandArgs.strTextLen);
-//	AnalyzeCommandChain(includeCommandArgs.strText, includeCommandArgs.strTextLen);
+  struct headRetMsgMultiple_s incCFHeadRetMsgMultipleFromFn =
+		AnalyzeCommandChain((uint8_t*)incCFIncludeCommandArgs.strText,
+		(const size_t) incCFIncludeCommandArgs.strTextLen);
 
   // free value from Fn GetAttrValTextByDefTextAttrText
-  if (valueName) {
+  if (attrCfgFNValueName) {
 	  
-	    if (valueName->strText) free(valueName->strText);
+		if (attrCfgFNValueName->strText) free(attrCfgFNValueName->strText);
 
-	    free(valueName);
+		free(attrCfgFNValueName);
 
-  }
+	}
 
-  free(includeCommandArgs.strText);
+  free(incCFIncludeCommandArgs.strText);
 
 // -------------------------------------------------------------------------------------------------
 
-  // if entries from retMsgMultiple add "configfile:" text to cfgRet
-  if (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+  // in case of strTextMultiple_t queue element add leading "configfile:" text to cfgRet.strText
+  if (!STAILQ_EMPTY(&incCFHeadRetMsgMultipleFromFn)) {
 	  
-	cc   strText_t includeCommandArgs;
-	  
-		// if starting: build text header and start adding first ret-msg ...
-	if (!cfgRet.strText) {
-
-		// create header text
+		// fill cfgRet.strText with leading "configfile:" text
 		cfgRet.strTextLen = asprintf((char**) &cfgRet.strText
-			,"configfile: %.*s"
-			,(int) retMsg->strTextLen
-			,(char*) retMsg->strText);
+			,"configfile: ");
+
 	}
-	  
-	  
-	  
-	  
-	  
-	  const char cfgErrMsg[] = "Messages collected while initializing FHEM:";  
-	  
-	// Reallocate memory to new size
-	cfgRet.strText = (char *) realloc(cfgRet.strText
-		,cfgRet.strTextLen + retMsg->strTextLen);
 
-	// add command-part to allocated memory
-	memcpy(cfgRet.strText + cfgRet.strTextLen
-		,retMsg->strText
-		,retMsg->strTextLen);
+  // loop the queue entries of retMsgMultiple and add them to cfgRet.strText
+  while (!STAILQ_EMPTY(&incCFHeadRetMsgMultipleFromFn)) {
 
-	// save new length
-	cfgRet.strTextLen += retMsg->strTextLen;
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  
-	  	
-  // get the entries from retMsgMultiple till empty, and add to cfgRet text
-  while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+		// get an retMsg element from queue
+		strTextMultiple_t *retMsg =
+			STAILQ_FIRST(&incCFHeadRetMsgMultipleFromFn);
 
-	// for processing the retMsg elements
-	strTextMultiple_t *retMsg =
-		STAILQ_FIRST(&headRetMsgMultipleFromFn);
+		// reallocate cfgRet.strText memory to new size
+		cfgRet.strText = (char *) realloc(cfgRet.strText
+			,cfgRet.strTextLen + retMsg->strTextLen);
 
-	// Reallocate memory to new size
-	cfgRet.strText = (char *) realloc(cfgRet.strText
-		,cfgRet.strTextLen + retMsg->strTextLen);
+		// add current retMsg->strText to cfgRet.strText
+		memcpy(cfgRet.strText + cfgRet.strTextLen
+			,retMsg->strText
+			,retMsg->strTextLen);
 
-	// add command-part to allocated memory
-	memcpy(cfgRet.strText + cfgRet.strTextLen
-		,retMsg->strText
-		,retMsg->strTextLen);
-
-	// save new length
-	cfgRet.strTextLen += retMsg->strTextLen;
+		// save new retMsg->strTextLen
+		cfgRet.strTextLen += retMsg->strTextLen;
 	
-	// done, remove this entry
-	STAILQ_REMOVE_HEAD(&headRetMsgMultipleFromFn, entries);
+		// done, remove this entry from queue
+		STAILQ_REMOVE_HEAD(&incCFHeadRetMsgMultipleFromFn, entries);
 //	STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
 
-	// free the msg-string
-	free(retMsg->strText);
+		// free the allocated retMsg->strText
+		free(retMsg->strText);
 
-	// and the strTextMultiple_t
-	free(retMsg);
-  }
+		// and the allocated strTextMultiple_t queue element
+		free(retMsg);
+
+	}
 
 // -------------------------------------------------------------------------------------------------
 
   // debug info ..
   if (cfgRet.strText) {
 
-	LOGD("cfgRet filled: %.*s"
+	LOGD("cfgRet after reading configfile filled: %.*s"
 			,cfgRet.strTextLen
 			,(char*) cfgRet.strText);
 
@@ -677,6 +637,100 @@ InitA()
   }
 
 // -------------------------------------------------------------------------------------------------
+
+	// get attribute statefile value (global->statefile)
+  strText_t attrStateFNDefName = {(char*) "global", 6};
+  strText_t attrStateFNAttrName = {(char*) "statefile", 9};
+  strText_t *attrStateFNValueName =
+		GetAttrValTextByDefTextAttrText(&attrStateFNDefName, &attrStateFNAttrName);
+// -------------------------------------------------------------------------------------------------
+
+  // create the args to execute the'include statefile' command
+  strText_t incSFIncludeCommandArgs;
+
+  incCFIncludeCommandArgs.strTextLen =
+	asprintf((char**) &incSFIncludeCommandArgs.strText
+		,"include %.*s"
+		,(int) attrStateFNValueName->strTextLen
+		,(char*) attrStateFNValueName->strText);
+
+  // call command include to process the initial state-file
+  struct headRetMsgMultiple_s incSFHeadRetMsgMultipleFromFn =
+		AnalyzeCommandChain((uint8_t*)incSFIncludeCommandArgs.strText
+		,(const size_t) incSFIncludeCommandArgs.strTextLen);
+
+  // free value from Fn GetAttrValTextByDefTextAttrText
+  if (attrStateFNValueName) {
+	  
+		if (attrStateFNValueName->strText) free(attrStateFNValueName->strText);
+
+		free(attrStateFNValueName);
+
+	}
+
+  free(incSFIncludeCommandArgs.strText);
+
+// -------------------------------------------------------------------------------------------------
+
+  // in case of strTextMultiple_t queue element add leading "statefile:" text to cfgRet.strText
+  if (!STAILQ_EMPTY(&incSFHeadRetMsgMultipleFromFn)) {
+	  
+		// fill cfgRet.strText with leading "statefile:" text
+		cfgRet.strTextLen = asprintf((char**) &cfgRet.strText
+			,"statefile: ");
+
+	}
+
+  // loop the queue entries of retMsgMultiple and add them to cfgRet.strText
+  while (!STAILQ_EMPTY(&incSFHeadRetMsgMultipleFromFn)) {
+
+		// get an retMsg element from queue
+		strTextMultiple_t *retMsg =
+			STAILQ_FIRST(&incSFHeadRetMsgMultipleFromFn);
+
+		// reallocate cfgRet.strText memory to new size
+		cfgRet.strText = (char *) realloc(cfgRet.strText
+			,cfgRet.strTextLen + retMsg->strTextLen);
+
+		// add current retMsg->strText to cfgRet.strText
+		memcpy(cfgRet.strText + cfgRet.strTextLen
+			,retMsg->strText
+			,retMsg->strTextLen);
+
+		// save new retMsg->strTextLen
+		cfgRet.strTextLen += retMsg->strTextLen;
+
+		// done, remove this entry from queue
+		STAILQ_REMOVE_HEAD(&incSFHeadRetMsgMultipleFromFn, entries);
+//	STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
+
+		// free the allocated retMsg->strText
+		free(retMsg->strText);
+
+		// and the allocated strTextMultiple_t queue element
+		free(retMsg);
+
+	}
+
+// -------------------------------------------------------------------------------------------------
+
+  // debug info ..
+  if (cfgRet.strText) {
+
+	LOGD("cfgRet after reading state filled: %.*s"
+			,cfgRet.strTextLen
+			,(char*) cfgRet.strText);
+
+  }
+  else {
+
+	LOGD("cfgRet NOT filled!");
+  }
+
+// -------------------------------------------------------------------------------------------------
+
+  const char cfgErrMsg[] = "Messages collected while initializing FHEM:";
+
 
   // if cfgRet text -> set attribute motd to cfgRet text
   if (cfgRet.strText) {
