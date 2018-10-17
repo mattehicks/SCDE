@@ -14,7 +14,7 @@ SCDEFn_t SCDEFn;
 void InitSCDERoot(void);
 
 
-
+void InitA();
 /*
  *  Functions made available to modules
  */
@@ -28,15 +28,14 @@ void Log3 (const uint8_t *name, const size_t nameLen, const uint8_t LogLevel, co
 //
 void Log4 (char *text);
 
+// returns ALL Readings of the Definition
+struct headRetMsgMultiple_s GetAllReadings (Common_Definition_t *Common_Definition);
+
 // analyzes + processes an configuration file
 struct headRetMsgMultiple_s AnalyzeCommandChain(const uint8_t *args, const size_t argsLen);
 
 // analyzes + processes one command row
 struct headRetMsgMultiple_s AnalyzeCommand(const uint8_t *args, const size_t argsLen);
-
-void InitA();
-
-
 
 // internal Fn
 Module_t* CommandActivateModule (ProvidedByModule_t* ProvidedByNEWModule);
@@ -49,6 +48,7 @@ Module_t* GetLoadedModulePtrByName(const uint8_t *typeName, const size_t typeNam
 //Common_Definition_t* AddDefineForModuleWithName(Module_t* ModulePtr, char* Name);
 
 int CommandLoadCommand(const uint8_t *commandTxt, const size_t commandTxtLen, commandFn_t commandFn, const uint8_t *commandHelp, const size_t commandHelpLen);
+
 Module_t* CommandReloadModule(const uint8_t *typeName, const size_t typeNameLen);
 
 //char* CommandDefine (const uint8_t *args, const size_t argsLen);

@@ -172,6 +172,10 @@ typedef void (* HexDumpOutFn_t) (char *desc, void *addr, int len);
 // typedef for Call GetFn by Def-Name - for 2 stage desings, requests data
 typedef int (* CallGetFnByDefNameFn_t) (const uint8_t *nameText, const size_t nameTextLen, Common_Definition_t *sourceCommon_Definition, void *X);
 
+// typedef for Call Get All Readings Fn by Def-Name - for 2 stage desings, requests data
+typedef struct headRetMsgMultiple_s (* GetAllReadingsFn_t) (Common_Definition_t *Common_Definition);
+
+
 
 /*
  *  Helper routine that parses Key=Value(@) input arguments into an allocated array
@@ -279,6 +283,8 @@ typedef struct SCDEFn_s
   ParseKVInputArgsFn_t ParseKVInputArgsFn;	// parses Key=Value(@) input arguments into array
 
   CallGetFnByDefNameFn_t CallGetFnByDefNameFn;  // original CallFn
+
+  GetAllReadingsFn_t GetAllReadingsFn;		// returns all readings of an definition
 
 } SCDEFn_t;
 

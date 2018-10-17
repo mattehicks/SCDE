@@ -142,6 +142,7 @@ SCDEFn_t SCDEFn = {
   ,HexDumpOut
   ,ParseKVInputArgs
   ,CallGetFnByDefName
+	,GetAllReadings
 };
 
 
@@ -226,7 +227,61 @@ doGlobalDef(const uint8_t *cfgFileName
 
 
 
+/* --------------------------------------------------------------------------------------------------
+ *  FName: GetAllReadings
+ *  Desc: Creates a new Define with name "Name", and Module "TypeName" and calls Modules DefFn with
+ *        args "Args"
+ *  Info: 'Name' is custom definition name [azAZ09._] char[31]
+ *        'TypeName' is module name
+ *        'Definition+X' is passed to modules DefineFn, and stored in Definition->Definition
+ *  Para: Common_Definition_t *Common_Definition -> ptr to definition which readings are requested
+ *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple (all) readings
+ *        from requested Definition, NULL=NONE
+ * --------------------------------------------------------------------------------------------------
+ */
+struct headRetMsgMultiple_s
+GetAllReadings (Common_Definition_t *Common_Definition)
+{
 
+  // prepare STAILQ head for multiple RetMsg storage
+  struct headRetMsgMultiple_s headRetMsgMultiple;
+
+  // Initialize the queue
+  STAILQ_INIT(&headRetMsgMultiple);
+
+
+
+  // loop the readings stored for this definition for processing
+	reading_t *readingNow;
+	STAILQ_FOREACH(readingNow, &Common_Definition->headReadings, entries) {
+
+		strTextMultiple_t *retMsg =
+			malloc(sizeof(strTextMultiple_t));
+
+		// get tist text
+		strText_t strText =
+			FmtDateTime(readingNow->readingTist);
+
+		retMsg->strTextLen += asprintf(retMsg->strText
+			,"  %.*s | %.*s = %.*s\r\n"
+			,strText.strTextLen
+			,strText.strText
+			,readingNow->readingNameTextLen
+			,readingNow->readingNameText
+			,readingNow->readingValueTextLen
+			,readingNow->readingValueText);
+
+		free(strText.strText);
+
+		// insert retMsg in stail-queue
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+	}
+
+	// return STAILQ head, stores multiple retMsg with readings, if NULL -> none
+	return headRetMsgMultiple;
+
+}
 
 
 
@@ -1982,6 +2037,7 @@ CommandUndefine (const uint8_t *args, const size_t argsLen)	//Undefine 'Name' ->
  * Rets: char* -> error-text-string in allocated mem, or NULL=OK
  *--------------------------------------------------------------------------------------------------
  */
+/* externer Befehl ?
 char*
 CommandAttr (char* Args)
   {
@@ -2020,7 +2076,7 @@ CommandAttr (char* Args)
   return NULL;
 
   }
-
+*/
 
 
 
