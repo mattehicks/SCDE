@@ -269,7 +269,8 @@ WriteStatefile()
 			
 	
  # my $now = gettimeofday();
-
+ time_t now = TimeNow(); //umbenennen in gettimeofday ??
+			
  # my @t = localtime($now);
 
  # $stateFile = ResolveDateWildcards($stateFile, @t);
@@ -320,6 +321,17 @@ WriteStatefile()
  # return "$attr{global}{statefile}: $!" if(!close(SFH));
  # return "";
 	
+	// loop the definition for processing
+	definition_t *definitionNow;
+	STAILQ_FOREACH(definitionNow, &Common_Definition->headReadings, entries) {
+		
+#       next if($defs{$d}{TEMPORARY});		//temporäre nicht!!
+		
+	 xx = GetAllReadings(definitionNow);
+		
+		
+	}
+		
 	
 	// return STAILQ head, stores multiple retMsg with readings, if NULL -> none
 	return headRetMsgMultiple;
