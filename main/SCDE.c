@@ -143,6 +143,7 @@ SCDEFn_t SCDEFn = {
   ,ParseKVInputArgs
   ,CallGetFnByDefName
 	,GetAllReadings
+	,WriteStatefile
 };
 
 
@@ -224,6 +225,106 @@ doGlobalDef(const uint8_t *cfgFileName
   }
 
 
+/* --------------------------------------------------------------------------------------------------
+ *  FName: WriteStatefile
+ *  Desc: Writes the statefile to filesystem.
+ *  Info: 
+ *  Para: -/-
+ *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple (all) readings
+ *        from requested Definition, NULL=NONE
+ * --------------------------------------------------------------------------------------------------
+ */
+struct headRetMsgMultiple_s
+WriteStatefile()
+{
+
+  // prepare STAILQ head for multiple RetMsg storage
+  struct headRetMsgMultiple_s headRetMsgMultiple;
+
+  // Initialize the queue
+  STAILQ_INIT(&headRetMsgMultiple);
+
+  // get attribute "global->statefile" value
+  strText_t attrStateFNDefName = {(char*) "global", 6};
+  strText_t attrStateFNAttrName = {(char*) "statefile", 9};
+  strText_t *attrStateFNValueName =
+		GetAttrValTextByDefTextAttrText(&attrStateFNDefName, &attrStateFNAttrName);
+
+	// attribute not found
+	if (!attrStateFNValueName) {
+		
+		// attribute found but valuenot assigned
+		if (!attrStateFNValueName->strText) {
+		
+			#errortext attr found, but empty
+			free(attrStateFNValueName);
+			return;
+		}
+		
+		else (
+		#errortext attr not found,
+		)
+	)
+			
+			
+	
+ # my $now = gettimeofday();
+
+ # my @t = localtime($now);
+
+ # $stateFile = ResolveDateWildcards($stateFile, @t);
+
+	// create statefilename string
+	char *stateFile = sprintf(
+	 
+	// free attribute statefile value
+	free (attrStateFNValueName->strText);	 
+	free (attrStateFNValueName);
+		
+	// open statefile
+	FILE* sFH = fopen("/spiffs/hello.txt", "w");
+    if (sFH == NULL) {
+        ESP_LOGE(TAG, "Failed to open file for writing");
+        return;
+    }
+	
+			
+		#if(!open(SFH, ">$stateFile")) {
+    #my $msg = "WriteStatefile: Cannot open $stateFile: $!";
+    #Log 1, $msg;
+    #return $msg;	
+			
+			
+	#----> #Sat Aug 19 14:16:59 2017
+  #my $t = localtime($now);
+  #print SFH "#$t\n";
+			
+			
+    fprintf(sFH, "Hello World!\n");
+	
+		// close statefile
+		fclose(sFH);
+	
+
+	                                               ## $d ist der Name!!!
+ # foreach my $d (sort keys %defs) {
+ #   next if($defs{$d}{TEMPORARY});		//temporäre nicht!!
+ #   if($defs{$d}{VOLATILE}) {
+ #     my $def = $defs{$d}{DEF};
+ #     $def =~ s/;/;;/g; # follow-on-for-timer at
+ #     print SFH "define $d $defs{$d}{TYPE} $def\n";
+ #   }
+ #   my @arr = GetAllReadings($d);
+ #   print SFH join("\n", @arr)."\n" if(@arr);
+ # }
+ # return "$attr{global}{statefile}: $!" if(!close(SFH));
+ # return "";
+	
+	
+	// return STAILQ head, stores multiple retMsg with readings, if NULL -> none
+	return headRetMsgMultiple;
+
+}
 
 
 
@@ -240,7 +341,7 @@ doGlobalDef(const uint8_t *cfgFileName
  * --------------------------------------------------------------------------------------------------
  */
 struct headRetMsgMultiple_s
-GetAllReadings (Common_Definition_t *Common_Definition)
+GetAllReadings(Common_Definition_t *Common_Definition)
 {
 
   // prepare STAILQ head for multiple RetMsg storage
@@ -289,14 +390,18 @@ GetAllReadings (Common_Definition_t *Common_Definition)
 
 
 
-/** Category: attr-management helper
+/** Category: attribute management, helper
  * -------------------------------------------------------------------------------------------------
  *  FName: GetAttrValTextByDefTextAttrText
  *  Desc: Returns the attribute value assigned to an attribute-name, for the definition
- *  Note: DO NOT FORGET TO FREE MEMORY strText_t *attrVal->strText, strText_t *attrVal !
+ *  Note: DO NOT FORGET TO FREE MEMORY !!!
+ *        free (*attrVal->strText) !
+ *        free (*attrVal) !
  *  Para: const strText_t *defName -> ptr to the definition name
  *        const strText_t *attrName -> ptr to the attribute name
- *  Rets: strText_t *attrVal -> the attribute value / NULL = not fnd., attrVal->strText = NULL -> empty
+ *  Rets: strText_t *attrVal -> if found the assigned attribute value
+ *               (attrVal = NULL -> not found / assigned)
+ *               (attrVal->strText = NULL -> found, but empty)
  * -------------------------------------------------------------------------------------------------
  */
 strText_t*
