@@ -177,166 +177,6 @@ InitSCDERoot(void)
 
 
 
-/**
- * -------------------------------------------------------------------------------------------------
- *  FName: doGlobalDef
- *  Desc: Initializes the global device
- *  Para: const uint8_t *cfgFileName -> Cfg-File-Name
- *        const size_t cfgFileNameLen -> length of the Cfg-File-Name
- *  Rets: Module_t* -> Pointer to Module / NULL if not found
- * -------------------------------------------------------------------------------------------------
- */
-void
-doGlobalDef(const uint8_t *cfgFileName
-		, const size_t cfgFileNameLen)
-  {
-
-  LOGD("doGlobalDef - cfgFileName:%.*s\n"
-	,cfgFileNameLen
-	,cfgFileName);
-
-  SCDERoot.DevCount = 1;
-
-/*
-3326	  $defs{global}{NR}    = $devcount++;
-3327	  $defs{global}{TYPE}  = "Global";
-3328	  $defs{global}{STATE} = "no definition";
-3329	  $defs{global}{DEF}   = "no definition";
-3330	  $defs{global}{NAME}  = "global";
-3331	
-3332	  CommandAttr(undef, "global verbose 3");
-3333	  CommandAttr(undef, "global configfile $arg");
-3334	  CommandAttr(undef, "global logfile -");
-3335	}
-3336	
-*/
-
-
-  // start the internal WebIF (built in module)
-  // define Name:MyTelnet Module:Telnet -> Args: Port:23
-//#define CMD_4_TELNET "define MyTelnet Telnet 23"
-
-  // there should be no return messages - we expect no return messages
-  AnalyzeCommand((const uint8_t *) "attr global verbose 3", 21);
-  AnalyzeCommand((const uint8_t *) "attr global logfile -", 21);
-
-  return;
-
-  }
-
-
-/* --------------------------------------------------------------------------------------------------
- *  FName: WriteStatefile
- *  Desc: Writes the statefile to filesystem.
- *  Info: 
- *  Para: -/-
- *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple (all) readings
- *        from requested Definition, NULL=NONE
- * --------------------------------------------------------------------------------------------------
- */
-struct headRetMsgMultiple_s
-WriteStatefile()
-{
-
-  // prepare STAILQ head for multiple RetMsg storage
-  struct headRetMsgMultiple_s headRetMsgMultiple;
-
-  // Initialize the queue
-  STAILQ_INIT(&headRetMsgMultiple);
-
-  // get attribute "global->statefile" value
-  strText_t attrStateFNDefName = {(char*) "global", 6};
-  strText_t attrStateFNAttrName = {(char*) "statefile", 9};
-  strText_t *attrStateFNValueName =
-		GetAttrValTextByDefTextAttrText(&attrStateFNDefName, &attrStateFNAttrName);
-
-	// attribute not found
-	if (!attrStateFNValueName) {
-		
-		// attribute found but valuenot assigned
-		if (!attrStateFNValueName->strText) {
-		
-			#errortext attr found, but empty
-			free(attrStateFNValueName);
-			return;
-		}
-		
-		else (
-		#errortext attr not found,
-		)
-	)
-			
-			
-	
- # my $now = gettimeofday();
- time_t now = TimeNow(); //umbenennen in gettimeofday ??
-			
- # my @t = localtime($now);
-
- # $stateFile = ResolveDateWildcards($stateFile, @t);
-
-	// create statefilename string
-	char *stateFile = sprintf(
-	 
-	// free attribute statefile value
-	free (attrStateFNValueName->strText);	 
-	free (attrStateFNValueName);
-		
-	// open statefile
-	FILE* sFH = fopen("/spiffs/hello.txt", "w");
-    if (sFH == NULL) {
-        ESP_LOGE(TAG, "Failed to open file for writing");
-        return;
-    }
-	
-			
-		#if(!open(SFH, ">$stateFile")) {
-    #my $msg = "WriteStatefile: Cannot open $stateFile: $!";
-    #Log 1, $msg;
-    #return $msg;	
-			
-			
-	#----> #Sat Aug 19 14:16:59 2017
-  #my $t = localtime($now);
-  #print SFH "#$t\n";
-			
-			
-    fprintf(sFH, "Hello World!\n");
-	
-		// close statefile
-		fclose(sFH);
-	
-
-	                                               ## $d ist der Name!!!
- # foreach my $d (sort keys %defs) {
- #   next if($defs{$d}{TEMPORARY});		//temporäre nicht!!
- #   if($defs{$d}{VOLATILE}) {
- #     my $def = $defs{$d}{DEF};
- #     $def =~ s/;/;;/g; # follow-on-for-timer at
- #     print SFH "define $d $defs{$d}{TYPE} $def\n";
- #   }
- #   my @arr = GetAllReadings($d);
- #   print SFH join("\n", @arr)."\n" if(@arr);
- # }
- # return "$attr{global}{statefile}: $!" if(!close(SFH));
- # return "";
-	
-	// loop the definition for processing
-	definition_t *definitionNow;
-	STAILQ_FOREACH(definitionNow, &Common_Definition->headReadings, entries) {
-		
-#       next if($defs{$d}{TEMPORARY});		//temporäre nicht!!
-		
-	 xx = GetAllReadings(definitionNow);
-		
-		
-	}
-		
-	
-	// return STAILQ head, stores multiple retMsg with readings, if NULL -> none
-	return headRetMsgMultiple;
-
-}
 
 
 
@@ -1183,130 +1023,8 @@ Log4 (char *text)
 
 
 
-/*  lan fürs loggen den loglevel vatiabel ermitteln?  Log GetLogLevel($name,4)
- *--------------------------------------------------------------------------------------------------
- *FName: GetLogLevel
- * Desc: This is the main logging function with 3 infos: definition, loglevel and log-text
- * Info: Level 0=System; 16=debug | DO NOT FORGET TO FREE char* LogText -> ITS ALLOCATED MEMORY !!!
- * Para: Common_Definition_t* Common_Definition -> ptr to the Device-Definition which wants a log entry
- *       uint8_t LogLevel -> Level of information - to decide if it should be finally logged
- *       char* LogText -> ptr to allocated mem, containing text-string that should be logged
- * Rets: char* -> text which should contain the log level ; NULL = NotFound/Error
- *--------------------------------------------------------------------------------------------------
- */
-char*
-GetLogLevel (char *Device
-	,uint8_t LogLevel)
-  {
-
-//  my ($dev,$deflev) = @_;
-//  my $df = defined($deflev) ? $deflev : 2;
-//
-//  return $df if(!defined($dev));
-//  return $attr{$dev}{loglevel}  if(defined($attr{$dev}) && defined($attr{$dev}{loglevel}));
-//  return $df;
 
 
-//  if (!GetDefinitionByName(DefinitionName)) return df;
-
-
-
-  return NULL;
-
-  }
-
-/*
-No output
- Error
-Warning
-Info
- Debug
- Verbose
-
-
-*/
-
-//#include <stdarg.h>
-/* --------------------------------------------------------------------------------------------------
- *  FName: Log3
- *  Desc: This is the main logging function with 3 infos: definition, loglevel and log-text
- *  Info: Level 0=System; 16=debug | DO NOT FORGET TO FREE char* LogText -> ITS ALLOCATED MEMORY !!!
- *  Para: Common_Definition_t* Common_Definition -> ptr to the Device-Definition which wants a log entry
- *        uint8_t LogLevel -> Level of information - to decide if it should be finally logged
- *        char* LogText -> ptr to allocated mem, containing text-string that should be logged
- *  Rets: -/-
- * --------------------------------------------------------------------------------------------------
- */
-void //IRAM_ATTR
-Log3 (const uint8_t *name
-		,const size_t nameLen
-		,const uint8_t LogLevel
-		,const char *format
-	,...)
-  {
-
-// 2016.10.12 07:26:16 LogPrioNr: Define->customname:
-
-	// generate into Log3Fn|2016.10.12 07:26:16 2: LiGHT.2_F4B64:
-  LOGD("Log3Fn|2016.10.12 07:26:16 %d: %.*s: "
-	,LogLevel
-	,nameLen
-	,name);
-
-
-  time_t now;
-      struct tm timeinfo;
-      time(&now);
-      localtime_r(&now, &timeinfo);
-
-      char strftime_buf[64];
-
-      // Set timezone to Eastern Standard Time and print local time
-         setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
-         tzset();
-         localtime_r(&now, &timeinfo);
-         strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-         LOGD("New York is: %s"
-        	,strftime_buf);
-
-
-  va_list list;
-  va_start(list, format);
-  vprintf(format, list);
-  va_end(list);
-
-
-
-  //= GetAssignedAttribute("global","verbose");
-
- // is Device
-//stp1: $dev = $dev->{NAME} if(defined($dev) && ref($dev) eq "HASH");
-
-/*stp2:
-  if(defined($dev) &&
-     defined($attr{$dev}) &&
-     defined (my $devlevel = $attr{$dev}{verbose}))
-	{
-    	return if($loglevel > $devlevel);
-	}
-  else
-	{
-	return if($loglevel > $attr{global}{verbose});
-	}*/
-
-
-
-
-/*  else
-	{
-	if ( > GetAttribute("global","verbose")
-
-
-  char* DevVerbose = GetAttribute(Dev,"verbose");
-  char* GlobalVerbose = GetAttribute("global","verbose");
-  if ( (GlobalVerbose) &&
-*/
-  }
 
 
 
@@ -1521,267 +1239,7 @@ CallGetFnByDefName(const uint8_t *nameText
 
 
 
-/* --------------------------------------------------------------------------------------------------
- *  FName: AnalyzeCommandChain
- *  Desc: Creates a new Define with name "Name", and Module "TypeName" and calls Modules DefFn with
- *        args "Args"
- *  Info: 'Name' is custom definition name [azAZ09._] char[31]
- *        'TypeName' is module name
- *        'Definition+X' is passed to modules DefineFn, and stored in Definition->Definition
- *  Para: const uint8_t *args  -> prt to space seperated command text string "Command ..."
- *        const size_t argsLen -> length of args
- *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple RetMsg (errors), NULL=OK
- * --------------------------------------------------------------------------------------------------
- */
-struct headRetMsgMultiple_s
-AnalyzeCommandChain (const uint8_t *args
-		, const size_t argsLen)
-{
-
-  // prepare STAILQ head for multiple RetMsg storage
-  struct headRetMsgMultiple_s headRetMsgMultiple;
-
-  // Initialize the queue
-  STAILQ_INIT(&headRetMsgMultiple);
-
-  // set start of possible Command
-  const uint8_t *commandName = args;
-
-  // set start of possible Command-Arguments
-  const uint8_t *commandArgs = args;
-
-  // a seek-counter
-  int i = 0;
-
-  // seek to next space !'\32'
-  while( (i < argsLen) && (*commandArgs != ' ') ) {i++;commandArgs++;}
-
-  // length of Name
-  size_t commandLen = i;
-
-  // seek to start position of Command-Arguments '\32'
-  while( (i < argsLen) && (*commandArgs == ' ') ) {i++;commandArgs++;}
-
-  // length of Command-Arguments
-
-  size_t commandArgsLen = argsLen - i;
-
- // veryfy lengths > 0, definition 0 allowed
-//  if ( (commandLen) == 0 || (commandArgsLen == 0) ) {
-  if (commandLen == 0 ) {
-
-	// alloc mem for retMsg
-	strTextMultiple_t *retMsg =
-		 malloc(sizeof(strTextMultiple_t));
-
-	// fill retMsg with error text
-	retMsg->strTextLen = asprintf((char**) &retMsg->strText
-		,"Could not interpret input '%.*s' ! Usage: <command> <command dependent arguments>"
-		,(int) argsLen
-		,args);
-
-	// insert retMsg in stail-queue
-	STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-	return headRetMsgMultiple;
-
-	}
-
-  // get the Command by Name
-  command_t *command;
-
-  // search for the command
-  STAILQ_FOREACH(command, &SCDERoot.headCommands, entries) {
-
-	LOGD("testing: %.*s\n"
-		,command->providedByCommand->commandNameTextLen
-		,command->providedByCommand->commandNameText);
-
-	if ( (command->providedByCommand->commandNameTextLen == commandLen)
-		&& (!strncasecmp((const char*) command->providedByCommand->commandNameText, (const char*) commandName, commandLen)) ) {
-
-		// call the CommandFn, if retMsg != NULL -> error ret Msg
-		struct headRetMsgMultiple_s headRetMsgMultipleFromFn
-			= command->providedByCommand->commandFn(commandArgs, commandArgsLen);
-
-		// retMsgMultiple stailq from Fn filled ?
-		while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
-
-			// for the retMsg elements
-			strTextMultiple_t *retMsg =
-				STAILQ_FIRST(&headRetMsgMultipleFromFn);
-
-			// first remove this entry from Fn ret queue
-			STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
-
-			// last insert entry in ret queue
-			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-		}
-
-		// return STAILQ head, it stores multiple RetMsg, if NULL -> no RetMsg-entries
-		return headRetMsgMultiple;
-	}
-  }
-
-// -------------------------------------------------------------------------------------------------
-
-  // alloc mem for retMsg
-  strTextMultiple_t *retMsg =
-	 malloc(sizeof(strTextMultiple_t));
-
-  // fill retMsg with error text
-  retMsg->strTextLen = asprintf((char**) &retMsg->strText
-	,"Unknown command <%.*s> with arguments <%.*s>!"
-	,(int) commandLen
-	,commandName
-	,(int) commandArgsLen
-	,commandArgs);
-
-  // insert retMsg in stail-queue
-  STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-  // return STAILQ head, stores multiple RetMsg, if NULL -> no RetMsg-entries
-  return headRetMsgMultiple;
-
-}
- 
-
-
-/* --------------------------------------------------------------------------------------------------
- *  FName: AnalyzeCommand
- *  Desc: Creates a new Define with name "Name", and Module "TypeName" and calls Modules DefFn with
- *        args "Args"
- *  Info: 'Name' is custom definition name [azAZ09._] char[31]
- *        'TypeName' is module name
- *        'Definition+X' is passed to modules DefineFn, and stored in Definition->Definition
- *  Para: const uint8_t *args  -> prt to space seperated command text string "Command ..."
- *        const size_t argsLen -> length of args
- *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple RetMsg (errors), NULL=OK
- * --------------------------------------------------------------------------------------------------
- */
-struct headRetMsgMultiple_s
-AnalyzeCommand (const uint8_t *args
-		, const size_t argsLen)
-{
-
-  // prepare STAILQ head for multiple RetMsg storage
-  struct headRetMsgMultiple_s headRetMsgMultiple;
-
-  // Initialize the queue
-  STAILQ_INIT(&headRetMsgMultiple);
-
-//  // for Fn response msg
-//  strTextMultiple_t *retMsg;
-
-  // set start of possible Command
-  const uint8_t *commandName = args;
-
-  // set start of possible Command-Arguments
-  const uint8_t *commandArgs = args;
-
-  // a seek-counter
-  int i = 0;
-
-  // seek to next space !'\32'
-  while( (i < argsLen) && (*commandArgs != ' ') ) {i++;commandArgs++;}
-
-  // length of Name
-  size_t commandLen = i;
-
-  // seek to start position of Command-Arguments '\32'
-  while( (i < argsLen) && (*commandArgs == ' ') ) {i++;commandArgs++;}
-
-  // length of Command-Arguments
-
-  size_t commandArgsLen = argsLen - i;
-
- // veryfy lengths > 0, definition 0 allowed
-//  if ( (commandLen) == 0 || (commandArgsLen == 0) ) {
-  if (commandLen == 0 ) {
-
-	// alloc mem for retMsg
-	strTextMultiple_t *retMsg =
-		 malloc(sizeof(strTextMultiple_t));
-
-	// fill retMsg with error text
-	retMsg->strTextLen = asprintf((char**) &retMsg->strText
-		,"Could not interpret input '%.*s' ! Usage: <command> <command dependent arguments>"
-		,(int) argsLen
-		,args);
-
-	// insert retMsg in stail-queue
-	STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-	return headRetMsgMultiple;
-
-	}
-
-  // get the Command by Name
-  command_t *command;
-
-  // search for the command
-  STAILQ_FOREACH(command, &SCDERoot.headCommands, entries) {
-
-	LOGD("testing: %.*s\n"
-		,command->providedByCommand->commandNameTextLen
-		,command->providedByCommand->commandNameText);
-
-	if ( (command->providedByCommand->commandNameTextLen == commandLen)
-		&& (!strncasecmp((const char*) command->providedByCommand->commandNameText, (const char*) commandName, commandLen)) ) {
-
-		// call the CommandFn, if retMsg != NULL -> error ret Msg
-		struct headRetMsgMultiple_s headRetMsgMultipleFromFn
-			= command->providedByCommand->commandFn(commandArgs, commandArgsLen);
-
-		// retMsgMultiple stailq from Fn filled ?
-		if (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
-
-			// for the retMsg elements
-			strTextMultiple_t *retMsg;
-
-			// get the entries till empty
-			while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
-
-				retMsg = STAILQ_FIRST(&headRetMsgMultipleFromFn);
-
-				// insert retMsg in stail-queue
-				STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-				// done, remove this entry
-				STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
-			}
-		}
-
-		// return STAILQ head, it stores multiple RetMsg, if NULL -> no RetMsg-entries
-		return headRetMsgMultiple;
-	}
-  }
-
-// -------------------------------------------------------------------------------------------------
-
-  // alloc mem for retMsg
-  strTextMultiple_t *retMsg =
-	 malloc(sizeof(strTextMultiple_t));
-
-  // fill retMsg with error text
-  retMsg->strTextLen = asprintf((char**) &retMsg->strText
-	,"Unknown command <%.*s> with arguments <%.*s>!"
-	,(int) commandLen
-	,commandName
-	,(int) commandArgsLen
-	,commandArgs);
-
-  // insert retMsg in stail-queue
-  STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-  // return STAILQ head, stores multiple RetMsg, if NULL -> no RetMsg-entries
-  return headRetMsgMultiple;
-
-}
-
+		
 
 
 /* --------------------------------------------------------------------------------------------------
@@ -2477,6 +1935,706 @@ DeleteAttribute(char* Definition
 */
 
 
+
+
+
+
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+//#################################################################################################
+//#################################################################################################
+//#####################################  FN GROSS GESCHRIEBEN #####################################
+//#################################################################################################
+//#################################################################################################		
+//#################################################################################################	
+		
+		
+		
+		
+		
+		
+	
+
+/* --------------------------------------------------------------------------------------------------
+ *  FName: AnalyzeCommand
+ *  Desc: Creates a new Define with name "Name", and Module "TypeName" and calls Modules DefFn with
+ *        args "Args"
+ *  Info: 'Name' is custom definition name [azAZ09._] char[31]
+ *        'TypeName' is module name
+ *        'Definition+X' is passed to modules DefineFn, and stored in Definition->Definition
+ *  Para: const uint8_t *args  -> prt to space seperated command text string "Command ..."
+ *        const size_t argsLen -> length of args
+ *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple RetMsg (errors), NULL=OK
+ * --------------------------------------------------------------------------------------------------
+ */
+struct headRetMsgMultiple_s
+AnalyzeCommand (const uint8_t *args
+		, const size_t argsLen)
+{
+
+  // prepare STAILQ head for multiple RetMsg storage
+  struct headRetMsgMultiple_s headRetMsgMultiple;
+
+  // Initialize the queue
+  STAILQ_INIT(&headRetMsgMultiple);
+
+//  // for Fn response msg
+//  strTextMultiple_t *retMsg;
+
+  // set start of possible Command
+  const uint8_t *commandName = args;
+
+  // set start of possible Command-Arguments
+  const uint8_t *commandArgs = args;
+
+  // a seek-counter
+  int i = 0;
+
+  // seek to next space !'\32'
+  while( (i < argsLen) && (*commandArgs != ' ') ) {i++;commandArgs++;}
+
+  // length of Name
+  size_t commandLen = i;
+
+  // seek to start position of Command-Arguments '\32'
+  while( (i < argsLen) && (*commandArgs == ' ') ) {i++;commandArgs++;}
+
+  // length of Command-Arguments
+
+  size_t commandArgsLen = argsLen - i;
+
+ // veryfy lengths > 0, definition 0 allowed
+//  if ( (commandLen) == 0 || (commandArgsLen == 0) ) {
+  if (commandLen == 0 ) {
+
+	// alloc mem for retMsg
+	strTextMultiple_t *retMsg =
+		 malloc(sizeof(strTextMultiple_t));
+
+	// fill retMsg with error text
+	retMsg->strTextLen = asprintf((char**) &retMsg->strText
+		,"Could not interpret input '%.*s' ! Usage: <command> <command dependent arguments>"
+		,(int) argsLen
+		,args);
+
+	// insert retMsg in stail-queue
+	STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+	return headRetMsgMultiple;
+
+	}
+
+  // get the Command by Name
+  command_t *command;
+
+  // search for the command
+  STAILQ_FOREACH(command, &SCDERoot.headCommands, entries) {
+
+	LOGD("testing: %.*s\n"
+		,command->providedByCommand->commandNameTextLen
+		,command->providedByCommand->commandNameText);
+
+	if ( (command->providedByCommand->commandNameTextLen == commandLen)
+		&& (!strncasecmp((const char*) command->providedByCommand->commandNameText, (const char*) commandName, commandLen)) ) {
+
+		// call the CommandFn, if retMsg != NULL -> error ret Msg
+		struct headRetMsgMultiple_s headRetMsgMultipleFromFn
+			= command->providedByCommand->commandFn(commandArgs, commandArgsLen);
+
+		// retMsgMultiple stailq from Fn filled ?
+		if (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+
+			// for the retMsg elements
+			strTextMultiple_t *retMsg;
+
+			// get the entries till empty
+			while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+
+				retMsg = STAILQ_FIRST(&headRetMsgMultipleFromFn);
+
+				// insert retMsg in stail-queue
+				STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+				// done, remove this entry
+				STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
+			}
+		}
+
+		// return STAILQ head, it stores multiple RetMsg, if NULL -> no RetMsg-entries
+		return headRetMsgMultiple;
+	}
+  }
+
+// -------------------------------------------------------------------------------------------------
+
+  // alloc mem for retMsg
+  strTextMultiple_t *retMsg =
+	 malloc(sizeof(strTextMultiple_t));
+
+  // fill retMsg with error text
+  retMsg->strTextLen = asprintf((char**) &retMsg->strText
+	,"Unknown command <%.*s> with arguments <%.*s>!"
+	,(int) commandLen
+	,commandName
+	,(int) commandArgsLen
+	,commandArgs);
+
+  // insert retMsg in stail-queue
+  STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+  // return STAILQ head, stores multiple RetMsg, if NULL -> no RetMsg-entries
+  return headRetMsgMultiple;
+
+}
+
+		
+
+/* --------------------------------------------------------------------------------------------------
+ *  FName: AnalyzeCommandChain
+ *  Desc: Creates a new Define with name "Name", and Module "TypeName" and calls Modules DefFn with
+ *        args "Args"
+ *  Info: 'Name' is custom definition name [azAZ09._] char[31]
+ *        'TypeName' is module name
+ *        'Definition+X' is passed to modules DefineFn, and stored in Definition->Definition
+ *  Para: const uint8_t *args  -> prt to space seperated command text string "Command ..."
+ *        const size_t argsLen -> length of args
+ *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple RetMsg (errors), NULL=OK
+ * --------------------------------------------------------------------------------------------------
+ */
+struct headRetMsgMultiple_s
+AnalyzeCommandChain (const uint8_t *args
+		, const size_t argsLen)
+{
+
+  // prepare STAILQ head for multiple RetMsg storage
+  struct headRetMsgMultiple_s headRetMsgMultiple;
+
+  // Initialize the queue
+  STAILQ_INIT(&headRetMsgMultiple);
+
+  // set start of possible Command
+  const uint8_t *commandName = args;
+
+  // set start of possible Command-Arguments
+  const uint8_t *commandArgs = args;
+
+  // a seek-counter
+  int i = 0;
+
+  // seek to next space !'\32'
+  while( (i < argsLen) && (*commandArgs != ' ') ) {i++;commandArgs++;}
+
+  // length of Name
+  size_t commandLen = i;
+
+  // seek to start position of Command-Arguments '\32'
+  while( (i < argsLen) && (*commandArgs == ' ') ) {i++;commandArgs++;}
+
+  // length of Command-Arguments
+
+  size_t commandArgsLen = argsLen - i;
+
+ // veryfy lengths > 0, definition 0 allowed
+//  if ( (commandLen) == 0 || (commandArgsLen == 0) ) {
+  if (commandLen == 0 ) {
+
+	// alloc mem for retMsg
+	strTextMultiple_t *retMsg =
+		 malloc(sizeof(strTextMultiple_t));
+
+	// fill retMsg with error text
+	retMsg->strTextLen = asprintf((char**) &retMsg->strText
+		,"Could not interpret input '%.*s' ! Usage: <command> <command dependent arguments>"
+		,(int) argsLen
+		,args);
+
+	// insert retMsg in stail-queue
+	STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+	return headRetMsgMultiple;
+
+	}
+
+  // get the Command by Name
+  command_t *command;
+
+  // search for the command
+  STAILQ_FOREACH(command, &SCDERoot.headCommands, entries) {
+
+	LOGD("testing: %.*s\n"
+		,command->providedByCommand->commandNameTextLen
+		,command->providedByCommand->commandNameText);
+
+	if ( (command->providedByCommand->commandNameTextLen == commandLen)
+		&& (!strncasecmp((const char*) command->providedByCommand->commandNameText, (const char*) commandName, commandLen)) ) {
+
+		// call the CommandFn, if retMsg != NULL -> error ret Msg
+		struct headRetMsgMultiple_s headRetMsgMultipleFromFn
+			= command->providedByCommand->commandFn(commandArgs, commandArgsLen);
+
+		// retMsgMultiple stailq from Fn filled ?
+		while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+
+			// for the retMsg elements
+			strTextMultiple_t *retMsg =
+				STAILQ_FIRST(&headRetMsgMultipleFromFn);
+
+			// first remove this entry from Fn ret queue
+			STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
+
+			// last insert entry in ret queue
+			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+		}
+
+		// return STAILQ head, it stores multiple RetMsg, if NULL -> no RetMsg-entries
+		return headRetMsgMultiple;
+	}
+  }
+
+// -------------------------------------------------------------------------------------------------
+
+  // alloc mem for retMsg
+  strTextMultiple_t *retMsg =
+	 malloc(sizeof(strTextMultiple_t));
+
+  // fill retMsg with error text
+  retMsg->strTextLen = asprintf((char**) &retMsg->strText
+	,"Unknown command <%.*s> with arguments <%.*s>!"
+	,(int) commandLen
+	,commandName
+	,(int) commandArgsLen
+	,commandArgs);
+
+  // insert retMsg in stail-queue
+  STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+  // return STAILQ head, stores multiple RetMsg, if NULL -> no RetMsg-entries
+  return headRetMsgMultiple;
+
+}
+	
+		
+
+/* helper
+ * --------------------------------------------------------------------------------------------------
+ *  FName: FmtTime
+ *  Desc: Creates formated time-text (uint8_t style - in this case zero terminated) from given
+ *        time-stamp. Returned in msgText_t (text in allocated memory + length information)
+ *  Note: DO NOT FORGET TO FREE MEMORY !! 
+ *  Para: time_t tiSt -> the time-stamp that should be used
+ *  Rets: strText_t -> formated time-text data
+ * --------------------------------------------------------------------------------------------------
+ */
+strText_t
+FmtTime(time_t tiSt)
+{
+
+  // our msg-text data packet
+  strText_t strText;
+
+  // get timeinfo for time-stamp
+  struct tm timeinfo;
+  localtime_r(&tiSt, &timeinfo);
+
+  // prepare formated-time-string in allocated memory
+  strText.strTextLen = asprintf((char**) &strText.strText
+	,"%02d:%02d:%02d"
+	,timeinfo.tm_hour
+	,timeinfo.tm_min
+	,timeinfo.tm_sec);
+
+  return strText;
+
+}
+
+
+
+/* helper
+ * --------------------------------------------------------------------------------------------------
+ *  FName: FmtDateTime 
+ *  Desc: Creates formated date-time-text (uint8_t style - in this case zero terminated) from given
+ *        time-stamp. Returned in msgText_t (text in allocated memory + length information)
+ *  Note: DO NOT FORGET TO FREE MEMORY !! 
+ *  Para: time_t tiSt -> the time-stamp that should be used
+ *  Rets: strText_t -> formated date-time-text data
+ * --------------------------------------------------------------------------------------------------
+ */
+strText_t
+FmtDateTime(time_t tiSt)
+{
+
+  // our msg-text data packet
+  strText_t strText;
+
+  // get timeinfo for time-stamp
+  struct tm timeinfo;
+  localtime_r(&tiSt, &timeinfo);
+
+  // prepare formated-time-string in allocated memory
+  strText.strTextLen = asprintf((char**) &strText.strText
+	,"%04d-%02d-%02d %02d:%02d:%02d"
+	,timeinfo.tm_year+1900
+	,timeinfo.tm_mday
+	,timeinfo.tm_mon+1
+	,timeinfo.tm_hour
+	,timeinfo.tm_min
+	,timeinfo.tm_sec);
+
+  return strText;
+
+}
+		
+
+		
+	/*  lan fürs loggen den loglevel vatiabel ermitteln?  Log GetLogLevel($name,4)
+ *--------------------------------------------------------------------------------------------------
+ *FName: GetLogLevel
+ * Desc: This is the main logging function with 3 infos: definition, loglevel and log-text
+ * Info: Level 0=System; 16=debug | DO NOT FORGET TO FREE char* LogText -> ITS ALLOCATED MEMORY !!!
+ * Para: Common_Definition_t* Common_Definition -> ptr to the Device-Definition which wants a log entry
+ *       uint8_t LogLevel -> Level of information - to decide if it should be finally logged
+ *       char* LogText -> ptr to allocated mem, containing text-string that should be logged
+ * Rets: char* -> text which should contain the log level ; NULL = NotFound/Error
+ *--------------------------------------------------------------------------------------------------
+ */
+char*
+GetLogLevel (char *Device
+	,uint8_t LogLevel)
+  {
+
+//  my ($dev,$deflev) = @_;
+//  my $df = defined($deflev) ? $deflev : 2;
+//
+//  return $df if(!defined($dev));
+//  return $attr{$dev}{loglevel}  if(defined($attr{$dev}) && defined($attr{$dev}{loglevel}));
+//  return $df;
+
+
+//  if (!GetDefinitionByName(DefinitionName)) return df;
+
+
+
+  return NULL;
+
+  }
+
+/*
+No output
+ Error
+Warning
+Info
+ Debug
+ Verbose
+
+
+*/
+		
+		
+		
+//#include <stdarg.h>
+/* --------------------------------------------------------------------------------------------------
+ *  FName: Log3
+ *  Desc: This is the main logging function with 3 infos: definition, loglevel and log-text
+ *  Info: Level 0=System; 16=debug | DO NOT FORGET TO FREE char* LogText -> ITS ALLOCATED MEMORY !!!
+ *  Para: Common_Definition_t* Common_Definition -> ptr to the Device-Definition which wants a log entry
+ *        uint8_t LogLevel -> Level of information - to decide if it should be finally logged
+ *        char* LogText -> ptr to allocated mem, containing text-string that should be logged
+ *  Rets: -/-
+ * --------------------------------------------------------------------------------------------------
+ */
+void //IRAM_ATTR
+Log3 (const uint8_t *name
+		,const size_t nameLen
+		,const uint8_t LogLevel
+		,const char *format
+	,...)
+  {
+
+// 2016.10.12 07:26:16 LogPrioNr: Define->customname:
+
+	// generate into Log3Fn|2016.10.12 07:26:16 2: LiGHT.2_F4B64:
+  LOGD("Log3Fn|2016.10.12 07:26:16 %d: %.*s: "
+	,LogLevel
+	,nameLen
+	,name);
+
+
+  time_t now;
+      struct tm timeinfo;
+      time(&now);
+      localtime_r(&now, &timeinfo);
+
+      char strftime_buf[64];
+
+      // Set timezone to Eastern Standard Time and print local time
+         setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
+         tzset();
+         localtime_r(&now, &timeinfo);
+         strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+         LOGD("New York is: %s"
+        	,strftime_buf);
+
+
+  va_list list;
+  va_start(list, format);
+  vprintf(format, list);
+  va_end(list);
+
+
+
+  //= GetAssignedAttribute("global","verbose");
+
+ // is Device
+//stp1: $dev = $dev->{NAME} if(defined($dev) && ref($dev) eq "HASH");
+
+/*stp2:
+  if(defined($dev) &&
+     defined($attr{$dev}) &&
+     defined (my $devlevel = $attr{$dev}{verbose}))
+	{
+    	return if($loglevel > $devlevel);
+	}
+  else
+	{
+	return if($loglevel > $attr{global}{verbose});
+	}*/
+
+
+
+
+/*  else
+	{
+	if ( > GetAttribute("global","verbose")
+
+
+  char* DevVerbose = GetAttribute(Dev,"verbose");
+  char* GlobalVerbose = GetAttribute("global","verbose");
+  if ( (GlobalVerbose) &&
+*/
+  }
+
+		
+		
+/* helper
+ * --------------------------------------------------------------------------------------------------
+ *  FName: TimeNow
+ *  Desc: Returns the current time stamp
+ *  Para: -/-
+ *  Rets: time_t -> current time-stamp
+ * --------------------------------------------------------------------------------------------------
+ */
+time_t
+TimeNow()
+{
+
+  time_t timeNow;
+
+  // assign time stamp
+  time(&timeNow);
+
+  return timeNow;
+
+}
+
+
+
+/* --------------------------------------------------------------------------------------------------
+ *  FName: WriteStatefile
+ *  Desc: Writes the statefile to filesystem.
+ *  Info: 
+ *  Para: -/-
+ *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple (all) readings
+ *        from requested Definition, NULL=NONE
+ * --------------------------------------------------------------------------------------------------
+ */
+struct headRetMsgMultiple_s
+WriteStatefile()
+{
+
+  // prepare STAILQ head for multiple RetMsg storage
+  struct headRetMsgMultiple_s headRetMsgMultiple;
+
+  // Initialize the queue
+  STAILQ_INIT(&headRetMsgMultiple);
+
+  // get attribute "global->statefile" value
+  strText_t attrStateFNDefName = {(char*) "global", 6};
+  strText_t attrStateFNAttrName = {(char*) "statefile", 9};
+  strText_t *attrStateFNValueName =
+		GetAttrValTextByDefTextAttrText(&attrStateFNDefName, &attrStateFNAttrName);
+
+	// attribute not found
+	if (!attrStateFNValueName) {
+		
+		// attribute found but valuenot assigned
+		if (!attrStateFNValueName->strText) {
+		
+			#errortext attr found, but empty
+			free(attrStateFNValueName);
+			return;
+		}
+		
+		else (
+		#errortext attr not found,
+		)
+	)
+			
+			
+	
+ # my $now = gettimeofday();
+ time_t now = TimeNow(); //umbenennen in gettimeofday ??
+			
+ # my @t = localtime($now);
+
+ # $stateFile = ResolveDateWildcards($stateFile, @t);
+
+	// create statefilename string
+	char *stateFile = sprintf(
+	 
+	// free attribute statefile value
+	free (attrStateFNValueName->strText);	 
+	free (attrStateFNValueName);
+		
+	// open statefile
+	FILE* sFH = fopen("/spiffs/hello.txt", "w");
+    if (sFH == NULL) {
+        ESP_LOGE(TAG, "Failed to open file for writing");
+        return;
+    }
+	
+			
+		#if(!open(SFH, ">$stateFile")) {
+    #my $msg = "WriteStatefile: Cannot open $stateFile: $!";
+    #Log 1, $msg;
+    #return $msg;	
+			
+			
+	#----> #Sat Aug 19 14:16:59 2017
+  #my $t = localtime($now);
+  #print SFH "#$t\n";
+			
+			
+    fprintf(sFH, "Hello World!\n");
+	
+		// close statefile
+		fclose(sFH);
+	
+
+	                                               ## $d ist der Name!!!
+ # foreach my $d (sort keys %defs) {
+ #   next if($defs{$d}{TEMPORARY});		//temporäre nicht!!
+ #   if($defs{$d}{VOLATILE}) {
+ #     my $def = $defs{$d}{DEF};
+ #     $def =~ s/;/;;/g; # follow-on-for-timer at
+ #     print SFH "define $d $defs{$d}{TYPE} $def\n";
+ #   }
+ #   my @arr = GetAllReadings($d);
+ #   print SFH join("\n", @arr)."\n" if(@arr);
+ # }
+ # return "$attr{global}{statefile}: $!" if(!close(SFH));
+ # return "";
+	
+	// loop the definition for processing
+	definition_t *definitionNow;
+	STAILQ_FOREACH(definitionNow, &Common_Definition->headReadings, entries) {
+		
+#       next if($defs{$d}{TEMPORARY});		//temporäre nicht!!
+		
+	 xx = GetAllReadings(definitionNow);
+		
+		
+	}
+		
+	
+	// return STAILQ head, stores multiple retMsg with readings, if NULL -> none
+	return headRetMsgMultiple;
+
+}
+
+
+
+		
+		
+		
+		
+//#################################################################################################
+//#################################################################################################
+//#####################################  FN KLEIN GESCHRIEBEN #####################################
+//#################################################################################################
+//#################################################################################################		
+//#################################################################################################
+		
+		
+		
+		
+		
+		
+		
+		
+	
+/**
+ * -------------------------------------------------------------------------------------------------
+ *  FName: doGlobalDef
+ *  Desc: Initializes the global device
+ *  Para: const uint8_t *cfgFileName -> Cfg-File-Name
+ *        const size_t cfgFileNameLen -> length of the Cfg-File-Name
+ *  Rets: Module_t* -> Pointer to Module / NULL if not found
+ * -------------------------------------------------------------------------------------------------
+ */
+void
+doGlobalDef(const uint8_t *cfgFileName
+		, const size_t cfgFileNameLen)
+  {
+
+  LOGD("doGlobalDef - cfgFileName:%.*s\n"
+	,cfgFileNameLen
+	,cfgFileName);
+
+  SCDERoot.DevCount = 1;
+
+/*
+3326	  $defs{global}{NR}    = $devcount++;
+3327	  $defs{global}{TYPE}  = "Global";
+3328	  $defs{global}{STATE} = "no definition";
+3329	  $defs{global}{DEF}   = "no definition";
+3330	  $defs{global}{NAME}  = "global";
+3331	
+3332	  CommandAttr(undef, "global verbose 3");
+3333	  CommandAttr(undef, "global configfile $arg");
+3334	  CommandAttr(undef, "global logfile -");
+3335	}
+3336	
+*/
+
+
+  // start the internal WebIF (built in module)
+  // define Name:MyTelnet Module:Telnet -> Args: Port:23
+//#define CMD_4_TELNET "define MyTelnet Telnet 23"
+
+  // there should be no return messages - we expect no return messages
+  AnalyzeCommand((const uint8_t *) "attr global verbose 3", 21);
+  AnalyzeCommand((const uint8_t *) "attr global logfile -", 21);
+
+  return;
+
+  }	
+		
+
+		
 /*
  * --------------------------------------------------------------------------------------------------
  *  FName: readingsBeginUpdateFn
@@ -3236,102 +3394,20 @@ readingsSingleUpdate($$$$)
 
 
 
-
-
-
-
-/* helper
- * --------------------------------------------------------------------------------------------------
- *  FName: TimeNow
- *  Desc: Returns the current time stamp
- *  Para: -/-
- *  Rets: time_t -> current time-stamp
- * --------------------------------------------------------------------------------------------------
- */
-time_t
-TimeNow()
-{
-
-  time_t timeNow;
-
-  // assign time stamp
-  time(&timeNow);
-
-  return timeNow;
-
-}
-
-
-
-/* helper
- * --------------------------------------------------------------------------------------------------
- *  FName: FmtDateTime 
- *  Desc: Creates formated date-time-text (uint8_t style - in this case zero terminated) from given
- *        time-stamp. Returned in msgText_t (text in allocated memory + length information)
- *  Note: DO NOT FORGET TO FREE MEMORY !! 
- *  Para: time_t tiSt -> the time-stamp that should be used
- *  Rets: strText_t -> formated date-time-text data
- * --------------------------------------------------------------------------------------------------
- */
-strText_t
-FmtDateTime(time_t tiSt)
-{
-
-  // our msg-text data packet
-  strText_t strText;
-
-  // get timeinfo for time-stamp
-  struct tm timeinfo;
-  localtime_r(&tiSt, &timeinfo);
-
-  // prepare formated-time-string in allocated memory
-  strText.strTextLen = asprintf((char**) &strText.strText
-	,"%04d-%02d-%02d %02d:%02d:%02d"
-	,timeinfo.tm_year+1900
-	,timeinfo.tm_mday
-	,timeinfo.tm_mon+1
-	,timeinfo.tm_hour
-	,timeinfo.tm_min
-	,timeinfo.tm_sec);
-
-  return strText;
-
-}
-
-
-
-/* helper
- * --------------------------------------------------------------------------------------------------
- *  FName: FmtTime
- *  Desc: Creates formated time-text (uint8_t style - in this case zero terminated) from given
- *        time-stamp. Returned in msgText_t (text in allocated memory + length information)
- *  Note: DO NOT FORGET TO FREE MEMORY !! 
- *  Para: time_t tiSt -> the time-stamp that should be used
- *  Rets: strText_t -> formated time-text data
- * --------------------------------------------------------------------------------------------------
- */
-strText_t
-FmtTime(time_t tiSt)
-{
-
-  // our msg-text data packet
-  strText_t strText;
-
-  // get timeinfo for time-stamp
-  struct tm timeinfo;
-  localtime_r(&tiSt, &timeinfo);
-
-  // prepare formated-time-string in allocated memory
-  strText.strTextLen = asprintf((char**) &strText.strText
-	,"%02d:%02d:%02d"
-	,timeinfo.tm_hour
-	,timeinfo.tm_min
-	,timeinfo.tm_sec);
-
-  return strText;
-
-}
-
+	
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 
 
 /* helper
