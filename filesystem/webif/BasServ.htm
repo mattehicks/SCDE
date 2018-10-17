@@ -1,0 +1,128 @@
+<html>
+<head>
+<title>%?%</title>
+
+<link rel="stylesheet" href="Style.css" type="text/css">
+
+<script language="javascript" src="../JS/rss.js"></script>
+
+</head>
+
+<body>
+<div id="alles">
+
+<div id="header">
+<l><a href="http://www.ecsuha.de"><img name="EcSUHA" src="../Images/Ecsuha.gif" width="360" height="66" alt=""></a></l>
+<h1>%?%</h1>
+<p>... or as we call it [%!%]<br>
+<p>Embedded Features: %=%<br>Welcome to the New Age of Living</p>
+</div>
+
+<div id="kopfzeile">
+<p><strong>Welcome to the Userinterface of CoNTROL 8S-1C-1ADC. You can now make your customisations including Firmware Update.</strong></p>
+</div>
+
+<div id="menu"><ul>%$%</ul>
+
+<div class="chan">
+<div id="chan_head"></div>
+<div id="chan_items"></div>
+</div>
+<script type="text/javascript">
+  getRSS("http://ecsuha.de/news/rss/1");
+</script>
+</div>
+
+<div id="content">
+<div id="content2">
+<h1>Basic Services Configuration</h1>
+
+<h2>Basic Services are essential for this Device and can NOT be deactivated.</h2>
+
+<hr>
+
+<h2>Basic Service #1 - HTTP Web-Server for Device Communication - activated at</h2>
+<h2><a href="http://%C%:%A%">http://%C%:%A%</a>  (if Device is connected as a Station)</h2>
+<h2><a href="http://%D%:%A%">http://%D%:%A%</a>  (when accessing the Device by the Service Access Point)</h2>
+
+<p>&nbsp;</p>
+
+<div class="CSSTab" style="width:700px;height:130px;">
+
+<table>
+
+<thead>
+<tr>
+	<th colspan="7">It is NOT recommended to change ports !</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+	<form method="post" action="BasServ.cgi">
+	<td colspan="3">HTTP Server talks at Port:</td>
+	<td colspan="2"><input name="A" type="number" value="%A%" min="0" max="65535"></td>
+	<td colspan="2"><input type="submit" name="X1" value="Set Port"></td>
+	</form>
+</tr>
+</tbody>
+
+<tfoot>
+<tr>
+	<th colspan="7">New Settings will apply after next POWER-ON !</th>
+</tr>
+</tfoot>
+
+</table>
+
+</div>
+
+<p>&nbsp;</p>
+
+<h2>Basic Service #2 - UDP Command Interface - activated at</h2>
+<h2>udp://%C%:%B%</a> (if Device is connected as a Station)</h2>
+<h2>udp://%D%:%B%</a> (when accessing the Device by the Service Access Point)</h2>
+
+<p>&nbsp;</p>
+
+<div class="CSSTab" style="width:700px;height:130px;">
+
+<table>
+
+<thead>
+<tr>
+	<th colspan="7">It is NOT recommended to change ports !</th>
+</tr>
+</thead>
+
+<tbody>
+	<form method="post" action="BasServ.cgi">
+<tr>
+	<td colspan="3">UDP Command Interface talks at Port:</td>
+	<td colspan="2"><input name="B" type="number" value="%B%" min="0" max="65535"></td>
+	<td colspan="2"><input type="submit" name="X2" value="Set Port"></td>
+</tr>
+	</form>
+</tbody>
+
+<tfoot>
+<tr>
+	<th colspan="7">New Settings will apply after next POWER-ON !</th>
+</tr>
+</tfoot>
+
+</table>
+
+</div>
+
+</div>
+
+	<h2>&nbsp;</h2>
+
+</div>
+
+%_%
+
+</div>
+</body>
+</html>

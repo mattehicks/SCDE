@@ -1,0 +1,453 @@
+<html>
+<head>
+<title>%?%</title>
+
+<link rel="stylesheet" href="../Style.css" type="text/css">
+
+<script type="text/javascript" src="140medley.min.js"></script>
+<script language="javascript" src="../JS/rss.js"></script>
+
+<script type="text/javascript">
+
+var xhr=j();
+
+
+
+window.onload=function(e)
+  {
+  var div = document.getElementById("ServAPCfg");
+  div.timeStamp=-1;
+
+  Update();
+  };
+
+
+
+// form value transmit func
+function AJAXPost(formId)
+  {
+
+  var elem = document.getElementById(formId);
+
+  var params = elem.name + "=" + encodeURIComponent(elem.value);
+
+  if (window.XMLHttpRequest)
+
+	{
+
+	// code for IE7+, Firefox, Chrome, Opera, Safari
+	TXxmlhttp = new XMLHttpRequest();
+
+	}
+
+  else
+	{ 
+
+	// code for IE6, IE5
+	TXxmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+
+	}
+
+  TXxmlhttp.open("POST","ServAPCfg.cgi",true);
+
+  TXxmlhttp.send(params);
+
+  return TXxmlhttp.responseText;
+
+  }
+
+
+
+// repeated polling, depends on TiSt for longpoll
+function RptPoll()
+  {
+
+  var div = document.getElementById("ServAPCfg");
+
+  if (div.timeStamp == "0")
+
+	{
+
+	setTimeout(Update, 5000);
+
+	}
+
+  else
+
+	{
+
+	Update();
+
+	}
+  }
+
+
+
+// poll func to get datas to the tables
+function Update()
+  {
+
+  var div = document.getElementById("ServAPCfg");
+
+  RXxmlhttp = new XMLHttpRequest();
+  RXxmlhttp.timeout = 40000;
+  RXxmlhttp.ontimeout = function () {RXxmlhttp.abort();}
+  RXxmlhttp.open("POST","ServAPCfg.jso",true);
+
+  if (div.timeStamp != -1)
+
+	{
+
+	RXxmlhttp.send("TIST=" + encodeURIComponent(div.timeStamp));
+
+	}
+
+  else 
+
+	{
+
+	RXxmlhttp.send();
+
+	}
+
+  RXxmlhttp.onreadystatechange=function()
+
+	{
+
+	if (RXxmlhttp.readyState == 4 && RXxmlhttp.status >= 200 && RXxmlhttp.status < 300)
+
+		{
+
+		var data = JSON.parse(RXxmlhttp.responseText);
+
+		// update
+		var A = document.getElementById('A');
+		if ( (!A.hasFocus) && ( typeof data.ServAPCfg.Name !== 'undefined') ) 
+			A.value = data.ServAPCfg.Name;
+
+		var B = document.getElementById('B');
+		if ( (!B.hasFocus) && ( typeof data.ServAPCfg.WSAP_Password !== 'undefined') )
+			B.value = data.ServAPCfg.WSAP_Password;
+
+		var C = document.getElementById('C');
+		if ( (!C.hasFocus) && ( typeof data.ServAPCfg.WSAP_RF_Channel !== 'undefined') )
+			C.value = data.ServAPCfg.WSAP_RF_Channel;
+
+		var D = document.getElementById('D');
+		if ( (!D.hasFocus) && ( typeof data.ServAPCfg.WSAP_Maximal_Connections !== 'undefined') )
+			D.value = data.ServAPCfg.WSAP_Maximal_Connections;
+
+		var E = document.getElementById('E');
+		if ( (!E.hasFocus) && ( typeof data.ServAPCfg.WSAP_Authentication_Method !== 'undefined') )
+			E.value = data.ServAPCfg.WSAP_Authentication_Method;
+
+		var F = document.getElementById('F');
+		if ( (!F.hasFocus) && ( typeof data.ServAPCfg.WSAP_SSID !== 'undefined') )
+			F.value = data.ServAPCfg.WSAP_SSID;
+
+		var G = document.getElementById('G');
+		if ( (!G.hasFocus) && ( typeof data.ServAPCfg.WSAP_Beacon_Interval !== 'undefined') )
+			G.value = data.ServAPCfg.WSAP_Beacon_Interval;
+
+		var I = document.getElementById('I');
+		if ( (!I.hasFocus) && ( typeof data.ServAPCfg.WSAP_DHCPS_Lease_Start_IP !== 'undefined') )
+			I.value = data.ServAPCfg.WSAP_DHCPS_Lease_Start_IP;
+
+		var J = document.getElementById('J');
+		if ( (!J.hasFocus) && ( typeof data.ServAPCfg.WSAP_DHCPS_Lease_End_IP !== 'undefined') )
+			J.value = data.ServAPCfg.WSAP_DHCPS_Lease_End_IP;
+
+		var K = document.getElementById('K');
+		if ( (!K.hasFocus) && ( typeof data.ServAPCfg.WSAP_IP_Adress !== 'undefined') )
+			K.value = data.ServAPCfg.WSAP_IP_Adress;
+
+		var L = document.getElementById('L');
+		if ( (!L.hasFocus) && ( typeof data.ServAPCfg.WSAP_Netmask !== 'undefined') )
+			L.value = data.ServAPCfg.WSAP_Netmask;
+
+		var M = document.getElementById('M');
+		if ( (!M.hasFocus) && ( typeof data.ServAPCfg.WSAP_Gateway_Adress !== 'undefined') )
+			M.value = data.ServAPCfg.WSAP_Gateway_Adress;
+
+		var N = document.getElementById('N');
+		if ( (!N.hasFocus) && ( typeof data.ServAPCfg.WSAP_MAC_Adress !== 'undefined') )
+			N.value = data.ServAPCfg.WSAP_MAC_Adress;
+
+
+
+		var H = document.getElementById('H');
+		if ( (!H.hasFocus) && ( typeof data.ServAPCfg.WSAP !== 'undefined') )
+			H.value = data.ServAPCfg.WSAP;
+
+		var O = document.getElementById('O');
+		if ( (!O.hasFocus) && ( typeof data.ServAPCfg.WSAP_DHCPS !== 'undefined') )
+			O.value = data.ServAPCfg.WSAP_DHCPS;
+
+
+/*
+
+
+		var E = document.getElementById('E');
+		if (typeof data.TiStCfg.TiSt_NTP !== 'undefined')
+			E.innerHTML="Real Time-Stamp" + new Date(data.TiStCfg.TiSt_NTP*1000);
+*/
+
+
+
+
+
+		// LP time stamp !
+		div.timeStamp = (data.STATUS.TiSt);
+
+		var AkTIST = new Date();
+		var DevTIST = new Date(data.STATUS.TiSt * 1000);
+
+		var Info = document.getElementById("Info");
+		Info.innerHTML="Local Time: " + 
+			AkTIST.toLocaleTimeString('de-AT') +
+			" - Device Time-Stamp: "+ DevTIST.toLocaleTimeString('de-AT') +
+			" - Device RAM: " + data.STATUS.Mem + " Bytes";
+
+		setTimeout(RptPoll, 500);
+
+		}
+	}
+  }
+
+</script>
+</head>
+
+<body>
+<div id="alles">
+
+<div id="header">
+<l><a href="http://www.ecsuha.de"><img name="EcSUHA" src="../Images/Ecsuha.gif" width="360" height="66" alt=""></a></l>
+<h1>%?%</h1>
+<p>... or as we call it [%!%]<br>
+<p>Embedded Features: %=%<br>Welcome to the New Age of Living</p>
+</div>
+
+<div id="kopfzeile">
+<p><strong>Welcome to the Userinterface of CoNTROL 8S-1C-1ADC. You can now make your customisations including Firmware Update.</strong></p>
+</div>
+
+<div id="menu"><ul>%$%</ul>
+
+<div class="chan">
+<div id="chan_head"></div>
+<div id="chan_items"></div>
+</div>
+<script type="text/javascript">
+  getRSS("http://ecsuha.de/news/rss/1");
+</script>
+</div>
+
+<div id="content">
+<h1>Wireless-Service-Access-Point Configuration</h1>
+
+<h2>General Status of Devices Wireless Service Access Point:</h2>
+
+<h2>
+<label>WSAP:
+<select name="WSAP" id="H" onchange="AJAXPost('H')">
+<option value="Enabled">Enabled</option>
+<option value="Disabled">Disabled</option>
+<option selected disabled>Unknown</option>
+</select>
+</label>
+</h2>
+
+<font color="red">
+<h2 style="color:red">Warning! Before disabling the Wireless-Service-Access-Point manually, make sure that the Device is connected to your Smart-Home-Access-Point infrastructure by Devices Station-Mode to keep GUI access!<br><br>Warning! You can NOT make changes to the Wireless-Service-Access-Point settings, if it is disabled! Enable it first manually or reset Device!</h2></font>
+
+<hr>
+
+<h2>Summary of Stations now connected to the Devices Service Access Point:</h2>
+<h2>%G%</h2>
+
+<hr>
+
+<h2>It is recommended to choose a customized Device-Name. It will appear in the User-Interface, in the Data-Exchange-Protocols and will be broadcasted as SSID.</h2>
+
+<div class="CSSTab" id="ServAPCfg" style="width:700px;height:440px;">
+
+<table>
+
+<thead>
+
+<tr>
+	<th colspan="5">Device Wireless-Service-Access-Point Configuration</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+	<form method="post" action="ServAPCfg.cgi">
+	<td>Device-Name (SSID):</td>
+	<td colspan="4"><input name="Name" id="A" type="text" size="48" maxlength="32" style="text-align:left;" onchange="AJAXPost('A')"></input></td>
+</tr>
+
+<tr>
+	<td>Password:</td>
+	<td colspan="4"><input name="WSAP_Password" id="B" type="text" size="48" maxlength="15" style="text-align:left;" onchange="AJAXPost('B')"></input></td>
+</tr>
+
+<tr>
+	<td>RF Channel: <input name="WSAP_RF_Channel" id="C" type="number" min="1" max="13" size="2" maxlength="2" onchange="AJAXPost('C')"></input></td>
+	<td colspan="2">Maximal Connections: <input name="WSAP_Maximal_Connections" id="D" type="number" min="1" max="5" size="1" maxlength="1" onchange="AJAXPost('D')"></input></td>
+	<td colspan="2">Beacon Interval:<input name="WSAP_Beacon_Interval" id="G" type="number" min="100" max="60000" size="5" maxlength="5" onchange="AJAXPost('G')"></input></td>
+</tr>
+
+<tr>
+	<td colspan="3"><label>Authentication Method:
+		<select name="WSAP_Authentication_Method" id="E" onchange="AJAXPost('E')">
+		<option value="OPEN">Open</option>
+		<option value="WEP">WEP</option>
+		<option value="WPA_PSK">WPA PSK</option>
+		<option value="WPA2_PSK">WPA2 PSK</option>
+		<option value="WPA_WPA2_PSK">WPA WPA2 PSK</option>
+		<option value="MAX">MAX</option>
+		</select>
+		</label>
+	</td>
+
+	<td colspan="2"><label>SSID Visibility:
+		<select name="WSAP_SSID" id="F" onchange="AJAXPost('F')">
+		<option value="Visible">Visible</option>
+		<option value="Hidden">Hidden</option>
+		</select>
+		</label>
+	</td>
+
+</tr>
+
+<tr>
+	<td colspan="5"><input type="submit" name="X1" value="Set Configuration for Devices Wireless Service Access Point"></td>
+	</form>
+</tr>
+
+
+<tr>
+	<td colspan="5"><input type="submit" name="WSAP_Free" id="Z" value="WSAP_Free" onchange="AJAXPost('Z')"></td>
+</tr>
+
+</tbody>
+
+<tfoot>
+
+<tr>
+	<th colspan="5" id="Info" ></th>
+</tr>
+
+<tfoot>
+
+</table>
+
+</div>
+
+<p>&nbsp;</p>
+<h2> Only applicable when AP is active! Used Station-Ch will override AP-Channel!</h2>
+<h2>Experts may want to customize further TCP / IP Network Settings. You can change the DHCP Range, or disable the Devices DHCP Server to specify an custom IP, Netmask and Gateway. Mac-Adress can also be customized.</h2>
+
+<div class="CSSTab" style="width:700px;height:560px;">
+
+<table>
+
+<thead>
+
+<tr>
+	<th colspan="8">Device Wireless Service Access-Point - Expert Settings</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+	<td colspan="4" rowspan="2">Status of DHCP Server:%I%</td>
+	<td colspan="4"> </td>
+</tr>
+
+<tr>
+	<td colspan="4"> </td>
+</tr>
+
+<tr>
+	<th colspan="8">Dynamic Host Configuration Protocol (DHCP) Server - Range</th>
+</tr>
+
+<tr>
+	<td colspan="3" rowspan="2"></td>
+	<td colspan="2">IP-Start: </td>
+	<td colspan="3"><input name="WSAP_DHCPS_Lease_Start_IP" id="I" type="text" maxlength="15" onchange="AJAXPost('I')"></input></td>
+</tr>
+
+<tr>
+	<td colspan="2">IP-Stop:</td>
+	<td colspan="3"><input name="WSAP_DHCPS_Lease_End_IP" id="J" type="text" maxlength="15" onchange="AJAXPost('J')"></input></td>
+</tr>
+
+<tr>
+	<th colspan="8">TCP / IP Network Configuration</th>
+</tr>
+
+<tr>
+	<td colspan="3" rowspan="3">
+
+
+<label>DHCPS:
+<select name="WSAP_DHCPS" id="O" onchange="AJAXPost('O')">
+<option value="Enabled">Enabled</option>
+<option value="Disabled">Disabled</option>
+</select>
+</label>
+</td>
+
+	<td colspan="2">IP-Adress: </td>
+	<td colspan="3"><input name="WSAP_IP_Adress" id="K" type="text" maxlength="15" onchange="AJAXPost('K')"></input></td>
+</tr>
+
+<tr>
+	<td colspan="2">Netmask:</td>
+	<td colspan="3"><input name="WSAP_Netmask" id="L" type="text" maxlength="15" onchange="AJAXPost('L')"></input></td>
+</tr>
+
+<tr>
+	<td colspan="2">Gateway:</td>
+	<td colspan="3"><input name="WSAP_Gateway_Adress" id="M" type="text" maxlength="15" onchange="AJAXPost('M')"></input></td>
+</tr>
+
+<tr>
+	<th colspan="8">Media Access Control Adress (MAC-Adress)</th>
+</tr>
+
+<tr>
+	<td colspan="3">Mac-Adress:</td>
+	<td colspan="5"><input name="WSAP_MAC_Adress" id="N" type="text" maxlength="17" onchange="AJAXPost('N')"></input></td>
+</tr>
+
+</tbody>
+
+<tfoot>
+
+<tr>
+	<th colspan="8">New MAC Settings will apply after next Power-ON !</th>
+</tr>
+
+</tfoot>
+
+</table>
+
+</div>
+
+	<h2>&nbsp;</h2>
+
+</div>
+
+%_%
+
+</div>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<html>
+<head>
+<title>%?%</title>
+
+<link rel="stylesheet" href="../Style.css" type="text/css">
+
+<script type="text/javascript" src="140medley.min.js"></script>
+<script language="javascript" src="../JS/rss.js"></script>
+
+<script type="text/javascript">
+
+var xhr=j();
+
+
+
+window.onload=function(e)
+  {
+  var div = document.getElementById("StationCfg");
+  div.timeStamp=-1;
+
+  Update();
+  };
+
+
+
+// form value transmit func
+function AJAXPost(formId)
+  {
+
+  var elem = document.getElementById(formId);
+
+  var params = elem.name + "=" + encodeURIComponent(elem.value);
+
+  if (window.XMLHttpRequest)
+
+	{
+
+	// code for IE7+, Firefox, Chrome, Opera, Safari
+	TXxmlhttp = new XMLHttpRequest();
+
+	}
+
+  else
+	{ 
+
+	// code for IE6, IE5
+	TXxmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+
+	}
+
+  TXxmlhttp.open("POST","StationCfg.cgi",true);
+
+  TXxmlhttp.send(params);
+
+  return TXxmlhttp.responseText;
+
+  }
+
+
+
+// repeated polling, depends on TiSt for longpoll
+function RptPoll()
+  {
+
+  var div = document.getElementById("StationCfg");
+
+  if (div.timeStamp == "0")
+
+	{
+
+	setTimeout(Update, 5000);
+
+	}
+
+  else
+
+	{
+
+	Update();
+
+	}
+  }
+
+
+
+// poll func to get datas to the tables
+function Update()
+  {
+
+  var div = document.getElementById("StationCfg");
+
+  RXxmlhttp = new XMLHttpRequest();
+  RXxmlhttp.timeout = 40000;
+  RXxmlhttp.ontimeout = function () {RXxmlhttp.abort();}
+  RXxmlhttp.open("POST","StationCfg.jso",true);
+
+  if (div.timeStamp != -1)
+
+	{
+
+	RXxmlhttp.send("TIST=" + encodeURIComponent(div.timeStamp));
+
+	}
+
+  else 
+
+	{
+
+	RXxmlhttp.send();
+
+	}
+
+  RXxmlhttp.onreadystatechange=function()
+
+	{
+
+	if (RXxmlhttp.readyState == 4 && RXxmlhttp.status >= 200 && RXxmlhttp.status < 300)
+
+		{
+
+		var data = JSON.parse(RXxmlhttp.responseText);
+
+		// update
+		var A = document.getElementById('A');
+		if ( (!A.hasFocus) && ( typeof data.StationCfg.Station_IP_Adress !== 'undefined') ) 
+			A.value = data.StationCfg.Station_IP_Adress;
+
+		var B = document.getElementById('B');
+		if ( (!B.hasFocus) && ( typeof data.StationCfg.Station_Netmask !== 'undefined') )
+			B.value = data.StationCfg.Station_Netmask;
+
+		var C = document.getElementById('C');
+		if ( (!C.hasFocus) && ( typeof data.StationCfg.Station_Gateway_Adress !== 'undefined') )
+			C.value = data.StationCfg.Station_Gateway_Adress;
+
+		var D = document.getElementById('D');
+		if ( (!D.hasFocus) && ( typeof data.StationCfg.Station !== 'undefined') )
+			D.value = data.StationCfg.Station;
+
+		var E = document.getElementById('E');
+		if ( (!E.hasFocus) && ( typeof data.StationCfg.Station_DHCP !== 'undefined') )
+			E.value = data.StationCfg.Station_DHCP;
+
+		var F = document.getElementById('F');
+		if ( (!F.hasFocus) && ( typeof data.StationCfg.Station_Auto_Connect !== 'undefined') )
+			F.value = data.StationCfg.Station_Auto_Connect;
+
+		var G = document.getElementById('G');
+		if ( (!G.hasFocus) && ( typeof data.StationCfg.Station_Physical_Mode !== 'undefined') )
+			G.value = data.StationCfg.Station_Physical_Mode;
+
+		var H = document.getElementById('H');
+		if ( (!H.hasFocus) && ( typeof data.StationCfg.Station_RSSI !== 'undefined') )
+			H.innerHTML = "Current Received Signal Strength: " + data.StationCfg.Station_RSSI + " dBm";
+
+		var I = document.getElementById('I');
+		if ( (!I.hasFocus) && ( typeof data.StationCfg.Station_MAC_Adress !== 'undefined') )
+			I.value = data.StationCfg.Station_MAC_Adress;
+
+
+
+
+
+
+
+
+/*
+		var E = document.getElementById('E');
+		if (typeof data.TiStCfg.TiSt_NTP !== 'undefined')
+			E.innerHTML="Real Time-Stamp" + new Date(data.TiStCfg.TiSt_NTP*1000);
+*/
+
+
+		// LP time stamp !
+		div.timeStamp = (data.STATUS.TiSt);
+
+		var AkTIST = new Date();
+		var DevTIST = new Date(data.STATUS.TiSt * 1000);
+
+		var Info = document.getElementById("Info");
+		Info.innerHTML="Local Time: " + 
+			AkTIST.toLocaleTimeString('de-AT') +
+			" - Device Time-Stamp: "+ DevTIST.toLocaleTimeString('de-AT') +
+			" - Device RAM: " + data.STATUS.Mem + " Bytes";
+
+		setTimeout(RptPoll, 500);
+
+		}
+	}
+  }
+</script>
+</head>
+
+<body>
+<div id="alles">
+
+<div id="header">
+<l><a href="http://www.ecsuha.de"><img name="EcSUHA" src="../Images/Ecsuha.gif" width="360" height="66" alt=""></a></l>
+<h1>%?%</h1>
+<p>... or as we call it [%!%]<br>
+<p>Embedded Features: %=%<br>Welcome to the New Age of Living</p>
+</div>
+
+<div id="kopfzeile">
+<p><strong>Welcome to the Userinterface of CoNTROL 8S-1C-1ADC. You can now make your customisations including Firmware Update.</strong></p>
+</div>
+
+<div id="menu"><ul>%$%</ul>
+
+<div class="chan">
+<div id="chan_head"></div>
+<div id="chan_items"></div>
+</div>
+<script type="text/javascript">
+  getRSS("http://ecsuha.de/news/rss/1");
+</script>
+</div>
+
+<div id="content">
+<h1>Wireless LAN Station Connect Configuration</h1>
+<h2>Wireless LAN Station Connect is used to link the SCD-Engine of this Device into your Smart Home Infrastructure.</h2>
+
+<h2>SCD-Engine Station Connection Feature is:</h2>
+
+<h2>
+<label>Station:
+<select name="Station" id="D" onchange="AJAXPost('D')">
+<option value="Enabled">Enabled</option>
+<option value="Disabled">Disabled</option>
+</select>
+</label>
+</h2>
+
+<h2><font color="red">!!! Warning !!! Make sure to keep GUI access by the Wireless Service Access Point Feature !!! (It is enabled by default) Loosing GUI access will soft - brick this Device !!!</h2>
+
+<hr>
+
+<h2>Station Record Slots - Summary and Selection of active Station Connection:</h2>
+<h2>%G%</h2>
+<p>&nbsp;</p>
+<h2>Device is now connected to Slot %M%, Status of Station Connection is: %L%</h2>
+
+<hr>
+
+<h2>Make the Device ready to connect to your Smart Home Wireless LAN Access Point Infrastructure. Choose Auto-Connect Status, available number of Access Point Slots, or make a connection to your Smarthome Network. Some Settings only apply when Devices Station Mode is active!</h2>
+
+<div class="CSSTab" id="StationCfg" style="width:700px;height:460px;">
+<table>
+
+<thead>
+<tr>
+	<th colspan="8">SCD-Engine Station Connect Feature Configuration</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+	<td colspan="4" rowspan="2">
+<label>Station Auto-Connect <br>after Power-ON:
+<select name="Station_Auto_Connect" id="F" onchange="AJAXPost('F')">
+<option value="Enabled">Enabled</option>
+<option value="Disabled">Disabled</option>
+</select>
+</label>
+	</td>
+
+	<td colspan="4"><input type="submit" name="X7" value="Disconnect from Station"</td>
+</tr>
+
+<tr>
+	<form method="post" action="StationCfg.cgi">
+	<td colspan="4"><input type="submit" name="X6" value="Connect to Station"</td>
+	</form>
+</tr>
+
+<tr>
+	<th colspan="8">Manual Station Slot Configuration - experts only !</th>
+</tr>
+
+<tr>
+	<form method="post" action="StationCfg.cgi">
+	<td colspan="2">SSID:</td>
+	<td colspan="6">
+	<input name="O1" type="text" value="%O1%" size="44" maxlength="32" style="text-align:left;"></td>
+</tr>
+
+<tr>
+	<td colspan="2">Password:</td>
+	<td colspan="6"><input name="O2" type="text" value="%O2%" size="44" maxlength="64" style="text-align:left;"></td>
+</tr>
+
+<tr>
+	<td colspan="2">BSSID:</td>
+	<td><input name="O4" type="text" value="%O4%" size="3" maxlength="2"></td>
+	<td><input name="O5" type="text" value="%O5%" size="3" maxlength="2"></td>
+	<td><input name="O6" type="text" value="%O6%" size="3" maxlength="2"></td>
+	<td><input name="O7" type="text" value="%O7%" size="3" maxlength="2"></td>
+	<td><input name="O8" type="text" value="%O8%" size="3" maxlength="2"></td>
+	<td><input name="O9" type="text" value="%O9%" size="3" maxlength="2"></td>
+</tr>
+
+<tr>
+	<td colspan="8"><input type="submit" name="XC" value="Store as new record and try to connect to this Station"</td>
+	</form>
+</tr>
+
+<tr>
+	<th colspan="8">Expert Settings</th>
+</tr>
+
+<tr>
+	<td colspan="2"> </td>
+	<td colspan="2"> </td>
+	<td colspan="2" id="H"></td>
+	<td colspan="2">
+<label>Physical-Mode:
+<select name="Station_Physical_Mode" id="G" onchange="AJAXPost('G')">
+<option value="802.11b">802.11b</option>
+<option value="802.11g">802.11g</option>
+<option value="802.11n">802.11n</option>
+</select>
+	</td>
+
+</tr>
+
+</tbody>
+
+<tfoot>
+<tr>
+	<th colspan="8" id="Info"></th>
+</tr>
+</tfoot>
+
+</table>
+</div>
+
+<h2>It is recommended to use Station Quick Connect !</h2>
+<p>&nbsp;</p>
+<h2>Experts may want to customize further Network Settings. You can disable the DHCP Client to specify an custom IP, Netmask and Gateway or change the Mac-Adress.</h2>
+
+<div class="CSSTab" style="width:700px;height:400px;">
+<table>
+
+<thead>
+<tr>
+	<th colspan="8">IP Network Configuration (Manual changes will disable DHCP-Client!)</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+	<td colspan="3" rowspan="3">
+
+<label>DHCP:
+<select name="Station_DHCP" id="E" onchange="AJAXPost('E')">
+<option value="Enabled">Enabled</option>
+<option value="Disabled">Disabled</option>
+</select>
+</label>
+</td>
+	</td>
+
+
+	<td colspan="2">IP-Adress: </td>
+	<td colspan="3"><input name="Station_IP_Adress" id="A" type="text" maxlength="15" onchange="AJAXPost('A')"></input></td>
+</tr>
+
+<tr>
+	<td colspan="2">Netmask:</td>
+	<td colspan="3"><input name="Station_Netmask" id="B" type="text" maxlength="15" onchange="AJAXPost('B')"></input></td>
+</tr>
+
+<tr>
+	<td colspan="2">Gateway:</td>
+	<td colspan="3"><input name="Station_Gateway_Adress" id="C" type="text" maxlength="15" onchange="AJAXPost('C')"></input></td>
+</tr>
+
+<tr>
+	<th colspan="8">Media Access Control Adress (MAC-Adress)</th>
+</tr>
+
+<tr>
+	<td colspan="3">Mac-Adress:</td>
+	<td colspan="5"><input name="Station_MAC_Adress" id="I" type="text" maxlength="17" onchange="AJAXPost('I')"></input></td>
+</tr>
+
+</tbody>
+
+<tfoot>
+
+<tr>
+	<th colspan="8">New MAC Settings will apply after next Power-ON !</th>
+</tr>
+
+</tfoot>
+
+</table>
+
+</div>
+	<h2>&nbsp;</h2>
+
+</div>
+
+%_%
+
+</div>
+</body>
+</html>

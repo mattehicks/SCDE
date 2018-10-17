@@ -1,0 +1,199 @@
+<html>
+<head>
+<title>%?%</title>
+
+<link rel="stylesheet" href="Style.css" type="text/css">
+
+<script type="text/javascript" src="WiFi/140medley.min.js"></script>
+<script language="javascript" src="../JS/rss.js"></script>
+
+<script type="text/javascript">
+
+var xhr=j();
+
+
+
+window.onload=function(e)
+  {
+  var div = document.getElementById("DeviceCfg");
+  div.timeStamp=-1;
+
+  Update();
+  };
+
+
+
+// form value transmit func
+function AJAXPost(formId)
+  {
+
+  var elem = document.getElementById(formId);
+
+  var params = elem.name + "=" + encodeURIComponent(elem.value);
+
+  if (window.XMLHttpRequest)
+
+	{
+
+	// code for IE7+, Firefox, Chrome, Opera, Safari
+	TXxmlhttp = new XMLHttpRequest();
+
+	}
+
+  else
+	{ 
+
+	// code for IE6, IE5
+	TXxmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+
+	}
+
+  TXxmlhttp.open("POST","DeviceCfg.cgi",true);
+
+  TXxmlhttp.send(params);
+
+  return TXxmlhttp.responseText;
+
+  }
+
+
+
+// repeated polling, depends on TiSt for longpoll
+function RptPoll()
+  {
+
+  var div = document.getElementById("DeviceCfg");
+
+  if (div.timeStamp == "0")
+
+	{
+
+	setTimeout(Update, 5000);
+
+	}
+
+  else
+
+	{
+
+	Update();
+
+	}
+  }
+
+
+
+// poll func to get datas to the tables
+function Update()
+  {
+
+  var div = document.getElementById("DeviceCfg");
+
+  RXxmlhttp = new XMLHttpRequest();
+  RXxmlhttp.timeout = 40000;
+  RXxmlhttp.ontimeout = function () {RXxmlhttp.abort();}
+  RXxmlhttp.open("POST","DeviceCfg.jso",true);
+
+  if (div.timeStamp != -1)
+
+	{
+
+	RXxmlhttp.send("TIST=" + encodeURIComponent(div.timeStamp));
+
+	}
+
+  else 
+
+	{
+
+	RXxmlhttp.send();
+
+	}
+
+  RXxmlhttp.onreadystatechange=function()
+
+	{
+
+	if (RXxmlhttp.readyState == 4 && RXxmlhttp.status >= 200 && RXxmlhttp.status < 300)
+
+		{
+
+		var data = JSON.parse(RXxmlhttp.responseText);
+
+		// update
+		var A = document.getElementById('A');
+		if ( (!A.hasFocus) && ( typeof data.STATUS.Device_HW !== 'undefined') ) 
+			A.value = data.STATUS.Device_HW;
+
+		// LP time stamp !
+		div.timeStamp = (data.STATUS.TiSt);
+
+		var AkTIST = new Date();
+		var DevTIST = new Date(data.STATUS.TiSt * 1000);
+
+		var Info = document.getElementById("Info");
+		Info.innerHTML="Local Time: " + 
+			AkTIST.toLocaleTimeString('de-AT') +
+			" - Device Time-Stamp: "+ DevTIST.toLocaleTimeString('de-AT') +
+			" - Device RAM: " + data.STATUS.Mem + " Bytes";
+
+		setTimeout(RptPoll, 500);
+
+		}
+	}
+  }
+
+</script>
+</head>
+
+<body>
+<div id="alles">
+
+<div id="header">
+<l><a href="http://www.ecsuha.de"><img name="EcSUHA" src="../Images/Ecsuha.gif" width="360" height="66" alt=""></a></l>
+<h1>%?%</h1>
+<p>... or as we call it [%!%]<br>
+<p>Embedded Features: %=%<br>Welcome to the New Age of Living</p>
+</div>
+
+<div id="kopfzeile">
+<p><strong>Welcome to the Userinterface of CoNTROL 8S-1C-1ADC. You can now make your customisations including Firmware Update.</strong></p>
+</div>
+
+<div id="menu"><ul>%$%</ul>
+
+<div class="chan">
+<div id="chan_head"></div>
+<div id="chan_items"></div>
+</div>
+<script type="text/javascript">
+  getRSS("http://ecsuha.de/news/rss/1");
+</script>
+</div>
+
+<div id="content">
+<h1 id="DeviceCfg">Device General Configuration (SCDE)</h1>
+<h2>Here Experts can get Essential Information about the SoC Hardware and Environment. Included are options for device / system factory reset.</h2>
+
+<hr>
+<h2>This Firmware is constructed to drive different, but similar Hardware. It can not auto-detect HW. Please choose.</h2>
+<label>This Firmware drives Device:
+<select name="Device_Set_HW" id="A" onchange="AJAXPost('A')">
+<option value="0">A 8S-1C-1ADC</option>
+<option value="1">B 6S-1C-1ADC</option>
+<option value="2">X 4S-1C-1ADC</option>
+<option value="3">X 2S-1C-1ADC</option>
+<option value="4">X 1S-1C-1ADC</option>
+</select>
+
+<hr>
+
+<h2 ID="Info">Status:</h2>
+
+</div>
+
+%_%
+
+</div>
+</body>
+</html>
