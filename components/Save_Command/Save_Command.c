@@ -83,11 +83,11 @@ Save_InitializeCommandFn(SCDERoot_t* SCDERootptr)
   SCDEFn = SCDERootptr->SCDEFn;
 
   SCDEFn->Log3Fn(Save_ProvidedByCommand.commandNameText
-		  ,Save_ProvidedByCommand.commandNameTextLen
-		  ,3
-		  ,"InitializeFn called. Command '%.*s' now useable.\n"
-		  ,Save_ProvidedByCommand.commandNameTextLen
-		  ,Save_ProvidedByCommand.commandNameText);
+		,Save_ProvidedByCommand.commandNameTextLen
+	  ,3
+	  ,"InitializeFn called. Command '%.*s' now useable.\n"
+	  ,Save_ProvidedByCommand.commandNameTextLen
+	  ,Save_ProvidedByCommand.commandNameText);
 
   return 0;
 
@@ -107,7 +107,7 @@ Save_InitializeCommandFn(SCDERoot_t* SCDERootptr)
  */
 struct headRetMsgMultiple_s ICACHE_FLASH_ATTR
 Save_CommandFn (const uint8_t *argsText
-		,const size_t argsTextLen)
+	,const size_t argsTextLen)
   {
 
   // prepare STAILQ head for multiple RetMsg storage
@@ -146,6 +146,40 @@ Save_CommandFn (const uint8_t *argsText
 
 // -------------------------------------------------------------------------------------------------
 
+// Argument ? verarbeiten	
+// if($param && $param eq "?") {
+//    return "No structural changes." if(!@structChangeHist);
+//    return "Last 10 structural changes:\n  ".join("\n  ", @structChangeHist);
+//  }
+	
+// skip save, if autosave is disabled 
+//	  if(!$cl && !AttrVal("global", "autosave", 1)) { # Forum #78769
+//    Log 4, "Skipping save, as autosave is disabled";
+//    return;
+//  }
+
+	
+// need an restore dir
+//my $restoreDir;
+// $restoreDir = restoreDir_init("save")
+	
+// clear structural changes	list
+//@structChangeHist = ();
+
+// send saved trigger signal
+//DoTrigger("global", "SAVE", 1);
+	
+	 restoreDir_saveFile($restoreDir, $attr{global}{statefile});
+  my $ret = WriteStatefile();
+	
+	// call the CommandFn, if retMsg != NULL -> error ret Msg
+	struct headRetMsgMultiple_s headRetMsgMultipleFromFn
+	= SCDEFn->WriteStatefileFn();
+	
+  return $ret if($ret);
+  $ret = "";    # cfgDB_SaveState may return undef
+	
+	
  /*
   FILE *fp = fopen("/data/x", "w");
 
@@ -198,9 +232,7 @@ Save_CommandFn (const uint8_t *argsText
 
 
 
-	// call the CommandFn, if retMsg != NULL -> error ret Msg
-	struct headRetMsgMultiple_s headRetMsgMultipleFromFn
-	= SCDEFn->WriteStatefileFn();
+
 
 
 
