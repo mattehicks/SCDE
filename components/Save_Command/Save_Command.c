@@ -169,15 +169,19 @@ Save_CommandFn (const uint8_t *argsText
 // send saved trigger signal
 //DoTrigger("global", "SAVE", 1);
 	
-	 restoreDir_saveFile($restoreDir, $attr{global}{statefile});
-  my $ret = WriteStatefile();
+// Unklar
+//restoreDir_saveFile($restoreDir, $attr{global}{statefile});
 	
 	// call the CommandFn, if retMsg != NULL -> error ret Msg
 	struct headRetMsgMultiple_s headRetMsgMultipleFromFn
 	= SCDEFn->WriteStatefileFn();
 	
-  return $ret if($ret);
-  $ret = "";    # cfgDB_SaveState may return undef
+// in case of an error: return STAILQ head, queue stores multiple retMsg entries
+  if (headRetMsgMultipleFromFn) return headRetMsgMultiple;
+
+//??  $ret = "";    # cfgDB_SaveState may return undef
+	
+	
 	
 	
  /*
