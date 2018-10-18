@@ -195,6 +195,23 @@ Save_CommandFn (const uint8_t *argsText
 
 
 
+
+
+
+	// call the CommandFn, if retMsg != NULL -> error ret Msg
+	struct headRetMsgMultiple_s headRetMsgMultipleFromFn
+	= SCDEFn->WriteStatefileFn();
+
+
+
+
+
+
+
+
+
+/*
+
 	// get the Common_Definitions for current module
 	Common_Definition_t *Common_Definition;
 
@@ -203,11 +220,6 @@ Save_CommandFn (const uint8_t *argsText
 
 //		strTextMultiple_t *retMsg =
 //			SCDEFn->GetAllReadingsFn(Common_Definition);
-
-
-
-
-
 
 
 		// call the CommandFn, if retMsg != NULL -> error ret Msg
@@ -237,7 +249,7 @@ Save_CommandFn (const uint8_t *argsText
 
 }
 
-
+*/
 
 
 

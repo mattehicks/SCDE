@@ -2465,10 +2465,10 @@ struct headRetMsgMultiple_s
 WriteStatefile()
 {
 
-  // prepare STAILQ head for multiple RetMsg storage
+  // prepare multiple RetMsg storage
   struct headRetMsgMultiple_s headRetMsgMultiple;
 
-  // Initialize the queue
+  // Initialize the queue (init STAILQ head)
   STAILQ_INIT(&headRetMsgMultiple);
 
   // get attribute "global->statefile" value
@@ -2479,61 +2479,137 @@ WriteStatefile()
 
 	// attribute not found
 	if (!attrStateFNValueName) {
-		
-		// attribute found but valuenot assigned
-		if (!attrStateFNValueName->strText) {
-		
-			#errortext attr found, but empty
-			free(attrStateFNValueName);
-			return;
-		}
-		
-		else (
-		#errortext attr not found,
-		)
-	)
-			
-			
-	
- # my $now = gettimeofday();
- time_t now = TimeNow(); //umbenennen in gettimeofday ??
-			
- # my @t = localtime($now);
 
- # $stateFile = ResolveDateWildcards($stateFile, @t);
+		// alloc mem for retMsg
+		strTextMultiple_t *retMsg =
+			malloc(sizeof(strTextMultiple_t));
+
+		// response with error text
+		retMsg->strTextLen = asprintf(&retMsg->strText
+			,"Error, Arribute %.*s not found in Definition %.*s !\r\n"
+			,attrStateFNAttrName.strTextLen
+			,attrStateFNAttrName.strText
+			,attrStateFNDefName.strTextLen
+			,attrStateFNDefName.strText);
+
+		// insert retMsg in stail-queue
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+		// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+		return headRetMsgMultiple;
+	}
+
+	// attribute found, but value not assigned
+	if (!attrStateFNValueName->strText) {
+		
+		// dealloc from FN GetAttrValTextByDefTextAttrText
+		free(attrStateFNValueName);
+
+		// alloc mem for retMsg
+		strTextMultiple_t *retMsg =
+			malloc(sizeof(strTextMultiple_t));
+
+		// response with error text
+		retMsg->strTextLen = asprintf(&retMsg->strText
+			,"Error, arribute %.*s found in Definition %.*s, but no value is assigned !\r\n"
+			,attrStateFNAttrName.strTextLen
+			,attrStateFNAttrName.strText
+			,attrStateFNDefName.strTextLen
+			,attrStateFNDefName.strText);
+
+		// insert retMsg in stail-queue
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+		// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+		return headRetMsgMultiple;
+	}
+		
+	// my $now = gettimeofday();
+	time_t now = TimeNow();
+			
+//todo: my @t = localtime($now);
+
+//todo: $stateFile = ResolveDateWildcards($stateFile, @t);
 
 	// create statefilename string
-	char *stateFile = sprintf(
+	char *stateFile;
+	asprintf(&stateFile
+			,"%.*s"
+			,attrStateFNValueName->strTextLen
+			,attrStateFNValueName->strText);
 	 
 	// free attribute statefile value
 	free (attrStateFNValueName->strText);	 
 	free (attrStateFNValueName);
 		
 	// open statefile
-	FILE* sFH = fopen("/spiffs/hello.txt", "w");
-    if (sFH == NULL) {
-        ESP_LOGE(TAG, "Failed to open file for writing");
-        return;
-    }
-	
+	FILE* sFH = fopen(stateFile, "w");
+	if (sFH == NULL) {
+
+		// alloc mem for retMsg
+		strTextMultiple_t *retMsg =
+			malloc(sizeof(strTextMultiple_t));
+
+		// response with error text
+		retMsg->strTextLen = asprintf(&retMsg->strText
+			,"Error, could not open $stateFile: %s !\r\n"
+			,stateFile);
+
+//   #Log 1, $errormsg; ???
+
+		free(stateFile);
+
+		// insert retMsg in stail-queue
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+		// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+		return headRetMsgMultiple;
+	}
 			
-		#if(!open(SFH, ">$stateFile")) {
-    #my $msg = "WriteStatefile: Cannot open $stateFile: $!";
-    #Log 1, $msg;
-    #return $msg;	
+	struct tm timeinfo;
+	localtime_r(&now, &timeinfo);
+
+	char strftime_buf[64];
+
+	// Set timezone to Eastern Standard Time and print local time
+	setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
+	tzset();
+
+	localtime_r(&now, &timeinfo);
+	strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+
+	LOGD("New York is: %s", strftime_buf);
+
+
+   // prepare formated-time-string in allocated memory
+  fprintf(sFH,"%04d-%02d-%02d %02d:%02d:%02d\n"
+	,timeinfo.tm_year+1900
+	,timeinfo.tm_mday
+	,timeinfo.tm_mon+1
+	,timeinfo.tm_hour
+	,timeinfo.tm_min
+	,timeinfo.tm_sec);
+
+ LOGD("readingsBeginUpdate tist: %d.%d.%d, %d:%d:%d\n"
+	,timeinfo.tm_mday
+	,timeinfo.tm_mon+1
+	,timeinfo.tm_year+1900
+	,timeinfo.tm_hour
+	,timeinfo.tm_min
+	,timeinfo.tm_sec);
+
+
+//	#----> #Sat Aug 19 14:16:59 2017
+//  #my $t = localtime($now);
+//  #print SFH "#$t\n";
 			
-			
-	#----> #Sat Aug 19 14:16:59 2017
-  #my $t = localtime($now);
-  #print SFH "#$t\n";
-			
-			
-    fprintf(sFH, "Hello World!\n");
-	
 		// close statefile
 		fclose(sFH);
-	
 
+
+
+
+/*
 	                                               ## $d ist der Name!!!
  # foreach my $d (sort keys %defs) {
  #   next if($defs{$d}{TEMPORARY});		//temporäre nicht!!
@@ -2558,7 +2634,7 @@ WriteStatefile()
 		
 		
 	}
-		
+	*/	
 	
 	// return STAILQ head, stores multiple retMsg with readings, if NULL -> none
 	return headRetMsgMultiple;
@@ -2714,8 +2790,7 @@ readingsBeginUpdate(Common_Definition_t *Common_Definition)
 	,timeinfo.tm_sec);
 
 
-  
-
+ 
 /*
     time_t now = 0;
     struct tm timeinfo = { 0 };

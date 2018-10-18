@@ -175,6 +175,8 @@ typedef int (* CallGetFnByDefNameFn_t) (const uint8_t *nameText, const size_t na
 // typedef for Call Get All Readings Fn by Def-Name - for 2 stage desings, requests data
 typedef struct headRetMsgMultiple_s (* GetAllReadingsFn_t) (Common_Definition_t *Common_Definition);
 
+// typedef for WriteStatefileFn - 
+typedef struct headRetMsgMultiple_s (* WriteStatefileFn_t) ();
 
 
 /*
@@ -253,18 +255,13 @@ typedef struct SCDEFn_s
 
   AnalyzeCommandChainFn_t AnalyzeCommandChainFn;// analyzes + processes an configuration file
 
-
   AnalyzeCommandFn_t AnalyzeCommandFn;		// analyzes + processes one command row
 
   GetLoadedModulePtrByNameFn_t GetLoadedModulePtrByNameFn;
 
   CommandReloadModuleFn_t CommandReloadModuleFn;
 
-
-
   CommandUndefineFn_t CommandUndefineFn;
-
-
 
   readingsBeginUpdateFn_t readingsBeginUpdateFn;// call this before updating readings
 
@@ -285,6 +282,8 @@ typedef struct SCDEFn_s
   CallGetFnByDefNameFn_t CallGetFnByDefNameFn;  // original CallFn
 
   GetAllReadingsFn_t GetAllReadingsFn;		// returns all readings of an definition
+
+  WriteStatefileFn_t WriteStatefileFn;		// 
 
 } SCDEFn_t;
 

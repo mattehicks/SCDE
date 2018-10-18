@@ -82,6 +82,9 @@ strText_t FmtDateTime(time_t tiSt);
 // returns formated text of Time from tist
 strText_t FmtTime(time_t tiSt);
 
+//
+struct headRetMsgMultiple_s WriteStatefile();
+
 // prints data as Hex-Dump to debug terminal
 void HexDumpOut (char *desc, void *addr, int len);
 
