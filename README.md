@@ -64,5 +64,3 @@ make partition_table
 CMD to make changes to ESP32 IDF
 make menuconfig
 
-picocom -b 115200 /dev/ttyUSB0
-
