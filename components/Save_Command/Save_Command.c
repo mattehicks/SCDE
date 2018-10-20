@@ -172,12 +172,44 @@ Save_CommandFn (const uint8_t *argsText
 // Unklar
 //restoreDir_saveFile($restoreDir, $attr{global}{statefile});
 	
-	// call the CommandFn, if retMsg != NULL -> error ret Msg
+
+  // !! correct to default LOG Fn!
+  printf("DebugA %.*s\n"
+	,fileNameTextLen
+	,fileNameText);
+
+
+
+	// call WriteStatefileFn
 	struct headRetMsgMultiple_s headRetMsgMultipleFromFn
-	= SCDEFn->WriteStatefileFn();
+		= SCDEFn->WriteStatefileFn();
 	
-// in case of an error: return STAILQ head, queue stores multiple retMsg entries
-  if (headRetMsgMultipleFromFn) return headRetMsgMultiple;
+  // if RetMsgMultiple queue filled -> error
+  if (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+
+		// get the queue entries from retMsgMultiple till empty
+		while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+
+			// get a retMsg element
+			strTextMultiple_t *retMsg =
+				STAILQ_FIRST(&headRetMsgMultipleFromFn);
+
+			printf("moving RetMsgFromFn: %.*s\n"
+				,retMsg->strTextLen
+				,retMsg->strText);
+
+			// insert retMsg element in main ret msg returning queue
+			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+			// done, remove this entry
+			STAILQ_REMOVE_HEAD(&headRetMsgMultipleFromFn, entries);
+
+		}
+
+  // return STAILQ head, stores multiple retMsg entries
+  return headRetMsgMultiple;
+
+	}
 
 //??  $ret = "";    # cfgDB_SaveState may return undef
 	

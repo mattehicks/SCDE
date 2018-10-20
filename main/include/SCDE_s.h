@@ -122,6 +122,8 @@ typedef void (* Log3Fn_t) (const uint8_t *name, const size_t nameLen, const uint
 //
 typedef void (* Log4Fn_t) (char *text);
 
+
+
 // typedef for AnalyzeCommandChainFn - analyzes + processes an configuration file
 //typedef char* (* AnalyzeCommandChainFn_t) (const uint8_t *args, const size_t argsLen);
 
@@ -548,7 +550,7 @@ struct Common_Definition_s {
  
   STAILQ_HEAD (stailhead8, common_Attribute_s) headAttributes;	// Link to assigned Attributes
 
-  uint32_t *link;		// link to next struct
+  uint32_t *link;															// link to next struct
 
   STAILQ_ENTRY(Common_Definition_s) entries; // Link to next Definition
 
@@ -621,9 +623,9 @@ enum Common_CtrlRegA {
 
 //
 typedef int (* initializeCommandFn_t)(SCDERoot_t* SCDERoot);
+
 //
 typedef struct headRetMsgMultiple_s (* commandFn_t) (const uint8_t *args, const size_t argsLen);
-
 
 // providedByCommand_t stores function callbacks and information for command operation
 typedef struct providedByCommand_s providedByCommand_t;
@@ -632,8 +634,8 @@ typedef struct providedByCommand_s providedByCommand_t;
 
 /* 
  * providedByCommand_s (struct)
- * - stores function callbacks and information for command operation
- * - nformation is associated when the command is loaded
+ * - stores function callbacks and information for a modular command
+ * - information is associated when the command is loaded
  * - (done in InitializeFn after command load)
  */
 struct providedByCommand_s {
@@ -641,15 +643,16 @@ struct providedByCommand_s {
   uint8_t commandNameText[32];			// name text of command
   size_t commandNameTextLen;
 
-  initializeCommandFn_t initializeCommandFn;	// returns module information (module_s) required for operation
+  initializeCommandFn_t initializeCommandFn;	// returns module information (module_s)
+						// required for operation
 
   commandFn_t commandFn;			// the command Fn
 
-  const uint8_t *helpText;			// string of help
-  const size_t helpTextLen;
+  const uint8_t *helpText;			// the help text
+  const size_t helpTextLen;			// and help text length
 
-  const uint8_t *helpDetailText;		// string of detailed help
-  const size_t helpDetailTextLen;
+  const uint8_t *helpDetailText;		// the detailed help text
+  const size_t helpDetailTextLen;		// and detailed help text length
 
 };
 

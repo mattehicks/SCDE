@@ -131,7 +131,6 @@ SCDEFn_t SCDEFn = {
   ,AnalyzeCommand
   ,GetLoadedModulePtrByName
   ,CommandReloadModule
-//  ,CommandSet
   ,CommandUndefine
   ,readingsBeginUpdate
   ,readingsBulkUpdate
@@ -196,42 +195,113 @@ struct headRetMsgMultiple_s
 GetAllReadings(Common_Definition_t *Common_Definition)
 {
 
-  // prepare STAILQ head for multiple RetMsg storage
+	// prepare STAILQ head for multiple RetMsg storage
   struct headRetMsgMultiple_s headRetMsgMultiple;
 
-  // Initialize the queue
+  // Initialize the queue head
   STAILQ_INIT(&headRetMsgMultiple);
 
+//---------------------------------------------------------------------------------------------------
 
+  // first the STATE reading
+ 
+	if (Common_Definition->state) {
+//	if(defined($val) &&
+//     $val ne "unknown" &&
+//     $val ne "Initialized" &&
+//     $val ne "" &&
+//     $val ne "???") {
+
+		// alloc new retMsgMultiple queue element
+		strTextMultiple_t *retMsgMultiple =
+			malloc(sizeof(strTextMultiple_t));
+
+		// write line to allocated memory and store to queue
+		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
+			,"setstate %.*s %.*s\r\n"
+			,Common_Definition->nameLen
+			,Common_Definition->name
+			,Common_Definition->stateLen
+			,Common_Definition->state);
+
+		// insert retMsg in stail-queue
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsgMultiple, entries);
+
+	}
+
+//---------------------------------------------------------------------------------------------------
+
+	// second the detailed list of readings
 
   // loop the readings stored for this definition for processing
 	reading_t *readingNow;
 	STAILQ_FOREACH(readingNow, &Common_Definition->headReadings, entries) {
 
-		strTextMultiple_t *retMsg =
+		// set current tist, if missing
+		if (!readingNow->readingTist) {
+
+			//Log 4, "WriteStatefile $d $c: Missing TIME, using current time";
+
+			time(&readingNow->readingTist);
+
+		}
+
+/*		// set current value, if missing
+		if (!readingNow->readingTist) {
+
+			//Log 4, "WriteStatefile $d $c: Missing VAL, setting it to 0";
+
+			readingNow->readingTist = ;
+
+		}*/
+
+		// get reading tist
+		struct tm timeinfo;
+		localtime_r(&readingNow->readingTist, &timeinfo);
+
+		// alloc new retMsgMultiple queue element
+		strTextMultiple_t *retMsgMultiple =
 			malloc(sizeof(strTextMultiple_t));
 
-		// get tist text
-		strText_t strText =
-			FmtDateTime(readingNow->readingTist);
-
-		retMsg->strTextLen += asprintf(retMsg->strText
-			,"  %.*s | %.*s = %.*s\r\n"
-			,strText.strTextLen
-			,strText.strText
+		// write line to allocated memory and store to queue
+		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
+			,"setstate %.*s %d.%d.%d %d:%d:%d %.*s %.*s TXT\r\n"
+			,Common_Definition->nameLen
+			,Common_Definition->name
+			,timeinfo.tm_year+1900
+			,timeinfo.tm_mon+1
+			,timeinfo.tm_mday
+			,timeinfo.tm_hour
+			,timeinfo.tm_min
+			,timeinfo.tm_sec
 			,readingNow->readingNameTextLen
 			,readingNow->readingNameText
 			,readingNow->readingValueTextLen
 			,readingNow->readingValueText);
 
-		free(strText.strText);
+/*
+		// display for debug
+		LOGD("setstate %.*s %d.%d.%d %d:%d:%d %.*s %.*s TXT\r\n"
+			,Common_Definition->nameLen
+			,Common_Definition->name
+			,timeinfo.tm_year+1900
+			,timeinfo.tm_mon+1
+			,timeinfo.tm_mday
+			,timeinfo.tm_hour
+			,timeinfo.tm_min
+			,timeinfo.tm_sec
+			,readingNow->readingNameTextLen
+			,readingNow->readingNameText
+			,readingNow->readingValueTextLen
+			,readingNow->readingValueText);
+*/
 
 		// insert retMsg in stail-queue
-		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsgMultiple, entries);
 
 	}
 
-	// return STAILQ head, stores multiple retMsg with readings, if NULL -> none
+	// return STAILQ head, stores multiple generated lines of text, if STAILQ_EMPTY -> none
 	return headRetMsgMultiple;
 
 }
@@ -2523,7 +2593,7 @@ WriteStatefile()
 		// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
 		return headRetMsgMultiple;
 	}
-		
+	
 	// my $now = gettimeofday();
 	time_t now = TimeNow();
 			
@@ -2534,7 +2604,7 @@ WriteStatefile()
 	// create statefilename string
 	char *stateFile;
 	asprintf(&stateFile
-			,"%.*s"
+			,"/spiffs/%.*s" //.cfg !!!!!!!!!!
 			,attrStateFNValueName->strTextLen
 			,attrStateFNValueName->strText);
 	 
@@ -2565,46 +2635,44 @@ WriteStatefile()
 		// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
 		return headRetMsgMultiple;
 	}
-			
-	struct tm timeinfo;
-	localtime_r(&now, &timeinfo);
 
+	// free our prepared filename
+	free(stateFile);
+		
+	struct tm timeinfo;
+
+  // to fill with: "Sat Aug 19 14:16:59 2017"
 	char strftime_buf[64];
+
+
+  // PREPARATIONS OF INTERNAL CLOCK
+	localtime_r(&now, &timeinfo);
 
 	// Set timezone to Eastern Standard Time and print local time
 	setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
 	tzset();
+	// END OF PREPARATION
+
 
 	localtime_r(&now, &timeinfo);
+
+  // get strftime-text into strftime_buf 
 	strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
 
-	LOGD("New York is: %s", strftime_buf);
+  // start statefile with date:-> #Sat Aug 19 14:16:59 2017
+  fprintf(sFH,"#%s\r\n", strftime_buf);
 
 
-   // prepare formated-time-string in allocated memory
-  fprintf(sFH,"%04d-%02d-%02d %02d:%02d:%02d\n"
-	,timeinfo.tm_year+1900
-	,timeinfo.tm_mday
-	,timeinfo.tm_mon+1
-	,timeinfo.tm_hour
-	,timeinfo.tm_min
-	,timeinfo.tm_sec);
-
- LOGD("readingsBeginUpdate tist: %d.%d.%d, %d:%d:%d\n"
-	,timeinfo.tm_mday
-	,timeinfo.tm_mon+1
-	,timeinfo.tm_year+1900
-	,timeinfo.tm_hour
-	,timeinfo.tm_min
-	,timeinfo.tm_sec);
-
-
-//	#----> #Sat Aug 19 14:16:59 2017
-//  #my $t = localtime($now);
-//  #print SFH "#$t\n";
 			
-		// close statefile
-		fclose(sFH);
+
+
+
+
+
+ 
+
+
+
 
 
 
@@ -2623,24 +2691,72 @@ WriteStatefile()
  # }
  # return "$attr{global}{statefile}: $!" if(!close(SFH));
  # return "";
-	
+		*/	
+
+
 	// loop the definition for processing
-	definition_t *definitionNow;
-	STAILQ_FOREACH(definitionNow, &Common_Definition->headReadings, entries) {
+	Common_Definition_t *Common_Definition;
+	STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries) {
 		
-#       next if($defs{$d}{TEMPORARY});		//temporäre nicht!!
+//#       next if($defs{$d}{TEMPORARY});		//temporäre nicht!!
 		
-	 xx = GetAllReadings(definitionNow);
-		
-		
+		LOGD("calling GetAllReadings for:%.*s\n"
+			,Common_Definition->nameLen
+			,Common_Definition->name);
+
+		struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
+			GetAllReadings(Common_Definition);
+
+		// if RetMsgMultiple queue not empty -> got readings from definition
+		if (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+
+			// get the queue entries from retMsgMultiple till empty
+			while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+
+				// get a retMsg element from queue
+				strTextMultiple_t *retMsg =
+					STAILQ_FIRST(&headRetMsgMultipleFromFn);
+
+				LOGD("store setstate line to File: %.*s\n"
+					,retMsg->strTextLen
+					,retMsg->strText);
+
+				// store setstate line
+				fprintf(sFH,"%.*s\n"
+					,retMsg->strTextLen
+					,retMsg->strText);
+
+				// done, remove this entry
+				STAILQ_REMOVE_HEAD(&headRetMsgMultipleFromFn, entries);
+
+				free(retMsg->strText);
+				free(retMsg);
+			}
+		}
 	}
-	*/	
-	
+
+	// close statefile
+	fclose(sFH);
+
+
+
+
+
+
+int c;
+FILE *file;
+file = fopen("/spiffs/state", "r");
+if (file) {
+    while ((c = getc(file)) != EOF)
+        putchar(c);
+    fclose(file);
+}
+
+
 	// return STAILQ head, stores multiple retMsg with readings, if NULL -> none
 	return headRetMsgMultiple;
 
 }
-
 
 
 		
