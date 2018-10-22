@@ -180,6 +180,11 @@ typedef struct headRetMsgMultiple_s (* GetAllReadingsFn_t) (Common_Definition_t 
 // typedef for WriteStatefileFn - 
 typedef struct headRetMsgMultiple_s (* WriteStatefileFn_t) ();
 
+// added Fn (Perl -> C)
+typedef strText_t* (*Get_attrVal_by_defName_and_attrNameFn_t) (const strText_t *defName
+				,const strText_t *attrName);
+
+
 
 /*
  *  Helper routine that parses Key=Value(@) input arguments into an allocated array
@@ -286,6 +291,9 @@ typedef struct SCDEFn_s
   GetAllReadingsFn_t GetAllReadingsFn;		// returns all readings of an definition
 
   WriteStatefileFn_t WriteStatefileFn;		// 
+
+	// added Fn (Perl -> C)
+	Get_attrVal_by_defName_and_attrNameFn_t Get_attrVal_by_defName_and_attrNameFn;
 
 } SCDEFn_t;
 
@@ -572,6 +580,8 @@ struct Common_Definition_s {
 
   int Common_CtrlRegA;		// Common Control Reg A (enum Common_CtrlRegA from WEBIF.h)
 
+  int defCtrlRegA;		// Definition Control Reg A (enum Common_DefCtrlRegA)
+
   xSemaphoreHandle def_mux; // 
 
   bulkUpdateReadings_t *bulkUpdateReadings;
@@ -586,6 +596,26 @@ struct Common_Definition_s {
 # NOTIFYDEV - if set, the notifyFn will only be called for this device
 */
 
+};
+
+// Information Flags - for Definition Control
+enum Common_DefCtrlRegA {
+    F_TEMPORARY		= 1 << 0	// indicates:Definition is temporary e.g. WEBIf connection
+  , F_VOLATILE		= 1 << 1	// indicates:Definition is volatile -> saved to statefile
+  , F_xRESYX			= 1 << 2	//   
+  , F_xRESYZ			= 1 << 3	// 
+  , F_xRESYA			= 1 << 4
+  , F_xRESYB			= 1 << 5
+  , F_xRESYC			= 1 << 6
+  , F_xRESYD			= 1 << 7
+  , F_xRESYE			= 1 << 8
+  , F_xRESYF			= 1 << 9
+  , F_xRESYG			= 1 << 10
+  , F_xRESYH			= 1 << 11
+  , F_xRESYI			= 1 << 12
+  , F_xRESYJ			= 1 << 13
+  , F_xRESYK			= 1 << 14
+  , F_xRESYL			= 1 << 15
 };
 
 

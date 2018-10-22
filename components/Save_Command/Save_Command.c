@@ -124,6 +124,7 @@ Save_CommandFn (const uint8_t *argsText
 
 // -------------------------------------------------------------------------------------------------
 
+/* valid Filename/content check ?
   // veryfy lengths > 0, definition 0 allowed
   if (fileNameTextLen == 0) {
 
@@ -143,7 +144,7 @@ Save_CommandFn (const uint8_t *argsText
 	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
 	return headRetMsgMultiple;
   }
-
+*/
 // -------------------------------------------------------------------------------------------------
 
 // Argument ? verarbeiten	
@@ -206,15 +207,285 @@ Save_CommandFn (const uint8_t *argsText
 
 		}
 
-  // return STAILQ head, stores multiple retMsg entries
-  return headRetMsgMultiple;
+ 	 // return STAILQ head, stores multiple retMsg entries
+ 	 return headRetMsgMultiple;
 
 	}
 
-//??  $ret = "";    # cfgDB_SaveState may return undef
+	// state file written, now continue with config file
+
+	// verify NameTextLen > 0, if still 0 -> try to get it from Attribute
+
+		// get attribute "global->configfile" value
+		strText_t attrConfigFNDefName = {(char*) "global", 6};
+		strText_t attrConfigFNAttrName = {(char*) "configfile", 10};
+		strText_t *attrConfigFNValueName =
+			SCDEFn->Get_attrVal_by_defName_and_attrNameFn(&attrConfigFNDefName, &attrConfigFNAttrName);
+
+		// veryfy length > 0, NameTextLen still 0 -> get it from Attribute
+		if (fileNameTextLen == 0) {
 	
+			// assigned Attribute found ?
+			if (attrConfigFNValueName) {
+
+				// with Value ?
+				if (attrConfigFNValueName->strText) {
+
+					// and its not an empty Value (has >0 chars) ?
+					if (attrConfigFNValueName->strTextLen) {
+
+						// case: configfile attribute set, use it
+						fileNameTextLen =
+							attrConfigFNValueName->strTextLen;
+						fileNameText =
+							(uint8_t *) attrConfigFNValueName->strText;
+					}
+				}
+			}
+		}
+
+
+
+
+
+
+
 	
-	
+
+	// case: no configfile attribute set and no command argument specified (Len = 0)
+
+	  // veryfy length > 0, NameTextLen still 0 -> not allowed
+		if (fileNameTextLen == 0) {
+
+			// alloc mem for retMsg
+			strTextMultiple_t *retMsg =
+				 malloc(sizeof(strTextMultiple_t));
+
+			// response with error text
+			retMsg->strTextLen = asprintf(&retMsg->strText
+				,"No configfile attribute set and no argument specified");
+
+			// insert retMsg in stail-queue
+			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+			// free attribute-data from Get_attrVal_by_defName_and_attrNameFn
+			if (attrConfigFNValueName->strText) free(attrConfigFNValueName->strText);	 
+			if (attrConfigFNValueName) free(attrConfigFNValueName);
+ 
+			// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+			return headRetMsgMultiple;
+		}
+
+//#restoreDir_saveFile($restoreDir, $param);
+
+	// create configfilename string
+	char *configFile;
+	asprintf(&configFile
+			,"/spiffs/%.*s" //.cfg !!!!!!!!!!
+			,fileNameTextLen
+			,fileNameText);
+
+	// open configfile
+	FILE* cFH = fopen(configFile, "w");
+	if (cFH == NULL) {
+
+		// alloc mem for retMsg
+		strTextMultiple_t *retMsg =
+			malloc(sizeof(strTextMultiple_t));
+
+		// response with error text
+		retMsg->strTextLen = asprintf(&retMsg->strText
+			,"Error, could not open $configFile: %s!\r\n"
+			,configFile);
+
+//   #Log 1, $errormsg; ???
+
+		// free filename-data
+		free(configFile);
+
+		// free attribute-data from Get_attrVal_by_defName_and_attrNameFn
+		if (attrConfigFNValueName->strText) free(attrConfigFNValueName->strText);	 
+		if (attrConfigFNValueName) free (attrConfigFNValueName);
+
+		// insert retMsg in stail-queue
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+		// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+		return headRetMsgMultiple;
+	}
+
+	// free filename-data
+	free(configFile);
+
+
+
+
+
+
+
+
+	// stores the time
+	struct tm timeinfo;
+
+ time_t timeNow;
+
+ // assign time stamp
+  time(&timeNow);
+
+  // get time
+	localtime_r(&timeNow, &timeinfo);
+
+  // to fill with: "Sat Aug 19 14:16:59 2017"
+	char strftime_buf[64];
+
+ // get strftime-text into strftime_buf 
+	strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+
+  // start statefile with date:-> #Sat Aug 19 14:16:59 2017
+  fprintf(cFH,"#%s\r\n", strftime_buf);
+
+
+
+
+
+
+
+
+ // for (uint32_t i = 0; i < SCDERoot->DevCount; i++) {
+
+
+
+
+	// its a comment, add it
+//#if(!defined($d)) {
+//#     print $fh $h->{TEXT},"\n";
+//#      next;
+//#    }
+
+
+
+//temp
+	// loop the definition for processing
+	Common_Definition_t *Common_Definition;
+	STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries) {
+//temp
+
+
+	// store Definition and Attribute
+		printf("calling GetDefAndAttr for:%.*s\n"
+			,Common_Definition->nameLen
+			,Common_Definition->name);
+
+		struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
+			GetDefAndAttr(Common_Definition);
+
+		// if RetMsgMultiple queue not empty -> got readings from definition
+		if (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+
+			// get the queue entries from retMsgMultiple till empty
+			while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+
+				// get a retMsg element from queue
+				strTextMultiple_t *retMsg =
+					STAILQ_FIRST(&headRetMsgMultipleFromFn);
+
+				LOGD("store def or attr line to File: %.*s\n"
+					,retMsg->strTextLen
+					,retMsg->strText);
+
+				// store def or attr line to file
+				fprintf(cFH,"%.*s\n"
+					,retMsg->strTextLen
+					,retMsg->strText);
+
+				// done, remove this entry
+				STAILQ_REMOVE_HEAD(&headRetMsgMultipleFromFn, entries);
+
+				free(retMsg->strText);
+				free(retMsg);
+			}
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// close configfile
+	fclose(cFH);
+
+
+
+
+	// filecontent debug
+	int c;
+	FILE *file;
+	file = fopen("/spiffs/config", "r");
+	if (file) {
+    while ((c = getc(file)) != EOF)
+        putchar(c);
+    fclose(file);
+	}
+
+
+	// finnish cmd save with confirmation string
+
+		// alloc mem for an retMsg
+		strTextMultiple_t *retMsg =
+			malloc(sizeof(strTextMultiple_t));
+
+		// response with error text
+		retMsg->strTextLen = asprintf(&retMsg->strText
+			,"Wrote configuration to %.*s!\r\n"
+			,fileNameTextLen
+			,fileNameText);
+
+		// insert retMsg in queue
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+		// free attribute-data from Get_attrVal_by_defName_and_attrNameFn
+		if (attrConfigFNValueName->strText) free(attrConfigFNValueName->strText);	 
+		if (attrConfigFNValueName) free (attrConfigFNValueName);
+
+	// return STAILQ head, stores multiple retMsg, if STAILQ_EMPTY -> no retMsg-entries
+	return headRetMsgMultiple;
+
+
+
+
+
+
+
+
+
+
 	
  /*
   FILE *fp = fopen("/data/x", "w");

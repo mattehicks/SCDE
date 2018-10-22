@@ -73,6 +73,11 @@ int readingsBulkUpdate(Common_Definition_t *Common_Definition, uint8_t *readingN
 // call this to after bulk-update to process readings
 int readingsEndUpdate(Common_Definition_t *Common_Definition);
 
+
+
+strText_t* Get_attrVal_by_defName_and_attrName(const strText_t *defName
+	,const strText_t *attrName);
+
 // returns current time stamp
 time_t TimeNow();
 
@@ -89,5 +94,8 @@ struct headRetMsgMultiple_s WriteStatefile();
 void HexDumpOut (char *desc, void *addr, int len);
 
 parsedKVInputArgs_t* ParseKVInputArgs(int numImplementedKeys, const kvParseImplementedKeys_t *XX_IK, const uint8_t *kvArgsText, const size_t kvArgsTextLen);
+
+
+
 
 #endif /*_SCDE_H_*/

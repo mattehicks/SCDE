@@ -1,5 +1,13 @@
 ﻿
+/* TO DO:
 
+
+     OLD NAME          NEW NAME: 
+ToDo valName           attrVal
+OK   attrName          attrName
+OK   defName           defName
+
+*/
 
 
 
@@ -143,6 +151,9 @@ SCDEFn_t SCDEFn = {
   ,CallGetFnByDefName
 	,GetAllReadings
 	,WriteStatefile
+
+// added Fn (Perl -> C)
+	,Get_attrVal_by_defName_and_attrName
 };
 
 
@@ -171,10 +182,137 @@ InitSCDERoot(void)
   STAILQ_INIT(&SCDERoot.HeadCommon_Definitions);
 
   STAILQ_INIT(&SCDERoot.HeadModules);
-
 }
 
 
+
+
+/* --------------------------------------------------------------------------------------------------
+ *  FName: GetDefAndAttr
+ *  Desc: Creates a new Define with name "Name", and Module "TypeName" and calls Modules DefFn with
+ *        args "Args"
+ *  Info: 'Name' is custom definition name [azAZ09._] char[31]
+ *        'TypeName' is module name
+ *        'Definition+X' is passed to modules DefineFn, and stored in Definition->Definition
+ *  Para: Common_Definition_t *Common_Definition -> ptr to definition which readings are requested
+ *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple (all) readings
+ *        from requested Definition, NULL=NONE
+ * --------------------------------------------------------------------------------------------------
+ */
+struct headRetMsgMultiple_s
+GetDefAndAttr(Common_Definition_t *Common_Definition)
+{
+
+	// prepare STAILQ head for multiple RetMsg storage
+  struct headRetMsgMultiple_s headRetMsgMultiple;
+
+  // Initialize the queue head
+  STAILQ_INIT(&headRetMsgMultiple);
+
+//---------------------------------------------------------------------------------------------------
+
+  // first the STATE reading
+ 
+	if (Common_Definition->state) {
+//	if(defined($val) &&
+//     $val ne "unknown" &&
+//     $val ne "Initialized" &&
+//     $val ne "" &&
+//     $val ne "???") {
+
+		// alloc new retMsgMultiple queue element
+		strTextMultiple_t *retMsgMultiple =
+			malloc(sizeof(strTextMultiple_t));
+
+		// write line to allocated memory and store to queue
+		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
+			,"setstate %.*s %.*s\r\n"
+			,Common_Definition->nameLen
+			,Common_Definition->name
+			,Common_Definition->stateLen
+			,Common_Definition->state);
+
+		// insert retMsg in stail-queue
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsgMultiple, entries);
+
+	}
+
+//---------------------------------------------------------------------------------------------------
+
+	// second the detailed list of readings
+
+  // loop the readings stored for this definition for processing
+	reading_t *readingNow;
+	STAILQ_FOREACH(readingNow, &Common_Definition->headReadings, entries) {
+
+		// set current tist, if missing
+		if (!readingNow->readingTist) {
+
+			//Log 4, "WriteStatefile $d $c: Missing TIME, using current time";
+
+			time(&readingNow->readingTist);
+
+		}
+
+/*		// set current value, if missing
+		if (!readingNow->readingTist) {
+
+			//Log 4, "WriteStatefile $d $c: Missing VAL, setting it to 0";
+
+			readingNow->readingTist = ;
+
+		}*/
+
+		// get reading tist
+		struct tm timeinfo;
+		localtime_r(&readingNow->readingTist, &timeinfo);
+
+		// alloc new retMsgMultiple queue element
+		strTextMultiple_t *retMsgMultiple =
+			malloc(sizeof(strTextMultiple_t));
+
+		// write line to allocated memory and store to queue
+		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
+			,"setstate %.*s %d.%d.%d %d:%d:%d %.*s %.*s TXT\r\n"
+			,Common_Definition->nameLen
+			,Common_Definition->name
+			,timeinfo.tm_year+1900
+			,timeinfo.tm_mon+1
+			,timeinfo.tm_mday
+			,timeinfo.tm_hour
+			,timeinfo.tm_min
+			,timeinfo.tm_sec
+			,readingNow->readingNameTextLen
+			,readingNow->readingNameText
+			,readingNow->readingValueTextLen
+			,readingNow->readingValueText);
+
+/*
+		// display for debug
+		LOGD("setstate %.*s %d.%d.%d %d:%d:%d %.*s %.*s TXT\r\n"
+			,Common_Definition->nameLen
+			,Common_Definition->name
+			,timeinfo.tm_year+1900
+			,timeinfo.tm_mon+1
+			,timeinfo.tm_mday
+			,timeinfo.tm_hour
+			,timeinfo.tm_min
+			,timeinfo.tm_sec
+			,readingNow->readingNameTextLen
+			,readingNow->readingNameText
+			,readingNow->readingValueTextLen
+			,readingNow->readingValueText);
+*/
+
+		// insert retMsg in stail-queue
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsgMultiple, entries);
+
+	}
+
+	// return STAILQ head, stores multiple generated lines of text, if STAILQ_EMPTY -> none
+	return headRetMsgMultiple;
+
+}
 
 
 
@@ -311,105 +449,6 @@ GetAllReadings(Common_Definition_t *Common_Definition)
 
 
 
-
-/** Category: attribute management, helper
- * -------------------------------------------------------------------------------------------------
- *  FName: GetAttrValTextByDefTextAttrText
- *  Desc: Returns the attribute value assigned to an attribute-name, for the definition
- *  Note: DO NOT FORGET TO FREE MEMORY !!!
- *        free (*attrVal->strText) !
- *        free (*attrVal) !
- *  Para: const strText_t *defName -> ptr to the definition name
- *        const strText_t *attrName -> ptr to the attribute name
- *  Rets: strText_t *attrVal -> if found the assigned attribute value
- *               (attrVal = NULL -> not found / assigned)
- *               (attrVal->strText = NULL -> found, but empty)
- * -------------------------------------------------------------------------------------------------
- */
-strText_t*
-GetAttrValTextByDefTextAttrText(const strText_t *defName
-				,const strText_t *attrName)  
-{
-
-  strText_t *attrVal;
-
-  // loop through the assigned attributes and try to find the existing attribute
-  attribute_t *attribute = STAILQ_FIRST(&SCDERoot.headAttributes);
-
-  while (true) {
-
-	// no assigned attribute found ?
-	if (attribute == NULL) {
-
-	// not found
-	attrVal = NULL;
-
-	return attrVal;
-
-	}
-
-	// is this the attribute we are searching for?
-	if ( (attribute->attrAssignedDef->nameLen == defName->strTextLen)
-		&& (!strncasecmp((const char*) attribute->attrAssignedDef->name, (const char*) defName->strText, defName->strTextLen))
-		&& (attribute->attrNameTextLen == attrName->strTextLen)
-		&& (!strncasecmp((const char*) attribute->attrNameText, (const char*) attrName->strText, attrName->strTextLen)) ) {
-
-		// found reserve memory
-		attrVal = malloc(sizeof(strText_t));	
-
-		// assigned attrValText has data, make a copy
-		if (attribute->attrValText) {
-
-			attrVal->strText = malloc(attribute->attrValTextLen);
-
-			memcpy(attrVal->strText, attribute->attrValText, attribute->attrValTextLen);
-
-			attrVal->strTextLen = attribute->attrValTextLen;
-
-		}
-
-		// assigned attrValText has NO data
-		else {
-
-			attrVal->strText = NULL;
-
-		}
-
-		if (attribute->attrValText) {
-
-			LOGD("Got attrVal:%.*s assigned to attrName:%.*s for defName:%.*s\n"
-				,attrVal->strTextLen
-				,attrVal->strText
-				,attribute->attrNameTextLen
-				,attribute->attrNameText
-				,attribute->attrAssignedDef->nameLen
-				,attribute->attrAssignedDef->name);
-		}
-
-		else {
-
-			LOGD("Got an empty attrVal! No value assigned to attrName:%.*s for defName:%.*s\n"
-				,attribute->attrNameTextLen
-				,attribute->attrNameText
-				,attribute->attrAssignedDef->nameLen
-				,attribute->attrAssignedDef->name);
-
-		}
-
-		// found, break
-		break;
-
-		}
-
-	// get next attribute for processing
-	attribute = STAILQ_NEXT(attribute, entries);
-  }
-
-  return attrVal;
-}
-
-
-
 /** Category: attr-management helper
  * -------------------------------------------------------------------------------------------------
  *  FName: SetAttrValTextByDefTextAttrText
@@ -422,6 +461,7 @@ GetAttrValTextByDefTextAttrText(const strText_t *defName
  */
 /*
 bool //ICACHE_FLASH_ATTR
+//NEWNAME: Set_valName_for_attrName_and_defName
 SetAttrValTextByDefTextAttrText(const strText_t *defName
 				,const strText_t *attrName
 				,const strText_t *valName)  
@@ -632,7 +672,7 @@ InitA()
   strText_t attrCfgFNDefName = {(char*) "global", 6};
   strText_t attrCfgFNAttrName = {(char*) "configfile", 10};
   strText_t *attrCfgFNValueName =
-		GetAttrValTextByDefTextAttrText(&attrCfgFNDefName, &attrCfgFNAttrName);
+		Get_attrVal_by_defName_and_attrName(&attrCfgFNDefName, &attrCfgFNAttrName);
 
 // -------------------------------------------------------------------------------------------------
 
@@ -724,7 +764,7 @@ InitA()
   strText_t attrStateFNDefName = {(char*) "global", 6};
   strText_t attrStateFNAttrName = {(char*) "statefile", 9};
   strText_t *attrStateFNValueName =
-		GetAttrValTextByDefTextAttrText(&attrStateFNDefName, &attrStateFNAttrName);
+		Get_attrVal_by_defName_and_attrName(&attrStateFNDefName, &attrStateFNAttrName);
 // -------------------------------------------------------------------------------------------------
 
   // create the args to execute the'include statefile' command
@@ -873,7 +913,7 @@ InitA()
   strText_t attrNamePort = {(char *) "port", 4};
   strText_t *valueNamePort =
 //	GetAttrValTextByDefTextAttrText( {(uint8_t*) "global", 6}, {(uint8_t*) "port", 4});
-	GetAttrValTextByDefTextAttrText(&defNameGlobal, &attrNamePort);
+	Get_attrVal_by_defName_and_attrName(&defNameGlobal, &attrNamePort);
 
   // if we have an value for attribute port -> build an telnet definition
   if ( (valueNamePort) && (valueNamePort->strText) ) {
@@ -2545,7 +2585,7 @@ WriteStatefile()
   strText_t attrStateFNDefName = {(char*) "global", 6};
   strText_t attrStateFNAttrName = {(char*) "statefile", 9};
   strText_t *attrStateFNValueName =
-		GetAttrValTextByDefTextAttrText(&attrStateFNDefName, &attrStateFNAttrName);
+		Get_attrVal_by_defName_and_attrName(&attrStateFNDefName, &attrStateFNAttrName);
 
 	// attribute not found
 	if (!attrStateFNValueName) {
@@ -2622,7 +2662,7 @@ WriteStatefile()
 
 		// response with error text
 		retMsg->strTextLen = asprintf(&retMsg->strText
-			,"Error, could not open $stateFile: %s !\r\n"
+			,"Error, could not open $stateFile: %s!\r\n"
 			,stateFile);
 
 //   #Log 1, $errormsg; ???
@@ -2637,8 +2677,9 @@ WriteStatefile()
 	}
 
 	// free our prepared filename
-	free(stateFile);
-		
+	free(stateFile);	//Noch benötigt ? Vorher freigeben?, dann nicht doppelt
+
+	// stores the time		
 	struct tm timeinfo;
 
   // to fill with: "Sat Aug 19 14:16:59 2017"
@@ -2653,7 +2694,7 @@ WriteStatefile()
 	tzset();
 	// END OF PREPARATION
 
-
+  // get time
 	localtime_r(&now, &timeinfo);
 
   // get strftime-text into strftime_buf 
@@ -2742,7 +2783,7 @@ WriteStatefile()
 
 
 
-
+//filecontent debug
 int c;
 FILE *file;
 file = fopen("/spiffs/state", "r");
@@ -3587,10 +3628,128 @@ readingsSingleUpdate($$$$)
 
 	
 		
-		
-		
-		
-		
+//#################################################################################################
+//#################################################################################################
+//#####################################  added Fn (Perl -> C) #####################################
+//#################################################################################################
+//#################################################################################################		
+//#################################################################################################
+
+
+
+/** Category: attribute management, helper
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Get_attrVal_by_defName_and_attrName   //GetAttrValTextByDefTextAttrText
+ *  Desc: Returns the attribute value assigned to an attribute-name, for the definition
+ *  Note: DO NOT FORGET TO FREE MEMORY !!!
+ *        if (attrVal->strText) free (attrVal->strText) !
+ *        if (attrVal) free (attrVal) !
+ *  Para: const strText_t *defName -> ptr to the definition name we are searching for
+ *        const strText_t *attrName -> ptr to the attribute name we are searching for
+ *  Rets: strText_t *attrVal = NULL -> not found / assigned)
+ *               or *attrVal != NULL & attrVal->strText = NULL -> found, but no value assigned
+ *             else *attrVal -> the assigned attribute value text an textLen
+ * -------------------------------------------------------------------------------------------------
+ */
+strText_t*
+Get_attrVal_by_defName_and_attrName(const strText_t *defName
+				,const strText_t *attrName)  
+{
+
+  strText_t *attrVal;
+
+  attribute_t *attribute =
+		STAILQ_FIRST(&SCDERoot.headAttributes);
+
+	// loop through the assigned attributes and try to find the existing attribute
+  while (true) {
+
+		// no assigned attribute found ?
+		if (attribute == NULL) {
+
+			// not found
+			attrVal = NULL;
+
+			return attrVal;
+
+		}
+
+		// is this the attribute we are searching for?
+		if ( (attribute->attrAssignedDef->nameLen == defName->strTextLen)
+			&& (!strncasecmp((const char*) attribute->attrAssignedDef->name, (const char*) defName->strText, defName->strTextLen))
+			&& (attribute->attrNameTextLen == attrName->strTextLen)
+			&& (!strncasecmp((const char*) attribute->attrNameText, (const char*) attrName->strText, attrName->strTextLen)) ) {
+
+			// found, reserve memory for the attrVal
+			attrVal = malloc(sizeof(strText_t));	
+
+			// assigned attrValText has data, make a copy
+			if (attribute->attrValText) {
+
+				attrVal->strText = malloc(attribute->attrValTextLen);
+
+				memcpy(attrVal->strText, attribute->attrValText, attribute->attrValTextLen);
+
+				attrVal->strTextLen = attribute->attrValTextLen;
+			}
+
+			// assigned attrValText has NO data
+			else {
+
+				attrVal->strText = NULL;
+			}
+
+			// Debug output ... 
+
+		// attribute found ? -> yes / no ?
+		if (attrVal) {
+
+			// yes attribute found -> has text or not ?
+			if (attrVal->strText) {
+
+				// has text
+				LOGD("Got attrVal:%.*s assigned to attrName:%.*s for defName:%.*s\n"
+					,attrVal->strTextLen
+					,attrVal->strText
+					,attribute->attrNameTextLen
+					,attribute->attrNameText
+					,attribute->attrAssignedDef->nameLen
+					,attribute->attrAssignedDef->name);
+			}
+
+			else {
+
+				// yes but has NO text
+				LOGD("No value assigned to attrName:%.*s for defName:%.*s\n"
+					,attribute->attrNameTextLen
+					,attribute->attrNameText
+					,attribute->attrAssignedDef->nameLen
+					,attribute->attrAssignedDef->name);
+			}
+		}
+
+		else {
+
+				// NOT found
+				LOGD("Assigned attrName:%.*s for defName:%.*s NOT found!\n"
+					,attribute->attrNameTextLen
+					,attribute->attrNameText
+					,attribute->attrAssignedDef->nameLen
+					,attribute->attrAssignedDef->name);
+			}
+
+		// found, break
+		break;
+		}
+
+	// get next attribute for processing
+	attribute = STAILQ_NEXT(attribute, entries);
+  }
+
+  return attrVal;
+}
+
+	
 		
 		
 		
