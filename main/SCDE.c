@@ -189,14 +189,12 @@ InitSCDERoot(void)
 
 /* --------------------------------------------------------------------------------------------------
  *  FName: GetDefAndAttr
- *  Desc: Creates a new Define with name "Name", and Module "TypeName" and calls Modules DefFn with
- *        args "Args"
- *  Info: 'Name' is custom definition name [azAZ09._] char[31]
- *        'TypeName' is module name
- *        'Definition+X' is passed to modules DefineFn, and stored in Definition->Definition
- *  Para: Common_Definition_t *Common_Definition -> ptr to definition which readings are requested
- *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple (all) readings
- *        from requested Definition, NULL=NONE
+ *  Desc: Creates a RetMsgMultiple with Definition CMD for this Definition and CMDs to create the
+ *        assigned Attributes
+ *  Info: 
+ *  Para: Common_Definition_t *Common_Definition -> ptr to definition for which Def and Attr is requested
+ *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple lines, 
+ *                                       Definition CMD line and Attribute CMD lines NULL=NONE
  * --------------------------------------------------------------------------------------------------
  */
 struct headRetMsgMultiple_s
@@ -211,40 +209,39 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 
 //---------------------------------------------------------------------------------------------------
 
-  // first the define cmd
+  // first get the define cmd
 	
 	// skip global definition - its built by SCDE
 	if($d ne "global") {
-					,Common_Definition->nameLen = 6
-			,Common_Definition->name == "global"
+		,Common_Definition->nameLen = 6
+		,Common_Definition->name == "global"
 		
 		// alloc new retMsgMultiple queue element
 		strTextMultiple_t *retMsgMultiple =
 			malloc(sizeof(strTextMultiple_t));
 		
-		// check: is an definition DEF stored?
+		// check: is an definition stored?
 		if(Common_Definition->definition) {
 		
-		// write define line with def-line and store to queue
-		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
-			,"define %.*s %.*s %.*s\r\n"
-			,Common_Definition->nameLen
-			,Common_Definition->name
-			,Common_Definition->module->ProvidedByModule->typeNameLen
-			,Common_Definition->module->ProvidedByModule->typeName
-			,Common_Definition->definitionLen
-			,Common_Definition->definition);	
+			// write define line with definition args and store it to queue
+			retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
+				,"define %.*s %.*s %.*s\r\n"
+				,Common_Definition->nameLen
+				,Common_Definition->name
+				,Common_Definition->module->ProvidedByModule->typeNameLen
+				,Common_Definition->module->ProvidedByModule->typeName
+				,Common_Definition->definitionLen
+				,Common_Definition->definition);	
 		}
 		
+		// write define line without definition args and store it to queue
 		else {
-		
-		// write define line without def-line and store to queue
-		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
-			,"setstate %.*s %.*s\r\n"
-			,Common_Definition->nameLen
-			,Common_Definition->name
-			,Common_Definition->module->ProvidedByModule->typeNameLen
-			,Common_Definition->module->ProvidedByModule->typeName);
+			retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
+				,"setstate %.*s %.*s\r\n"
+				,Common_Definition->nameLen
+				,Common_Definition->name
+				,Common_Definition->module->ProvidedByModule->typeNameLen
+				,Common_Definition->module->ProvidedByModule->typeName);
 		}
 		
 		// insert retMsg in stail-queue
@@ -253,33 +250,11 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 
 //---------------------------------------------------------------------------------------------------
 
-	// second the detailed list of readings
+	// second the attribute(s)
 
-  // loop the readings stored for this definition for processing
-	reading_t *readingNow;
-	STAILQ_FOREACH(readingNow, &Common_Definition->headReadings, entries) {
-
-		// set current tist, if missing
-		if (!readingNow->readingTist) {
-
-			//Log 4, "WriteStatefile $d $c: Missing TIME, using current time";
-
-			time(&readingNow->readingTist);
-
-		}
-
-/*		// set current value, if missing
-		if (!readingNow->readingTist) {
-
-			//Log 4, "WriteStatefile $d $c: Missing VAL, setting it to 0";
-
-			readingNow->readingTist = ;
-
-		}*/
-
-		// get reading tist
-		struct tm timeinfo;
-		localtime_r(&readingNow->readingTist, &timeinfo);
+  // loop the attributes stored for this definition for processing
+	attribute_t *attributeNow;
+	STAILQ_FOREACH(attributeNow, &Common_Definition->headAttribute, entries) {
 
 		// alloc new retMsgMultiple queue element
 		strTextMultiple_t *retMsgMultiple =
@@ -287,35 +262,23 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 
 		// write line to allocated memory and store to queue
 		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
-			,"setstate %.*s %d.%d.%d %d:%d:%d %.*s %.*s TXT\r\n"
+			,"attr %.*s %.*s %.*s\r\n"
 			,Common_Definition->nameLen
 			,Common_Definition->name
-			,timeinfo.tm_year+1900
-			,timeinfo.tm_mon+1
-			,timeinfo.tm_mday
-			,timeinfo.tm_hour
-			,timeinfo.tm_min
-			,timeinfo.tm_sec
-			,readingNow->readingNameTextLen
-			,readingNow->readingNameText
-			,readingNow->readingValueTextLen
-			,readingNow->readingValueText);
+			,attributeNow->attrNameTextLen
+			,attributeNow->attrNameText
+			,attributeNow->attrValTextLen
+			,attributeNow->attrValText);
 
 /*
 		// display for debug
-		LOGD("setstate %.*s %d.%d.%d %d:%d:%d %.*s %.*s TXT\r\n"
+		LOGD("attr %.*s %.*s %.*s\r\n"
 			,Common_Definition->nameLen
 			,Common_Definition->name
-			,timeinfo.tm_year+1900
-			,timeinfo.tm_mon+1
-			,timeinfo.tm_mday
-			,timeinfo.tm_hour
-			,timeinfo.tm_min
-			,timeinfo.tm_sec
-			,readingNow->readingNameTextLen
-			,readingNow->readingNameText
-			,readingNow->readingValueTextLen
-			,readingNow->readingValueText);
+			,attributeNow->attrNameTextLen
+			,attributeNow->attrNameText
+			,attributeNow->attrValTextLen
+			,attributeNow->attrValText);
 */
 
 		// insert retMsg in stail-queue
