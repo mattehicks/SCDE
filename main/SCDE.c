@@ -211,30 +211,44 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 
 //---------------------------------------------------------------------------------------------------
 
-  // first the STATE reading
- 
-	if (Common_Definition->state) {
-//	if(defined($val) &&
-//     $val ne "unknown" &&
-//     $val ne "Initialized" &&
-//     $val ne "" &&
-//     $val ne "???") {
-
+  // first the define cmd
+	
+	// skip global definition - its built by SCDE
+	if($d ne "global") {
+					,Common_Definition->nameLen = 6
+			,Common_Definition->name == "global"
+		
 		// alloc new retMsgMultiple queue element
 		strTextMultiple_t *retMsgMultiple =
 			malloc(sizeof(strTextMultiple_t));
-
-		// write line to allocated memory and store to queue
+		
+		// check: is an definition DEF stored?
+		if(Common_Definition->definition) {
+		
+		// write define line with def-line and store to queue
+		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
+			,"define %.*s %.*s %.*s\r\n"
+			,Common_Definition->nameLen
+			,Common_Definition->name
+			,Common_Definition->module->ProvidedByModule->typeNameLen
+			,Common_Definition->module->ProvidedByModule->typeName
+			,Common_Definition->definitionLen
+			,Common_Definition->definition);	
+		}
+		
+		else {
+		
+		// write define line without def-line and store to queue
 		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
 			,"setstate %.*s %.*s\r\n"
 			,Common_Definition->nameLen
 			,Common_Definition->name
-			,Common_Definition->stateLen
-			,Common_Definition->state);
-
+			,Common_Definition->module->ProvidedByModule->typeNameLen
+			,Common_Definition->module->ProvidedByModule->typeName);
+		}
+		
 		// insert retMsg in stail-queue
-		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsgMultiple, entries);
-
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsgMultiple, entries);		
 	}
 
 //---------------------------------------------------------------------------------------------------
