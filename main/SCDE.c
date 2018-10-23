@@ -149,8 +149,9 @@ SCDEFn_t SCDEFn = {
   ,HexDumpOut
   ,ParseKVInputArgs
   ,CallGetFnByDefName
-	,GetAllReadings
-	,WriteStatefile
+  ,GetAllReadings
+  ,WriteStatefile
+  ,GetDefAndAttr
 
 // added Fn (Perl -> C)
 	,Get_attrVal_by_defName_and_attrName
@@ -212,9 +213,11 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
   // first get the define cmd
 	
 	// skip global definition - its built by SCDE
-	if($d ne "global") {
-		,Common_Definition->nameLen = 6
-		,Common_Definition->name == "global"
+	if (memcmp(Common_Definition->nameLen, "global", 6) != 0) {
+/* && 
+		(Common_Definition->nameLen == 6
+*/
+
 		
 		// alloc new retMsgMultiple queue element
 		strTextMultiple_t *retMsgMultiple =
@@ -254,7 +257,7 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 
   // loop the attributes stored for this definition for processing
 	attribute_t *attributeNow;
-	STAILQ_FOREACH(attributeNow, &Common_Definition->headAttribute, entries) {
+	STAILQ_FOREACH(attributeNow, &Common_Definition->headAttributes, entries) {
 
 		// alloc new retMsgMultiple queue element
 		strTextMultiple_t *retMsgMultiple =

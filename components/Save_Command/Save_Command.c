@@ -367,7 +367,7 @@ Save_CommandFn (const uint8_t *argsText
 //temp
 	// loop the definition for processing
 	Common_Definition_t *Common_Definition;
-	STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries) {
+	STAILQ_FOREACH(Common_Definition, &SCDERoot->HeadCommon_Definitions, entries) {
 //temp
 
 
@@ -377,7 +377,7 @@ Save_CommandFn (const uint8_t *argsText
 			,Common_Definition->name);
 
 		struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
-			GetDefAndAttr(Common_Definition);
+			SCDEFn->GetDefAndAttrFn(Common_Definition);
 
 		// if RetMsgMultiple queue not empty -> got readings from definition
 		if (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
@@ -389,7 +389,7 @@ Save_CommandFn (const uint8_t *argsText
 				strTextMultiple_t *retMsg =
 					STAILQ_FIRST(&headRetMsgMultipleFromFn);
 
-				LOGD("store def or attr line to File: %.*s\n"
+				printf("store def or attr line to File: %.*s\n"
 					,retMsg->strTextLen
 					,retMsg->strText);
 

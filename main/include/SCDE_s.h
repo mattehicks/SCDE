@@ -174,8 +174,11 @@ typedef void (* HexDumpOutFn_t) (char *desc, void *addr, int len);
 // typedef for Call GetFn by Def-Name - for 2 stage desings, requests data
 typedef int (* CallGetFnByDefNameFn_t) (const uint8_t *nameText, const size_t nameTextLen, Common_Definition_t *sourceCommon_Definition, void *X);
 
-// typedef for Call Get All Readings Fn by Def-Name - for 2 stage desings, requests data
+// typedef for Call Get All Readings Fn by Def-Name
 typedef struct headRetMsgMultiple_s (* GetAllReadingsFn_t) (Common_Definition_t *Common_Definition);
+
+// typedef for Call Get Definition and Attributes setup lines Fn by Def-Name
+typedef struct headRetMsgMultiple_s (*GetDefAndAttrFn_t) (Common_Definition_t *Common_Definition);
 
 // typedef for WriteStatefileFn - 
 typedef struct headRetMsgMultiple_s (* WriteStatefileFn_t) ();
@@ -292,8 +295,10 @@ typedef struct SCDEFn_s
 
   WriteStatefileFn_t WriteStatefileFn;		// 
 
-	// added Fn (Perl -> C)
-	Get_attrVal_by_defName_and_attrNameFn_t Get_attrVal_by_defName_and_attrNameFn;
+  GetDefAndAttrFn_t GetDefAndAttrFn;		//
+
+  // added Fn (Perl -> C)
+  Get_attrVal_by_defName_and_attrNameFn_t Get_attrVal_by_defName_and_attrNameFn;
 
 } SCDEFn_t;
 

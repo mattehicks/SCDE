@@ -31,6 +31,9 @@ void Log4 (char *text);
 // returns ALL Readings of the Definition
 struct headRetMsgMultiple_s GetAllReadings (Common_Definition_t *Common_Definition);
 
+// returns the Definition line and the Attribute line
+struct headRetMsgMultiple_s GetDefAndAttr(Common_Definition_t *Common_Definition);
+
 // analyzes + processes an configuration file
 struct headRetMsgMultiple_s AnalyzeCommandChain(const uint8_t *args, const size_t argsLen);
 
