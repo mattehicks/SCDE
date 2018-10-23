@@ -213,7 +213,10 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
   // first get the define cmd
 	
 	// skip global definition - its built by SCDE
-	if (memcmp(Common_Definition->nameLen, "global", 6) != 0) {
+	if (
+		(! //NOT!
+		(Common_Definition->nameLen == 6) &&
+	     	(memcmp(Common_Definition->nameLen, "global", 6) == 0) ) {
 /* && 
 		(Common_Definition->nameLen == 6
 */
