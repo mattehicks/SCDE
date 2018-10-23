@@ -210,17 +210,13 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 
 //---------------------------------------------------------------------------------------------------
 
-  // first get the define cmd
+  // first get the define cmd, but skip global definition - its defined by SCDE on startup
 	
-	// skip global definition - its built by SCDE
+	// get the Definition line
 	if (
-		(! //NOT!
+		(! //NOT! skip "global" definition!
 		(Common_Definition->nameLen == 6) &&
 	     	(memcmp(Common_Definition->nameLen, "global", 6) == 0) ) {
-/* && 
-		(Common_Definition->nameLen == 6
-*/
-
 		
 		// alloc new retMsgMultiple queue element
 		strTextMultiple_t *retMsgMultiple =
@@ -262,34 +258,44 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 	attribute_t *attributeNow;
 	STAILQ_FOREACH(attributeNow, &Common_Definition->headAttributes, entries) {
 
-		// alloc new retMsgMultiple queue element
-		strTextMultiple_t *retMsgMultiple =
-			malloc(sizeof(strTextMultiple_t));
+		// are we in "global" Definition ?
+		if ( (Common_Definition->nameLen == 6) &&
+				 (memcmp(Common_Definition->nameLen, "global", 6) == 0) ) {
+			
+			// and current Attribute is "configfile" or "version"? Skip, its defined by SCDE on startup
+		
+		}
+			
+		else {
+		
+			// alloc new retMsgMultiple queue element
+			strTextMultiple_t *retMsgMultiple =
+				malloc(sizeof(strTextMultiple_t));
 
-		// write line to allocated memory and store to queue
-		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
-			,"attr %.*s %.*s %.*s\r\n"
-			,Common_Definition->nameLen
-			,Common_Definition->name
-			,attributeNow->attrNameTextLen
-			,attributeNow->attrNameText
-			,attributeNow->attrValTextLen
-			,attributeNow->attrValText);
+			// write line to allocated memory and store to queue
+			retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
+				,"attr %.*s %.*s %.*s\r\n"
+				,Common_Definition->nameLen
+				,Common_Definition->name
+				,attributeNow->attrNameTextLen
+				,attributeNow->attrNameText
+				,attributeNow->attrValTextLen
+				,attributeNow->attrValText);
 
 /*
-		// display for debug
-		LOGD("attr %.*s %.*s %.*s\r\n"
-			,Common_Definition->nameLen
-			,Common_Definition->name
-			,attributeNow->attrNameTextLen
-			,attributeNow->attrNameText
-			,attributeNow->attrValTextLen
-			,attributeNow->attrValText);
+			// display for debug
+			LOGD("attr %.*s %.*s %.*s\r\n"
+				,Common_Definition->nameLen
+				,Common_Definition->name
+				,attributeNow->attrNameTextLen
+				,attributeNow->attrNameText
+				,attributeNow->attrValTextLen
+				,attributeNow->attrValText);
 */
 
-		// insert retMsg in stail-queue
-		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsgMultiple, entries);
-
+			// insert retMsg in stail-queue
+			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsgMultiple, entries);
+		}
 	}
 
 	// return STAILQ head, stores multiple generated lines of text, if STAILQ_EMPTY -> none
