@@ -323,7 +323,7 @@ Save_CommandFn (const uint8_t *argsText
 
 
 
-
+/*
 	// stores the time
 	struct tm timeinfo;
 
@@ -343,7 +343,7 @@ Save_CommandFn (const uint8_t *argsText
 
   // start statefile with date:-> #Sat Aug 19 14:16:59 2017
   fprintf(cFH,"#%s\r\n", strftime_buf);
-
+*/
 
 
 
@@ -406,22 +406,6 @@ Save_CommandFn (const uint8_t *argsText
 			}
 		}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	}
 
 
@@ -447,7 +431,7 @@ Save_CommandFn (const uint8_t *argsText
 	// filecontent debug
 	int c;
 	FILE *file;
-	file = fopen("/spiffs/config", "r");
+	file = fopen("/spiffs/maker", "r");
 	if (file) {
     while ((c = getc(file)) != EOF)
         putchar(c);

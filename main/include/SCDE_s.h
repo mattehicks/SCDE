@@ -563,19 +563,21 @@ struct Common_Definition_s {
  
   STAILQ_HEAD (stailhead8, common_Attribute_s) headAttributes;	// Link to assigned Attributes
 
-  uint32_t *link;															// link to next struct
+  uint32_t *link;		//link to next struct
 
   STAILQ_ENTRY(Common_Definition_s) entries; // Link to next Definition
 
-
+// strText_t name; NEU
   uint8_t *name;//nameText;	// Ptr to the Name string (assigned by users declaration - in allocated mem)
   size_t nameLen;//nameTextLen
 
   Module_t *module;		// Ptr to the Module_t (assigned when module is loaded)
 
+// strText_t state; NEU
   uint8_t *state;//stateText	// Ptr to allocated memory filled with oneliner-string describing its state
   size_t stateLen;//stateTextLen
 
+// strText_t definition; NEU
   uint8_t *definition;//definitionText	// Ptr to allocated memory filled with users definition string
   size_t definitionLen;//definitionTextLen
 
@@ -675,6 +677,7 @@ typedef struct providedByCommand_s providedByCommand_t;
  */
 struct providedByCommand_s {
 
+// strText_t commandName; NEU			// name text of command
   uint8_t commandNameText[32];			// name text of command
   size_t commandNameTextLen;
 
@@ -683,9 +686,11 @@ struct providedByCommand_s {
 
   commandFn_t commandFn;			// the command Fn
 
+// const strText_t help; NEU			// help text
   const uint8_t *helpText;			// the help text
   const size_t helpTextLen;			// and help text length
 
+// const strText_t helpDetail; NEU		// detailed help text
   const uint8_t *helpDetailText;		// the detailed help text
   const size_t helpDetailTextLen;		// and detailed help text length
 
@@ -734,11 +739,14 @@ struct attribute_s {
 
   STAILQ_ENTRY(attribute_s) entries;	// link to next attribute
 
+//  Common_Definition_t *assignedDef; NEU	
   Common_Definition_t *attrAssignedDef;	// ptr to the definition the attribute is assigned to
 
+// strText_t name; NEU
   uint8_t *attrNameText;		// ptr to the attribute name text (text in allocated mem!)
   size_t   attrNameTextLen;
 
+// strText_t value; NEU
   uint8_t *attrValText;			// ptr to the attribute value text (text in allocated mem!)
   size_t   attrValTextLen;
 

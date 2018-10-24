@@ -213,10 +213,10 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
   // first get the define cmd, but skip global definition - its defined by SCDE on startup
 	
 	// get the Definition line
-	if (
-		(! //NOT! skip "global" definition!
+	if (! //NOT! skip "global" definition!
+		(
 		(Common_Definition->nameLen == 6) &&
-	     	(memcmp(Common_Definition->nameLen, "global", 6) == 0) ) {
+	     	(memcmp(Common_Definition->name, "Global", 6) == 0) ) ) {
 		
 		// alloc new retMsgMultiple queue element
 		strTextMultiple_t *retMsgMultiple =
@@ -233,13 +233,14 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 				,Common_Definition->module->ProvidedByModule->typeNameLen
 				,Common_Definition->module->ProvidedByModule->typeName
 				,Common_Definition->definitionLen
-				,Common_Definition->definition);	
+				,Common_Definition->definition);
 		}
 		
 		// write define line without definition args and store it to queue
 		else {
+
 			retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
-				,"setstate %.*s %.*s\r\n"
+				,"define %.*s %.*s\r\n"
 				,Common_Definition->nameLen
 				,Common_Definition->name
 				,Common_Definition->module->ProvidedByModule->typeNameLen
@@ -256,14 +257,27 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 
   // loop the attributes stored for this definition for processing
 	attribute_t *attributeNow;
-	STAILQ_FOREACH(attributeNow, &Common_Definition->headAttributes, entries) {
+
+//	STAILQ_FOREACH(attributeNow, &Common_Definition->headAttributes, entries) {
+	STAILQ_FOREACH(attributeNow, &SCDERoot.headAttributes, entries) {
+
+		if (attributeNow->attrAssignedDef == Common_Definition) {
 
 		// are we in "global" Definition ?
-		if ( (Common_Definition->nameLen == 6) &&
-				 (memcmp(Common_Definition->nameLen, "global", 6) == 0) ) {
+		if ( 
+				((Common_Definition->nameLen == 6) &&
+				 (memcmp(Common_Definition->name, "Global", 6) == 0) )
+				&& (
+				((attributeNow->attrNameTextLen == 10) &&
+					 (memcmp(attributeNow->attrNameText, "configfile", 10) == 0) )
+				||
+				((attributeNow->attrNameTextLen == 7) &&
+					 (memcmp(attributeNow->attrNameText, "version", 7) == 0) )
+					)
+																																	) {
 			
 			// and current Attribute is "configfile" or "version"? Skip, its defined by SCDE on startup
-		
+
 		}
 			
 		else {
@@ -282,7 +296,7 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 				,attributeNow->attrValTextLen
 				,attributeNow->attrValText);
 
-/*
+
 			// display for debug
 			LOGD("attr %.*s %.*s %.*s\r\n"
 				,Common_Definition->nameLen
@@ -291,16 +305,16 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 				,attributeNow->attrNameText
 				,attributeNow->attrValTextLen
 				,attributeNow->attrValText);
-*/
+
 
 			// insert retMsg in stail-queue
 			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsgMultiple, entries);
+		}
 		}
 	}
 
 	// return STAILQ head, stores multiple generated lines of text, if STAILQ_EMPTY -> none
 	return headRetMsgMultiple;
-
 }
 
 
