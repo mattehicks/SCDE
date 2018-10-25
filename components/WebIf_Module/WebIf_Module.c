@@ -10966,6 +10966,13 @@ WebIf_DirectRead(Common_Definition_t* Common_Definition)
 		,NewWebIf_Definition->proto.tcp->remote_ip[3]
 		,NewWebIf_Definition->proto.tcp->remote_port);
 
+  // assign an unique number
+  NewWebIf_Definition->common.nr = SCDERoot->DevCount++;
+
+  // make this definition temporary
+	NewWebIf_Definition->common.defCtrlRegA |= F_TEMPORARY;
+
+	// official log entry
 	SCDEFn->Log3Fn(NewWebIf_Definition->common.name
 		,NewWebIf_Definition->common.nameLen
 		,1

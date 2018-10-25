@@ -215,7 +215,9 @@ Define_CommandFn (const uint8_t *args
   NewCommon_Definition->nameLen = nameLen;
 
   // store new definition to SCDE-Root
-  STAILQ_INSERT_HEAD(&SCDERoot->HeadCommon_Definitions, NewCommon_Definition, entries);
+  STAILQ_INSERT_HEAD(&SCDERoot->HeadCommon_Definitions
+	,NewCommon_Definition
+	,entries);
 
   printf("Defined Name:%.*s TypeName:%.*s\n"
     ,NewCommon_Definition->nameLen
@@ -228,7 +230,7 @@ Define_CommandFn (const uint8_t *args
   memcpy(NewCommon_Definition->definition, definition, definitionLen);
   NewCommon_Definition->definitionLen = definitionLen;
 
-  // assign an internal number
+  // assign an unique number
   NewCommon_Definition->nr = SCDERoot->DevCount++;
 
   // do we need initial state? or NULL ? store initial state

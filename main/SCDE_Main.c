@@ -87,7 +87,7 @@
 #include "sdkconfig.h"
 
 
-LOG_TAG("scde_main");
+LOG_TAG("SCDE_Main");
 
 
 
@@ -112,8 +112,8 @@ static const char *TAG = "example";
 /*
  *  address of espfs file system binary - included by linker
  */
-extern uint32_t _binary_x_img_start;
-extern uint32_t _binary_espfs_img_start;
+//extern uint32_t _binary_x_img_start;
+//extern uint32_t _binary_espfs_img_start;
 //extern const uint8_t espfs_img_start[] asm("_binary_espfs_img_start");
 
 
@@ -309,12 +309,18 @@ SCDE_memcpy_plus(char *dst
 
 
 
-int ICACHE_FLASH_ATTR httpdPlatSendData(ConnTypePtr conn, char *buff, int len) {
+int ICACHE_FLASH_ATTR
+httpdPlatSendData(ConnTypePtr conn, char *buff, int len)
+{
 	conn->needWriteDoneNotif=1;
 	return (write(conn->fd, buff, len)>=0);
 }
 
-void ICACHE_FLASH_ATTR httpdPlatDisconnect(ConnTypePtr conn) {
+
+
+void ICACHE_FLASH_ATTR
+httpdPlatDisconnect(ConnTypePtr conn)
+{
 	conn->needsClose=1;
 	conn->needWriteDoneNotif=1; //because the real close is done in the writable select code
 }
@@ -322,78 +328,118 @@ void ICACHE_FLASH_ATTR httpdPlatDisconnect(ConnTypePtr conn) {
 
 
 
-void httpdPlatDisableTimeout(ConnTypePtr conn) {
+void 
+httpdPlatDisableTimeout(ConnTypePtr conn)
+{
 	//Unimplemented for FreeRTOS
 }
+
+
 
 //Set/clear global httpd lock.
 void ICACHE_FLASH_ATTR httpdPlatLock() {
 	xSemaphoreTakeRecursive(httpdMux, portMAX_DELAY);
 }
 
-void ICACHE_FLASH_ATTR httpdPlatUnlock() {
+
+
+void ICACHE_FLASH_ATTR 
+httpdPlatUnlock()
+{
 	xSemaphoreGiveRecursive(httpdMux);
 }
 
 
+
+
+
+/**
+ * -------------------------------------------------------------------------------------------------
+ *  FName: platHttpServerTask
+ *  Desc: 
+ *  Info: 
+ *  Para: -/- 
+ *  Rets: -/-
+ * -------------------------------------------------------------------------------------------------
+ */
 #define RECV_BUF_SIZE 2048
-static void platHttpServerTask(void *pvParameters) {
-	int32_t listenfd;
-	int32_t remotefd;
-	int32_t len;
-	int32_t ret;
-	int x;
-	int maxfdp = 0;
-	char *precvbuf;
-	fd_set readset,writeset;
-	struct sockaddr name;
-	//struct timeval timeout;
-	struct sockaddr_in server_addr;
-	struct sockaddr_in remote_addr;
+static void 
+platHttpServerTask(void *pvParameters)
+{
+  int32_t listenfd;
+  int32_t remotefd;
+  int32_t len;
+  int32_t ret;
+  int x;
+  int maxfdp = 0;
+  char *precvbuf;
+  fd_set readset,writeset;
+  struct sockaddr name;
+
+  //struct timeval timeout;
+  struct sockaddr_in server_addr;
+  struct sockaddr_in remote_addr;
 	
-	httpdMux=xSemaphoreCreateRecursiveMutex();
+  httpdMux = xSemaphoreCreateRecursiveMutex();
 	
-	for (x=0; x<HTTPD_MAX_CONNECTIONS; x++) {
-		rconn[x].fd=-1;
-	}
+  for (x=0; x<HTTPD_MAX_CONNECTIONS; x++) {
+
+		rconn[x].fd = -1;
+  }
 	
-	/* Construct local address structure */
-	memset(&server_addr, 0, sizeof(server_addr)); /* Zero out structure */
-	server_addr.sin_family = AF_INET;			/* Internet address family */
-	server_addr.sin_addr.s_addr = INADDR_ANY;   /* Any incoming interface */
+	// Construct local address structure
+	memset(&server_addr, 0, sizeof(server_addr)); // zero out structure
+	server_addr.sin_family = AF_INET;							// internet address family
+	server_addr.sin_addr.s_addr = INADDR_ANY;			// any incoming interface
 	server_addr.sin_len = sizeof(server_addr);  
-	server_addr.sin_port = htons(81);//httpPort); /* Local port */
+	server_addr.sin_port = htons(81);//httpPort); // local port
 
-	/* Create socket for incoming connections */
-	do{
+  // Create socket for incoming connections
+	do {
+
 		listenfd = socket(AF_INET, SOCK_STREAM, 0);
-		if (listenfd == -1) {
-			os_printf("platHttpServerTask: failed to create sock!\n");
-			vTaskDelay(1000/portTICK_RATE_MS);
-		}
-	} while(listenfd == -1);
 
-	/* Bind to the local port */
-	do{
-		ret = bind(listenfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
-		if (ret != 0) {
-			os_printf("platHttpServerTask: failed to bind!\n");
+		if (listenfd == -1) {
+
+			os_printf("platHttpServerTask: failed to create sock!\n");
+
 			vTaskDelay(1000/portTICK_RATE_MS);
 		}
+
+  } while (listenfd == -1);
+
+	// bind to the local port
+	do {
+
+		ret = bind(listenfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+
+		if (ret != 0) {
+
+			os_printf("platHttpServerTask: failed to bind!\n");
+
+			vTaskDelay(1000/portTICK_RATE_MS);
+		}
+
 	} while(ret != 0);
 
-	do{
-		/* Listen to the local connection */
+	// Listen to the local connection
+	do {
+
 		ret = listen(listenfd, HTTPD_MAX_CONNECTIONS);
+
 		if (ret != 0) {
+
 			os_printf("platHttpServerTask: failed to listen!\n");
+
 			vTaskDelay(1000/portTICK_RATE_MS);
 		}
-		
+
 	} while(ret != 0);
 	
 	os_printf("esphttpd: active and listening to connections.\n");
-	while(1){
+
+	while (1) {
+
 		// clear fdset, and set the select function wait time
 		int socketsFull=1;
 		maxfdp = 0;
@@ -402,60 +448,76 @@ static void platHttpServerTask(void *pvParameters) {
 		//timeout.tv_sec = 2;
 		//timeout.tv_usec = 0;
 		
-		for(x=0; x<HTTPD_MAX_CONNECTIONS; x++){
-			if (rconn[x].fd!=-1) {
+		for (x=0 ; x<HTTPD_MAX_CONNECTIONS ; x++) {
+
+			if (rconn[x].fd != -1) {
+
 				FD_SET(rconn[x].fd, &readset);
+
 				if (rconn[x].needWriteDoneNotif) FD_SET(rconn[x].fd, &writeset);
+
 				if (rconn[x].fd>maxfdp) maxfdp=rconn[x].fd;
+
 			} else {
-				socketsFull=0;
+
+				socketsFull = 0;
 			}
 		}
 		
 		if (!socketsFull) {
 			FD_SET(listenfd, &readset);
-			if (listenfd>maxfdp) maxfdp=listenfd;
+			if (listenfd > maxfdp) maxfdp = listenfd;
 		}
 
-
-
-		//polling all exist client handle,wait until readable/writable
+		// polling all exist client handle,wait until readable/writable
 		ret = select(maxfdp+1, &readset, &writeset, NULL, NULL);//&timeout
 
-		if(ret > 0){
+		if (ret > 0) {
+
 			os_printf("action!\n");
-			//See if we need to accept a new connection
+
+			// see if we need to accept a new connection
 			if (FD_ISSET(listenfd, &readset)) {
-				len=sizeof(struct sockaddr_in);
+
+				len = sizeof(struct sockaddr_in);
+
 				remotefd = accept(listenfd, (struct sockaddr *)&remote_addr, (socklen_t *)&len);
-				if (remotefd<0) {
+
+				if (remotefd < 0) {
+
 					os_printf("platHttpServerTask: Huh? Accept failed.\n");
+
 					continue;
 				}
-				for(x=0; x<HTTPD_MAX_CONNECTIONS; x++) if (rconn[x].fd==-1) break;
-				if (x==HTTPD_MAX_CONNECTIONS) {
+
+				for (x=0 ; x<HTTPD_MAX_CONNECTIONS ; x++) if (rconn[x].fd == -1) break;
+
+				if (x == HTTPD_MAX_CONNECTIONS) {
+
 					os_printf("platHttpServerTask: Huh? Got accept with all slots full.\n");
+
 					continue;
 				}
-				int keepAlive = 1; //enable keepalive
-				int keepIdle = 60; //60s
-				int keepInterval = 5; //5s
-				int keepCount = 3; //retry times
+
+				int keepAlive = 1; // enable keepalive
+				int keepIdle = 60; // 60s
+				int keepInterval = 5; // 5s
+				int keepCount = 3; // retry times
 					
 				setsockopt(remotefd, SOL_SOCKET, SO_KEEPALIVE, (void *)&keepAlive, sizeof(keepAlive));
 				setsockopt(remotefd, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&keepIdle, sizeof(keepIdle));
 				setsockopt(remotefd, IPPROTO_TCP, TCP_KEEPINTVL, (void *)&keepInterval, sizeof(keepInterval));
 				setsockopt(remotefd, IPPROTO_TCP, TCP_KEEPCNT, (void *)&keepCount, sizeof(keepCount));
 				
-				rconn[x].fd=remotefd;
-				rconn[x].needWriteDoneNotif=0;
-				rconn[x].needsClose=0;
+				rconn[x].fd = remotefd;
+				rconn[x].needWriteDoneNotif = 0;
+				rconn[x].needsClose = 0;
 				
-				len=sizeof(name);
-				getpeername(remotefd, &name, (socklen_t *)&len);
-				struct sockaddr_in *piname=(struct sockaddr_in *)&name;
+				len = sizeof(name);
+				getpeername(remotefd, &name, (socklen_t *) &len);
+				struct sockaddr_in *piname = (struct sockaddr_in *) &name;
 
-				rconn[x].port=piname->sin_port;
+				rconn[x].port = piname->sin_port;
 				memcpy(&rconn[x].ip, &piname->sin_addr.s_addr, sizeof(rconn[x].ip));
 
 				//httpdConnectCb(&rconn[x], rconn[x].ip, rconn[x].port);
@@ -465,45 +527,68 @@ static void platHttpServerTask(void *pvParameters) {
 //				httpd_printf("httpserver acpt index %d sockfd %d!\n", x, remotefd);
 			}
 			
-			//See if anything happened on the existing connections.
-			for(x=0; x < HTTPD_MAX_CONNECTIONS; x++){
-				//Skip empty slots
-				if (rconn[x].fd==-1) continue;
+			// see if anything happened on the existing connections.
+			for (x = 0 ; x < HTTPD_MAX_CONNECTIONS ; x++) {
+
+				// skip empty slots
+				if (rconn[x].fd == -1) continue;
 
 				os_printf("aaah\n");
 
 				//Check for write availability first: the read routines may write needWriteDoneNotif while
 				//the select didn't check for that.
 				if (rconn[x].needWriteDoneNotif && FD_ISSET(rconn[x].fd, &writeset)) {
+
 					rconn[x].needWriteDoneNotif=0; //Do this first, httpdSentCb may write something making this 1 again.
 					if (rconn[x].needsClose) {
+
 						//Do callback and close fd.
+
 						//httpdDisconCb(&rconn[x], rconn[x].ip, rconn[x].port);
+
 						close(rconn[x].fd);
+
 						rconn[x].fd=-1;
+
 					} else {
+
 						//httpdSentCb(&rconn[x], rconn[x].ip, rconn[x].port);
+
 					}
 				}
 
 				if (FD_ISSET(rconn[x].fd, &readset)) {
-					precvbuf=(char*)malloc(RECV_BUF_SIZE);
-					if (precvbuf==NULL) {
+
+					precvbuf = (char*)malloc(RECV_BUF_SIZE);
+
+					if (precvbuf == NULL) {
+
 						os_printf("platHttpServerTask: memory exhausted!\n");
+
 						//httpdDisconCb(&rconn[x], rconn[x].ip, rconn[x].port);
+
 						close(rconn[x].fd);
+
 						rconn[x].fd=-1;
 					}
-					ret=recv(rconn[x].fd, precvbuf, RECV_BUF_SIZE,0);
+
+					ret = recv(rconn[x].fd, precvbuf, RECV_BUF_SIZE,0);
+
 					if (ret > 0) {
+
 						//Data received. Pass to httpd.
 						//httpdRecvCb(&rconn[x], rconn[x].ip, rconn[x].port, precvbuf, ret);
+
 					} else {
+
 						//recv error,connection close
 						//httpdDisconCb(&rconn[x], rconn[x].ip, rconn[x].port);
+
 						close(rconn[x].fd);
+
 						rconn[x].fd=-1;
 					}
+
 					if (precvbuf) free(precvbuf);
 				}
 			}

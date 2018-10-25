@@ -173,12 +173,12 @@ Save_CommandFn (const uint8_t *argsText
 // Unklar
 //restoreDir_saveFile($restoreDir, $attr{global}{statefile});
 	
-
+/*
   // !! correct to default LOG Fn!
   printf("DebugA %.*s\n"
 	,fileNameTextLen
 	,fileNameText);
-
+*/
 
 
 	// call WriteStatefileFn
@@ -194,11 +194,11 @@ Save_CommandFn (const uint8_t *argsText
 			// get a retMsg element
 			strTextMultiple_t *retMsg =
 				STAILQ_FIRST(&headRetMsgMultipleFromFn);
-
+/*
 			printf("moving RetMsgFromFn: %.*s\n"
 				,retMsg->strTextLen
 				,retMsg->strText);
-
+*/
 			// insert retMsg element in main ret msg returning queue
 			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
 
@@ -350,8 +350,8 @@ Save_CommandFn (const uint8_t *argsText
 
 
 
-
- // for (uint32_t i = 0; i < SCDERoot->DevCount; i++) {
+  // loop through definitions unique number to process them in order of creation
+  for (uint32_t i = 0 ; i < SCDERoot->DevCount ; i++) {
 
 
 
@@ -364,71 +364,64 @@ Save_CommandFn (const uint8_t *argsText
 
 
 
-//temp
-	// loop the definition for processing
-	Common_Definition_t *Common_Definition;
-	STAILQ_FOREACH(Common_Definition, &SCDERoot->HeadCommon_Definitions, entries) {
-//temp
 
 
-	// store Definition and Attribute
-		printf("calling GetDefAndAttr for:%.*s\n"
-			,Common_Definition->nameLen
-			,Common_Definition->name);
+		Common_Definition_t *Common_Definition;
 
-		struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
-			SCDEFn->GetDefAndAttrFn(Common_Definition);
+		// loop through definitions to find matching unique nr
+		STAILQ_FOREACH(Common_Definition, &SCDERoot->HeadCommon_Definitions, entries) {
 
-		// if RetMsgMultiple queue not empty -> got readings from definition
-		if (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
 
-			// get the queue entries from retMsgMultiple till empty
-			while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+			// if this Definition matches current unique number -> process it
+			if (
+				(Common_Definition->nr == i) &&												// the current unique number
+				(!(Common_Definition->defCtrlRegA & F_TEMPORARY)) &&	// and NO temporary definition
+				(!(Common_Definition->defCtrlRegA & F_VOLATILE))			// and NO volatile definition
+				 ) {
+/*
+				// store Definition and Attribute
+				printf("calling GetDefAndAttr for:%.*s\n"
+					,Common_Definition->nameLen
+					,Common_Definition->name);
+*/
+				// get .CFG lines for definition and attribute setup
+				struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
+					SCDEFn->GetDefAndAttrFn(Common_Definition);
 
-				// get a retMsg element from queue
-				strTextMultiple_t *retMsg =
-					STAILQ_FIRST(&headRetMsgMultipleFromFn);
+				// if RetMsgMultiple queue not empty -> got lines to add to .CFG
+				if (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
 
-				printf("store def or attr line to File: %.*s\n"
-					,retMsg->strTextLen
-					,retMsg->strText);
+					// get the queue entries from retMsgMultiple till empty
+					while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
 
-				// store def or attr line to file
-				fprintf(cFH,"%.*s\n"
-					,retMsg->strTextLen
-					,retMsg->strText);
+						// get a retMsg element from queue
+						strTextMultiple_t *retMsg =
+							STAILQ_FIRST(&headRetMsgMultipleFromFn);
+/*
+						printf("store def or attr line to File: %.*s\n"
+							,retMsg->strTextLen
+							,retMsg->strText);
+*/
+						// store def or attr line to file
+						fprintf(cFH,"%.*s\n"
+							,retMsg->strTextLen
+							,retMsg->strText);
 
-				// done, remove this entry
-				STAILQ_REMOVE_HEAD(&headRetMsgMultipleFromFn, entries);
+						// done, remove this entry
+						STAILQ_REMOVE_HEAD(&headRetMsgMultipleFromFn, entries);
 
-				free(retMsg->strText);
-				free(retMsg);
+						free(retMsg->strText);
+						free(retMsg);
+					}
+				}
 			}
 		}
-
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  }
 
 	// close configfile
 	fclose(cFH);
 
-
-
-
-	// filecontent debug
+	// show filecontent on debug term
 	int c;
 	FILE *file;
 	file = fopen("/spiffs/maker", "r");
@@ -437,7 +430,6 @@ Save_CommandFn (const uint8_t *argsText
         putchar(c);
     fclose(file);
 	}
-
 
 	// finnish cmd save with confirmation string
 
@@ -460,48 +452,7 @@ Save_CommandFn (const uint8_t *argsText
 
 	// return STAILQ head, stores multiple retMsg, if STAILQ_EMPTY -> no retMsg-entries
 	return headRetMsgMultiple;
-
-
-
-
-
-
-
-
-
-
-	
- /*
-  FILE *fp = fopen("/data/x", "w");
-
-  // return msg in case of an error
-  if (fp == NULL) {
-
-	// alloc mem for retMsg
-	strTextMultiple_t *retMsg =
-		 malloc(sizeof(strTextMultiple_t));
-
-	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
-	,"should load: %.*s here!\r\n"
-	,fileNameTextLen
-	,fileNameText);
-
-  // insert retMsg in stail-queue
-  STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-  // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-  return headRetMsgMultiple;
-
-  }
-
-*/
-
-  // !! correct to default LOG Fn!
-  printf("Including %.*s\n"
-	,fileNameTextLen
-	,fileNameText);
-
+}
 
 /*
 
@@ -516,89 +467,6 @@ Save_CommandFn (const uint8_t *argsText
 1228	    $comments{$nr}{CFGFN} = $currcfgfile		if($currcfgfile ne $gcfg);
 1229	  }
 */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-	// get the Common_Definitions for current module
-	Common_Definition_t *Common_Definition;
-
-	STAILQ_FOREACH(Common_Definition, &SCDERoot->HeadCommon_Definitions, entries) {
-
-
-//		strTextMultiple_t *retMsg =
-//			SCDEFn->GetAllReadingsFn(Common_Definition);
-
-
-		// call the CommandFn, if retMsg != NULL -> error ret Msg
-		struct headRetMsgMultiple_s headRetMsgMultipleFromFn
-			= SCDEFn->GetAllReadingsFn(Common_Definition);
-
-		// retMsgMultiple stailq from Fn filled ?
-		if (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
-
-			// for the retMsg elements
-			strTextMultiple_t *retMsg;
-
-			// get the entries till empty
-			while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
-
-				retMsg = STAILQ_FIRST(&headRetMsgMultipleFromFn);
-
-				// insert retMsg in stail-queue
-				STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-				// done, remove this entry
-				STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
-			}
-		}
-
-
-
-}
-
-*/
-
-
-
-
-
-
-
-  // return STAILQ head, queue stores multiple retMsg entries, if NULL -> no retMsg-entry
-  return headRetMsgMultiple;
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

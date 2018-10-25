@@ -1607,16 +1607,17 @@ Telnet_DirectRead(Common_Definition_t* Common_Definition)
 
 // --------------------------------------------------------------------------------------------------
 
-	// create a new WebIF Definition
+	// create a new Telnet Definition
 	Telnet_Definition_t* NewTelnet_Definition;
 
 	// alloc mem for modul specific definition structure (Common_Definition_t + X)
-	NewTelnet_Definition = (Telnet_Definition_t*) malloc(sizeof(Telnet_Definition_t));
+	NewTelnet_Definition = 
+		(Telnet_Definition_t*) malloc(sizeof(Telnet_Definition_t));
 
 	// zero the struct
 	memset(NewTelnet_Definition, 0, sizeof (Telnet_Definition_t));
 
-	// store new WebIF Definition
+	// store new Telnet Definition
 	STAILQ_INSERT_HEAD(&SCDERoot->HeadCommon_Definitions
 		,(Common_Definition_t*) NewTelnet_Definition
 		, entries);
@@ -1676,7 +1677,7 @@ Telnet_DirectRead(Common_Definition_t* Common_Definition)
 
 	// using TCP, fill struct
 	tcp->remote_port = piname->sin_port;	// port
-	memcpy(&tcp->remote_ip			// dest-ip!?
+	memcpy(&tcp->remote_ip	// dest-ip!?
 		, &piname->sin_addr.s_addr
 		, sizeof(tcp->remote_ip));
 
@@ -1684,7 +1685,8 @@ Telnet_DirectRead(Common_Definition_t* Common_Definition)
 	NewTelnet_Definition->proto.tcp = tcp;
 
 	// give definition a new unique name
-	NewTelnet_Definition->common.nameLen = asprintf((char**)&NewTelnet_Definition->common.name
+	NewTelnet_Definition->common.nameLen = 
+		asprintf((char**)&NewTelnet_Definition->common.name
 		,"%.*s.%d.%d.%d.%d.%u"
 		,(int) Telnet_Definition->common.nameLen
 		,Telnet_Definition->common.name
@@ -1693,6 +1695,12 @@ Telnet_DirectRead(Common_Definition_t* Common_Definition)
 		,NewTelnet_Definition->proto.tcp->remote_ip[2]
 		,NewTelnet_Definition->proto.tcp->remote_ip[3]
 		,NewTelnet_Definition->proto.tcp->remote_port);
+
+  // assign an unique number
+  NewTelnet_Definition->common.nr = SCDERoot->DevCount++;
+
+  // make this definition temporary
+	NewTelnet_Definition->common.defCtrlRegA |= F_TEMPORARY;
 
 	// official log entry
 	SCDEFn->Log3Fn(NewTelnet_Definition->common.name

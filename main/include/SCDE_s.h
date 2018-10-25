@@ -581,7 +581,7 @@ struct Common_Definition_s {
   uint8_t *definition;//definitionText	// Ptr to allocated memory filled with users definition string
   size_t definitionLen;//definitionTextLen
 
-  int nr;			// Sequential number assigned to device by HCTRLD
+  uint32_t nr;			// unique sequential number assigned to definition
 
   int fd;			// FileDescriptor. Used by selectlist / readyfnlist (-1 = not assigned)
 
@@ -774,7 +774,7 @@ struct SCDERoot_s {
 //use vars qw($cmdFromAnalyze);   # used by the warnings-sub
 //use vars qw($cvsid);            # used in 98_version.pm
   strText_t currCfgFile;
-  uint32_t DevCount;					// Maximum device number, used for storing
+  uint32_t DevCount;		// used to generate unique sequential number in definition = highest
   uint32_t FeatureLevel;				// for version management
   uint32_t globalCtrlRegA;				// global flags A
 //use vars qw($fhem_started);     # used for uptime calculation
