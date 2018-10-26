@@ -127,7 +127,7 @@ set room=kitchen:FILTER=STATE!=off off
 struct headRetMsgMultiple_s ICACHE_FLASH_ATTR
 Attr_CommandFn (const uint8_t *argsText
 		,const size_t argsTextLen)
-  {
+{
 
   // prepare STAILQ head for multiple RetMsg storage
   struct headRetMsgMultiple_s headRetMsgMultiple;
@@ -135,41 +135,53 @@ Attr_CommandFn (const uint8_t *argsText
   // Initialize the queue
   STAILQ_INIT(&headRetMsgMultiple);
 
-  // set start of possible def-Name-Text
-  const uint8_t *defNameText = argsText;
-
-  // set start of possible attr-Name-Text
-  const uint8_t *attrNameText = argsText;
-
-  // a seek-counter
+	// a seek-counter
   int i = 0;
+	
+	// set start * of possible def-Name-Text seek-start-pos
+  const uint8_t *defNameText = argsText;
+	
+	// seek to start * of attr-Name-Text '\32' after space
+  while( (i < argsTextLen) && (*defNameText == ' ') ) {i++;defNameText++;}
+	
+  // set start * of possible attr-Name-Text seek-start-pos
+  const uint8_t *attrNameText = defNameText;
 
   // seek to next space '\32'
   while( (i < argsTextLen) && (*attrNameText != ' ') ) {i++;attrNameText++;}
 
-  // length of def-Name-Text
+  // length of def-Name-Text determined
   size_t defNameTextLen = i;
 
-  // seek to start position of attr-Name-Text '\32'
+  // seek to start * of attr-Name-Text '\32' after space
   while( (i < argsTextLen) && (*attrNameText == ' ') ) {i++;attrNameText++;}
 
-  // set start of possible attr-Val
+  // set start * of possible attr-Val seek-start-pos
   const uint8_t *attrValText = attrNameText;
 
-  // a 2nd seek-counter
+  // a second seek-counter
   int j = 0;
 
   // seek to next space '\32'
   while( (i < argsTextLen) && (*attrValText != ' ') ) {i++,j++;attrValText++;}
 
-  // length of attr-Name-Text
+  // length of attr-Name-Text determined
   size_t attrNameTextLen = j;
 
-  // start position of attr-Val-Text
+  // start * of attr-Val-Text '\32' after space
   while( (i < argsTextLen) && (*attrValText == ' ') ) {i++;attrValText++;}
+		
+	 // set start * of possible attr-Va-end seek-start-pos
+  const uint8_t *attrValTextEnd = attrValText;
+	
+	// a third seek-counter
+  int k = 0;
 
-  // length of attr-Val-Text
-  size_t attrValTextLen = argsTextLen - i;
+  // seek to next space '\32'
+  while( (i < argsTextLen) && (*attrValTextEnd != ' ') ) {i++,k++;attrValTextEnd++;}
+
+  // length of attr-Val-Text determined
+  size_t attrValTextLen = k;
 
 // -------------------------------------------------------------------------------------------------
 
