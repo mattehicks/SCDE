@@ -85,7 +85,7 @@ Save_InitializeCommandFn(SCDERoot_t* SCDERootptr)
   SCDEFn->Log3Fn(Save_ProvidedByCommand.commandNameText
 		,Save_ProvidedByCommand.commandNameTextLen
 	  ,3
-	  ,"InitializeFn called. Command '%.*s' now useable.\n"
+	  ,"InitializeFn called. Command '%.*s' now useable."
 	  ,Save_ProvidedByCommand.commandNameTextLen
 	  ,Save_ProvidedByCommand.commandNameText);
 
@@ -281,7 +281,7 @@ Save_CommandFn (const uint8_t *argsText
 	// create configfilename string
 	char *configFile;
 	asprintf(&configFile
-			,"/spiffs/%.*s" //.cfg !!!!!!!!!!
+			,"/spiffs/%.*s.cfg"
 			,fileNameTextLen
 			,fileNameText);
 
@@ -424,7 +424,7 @@ Save_CommandFn (const uint8_t *argsText
 	// show filecontent on debug term
 	int c;
 	FILE *file;
-	file = fopen("/spiffs/maker", "r");
+	file = fopen("/spiffs/maker.cfg", "r");
 	if (file) {
     while ((c = getc(file)) != EOF)
         putchar(c);

@@ -85,13 +85,12 @@ Include_InitializeCommandFn(SCDERoot_t* SCDERootptr)
   SCDEFn->Log3Fn(Include_ProvidedByCommand.commandNameText
 		  ,Include_ProvidedByCommand.commandNameTextLen
 		  ,3
-		  ,"InitializeFn called. Command '%.*s' now useable.\n"
+		  ,"InitializeFn called. Command '%.*s' now useable."
 		  ,Include_ProvidedByCommand.commandNameTextLen
 		  ,Include_ProvidedByCommand.commandNameText);
 
   return 0;
-
-  }
+}
 
 
 
@@ -231,7 +230,7 @@ Include_CommandFn (const uint8_t *argsText
 		SCDEFn->Log3Fn(Include_ProvidedByCommand.commandNameText //Common_Definition->name
 			,Include_ProvidedByCommand.commandNameTextLen  					 //Common_Definition->nameLen
 			,1
-			,"Failed to open file %.*s.cfg for reading!\n"
+			,"Failed to open file %.*s.cfg for reading!"
 			,fileNameTextLen
 			,fileNameText);
 	//	return; HOW TO EXIT ???????
@@ -263,7 +262,7 @@ Include_CommandFn (const uint8_t *argsText
 //  char *ptr;
 //  ptr = strtok(string, delimiter);
 
-	char line [100+1];
+	char line [256+1];
 	while (fgets(line, sizeof(line),f) != NULL) {
 
 		char *ptr = &line;

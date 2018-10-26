@@ -83,7 +83,7 @@ Define_InitializeCommandFn(SCDERoot_t* SCDERootptr)
   SCDEFn->Log3Fn(Define_ProvidedByCommand.commandNameText
 		  ,Define_ProvidedByCommand.commandNameTextLen
 		  ,3
-		  ,"InitializeFn called. Command '%.*s' now useable.\n"
+		  ,"InitializeFn called. Command '%.*s' now useable."
 		  ,Define_ProvidedByCommand.commandNameTextLen
 		  ,Define_ProvidedByCommand.commandNameText);
 

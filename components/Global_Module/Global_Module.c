@@ -211,13 +211,13 @@ Global_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 */
 
   // there should be no return messages - we expect no return messages
-  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global verbose 3", 21);
-  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global logfile -", 21);
+//  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global verbose 3", 21);
+//  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global logfile -", 21);
 
-  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global configfile maker", 32);
-  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global statefile state", 31);
-  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global port 1234", 21);
-
+  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global configfile maker", 28);
+//  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global statefile state", 27);
+//  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global port 1234", 21);
+                                                       //|12
 // -------------------------------------------------------------------------------------------
 
   return retMsg;

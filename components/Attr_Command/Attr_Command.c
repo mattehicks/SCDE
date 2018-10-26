@@ -84,7 +84,7 @@ Attr_InitializeCommandFn(SCDERoot_t* SCDERootptr)
   SCDEFn->Log3Fn(Attr_ProvidedByCommand.commandNameText
 		  ,Attr_ProvidedByCommand.commandNameTextLen
 		  ,3
-		  ,"InitializeFn called. Command '%.*s' now useable.\n"
+		  ,"InitializeFn called. Command '%.*s' now useable."
 		  ,Attr_ProvidedByCommand.commandNameTextLen
 		  ,Attr_ProvidedByCommand.commandNameText);
 
@@ -340,7 +340,7 @@ Attr_CommandFn (const uint8_t *argsText
 			// add new attribute at tail
 			STAILQ_INSERT_HEAD(&SCDERoot->headAttributes, attribute, entries);
 
-			printf("Added new attribute - defName:%.*s, attrName:%.*s, attrVal:%.*s\n"
+			printf("Added new attribute - defName:%.*s, attrName:%.*s, attrVal:%.*sx\n"
 				,attribute->attrAssignedDef->nameLen
 				,attribute->attrAssignedDef->name
 				,attribute->attrNameTextLen

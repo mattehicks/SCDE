@@ -763,37 +763,63 @@ InitA()
 
 // -------------------------------------------------------------------------------------------------
 
-	// get attribute statefile value (global->statefile)
+	// get attribute 'statefile' value (from global->statefile)
   strText_t attrStateFNDefName = {(char*) "global", 6};
   strText_t attrStateFNAttrName = {(char*) "statefile", 9};
   strText_t *attrStateFNValueName =
 		Get_attrVal_by_defName_and_attrName(&attrStateFNDefName, &attrStateFNAttrName);
+
 // -------------------------------------------------------------------------------------------------
 
-  // create the args to execute the'include statefile' command
-  strText_t incSFIncludeCommandArgs;
+  // for the args to execute the 'include statefile' command
+  strText_t *incSFIncludeCommandArgs = NULL;
 
-  incCFIncludeCommandArgs.strTextLen =
-	asprintf((char**) &incSFIncludeCommandArgs.strText
-		,"include %.*s"
-		,(int) attrStateFNValueName->strTextLen
-		,(char*) attrStateFNValueName->strText);
+  // attr "statefile" found ?
+  if (attrStateFNValueName) {
+
+		// +value found ? 
+		if (attrStateFNValueName->strText) {
+
+			// build strText_t for cmd args
+			incSFIncludeCommandArgs =
+				malloc(sizeof(strText_t));
+
+			// attribute "statefile" complete, use it to build args
+			incCFIncludeCommandArgs.strTextLen =
+				asprintf((char**) &incSFIncludeCommandArgs->strText
+					,"include %.*s"
+					,(int) attrStateFNValueName->strTextLen
+					,(char*) attrStateFNValueName->strText);
+
+			free(attrStateFNValueName->strText);
+		}
+
+  free(attrStateFNValueName);
+	}
+
+  // seems that attribute "statefile" is not set, use default to build args
+  if (!incSFIncludeCommandArgs) {
+
+		// build strText_t for cmd args
+		incSFIncludeCommandArgs =
+			malloc(sizeof(strText_t));
+
+		// and fill with cmd-args
+		incCFIncludeCommandArgs.strTextLen =
+			asprintf((char**) &incSFIncludeCommandArgs->strText
+			,"include state");
+  }
 
   // call command include to process the initial state-file
   struct headRetMsgMultiple_s incSFHeadRetMsgMultipleFromFn =
-		AnalyzeCommandChain((uint8_t*)incSFIncludeCommandArgs.strText
-		,(const size_t) incSFIncludeCommandArgs.strTextLen);
+		AnalyzeCommandChain((uint8_t*)incSFIncludeCommandArgs->strText
+		,(const size_t) incSFIncludeCommandArgs->strTextLen);
 
-  // free value from Fn GetAttrValTextByDefTextAttrText
-  if (attrStateFNValueName) {
-	  
-		if (attrStateFNValueName->strText) free(attrStateFNValueName->strText);
-
-		free(attrStateFNValueName);
-
-	}
-
-  free(incSFIncludeCommandArgs.strText);
+  // free our strText_t that fits the created args
+  if (incSFIncludeCommandArgs->strText) 
+		free(incSFIncludeCommandArgs->strText);
+  if (incSFIncludeCommandArgs)
+		free(incSFIncludeCommandArgs);
 
 // -------------------------------------------------------------------------------------------------
 
@@ -908,7 +934,7 @@ InitA()
 
 
 
-
+/* bereich ist für telnet setup gewesen
 // -------------------------------------------------------------------------------------------------
 
   // try to get the port (for telnet) from value of attribute (global->port)
@@ -996,7 +1022,7 @@ InitA()
   LOGD("entering7...");
  // vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-
+*/
 
 
 
@@ -2461,51 +2487,61 @@ Info
 //#include <stdarg.h>
 /* --------------------------------------------------------------------------------------------------
  *  FName: Log3
- *  Desc: This is the main logging function with 3 infos: definition, loglevel and log-text
- *  Info: Level 0=System; 16=debug | DO NOT FORGET TO FREE char* LogText -> ITS ALLOCATED MEMORY !!!
- *  Para: Common_Definition_t* Common_Definition -> ptr to the Device-Definition which wants a log entry
- *        uint8_t LogLevel -> Level of information - to decide if it should be finally logged
- *        char* LogText -> ptr to allocated mem, containing text-string that should be logged
+ *  Desc: This is the main logging function with 3 infos:
+ *        time-stamp, loglevel, creator ant the log-text
+ *  Info: Level 0=System; 16=debug
+ *        DO NOT FORGET TO FREE char* LogText -> ITS ALLOCATED MEMORY !!!
+ *  Para: const uint8_t *name -> the creator name of this log entry
+ *        const size_t nameLen -> length of the creator name of this log entry
+ *        const uint8_t LogLevel -> the log level of this entry
+ *        const char *format -> ptr to the text
+ *        ... -> arguments to fill text
  *  Rets: -/-
  * --------------------------------------------------------------------------------------------------
  */
-void //IRAM_ATTR
+void
 Log3 (const uint8_t *name
 		,const size_t nameLen
 		,const uint8_t LogLevel
 		,const char *format
-	,...)
-  {
+		,...)
+{
 
-// 2016.10.12 07:26:16 LogPrioNr: Define->customname:
+  // for current time
+  time_t nowTist;
 
-	// generate into Log3Fn|2016.10.12 07:26:16 2: LiGHT.2_F4B64:
-  LOGD("Log3Fn|2016.10.12 07:26:16 %d: %.*s: "
-	,LogLevel
-	,nameLen
-	,name);
+  // get current time
+  time(&nowTist);
 
+  // create and fill timeinfo struct
+  struct tm timeinfo;
+  localtime_r(&nowTist, &timeinfo);
 
-  time_t now;
-      struct tm timeinfo;
-      time(&now);
-      localtime_r(&now, &timeinfo);
+  // time,loglevel,name
+  printf("Log3|%d.%d.%d %d:%d:%d %d: %.*s: "
+		,timeinfo.tm_year+1900
+		,timeinfo.tm_mon+1
+		,timeinfo.tm_mday
+		,timeinfo.tm_hour
+		,timeinfo.tm_min
+		,timeinfo.tm_sec
+		,LogLevel
+		,nameLen
+		,name);
 
-      char strftime_buf[64];
-
-      // Set timezone to Eastern Standard Time and print local time
-         setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
-         tzset();
-         localtime_r(&now, &timeinfo);
-         strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-         LOGD("New York is: %s"
-        	,strftime_buf);
-
-
-  va_list list;
+  // the variable arguments
+	va_list list;
   va_start(list, format);
   vprintf(format, list);
   va_end(list);
+
+	// finalize line
+  printf("\n");
+
+
+
+
+
 
 
 
@@ -2554,13 +2590,13 @@ time_t
 TimeNow()
 {
 
+  // for time stamp storage
   time_t timeNow;
 
-  // assign time stamp
+  // get time stamp
   time(&timeNow);
 
   return timeNow;
-
 }
 
 
@@ -2647,7 +2683,7 @@ WriteStatefile()
 	// create statefilename string
 	char *stateFile;
 	asprintf(&stateFile
-			,"/spiffs/%.*s" //.cfg !!!!!!!!!!
+			,"/spiffs/%.*s.cfg"
 			,attrStateFNValueName->strTextLen
 			,attrStateFNValueName->strText);
 	 
@@ -2688,7 +2724,7 @@ WriteStatefile()
   // to fill with: "Sat Aug 19 14:16:59 2017"
 	char strftime_buf[64];
 
-
+/*
   // PREPARATIONS OF INTERNAL CLOCK
 	localtime_r(&now, &timeinfo);
 
@@ -2696,8 +2732,9 @@ WriteStatefile()
 	setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
 	tzset();
 	// END OF PREPARATION
+*/
 
-  // get time
+  // get time to struct timeinfo
 	localtime_r(&now, &timeinfo);
 
   // get strftime-text into strftime_buf 
@@ -2789,7 +2826,7 @@ WriteStatefile()
 //filecontent debug
 int c;
 FILE *file;
-file = fopen("/spiffs/state", "r");
+file = fopen("/spiffs/state.cfg", "r");
 if (file) {
     while ((c = getc(file)) != EOF)
         putchar(c);
@@ -2822,7 +2859,7 @@ if (file) {
 		
 		
 	
-/**
+/** AKTUELL ERSETZT DURCH GLOBAL MODULE!!!
  * -------------------------------------------------------------------------------------------------
  *  FName: doGlobalDef
  *  Desc: Initializes the global device
@@ -2894,7 +2931,7 @@ readingsBeginUpdate(Common_Definition_t *Common_Definition)
 	Log3(Common_Definition->module->ProvidedByModule->typeName
 		  ,Common_Definition->module->ProvidedByModule->typeNameLen
 		  ,1
-		  ,"Error! readingsEndUpdateFn not called in Def-Name: '%.*s'. Can not begin new update.\n"
+		  ,"Error! readingsEndUpdateFn not called in Def-Name: '%.*s'. Can not begin new update."
 		  ,Common_Definition->name
 		  ,Common_Definition->nameLen);
 
@@ -3003,7 +3040,7 @@ readingsBulkUpdate(Common_Definition_t *Common_Definition
 	Log3(Common_Definition->module->ProvidedByModule->typeName
 		  ,Common_Definition->module->ProvidedByModule->typeNameLen
 		  ,1
-		  ,"Error! readingsBulkUpdateFn called without calling readingsBeginUpdateFn first in Def-Name: '%.*s'.\n"
+		  ,"Error! readingsBulkUpdateFn called without calling readingsBeginUpdateFn first in Def-Name: '%.*s'."
 		  ,Common_Definition->name
 		  ,Common_Definition->nameLen);
 
@@ -3078,7 +3115,7 @@ readingsEndUpdate(Common_Definition_t *Common_Definition)
 	Log3(Common_Definition->module->ProvidedByModule->typeName
 		  ,Common_Definition->module->ProvidedByModule->typeNameLen
 		  ,1
-		  ,"Error! readingsEndUpdateFn called without calling readingsBeginUpdateFn first in Def-Name: '%.*s'.\n"
+		  ,"Error! readingsEndUpdateFn called without calling readingsBeginUpdateFn first in Def-Name: '%.*s'."
 		  ,Common_Definition->name
 		  ,Common_Definition->nameLen);
 
@@ -3664,7 +3701,7 @@ Get_attrVal_by_defName_and_attrName(const strText_t *defName
   attribute_t *attribute =
 		STAILQ_FIRST(&SCDERoot.headAttributes);
 
-	// loop through the assigned attributes and try to find the existing attribute
+	// loop through the assigned attributes and try to find the attribute by name
   while (true) {
 
 		// no assigned attribute found ?

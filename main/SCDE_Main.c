@@ -877,33 +877,43 @@ SelectQueryTask(void *pvParameters)
 
 #include "apps/sntp/sntp.h"
 
-static void initialize_sntp(void)
+static void 
+Initialize_SNTP(void)
 {
-    ESP_LOGI(TAG, "Initializing SNTP");
-    sntp_setoperatingmode(SNTP_OPMODE_POLL);
-    sntp_setservername(0, "pool.ntp.org");
-    sntp_init();
+  ESP_LOGI(TAG, "Initializing SNTP");
+  sntp_setoperatingmode(SNTP_OPMODE_POLL);
+  sntp_setservername(0, "pool.ntp.org");
+  sntp_init();
 }
 
 
 
 
 
-static void obtain_time(void)
+static void
+Obtain_Time(void)
 {
-    initialize_sntp();
+  Initialize_SNTP();
 
-    // wait for time to be set
-    time_t now = 0;
-    struct tm timeinfo = { 0 };
-    int retry = 0;
-    const int retry_count = 10;
-    while(timeinfo.tm_year < (2016 - 1900) && ++retry < retry_count) {
-        ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
-        vTaskDelay(2000 / portTICK_PERIOD_MS);
-        time(&now);
-        localtime_r(&now, &timeinfo);
-    }
+  // wait for time to be set
+  time_t now = 0;
+
+  struct tm timeinfo = { 0 };
+
+  int retry = 0;
+
+  const int retry_count = 10;
+
+  while (timeinfo.tm_year < (2016 - 1900) && ++retry < retry_count) {
+
+ 		ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
+
+		vTaskDelay(2000 / portTICK_PERIOD_MS);
+
+ 		time(&now);
+
+		localtime_r(&now, &timeinfo);
+	}
 }
 
 
@@ -988,7 +998,7 @@ ESP32_WiFiEventHandler(void *ctx, system_event_t *event)
 	Log3( (const uint8_t*)"xxx"
 		, sizeof("xxx")
 		,1
-		,"Devices station connected to an access-point. SSID:%s, channel:%d\n"
+		,"Devices station connected to an access-point. SSID:%s, channel:%d"
 		,event->event_info.connected.ssid
 		,event->event_info.connected.channel);
 
@@ -1013,7 +1023,7 @@ ESP32_WiFiEventHandler(void *ctx, system_event_t *event)
 	Log3( (const uint8_t*)"xxx"
 		, sizeof("xxx")
 		,1
-		,"Devices station disconnected from an access-point. SSID:%s, reason:%d\n"
+		,"Devices station disconnected from an access-point. SSID:%s, reason:%d"
 		,event->event_info.disconnected.ssid
 		,event->event_info.disconnected.reason);
 
@@ -1032,7 +1042,7 @@ ESP32_WiFiEventHandler(void *ctx, system_event_t *event)
 	Log3( (const uint8_t*)"xxx"
 		, sizeof("xxx")
 		,1
-		,"Devices station - Authmode changed from %d to %d\n",
+		,"Devices station - Authmode changed from %d to %d",
 		event->event_info.auth_change.old_mode,
 		event->event_info.auth_change.new_mode);
 
@@ -1053,7 +1063,7 @@ ESP32_WiFiEventHandler(void *ctx, system_event_t *event)
 	Log3( (const uint8_t*)"xxx"
 		, sizeof("xxx")
 		,1
-		,"Devices station got IP from access point:"IPSTR ", mask:"IPSTR", gw:"IPSTR"\n",
+		,"Devices station got IP from access point:"IPSTR ", mask:"IPSTR", gw:"IPSTR,
 		IP2STR(&event->event_info.got_ip.ip_info.ip),
 		IP2STR(&event->event_info.got_ip.ip_info.netmask),
 		IP2STR(&event->event_info.got_ip.ip_info.gw));
@@ -1087,7 +1097,7 @@ ESP32_WiFiEventHandler(void *ctx, system_event_t *event)
 	Log3( (const uint8_t*)"xxx"
 		, sizeof("xxx")
 		,1
-		,"I:WSAP Device conn.: "MACSTR ", AID = %d\n",
+		,"I:WSAP Device conn.: "MACSTR ", AID = %d",
 		MAC2STR(event->event_info.sta_connected.mac),
 		event->event_info.sta_connected.aid);
 
@@ -1106,7 +1116,7 @@ ESP32_WiFiEventHandler(void *ctx, system_event_t *event)
 	Log3( (const uint8_t*)"xxx"
 		, sizeof("xxx")
 		,1
-		,"WSAP - Device disconnected: "MACSTR ", AID = %d\n",
+		,"WSAP - Device disconnected: "MACSTR ", AID = %d",
 		MAC2STR(event->event_info.sta_disconnected.mac),
 		event->event_info.sta_disconnected.aid);
 
@@ -1125,7 +1135,7 @@ ESP32_WiFiEventHandler(void *ctx, system_event_t *event)
 	Log3( (const uint8_t*)"xxx"
 		, sizeof("xxx")
 		,1
-		,"WSAP - ProbeReq.Rcved:%d\n"
+		,"WSAP - ProbeReq.Rcved:%d"
 		,event->event_info.ap_probereqrecved.rssi);
 
 	break;
@@ -1282,8 +1292,56 @@ app_main(void)
 		  ,true
 		  ,portMAX_DELAY);
 
-  // sync the rtc-time
-  initialize_sntp();
+
+  // sync time via SNTP
+  Obtain_Time();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+  time_t now;
+      struct tm timeinfo;
+      time(&now);
+      localtime_r(&now, &timeinfo);
+
+      char strftime_buf[64];
+
+      // Set timezone to Eastern Standard Time and print local time
+         setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
+         tzset();
+         localtime_r(&now, &timeinfo);
+         strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+         LOGD("New York is: %s"
+        	,strftime_buf);
+*/
+
+ 
+
+
+
+
+
+
+
+
 
 
 
@@ -1507,7 +1565,7 @@ app_main(void)
   // initialize the global definition
 
 
-#define CMD_4_GLOBAL "define Global Global"
+  #define CMD_4_GLOBAL "define Global Global"
   headRetMsgMultiple = AnalyzeCommand((const uint8_t*) CMD_4_GLOBAL, 20);//sizeof(CMD_4_TELNET));
 
   // retMsgMultiple stailq filled ?
@@ -1541,6 +1599,10 @@ app_main(void)
 
   vTaskDelay(1000 / portTICK_PERIOD_MS);
 
+
+// do global def ?? oder als Modul???
+//  doGlobalDef("cfgfilename", 11);
+
   InitA();
 
   vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -1548,7 +1610,8 @@ app_main(void)
 
 //--------------------------------------------------------------------------------------------------
 
-//  doGlobalDef("cfgfilename", 11);
+
+
 
 
 //--------------------------------------------------------------------------------------------------
@@ -1788,19 +1851,21 @@ app_main(void)
 
 
   // Test of logging
-  Log("HCTRL",16,"MainFn Reached\n");
+  Log("SCDE",16,"MainFn Reached\n");
 
   gpio_set_direction(GPIO_NUM_4, GPIO_MODE_OUTPUT);
 
   int level = 0;
 
   while (true) {
-    gpio_set_level(GPIO_NUM_4, level);
-    level = !level;
-    vTaskDelay(300 / portTICK_PERIOD_MS);
+
+		gpio_set_level(GPIO_NUM_4, level);
+
+		level = !level;
+
+		vTaskDelay(300 / portTICK_PERIOD_MS);
   }
 
   return 0;
-
 }
 
