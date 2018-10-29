@@ -288,7 +288,6 @@ Include_CommandFn (const uint8_t *argsText
 
 				// init length
 				rebuiltCmdRow.strTextLen = partialCmdRow.strTextLen;
-
 			}
 
 			// continuing a command row with an part ...
@@ -305,14 +304,13 @@ Include_CommandFn (const uint8_t *argsText
 
 				// save new length
 				rebuiltCmdRow.strTextLen += partialCmdRow.strTextLen;
-		
 			}
 
 			// not ending with //? -> execute
 			if ( (rebuiltCmdRow.strTextLen < 2) ||
 				(memcmp(rebuiltCmdRow.strText + rebuiltCmdRow.strTextLen - 2, "//", 2)) ) {
 
-				printf("rebuiltCmdRowFromFile: %.*s\n"
+				printf("rebuiltCmdRowFromFile '%.*s'\n"
 					,rebuiltCmdRow.strTextLen
 					,rebuiltCmdRow.strText);
 
@@ -337,7 +335,6 @@ Include_CommandFn (const uint8_t *argsText
 
 					// then insert retMsg in stail-queue
 					STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
 				}
 
 				// release memory for next cycle
@@ -346,19 +343,14 @@ Include_CommandFn (const uint8_t *argsText
 
 				// break, if the global quit-flag is set
 				if (SCDERoot->globalCtrlRegA & F_RECEIVED_QUIT) break;
-	
 			}
-
 
 			// ending with //? -> more to come, sub 2 chars (//)
 			else {
 
 				rebuiltCmdRow.strTextLen -= 2;
-
 			}
-
 		}
-
   }
 
   // there may be an incomplete processed multiline row in memory -> release it
@@ -372,7 +364,6 @@ Include_CommandFn (const uint8_t *argsText
 
   // return STAILQ head, queue stores multiple retMsg entries, if NULL -> no retMsg-entry
   return headRetMsgMultiple;
-
 }
 
 

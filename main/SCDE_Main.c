@@ -1499,6 +1499,10 @@ app_main(void)
   extern providedByCommand_t List_ProvidedByCommand;
   CommandActivateCommand(&List_ProvidedByCommand);
 
+  // Activate Rename as SCDE built-in Command
+  extern providedByCommand_t Rename_ProvidedByCommand;
+  CommandActivateCommand(&Rename_ProvidedByCommand);
+
   // Activate Rereadcfg as SCDE built-in Command
   extern providedByCommand_t Rereadcfg_ProvidedByCommand;
   CommandActivateCommand(&Rereadcfg_ProvidedByCommand);
