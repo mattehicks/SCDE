@@ -1,4 +1,4 @@
-﻿/* #################################################################################################
+/* #################################################################################################
  *
  *  Function: Rename Command for SCDE (Smart Connected Device Engine)
  *
@@ -88,7 +88,6 @@ Rename_InitializeCommandFn(SCDERoot_t* SCDERootptr)
 		  ,Rename_ProvidedByCommand.commandNameText);
 
   return 0;
-
 }
 
 
@@ -97,7 +96,7 @@ Rename_InitializeCommandFn(SCDERoot_t* SCDERootptr)
 
 /* --------------------------------------------------------------------------------------------------
  *  FName: CommandRename
- *  Desc: Renames the definition named "old-name" to an new name "new-name"
+ *  Desc: Renames the definition named "old-name" to the new name "new-name"
  *  Info: 'old-name' is custom definition name. Allowed: [azAZ09._], uint8_t[32]
  *        'new-name' is custom definition name. Allowed: [azAZ09._], uint8_t[32]
  *  Para: const uint8_t *args  -> prt to space seperated Rename text string "old-name mew-name"
@@ -116,52 +115,37 @@ Rename_CommandFn (const uint8_t *args
   // Initialize the queue
   STAILQ_INIT(&headRetMsgMultiple);
 
-  // set start of possible Name
-  const uint8_t *name = args;
+  // set start of possible old name
+  const uint8_t *oldName = args;
 
-  // set start of possible Type-Name
-  const uint8_t *typeName = args;
+  // set start of possible new name
+  const uint8_t *newName = args;
 
   // a seek-counter
   int i = 0;
 
   // seek to next space !'\32'
-  while( (i < argsLen) && (*typeName != ' ') ) {i++; typeName++;}
+  while( (i < argsLen) && (*newName != ' ') ) {i++; newName++;}
 
-  // length of Name
-  size_t nameLen = i;
+  // length of old name
+  size_t oldNameLen = i;
 
-  // seek to start position of Type-Name '\32'
-  while( (i < argsLen) && (*typeName == ' ') ) {i++; typeName++;}
+  // seek to start position of new name '\32'
+  while( (i < argsLen) && (*newName == ' ') ) {i++; newName++;}
 
-  // set start of possible Definition
-  const uint8_t *definition = typeName;
-
-  // a 2nd seek-counter
-  int j = 0;
-
-  // seek to next space !'\32'
-  while( (i < argsLen) && (*definition != ' ') ) {i++, j++; definition++;}
-
-  // length of Type-Name
-  size_t typeNameLen = j;
-
-  // start position of Definition
-  while( (i < argsLen) && (*definition == ' ') ) {i++; definition++;}
-
-  // length of Type-Name
-  size_t definitionLen = argsLen - i;
+  // length of new-name
+  size_t newNameLen = argsLen - i;
 
   // veryfy lengths > 0, definition 0 allowed
-  if ( (nameLen) == 0 || (typeNameLen == 0) ) {
-
+  if ( (oldNameLen) == 0 || (newNameLen == 0) ) {
+	  
     // alloc mem for retMsg
     strTextMultiple_t *retMsg =
       malloc(sizeof(strTextMultiple_t));
 
     // response with error text
     retMsg->strTextLen = asprintf(&retMsg->strText
-      ,"Could not interpret command '%.*s'! Usage: Rename <name> <type-name> <type dependent arguments>"
+      ,"Could not interpret command '%.*s'! Usage: Rename <old-name> <new-name>. Note: 31 chars [azAZ09._] allowed."
       ,argsLen
       ,args);
 
@@ -170,142 +154,61 @@ Rename_CommandFn (const uint8_t *args
 
     // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
     return headRetMsgMultiple;
-
   }
 
- /*
-   if(Defined($defs{$name}));
-   asprintf(&RetMsg, "%s already Defined, Define it first\n", name);
-   return RetMsg;
+	// get the Common_Definition by Name
+  Common_Definition_t *Common_Definition;
 
-   if($name !~ m/^[a-z0-9.:_]*$/i);
-   asprintf(&RetMsg, "Invalid characters in name (not A-Za-z0-9._): %s\n", name);
-   return RetMsg;
-  */
-
-
-   // get the module ptr by name
-   Module_t* Module = SCDEFn->GetLoadedModulePtrByNameFn(typeName
-    ,typeNameLen);
-
-  // do we need to reload Module?
-  if (!Module) // NOT FUNCTIONAL!
-    Module = SCDEFn->CommandReloadModuleFn(typeName, typeNameLen);
-
-  // alloc mem for modul specific definition structure (Common_Definition_t + X)
-  Common_Definition_t *NewCommon_Definition
-    = malloc(Module->ProvidedByModule->SizeOfDefinition);
-
-  // zero the struct
-  memset(NewCommon_Definition, 0, Module->ProvidedByModule->SizeOfDefinition);
-
-  // prepare default fields in definition
-
-  // create semaphore for definition access
-  NewCommon_Definition->def_mux = xSemaphoreCreateMutex();
-
-  // copy ptr to associated module
-  NewCommon_Definition->module = Module;
-
-  // copy custom name
-  NewCommon_Definition->name = malloc(nameLen);
-  memcpy(NewCommon_Definition->name, name, nameLen);
-  NewCommon_Definition->nameLen = nameLen;
-
-  // store new definition to SCDE-Root
-  STAILQ_INSERT_HEAD(&SCDERoot->HeadCommon_Definitions
-	,NewCommon_Definition
-	,entries);
-
-  printf("Defined Name:%.*s TypeName:%.*s\n"
-    ,NewCommon_Definition->nameLen
-    ,NewCommon_Definition->name
-    ,NewCommon_Definition->module->ProvidedByModule->typeNameLen
-    ,NewCommon_Definition->module->ProvidedByModule->typeName);
-
-  // store Definition string in Defp->Definition
-  NewCommon_Definition->definition = malloc(definitionLen);
-  memcpy(NewCommon_Definition->definition, definition, definitionLen);
-  NewCommon_Definition->definitionLen = definitionLen;
-
-  // assign an unique number
-  NewCommon_Definition->nr = SCDERoot->DevCount++;
-
-  // do we need initial state? or NULL ? store initial state
-  NewCommon_Definition->stateLen =
-    asprintf((char**)&NewCommon_Definition->state, "???");
-
-  // init stailq readings
-  STAILQ_INIT(&NewCommon_Definition->headReadings);
-
-  // RenameFn assigned by module ?
-  if (Module->ProvidedByModule->RenameFn) {
-
-    printf("Calling RenameFN for Name:%.*s TypeName:%.*s Definition:%.*s cnt:%d state:%.*s\n"
-      ,NewCommon_Definition->nameLen
-      ,NewCommon_Definition->name
-      ,NewCommon_Definition->module->ProvidedByModule->typeNameLen
-      ,NewCommon_Definition->module->ProvidedByModule->typeName
-      ,NewCommon_Definition->definitionLen
-      ,NewCommon_Definition->definition
-      ,NewCommon_Definition->nr
-      ,NewCommon_Definition->stateLen
-      ,NewCommon_Definition->state);
-
-    // execute RenameFn and maybe get an error msg
-    strTextMultiple_t *retMsg = 
-      Module->ProvidedByModule->RenameFn(NewCommon_Definition);
-
-    // got an error msg?
-    if (retMsg) {
-
-      // insert retMsg in stail-queue
-      STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-    }
-	  
-  }
+	// for possible answer
+	strTextMultiple_t *retMsg = NULL;
 	
-/*
-  // RenameFn NOT assigned by module
-  else	{
+  STAILQ_FOREACH(Common_Definition, &SCDERoot->HeadCommon_Definitions, entries) {
 
-	// alloc mem for retMsg
-	strTextMultiple_t *retMsg =
-		 malloc(sizeof(strTextMultiple_t));
+		if ( (Common_Definition->nameLen == oldNameLen)
+			&& (!strncasecmp((const char*) Common_Definition->name, (const char*) oldName, oldNameLen)) ) {
 
-	// response with error -> Type doesnt support RenameFn
-	retMsg->strTextLen = asprintf(&retMsg->strText
-		,"Error! Could not ADD Key=Value attributes '%.*s' to Rename '%.*s'! Type '%.*s' does not support it!"
-		,kvArgsLen
-		,kvArgs
-		,Common_Definition->nameLen
-		,Common_Definition->name
-		,Common_Definition->module->ProvidedByModule->typeNameLen
-		,Common_Definition->module->ProvidedByModule->typeName);
+		// definition found, backup old value
+		char* oldNameBackup = Common_Definition->name;
+		uint8_t oldNameBackupLen = Common_Definition->nameLen;
+			
+		// store new name
+		Common_Definition->nameLen = 
+			asprintf(&Common_Definition->name, "%.*s"
+				,oldNameLen
+				,oldName);
+			
+		// create an log entry
+		SCDEFn->Log3Fn(Set_ProvidedByCommand.commandNameText
+			,Set_ProvidedByCommand.commandNameTextLen
+		  ,3
+		 	,"Renaming Definition '%.*s' to '%.*s'.\n"
+		  ,oldNameBackupLen
+			,oldNameBackup
+			,Common_Definition->nameLen
+			,Common_Definition->name);
+				
+		// free mem from old name
+		free(oldNameBackup);			
+			
+	  // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+  	return headRetMsgMultiple;	
+	}
 
-		// insert retMsg in stail-queue
-		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+  // we have a retMsg, alloc mem
+	retMsg =
+		malloc(sizeof(strTextMultiple_t));
 
-  }
-*/
-
-  // do we have an error msg? Interpret it as veto!
-  if (!STAILQ_EMPTY(&headRetMsgMultiple)) {
-
-//	printf("Got error from RenameFN %s \n"
-//			  ,retMsg.strText);
-
-    printf("Got error from RenameFN!\n");
-
-	//Log 1, "Rename $def: $ret";
-//	RenameDefinition(Name);	//Rename $defs{$name};                            # Veto
-//	RenameAttribute(Name);	//Rename $attr{$name};
-
-  }
+  // response with error text
+  retMsg->strTextLen = asprintf(&retMsg->strText
+		,"Error! Could not execute command Rename! Definition '%.*s' not found!"
+ 		,oldNameLen
+		,oldName);
+	
+  // insert retMsg in stail-queue
+  STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
 
   // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
   return headRetMsgMultiple;
-
 }
-
-
+	
+	
