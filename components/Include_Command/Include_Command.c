@@ -225,8 +225,10 @@ Include_CommandFn (const uint8_t *argsText
 		,fileNameText);
 
   FILE *f;
+	
 	f = fopen(fileName, "r");
-	if (f == NULL) {
+
+	if ( f == NULL ) {
 		SCDEFn->Log3Fn(Include_ProvidedByCommand.commandNameText //Common_Definition->name
 			,Include_ProvidedByCommand.commandNameTextLen  					 //Common_Definition->nameLen
 			,1
@@ -238,12 +240,9 @@ Include_CommandFn (const uint8_t *argsText
 
   free(fileName);
 
-
-
+  // our delimiter
   char delimiter[] = "\r\n";
  
-
-
   // backup old configuration file, for reconstruction
   strText_t oldCfgFile = SCDERoot->currCfgFile;
 
@@ -254,113 +253,112 @@ Include_CommandFn (const uint8_t *argsText
   // clear, reset the global quit-flag
   SCDERoot->globalCtrlRegA &= ~(F_RECEIVED_QUIT);
 
-  // to build our command row and start with empty
+  // to build one complete command row, start empty
   strTextMultiple_t rebuiltCmdRow;
   rebuiltCmdRow.strText = NULL;
 
-//  // initialize strtok, start with first line in text file
-//  char *ptr;
-//  ptr = strtok(string, delimiter);
-
+  // our one line cache
 	char line [256+1];
-	while (fgets(line, sizeof(line),f) != NULL) {
+	
+	// get one file content line, till /n newline
+	while (fgets(line, sizeof(line), f)) {
 
-		// seek ptr
-		char *ptr = &line;
+	  // partialCmdRow building (line may contain multiple commands) 
+	  strTextMultiple_t partialCmdRow;
 
-		// init partialCmdRow building (line may contain multiple commands) 
-		strTextMultiple_t partialCmdRow;
-		partialCmdRow.strText = (char *) ptr;
-		partialCmdRow.strTextLen = (size_t) strlen(ptr); //the newline ?
+		// initialize strtok
+  	partialCmdRow.strText = strtok(line, delimiter);	
+		
+		// do till we have chars from line
+    while ( ( partialCmdRow.strText!= NULL ) {
+			
+			// get length in this loop
+			partialCmdRow.strTextLen = (size_t) strlen(partialCmdRow.strText);
+			
+				// further processing only if we have chars
+		  	if (partialCmdRow.strTextLen > 0) {
 
-// müllcode
- if ( (!memcmp(ptr+partialCmdRow.strTextLen,"\n",1)) ||
-      (!memcmp(ptr+partialCmdRow.strTextLen,"\r",1)) ) 			
-		partialCmdRow.strTextLen--;
-if ( (!memcmp(ptr+partialCmdRow.strTextLen,"\n",1)) ||
-      (!memcmp(ptr+partialCmdRow.strTextLen,"\r",1)) ) 			
-		partialCmdRow.strTextLen--;
+			  	// if starting with new command row (not continuing one) ...
+			  	if (rebuiltCmdRow.strText == NULL) {
 
+				  	// memory allocation for new command row
+				  	rebuiltCmdRow.strText = (char *) malloc(partialCmdRow.strTextLen);
 
-		// loop through partialCmdRow till strTextLen > 0
-		if (partialCmdRow.strTextLen) {
+				  	// copy corrent row to allocated memory
+				  	memcpy(rebuiltCmdRow.strText
+					  	,partialCmdRow.strText
+						  ,partialCmdRow.strTextLen);
 
-			// if starting with new command row part ...
-			if (!rebuiltCmdRow.strText) {
+					  // init length
+				  	rebuiltCmdRow.strTextLen = partialCmdRow.strTextLen;
+			  	}
 
-				// init memory allocation for new command row
-				rebuiltCmdRow.strText = (char *) malloc(partialCmdRow.strTextLen);
+			  	// continuing a command row with an part ...
+			  	else {
 
-				// copy command to allocated memory
-				memcpy(rebuiltCmdRow.strText
-					,partialCmdRow.strText
-					,partialCmdRow.strTextLen);
+				  	// Reallocate memory to new size
+				  	rebuiltCmdRow.strText = (char *) realloc(rebuiltCmdRow.strText
+				  		,rebuiltCmdRow.strTextLen + partialCmdRow.strTextLen);
 
-				// init length
-				rebuiltCmdRow.strTextLen = partialCmdRow.strTextLen;
-			}
+				   	// add command-part to allocated memory
+				  	memcpy(rebuiltCmdRow.strText + rebuiltCmdRow.strTextLen
+					  	,partialCmdRow.strText
+				 		 	,partialCmdRow.strTextLen);
 
-			// continuing a command row with an part ...
-			else {
+					  // save new length
+			 		 	rebuiltCmdRow.strTextLen += partialCmdRow.strTextLen;
+		 		 	}
 
-				// Reallocate memory to new size
-				rebuiltCmdRow.strText = (char *) realloc(rebuiltCmdRow.strText
-					,rebuiltCmdRow.strTextLen + partialCmdRow.strTextLen);
+		 		 	// not ending with //? -> execute its complete
+		 		 	if ( (rebuiltCmdRow.strTextLen < 2) ||
+				  	(memcmp(rebuiltCmdRow.strText + rebuiltCmdRow.strTextLen - 2, "//", 2)) ) {
 
-				// add command-part to allocated memory
-				memcpy(rebuiltCmdRow.strText + rebuiltCmdRow.strTextLen
-					,partialCmdRow.strText
-					,partialCmdRow.strTextLen);
+			 	  	printf("Rebuilt an CMD row from file '%.*s'\n"
+					  	,rebuiltCmdRow.strTextLen
+					   	,rebuiltCmdRow.strText);
 
-				// save new length
-				rebuiltCmdRow.strTextLen += partialCmdRow.strTextLen;
-			}
+						// call the AnalyzeCommandChainFn, if retMsg != NULL -> got ret Msgs entries
+						struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
+							SCDEFn->AnalyzeCommandChainFn((const uint8_t *) rebuiltCmdRow.strText,
+								rebuiltCmdRow.strTextLen);
 
-			// not ending with //? -> execute
-			if ( (rebuiltCmdRow.strTextLen < 2) ||
-				(memcmp(rebuiltCmdRow.strText + rebuiltCmdRow.strTextLen - 2, "//", 2)) ) {
+						// retMsgMultiple stailq filled from Fn ? -> get the entries till empty
+						while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
 
-				printf("rebuiltCmdRowFromFile '%.*s'\n"
-					,rebuiltCmdRow.strTextLen
-					,rebuiltCmdRow.strText);
+							// for the retMsg elements
+							strTextMultiple_t *retMsg =
+								STAILQ_FIRST(&headRetMsgMultipleFromFn);
 
-				// call the AnalyzeCommandChainFn, if retMsg != NULL -> got ret Msgs entries
-				struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
-					SCDEFn->AnalyzeCommandChainFn((const uint8_t *) rebuiltCmdRow.strText,
-						rebuiltCmdRow.strTextLen);
+							printf("AddingRetMsg: %.*s\n"
+								,retMsg->strTextLen
+								,retMsg->strText);
 
-				// retMsgMultiple stailq filled from Fn ? -> get the entries till empty
-				while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+							// first remove this entry
+							STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
 
-					// for the retMsg elements
-					strTextMultiple_t *retMsg =
-						STAILQ_FIRST(&headRetMsgMultipleFromFn);
+							// then insert retMsg in stail-queue
+							STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+						}
 
-					printf("AddingRetMsg: %.*s\n"
-						,retMsg->strTextLen
-						,retMsg->strText);
+						// release memory for next cycle
+						free(rebuiltCmdRow.strText);
+						rebuiltCmdRow.strText = NULL;
 
-					// first remove this entry
-					STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
+						// break, if the global quit-flag is set
+						if (SCDERoot->globalCtrlRegA & F_RECEIVED_QUIT) break;
+					}
 
-					// then insert retMsg in stail-queue
-					STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+					// ending with //? -> more to come
+					else {
+			
+						// sub 2 chars (//)
+						rebuiltCmdRow.strTextLen -= 2;
+					}
 				}
-
-				// release memory for next cycle
-				free(rebuiltCmdRow.strText);
-				rebuiltCmdRow.strText = NULL;
-
-				// break, if the global quit-flag is set
-				if (SCDERoot->globalCtrlRegA & F_RECEIVED_QUIT) break;
-			}
-
-			// ending with //? -> more to come, sub 2 chars (//)
-			else {
-
-				rebuiltCmdRow.strTextLen -= 2;
 			}
 		}
+			
+		partialCmdRow.strText = strtok(NULL, delimiter);	
   }
 
   // there may be an incomplete processed multiline row in memory -> release it
