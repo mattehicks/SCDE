@@ -15,8 +15,10 @@
 
 
 #include <ProjectConfig.h>
-#include <esp8266.h>
 #include <Platform.h>
+
+#include <esp8266.h>
+
 
 #include <SCDE_s.h>
 
@@ -44,8 +46,8 @@ static SCDEFn_t* SCDEFn;
  * --------------------------------------------------------------------------------------------------
  */
 
-  const uint8_t helpTexta[] = "Usage: Rename <old> <new>, to rename a definition";	// CommandHelp, Len
-  const uint8_t helpDetailTexta[] = "Usagebwrebwerb: Rename <old> <new>, to rename a definition";	// CommandHelp, Len
+  const uint8_t helpTexto[] = "Usage: Rename <old> <new>, to rename a definition";	// CommandHelp, Len
+  const uint8_t helpDetailTexto[] = "Usagebwrebwerb: Rename <old> <new>, to rename a definition";	// CommandHelp, Len
 
 
 providedByCommand_t Rename_ProvidedByCommand = {
@@ -53,10 +55,10 @@ providedByCommand_t Rename_ProvidedByCommand = {
   ,6						// length of cmd
   ,Rename_InitializeCommandFn			// Initialize Fn
   ,Rename_CommandFn				// the Fn code
-  ,&helpTexta
-  ,sizeof(helpTexta)
-  ,&helpDetailTexta
-  ,sizeof(helpDetailTexta)
+  ,&helpTexto
+  ,sizeof(helpTexto)
+  ,&helpDetailTexto
+  ,sizeof(helpDetailTexto)
 };
 
 //(const uint8_t *) "Usage: Rename <name> <type> <options>, to Rename a device",57);	// CommandHelp, Len
@@ -167,31 +169,32 @@ Rename_CommandFn (const uint8_t *args
 		if ( (Common_Definition->nameLen == oldNameLen)
 			&& (!strncasecmp((const char*) Common_Definition->name, (const char*) oldName, oldNameLen)) ) {
 
-		// definition found, backup old value
-		char* oldNameBackup = Common_Definition->name;
-		uint8_t oldNameBackupLen = Common_Definition->nameLen;
+			// definition found, backup old value
+			uint8_t *oldNameBackup = Common_Definition->name;
+			size_t oldNameBackupLen = Common_Definition->nameLen;
 			
-		// store new name
-		Common_Definition->nameLen = 
-			asprintf(&Common_Definition->name, "%.*s"
-				,oldNameLen
-				,oldName);
+			// store new name
+			Common_Definition->nameLen = 
+				asprintf(&Common_Definition->name, "%.*s"
+					,newNameLen
+					,newName);
 			
-		// create an log entry
-		SCDEFn->Log3Fn(Set_ProvidedByCommand.commandNameText
-			,Set_ProvidedByCommand.commandNameTextLen
-		  ,3
-		 	,"Renaming Definition '%.*s' to '%.*s'.\n"
-		  ,oldNameBackupLen
-			,oldNameBackup
-			,Common_Definition->nameLen
-			,Common_Definition->name);
+			// create an log entry
+			SCDEFn->Log3Fn(Rename_ProvidedByCommand.commandNameText
+				,Rename_ProvidedByCommand.commandNameTextLen
+			  ,3
+			 	,"Renaming Definition '%.*s' to '%.*s'.\n"
+			  ,oldNameBackupLen
+				,oldNameBackup
+				,Common_Definition->nameLen
+				,Common_Definition->name);
 				
-		// free mem from old name
-		free(oldNameBackup);			
+			// free mem from old name
+			free(oldNameBackup);			
 			
-	  // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-  	return headRetMsgMultiple;	
+	 	 // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+  		return headRetMsgMultiple;	
+		}
 	}
 
   // we have a retMsg, alloc mem

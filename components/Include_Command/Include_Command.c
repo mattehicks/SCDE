@@ -265,12 +265,22 @@ Include_CommandFn (const uint8_t *argsText
 	char line [256+1];
 	while (fgets(line, sizeof(line),f) != NULL) {
 
+		// seek ptr
 		char *ptr = &line;
 
-		// init partialCmdRow processing (line may contain multiple commands) 
+		// init partialCmdRow building (line may contain multiple commands) 
 		strTextMultiple_t partialCmdRow;
 		partialCmdRow.strText = (char *) ptr;
-		partialCmdRow.strTextLen = (size_t) strlen(ptr);
+		partialCmdRow.strTextLen = (size_t) strlen(ptr); //the newline ?
+
+// müllcode
+ if ( (!memcmp(ptr+partialCmdRow.strTextLen,"\n",1)) ||
+      (!memcmp(ptr+partialCmdRow.strTextLen,"\r",1)) ) 			
+		partialCmdRow.strTextLen--;
+if ( (!memcmp(ptr+partialCmdRow.strTextLen,"\n",1)) ||
+      (!memcmp(ptr+partialCmdRow.strTextLen,"\r",1)) ) 			
+		partialCmdRow.strTextLen--;
+
 
 		// loop through partialCmdRow till strTextLen > 0
 		if (partialCmdRow.strTextLen) {

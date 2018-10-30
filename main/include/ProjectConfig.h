@@ -1,7 +1,6 @@
 #ifndef PROJECTCONFIG_H
 #define PROJECTCONFIG_H
 
-//#define EFS_HEATSHRINK	//wohin?
 
 #define FREERTOS
 #define ESP32

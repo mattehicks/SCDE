@@ -1,6 +1,7 @@
 Rename_Command.o: \
  /home/maikschulze/esp/SCDE/components/Rename_Command/Rename_Command.c \
  /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h \
+ /home/maikschulze/esp/SCDE/main/include/Platform.h \
  /home/maikschulze/esp/SCDE/main/include/esp8266.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h \
@@ -142,12 +143,13 @@ Rename_Command.o: \
  /home/maikschulze/esp/esp-idf/components/log/include/esp_log_internal.h \
  /home/maikschulze/esp/SCDE/main/include/Platform.h \
  /home/maikschulze/esp/SCDE/main/include/espmissingincludes.h \
- /home/maikschulze/esp/SCDE/main/include/Platform.h \
  /home/maikschulze/esp/SCDE/main/include/SCDE_s.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h \
  /home/maikschulze/esp/SCDE/components/Rename_Command/include/Rename_Command.h
 
 /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h:
+
+/home/maikschulze/esp/SCDE/main/include/Platform.h:
 
 /home/maikschulze/esp/SCDE/main/include/esp8266.h:
 
@@ -430,8 +432,6 @@ Rename_Command.o: \
 /home/maikschulze/esp/SCDE/main/include/Platform.h:
 
 /home/maikschulze/esp/SCDE/main/include/espmissingincludes.h:
-
-/home/maikschulze/esp/SCDE/main/include/Platform.h:
 
 /home/maikschulze/esp/SCDE/main/include/SCDE_s.h:
 
