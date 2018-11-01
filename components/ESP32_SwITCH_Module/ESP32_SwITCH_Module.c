@@ -435,7 +435,7 @@ ProvidedByModule_t ESP32_SwITCH_ProvidedByModule = {
 
   ,NULL					// Ready
 
-  ,NULL					// Rename
+  ,ESP32_SwITCH_Rename	// Rename
 
   ,ESP32_SwITCH_Set			// Set
 
@@ -1009,11 +1009,54 @@ ESP32_SwITCH_Initialize(SCDERoot_t* SCDERootptr)
 		  ,ESP32_SwITCH_ProvidedByModule.typeName);
 
   return 0;
-
 }
 
 
 
+/**
+ * -------------------------------------------------------------------------------------------------
+ *  FName: ESP32_SwITCH_Rename
+ *  Desc: FN is called when a Definition of this Module was renamed. Module can do further things here. 
+ *  Info: An FN for Rename is optional!
+ *  Para: ESP32_SwITCH_Definition_t *ESP32_SwITCH_Definition -> ESP32_SwITCH Definition that was renamed
+ *        uint8_t *newName -> ptr to the new name (do we need it???)
+ *        size_t newNameLen -> length of the new name
+ *        uint8_t *oldName -> ptr to old name
+ *        size_t oldNameLen -> length of the old name
+ *  Rets: strTextMultiple_t* -> response text in allocated memory, NULL=no text
+ * -------------------------------------------------------------------------------------------------
+ */
+strTextMultiple_t*
+ESP32_SwITCH_Rename(Common_Definition_t *Common_Definition
+	,uint8_t *newName
+	,size_t newNameLen
+	,uint8_t *oldName
+	,size_t oldNameLen)
+{
+	
+	// for Fn response msg
+  strTextMultiple_t *multipleRetMsg = NULL;
+	
+	SCDEFn->Log3Fn(Common_Definition->name
+		,Common_Definition->nameLen
+		,5
+		,"RenameFn of Module '%.*s' is called for Definition '%.*s'. Definition got new name. Old name was '%.*s'."
+		,ESP32_SwITCH_Definition->common.module->ProvidedByModule->typeNameLen
+		,ESP32_SwITCH_Definition->common.module->ProvidedByModule->typeName
+		,uint8_t *newName
+		,size_t newNameLen
+		,uint8_t *oldName
+		,size_t oldNameLen);
+	
+  // make common ptr to modul specific ptr
+  ESP32_SwITCH_Definition_t* ESP32_SwITCH_Definition =
+		(ESP32_SwITCH_Definition_t*) Common_Definition;
+
+	return multipleRetMsg;
+}
+	
+	
+	
 /**
  * -------------------------------------------------------------------------------------------------
  *  FName: ESP32_SwITCH_Set
