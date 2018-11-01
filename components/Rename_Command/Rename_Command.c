@@ -188,6 +188,35 @@ Rename_CommandFn (const uint8_t *args
 				,oldNameBackup
 				,Common_Definition->nameLen
 				,Common_Definition->name);
+			
+			// RenameFn assigned by module ?
+  		if (Module->ProvidedByModule->RenameFn) {
+							 
+				printf("Calling module '%.*s' RenameFN(%.*s,%.*s,%.*s)\n"
+					,Common_Definition->module->ProvidedByModule->typeNameLen
+     			,Common_Definition->module->ProvidedByModule->typeName
+					,Common_Definition->nameLen
+      		,Common_Definition->name
+					,Common_Definition->nameLen
+					,Common_Definition->name
+					,oldNameBackupLen
+					,oldNameBackup);
+
+    		// execute RenameFn and maybe get an error msg
+   			strTextMultiple_t *retMsg = 
+    	  	Common_Definition->Module->ProvidedByModule->RenameFn(Common_Definition
+						,Common_Definition->nameLen
+						,Common_Definition->name
+						,oldNameBackupLen
+						,oldNameBackup);
+
+    		// got an error msg?
+    		if (retMsg) {
+
+     	 		// insert retMsg in stail-queue
+      		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+    		}
+  		}
 				
 			// free mem from old name
 			free(oldNameBackup);			
