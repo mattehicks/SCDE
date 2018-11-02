@@ -804,7 +804,7 @@ InitA()
 				malloc(sizeof(strText_t));
 
 			// attribute "statefile" complete, use it to build args
-			incCFIncludeCommandArgs.strTextLen =
+			incSFIncludeCommandArgs->strTextLen =
 				asprintf((char**) &incSFIncludeCommandArgs->strText
 					,"include %.*s"
 					,(int) attrStateFNValueName->strTextLen
@@ -824,7 +824,7 @@ InitA()
 			malloc(sizeof(strText_t));
 
 		// and fill with cmd-args
-		incCFIncludeCommandArgs.strTextLen =
+		incSFIncludeCommandArgs->strTextLen =
 			asprintf((char**) &incSFIncludeCommandArgs->strText
 			,"include state");
   }

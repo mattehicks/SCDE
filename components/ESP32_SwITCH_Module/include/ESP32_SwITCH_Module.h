@@ -242,6 +242,7 @@ strTextMultiple_t* ESP32_SwITCH_Attribute(Common_Definition_t* Common_Definition
 strTextMultiple_t* ESP32_SwITCH_Define(Common_Definition_t *Common_Definition);
 int                ESP32_SwITCH_IdleCb(Common_Definition_t *Common_Definition);
 int                ESP32_SwITCH_Initialize(SCDERoot_t* SCDERoot);
+strTextMultiple_t* ESP32_SwITCH_Rename(Common_Definition_t *Common_Definition, uint8_t *newName, size_t newNameLen, uint8_t *oldName, size_t oldNameLen);
 strTextMultiple_t* ESP32_SwITCH_Set(Common_Definition_t* Common_Definition, uint8_t *setArgs, size_t setArgsLen);
 strTextMultiple_t* ESP32_SwITCH_Shutdown(Common_Definition_t* Common_Definition);
 strTextMultiple_t* ESP32_SwITCH_Undefine(Common_Definition_t* Common_Definition);

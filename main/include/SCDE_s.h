@@ -313,8 +313,6 @@ typedef struct SCDEFn_s
  * should be only called if not NULL.
  *
  * InitializeFn  - returns module information (module_s) required for operation
- *xxxxxxxxxxxxxxxxxxx AttributeFn   - called for attribute changes
- * DefineFn      - define a "device" of this type	// Callback wird beim Define eines Devices/Gerätes aufgerufen
  * DeleteFn      - clean up (delete logfile), called by delete after UndefFn	// wird beim delete aufgerufen um das Device/Gerät endgültig zu löschen
  * ExceptFn      - called if the global select reports an except field
  * GetFn         - get some data from this device
@@ -322,7 +320,6 @@ typedef struct SCDEFn_s
  * ParseFn       - Interpret a raw message
  * ReadFn        - Reading from a Device (see FHZ/WS300)
  * ReadyFn       - check for available data, if no FD
- * RenameFn      - inform the device about its renameing
  * SetFn         - set/activate this device
  * ShutdownFn    - called before shutdown
  * StateFn       - set local info for this device, do not activate anything
@@ -360,7 +357,7 @@ typedef struct SCDEFn_s
 
 
 
-// ProvidedByModule_t stores function callbacks (Fn) for SCDE module operation
+// ProvidedByModule_t stores differnt function callbacks (Fn) - the heart of SCDE module operation
 typedef struct ProvidedByModule_s ProvidedByModule_t;
 
 // typedef for AddFn - experimental - provided my module
@@ -372,19 +369,37 @@ typedef strTextMultiple_t* (* AttributeFn_t)(Common_Definition_t* Common_Definit
 // typedef for DefineFn - called to create a new definition of this type - provided my module
 typedef strTextMultiple_t* (* DefineFn_t)(Common_Definition_t *Common_Definition);//, const char *Definition);
 
+//
 typedef int (* DeleteFn_t)(Common_Definition_t *Common_Definition);		
+
+//
 typedef int (* ExceptFn_t)(Common_Definition_t *Common_Definition);
+
+//
 typedef int (* FingerprintFn_t)(Common_Definition_t *Common_Definition);
 
 // typedef for GetFn - for 2 stage designs - called to get data from this type - provided my module
 typedef int (* GetFn_t)(Common_Definition_t *Common_Definition, Common_Definition_t *sourceCommon_Definition, void *X);
 
+//
 typedef int (* IdleCbFn_t)(Common_Definition_t *Common_Definition);
+
+//
 typedef int (* InitializeFn_t)(SCDERoot_t *SCDERoot);
+
+//
 typedef int (* NotifyFn_t)(Common_Definition_t *Common_Definition);
+
+//
 typedef int (* ParseFn_t)(Common_Definition_t *Common_Definition);
+
+//
 typedef int (* ReadFn_t)(Common_Definition_t *Common_Definition);
+
+//
 typedef int (* ReadyFn_t)(Common_Definition_t *Common_Definition);
+
+// typedef for RenameFn - called to inform the definition about its renameing - provided my module
 typedef int (* RenameFn_t)(Common_Definition_t *Common_Definition, uint8_t *newName, size_t newNameLen, uint8_t *oldName, size_t oldNameLen);
 
 // typedef for SetFn - called to send data to the device (opposite of Get) - provided my module
@@ -393,6 +408,7 @@ typedef strTextMultiple_t* (* SetFn_t)(Common_Definition_t *Common_Definition, u
 // typedef for ShutdownFn - called to do activities before SCDE shuts down - provided my module
 typedef strTextMultiple_t* (* ShutdownFn_t)(Common_Definition_t *Common_Definition);
 
+//
 typedef int (* StateFn_t)(Common_Definition_t *Common_Definition);
 
 // typedef for SubFn - experimental - provided my module
@@ -401,7 +417,10 @@ typedef strTextMultiple_t* (* SubFn_t)(Common_Definition_t *Common_Definition, u
 // typedef for UndefineFn - called when device is deleted, chance to cleanup - provided my module
 typedef strTextMultiple_t* (* UndefineFn_t)(Common_Definition_t *Common_Definition);		
 
+//
 typedef int (* DirectReadFn_t)(Common_Definition_t *Common_Definition);
+
+//
 typedef int (* DirectWriteFn_t)(Common_Definition_t *Common_Definition);
 
 
@@ -414,14 +433,14 @@ typedef int (* DirectWriteFn_t)(Common_Definition_t *Common_Definition);
  */
 struct ProvidedByModule_s {
 
-  uint8_t typeName[32];	//typeNameText;	// Type-Name string of module
-  size_t typeNameLen;//typeNameTextLen;
+  uint8_t typeName[32];		// Type-Name of module
+  size_t typeNameLen;
 
   AddFn_t AddFn;		// called when Key=Value Attributes owned by this Module are assigned
 
-  AttributeFn_t AttributeFn;	// called in case of attribute activities / changes, to check them
+  AttributeFn_t AttributeFn;	// called in case of attribute changes, to check them
 
-  DefineFn_t DefineFn;		// called to create a new definition of this type / to finalize setup
+  DefineFn_t DefineFn;		// called to create a new definition of this type
 
   DeleteFn_t DeleteFn;		// clean up (delete logfile), called by delete after UndefFn
 
@@ -441,7 +460,7 @@ struct ProvidedByModule_s {
 
   ReadyFn_t ReadyFn;		// check for available data, if no FD
 
-  RenameFn_t RenameFn;		// inform the device about its renameing
+  RenameFn_t RenameFn;		// called to inform the definition about its renameing
 
   SetFn_t SetFn;		// set/activate this device
 
@@ -460,7 +479,6 @@ struct ProvidedByModule_s {
 // uint32_t *FnProvided;	// Fn Provided for other Modules
 
   int SizeOfDefinition;		// Size of modul specific definition structure (Common_Definition_t + X)
-
 };
 
 

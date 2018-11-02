@@ -440,7 +440,7 @@ ProvidedByModule_t ESP32_S0_ProvidedByModule =  {
 
   ,NULL					// Ready
 
-  ,NULL					// Rename
+  ,ESP32_S0_Rename			// Rename
 
   ,ESP32_S0_Set				// Set
 
@@ -865,6 +865,50 @@ ESP32_S0_Initialize(SCDERoot_t* SCDERootptr)
 }
 
 
+
+/**
+ * -------------------------------------------------------------------------------------------------
+ *  FName: ESP32_S0_Rename
+ *  Desc: FN is called when a Definition of this Module was renamed. Module can do further things here. 
+ *  Info: An FN for Rename is optional!
+ *  Para: ESP32_S0_Definition_t *ESP32_S0_Definition -> ESP32_S0 Definition that was renamed
+ *        uint8_t *newName -> ptr to the new name (do we need it???)
+ *        size_t newNameLen -> length of the new name
+ *        uint8_t *oldName -> ptr to old name
+ *        size_t oldNameLen -> length of the old name
+ *  Rets: strTextMultiple_t* -> response text in allocated memory, NULL=no text
+ * -------------------------------------------------------------------------------------------------
+ */
+strTextMultiple_t*
+ESP32_S0_Rename(Common_Definition_t *Common_Definition
+	,uint8_t *newName
+	,size_t newNameLen
+	,uint8_t *oldName
+	,size_t oldNameLen)
+{
+	
+	// for Fn response msg
+  strTextMultiple_t *multipleRetMsg = NULL;
+	
+  // make common ptr to modul specific ptr
+  ESP32_S0_Definition_t* ESP32_S0_Definition =
+		(ESP32_S0_Definition_t*) Common_Definition;
+
+	SCDEFn->Log3Fn(Common_Definition->name
+		,Common_Definition->nameLen
+		,5
+		,"RenameFn of Module '%.*s' is called for Definition '%.*s'. Definition got new name. Old name was '%.*s'."
+		,ESP32_S0_Definition->common.module->ProvidedByModule->typeNameLen
+		,ESP32_S0_Definition->common.module->ProvidedByModule->typeName
+		,newName
+		,newNameLen
+		,oldName
+		,oldNameLen);
+	
+	return multipleRetMsg;
+}
+	
+	
 
 /**
  * -------------------------------------------------------------------------------------------------

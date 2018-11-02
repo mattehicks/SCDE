@@ -435,7 +435,7 @@ ProvidedByModule_t ESP32_SwITCH_ProvidedByModule = {
 
   ,NULL					// Ready
 
-  ,ESP32_SwITCH_Rename	// Rename
+  ,ESP32_SwITCH_Rename			// Rename
 
   ,ESP32_SwITCH_Set			// Set
 
@@ -1037,21 +1037,21 @@ ESP32_SwITCH_Rename(Common_Definition_t *Common_Definition
 	// for Fn response msg
   strTextMultiple_t *multipleRetMsg = NULL;
 	
+  // make common ptr to modul specific ptr
+  ESP32_SwITCH_Definition_t* ESP32_SwITCH_Definition =
+		(ESP32_SwITCH_Definition_t*) Common_Definition;
+
 	SCDEFn->Log3Fn(Common_Definition->name
 		,Common_Definition->nameLen
 		,5
 		,"RenameFn of Module '%.*s' is called for Definition '%.*s'. Definition got new name. Old name was '%.*s'."
 		,ESP32_SwITCH_Definition->common.module->ProvidedByModule->typeNameLen
 		,ESP32_SwITCH_Definition->common.module->ProvidedByModule->typeName
-		,uint8_t *newName
-		,size_t newNameLen
-		,uint8_t *oldName
-		,size_t oldNameLen);
+		,newName
+		,newNameLen
+		,oldName
+		,oldNameLen);
 	
-  // make common ptr to modul specific ptr
-  ESP32_SwITCH_Definition_t* ESP32_SwITCH_Definition =
-		(ESP32_SwITCH_Definition_t*) Common_Definition;
-
 	return multipleRetMsg;
 }
 	

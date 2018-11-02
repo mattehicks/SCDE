@@ -222,6 +222,7 @@ strTextMultiple_t* ESP32_S0_Attribute(Common_Definition_t* Common_Definition, co
 strTextMultiple_t* ESP32_S0_Define(Common_Definition_t *Common_Definition);
 int                ESP32_S0_IdleCb(Common_Definition_t *Common_Definition);
 int                ESP32_S0_Initialize(SCDERoot_t* SCDERoot);
+strTextMultiple_t* ESP32_S0_Rename(Common_Definition_t *Common_Definition, uint8_t *newName, size_t newNameLen, uint8_t *oldName, size_t oldNameLen);
 strTextMultiple_t* ESP32_S0_Set(Common_Definition_t* Common_Definition, uint8_t *setArgs, size_t setArgsLen);
 strTextMultiple_t* ESP32_S0_Shutdown(Common_Definition_t* Common_Definition);
 strTextMultiple_t* ESP32_S0_Undefine(Common_Definition_t* Common_Definition);

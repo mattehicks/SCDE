@@ -58,8 +58,9 @@ esptool --chip esp32 --port /dev/ttyUSB0 --baud 115200 write_flash -z 0x110000 s
 CMD to build and flash SCDE
 make flash
 
-CMD to flash the partition table:
+CMD to build the partition table:
 make partition_table
+(read screen for instructions anout flashing the table!)
 
 CMD to make changes to ESP32 IDF
 make menuconfig

@@ -190,7 +190,7 @@ Rename_CommandFn (const uint8_t *args
 				,Common_Definition->name);
 			
 			// RenameFn assigned by module ?
-  		if (Module->ProvidedByModule->RenameFn) {
+  		if (Common_Definition->module->ProvidedByModule->RenameFn) {
 							 
 				printf("Calling module '%.*s' RenameFN(%.*s,%.*s,%.*s)\n"
 					,Common_Definition->module->ProvidedByModule->typeNameLen
@@ -204,7 +204,7 @@ Rename_CommandFn (const uint8_t *args
 
     		// execute RenameFn and maybe get an error msg
    			strTextMultiple_t *retMsg = 
-    	  	Common_Definition->Module->ProvidedByModule->RenameFn(Common_Definition
+    	  	Common_Definition->module->ProvidedByModule->RenameFn(Common_Definition
 						,Common_Definition->nameLen
 						,Common_Definition->name
 						,oldNameBackupLen
