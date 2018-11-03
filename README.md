@@ -48,6 +48,9 @@ This is part of
 EcSUHA - ECONOMIC SURVEILLANCE AND HOME AUTOMATION - WWW.EcSUHA.DE
 
 
+CMD to clone SCDE (ESP-IDF should be installed and tested)
+git clone --recursive <project url>
+
 
 CMD to build the SPIFFS image:
 ./mkspiffs -c filesystem/ -b 4096 -p 256 -s 0x100000 spiffs.bin
