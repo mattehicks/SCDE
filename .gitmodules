@@ -1,0 +1,3 @@
+[submodule "components/ESP32_SwITCH_Module"]
+	path = components/ESP32_SwITCH_Module
+	url = https://github.com/EcSUHA/SCDE.git
