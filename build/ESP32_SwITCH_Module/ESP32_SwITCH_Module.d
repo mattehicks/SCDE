@@ -155,7 +155,14 @@ ESP32_SwITCH_Module.o: \
  /home/maikschulze/esp/SCDE/components/ESP32_Control_Module/include/HTools_cgi.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Content/include/ServAPCfg_tpl.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/CGI_Redirect.h
+ /home/maikschulze/esp/SCDE/components/WebIf_Module/include/CGI_Redirect.h \
+ /home/maikschulze/esp/esp-idf/components/driver/include/driver/ledc.h \
+ /home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_reg.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/esp_dport_access.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h \
+ /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h
 
 /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h:
 
@@ -468,4 +475,18 @@ ESP32_SwITCH_Module.o: \
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/CGI_Redirect.h:
+
+/home/maikschulze/esp/esp-idf/components/driver/include/driver/ledc.h:
+
+/home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_reg.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h:
+
+/home/maikschulze/esp/esp-idf/components/esp32/include/esp_dport_access.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h:
+
+/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h:
 /home/maikschulze/esp/SCDE/components/ESP32_SwITCH_Module/./ESP32_SwITCH_Module.c:

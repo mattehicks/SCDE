@@ -400,7 +400,7 @@ typedef int (* ReadFn_t)(Common_Definition_t *Common_Definition);
 typedef int (* ReadyFn_t)(Common_Definition_t *Common_Definition);
 
 // typedef for RenameFn - called to inform the definition about its renameing - provided my module
-typedef int (* RenameFn_t)(Common_Definition_t *Common_Definition, uint8_t *newName, size_t newNameLen, uint8_t *oldName, size_t oldNameLen);
+typedef strTextMultiple_t* (* RenameFn_t)(Common_Definition_t *Common_Definition, uint8_t *newName, size_t newNameLen, uint8_t *oldName, size_t oldNameLen);
 
 // typedef for SetFn - called to send data to the device (opposite of Get) - provided my module
 typedef strTextMultiple_t* (* SetFn_t)(Common_Definition_t *Common_Definition, uint8_t *setArgs, size_t setArgsLen);

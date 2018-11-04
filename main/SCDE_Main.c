@@ -1255,7 +1255,7 @@ app_main(void)
 
  // nvs_flash_init();
 
-  system_init();
+//  system_init();
 
   LOGD("WiFi init");
   ESP32_WiFiInit();
