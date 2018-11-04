@@ -45,19 +45,24 @@ static SCDEFn_t* SCDEFn;
  *  Data: 
  * --------------------------------------------------------------------------------------------------
  */
-  const uint8_t shelpText[] = "Usage: Set <Def-Name> <Type dependent arguments or ?>";	// CommandHelp, Len
-  const uint8_t shelpDetailText[] = "Usagebwrebwerb: define <name> <type> <options>, to define a device";	// CommandHelp, Len
+
+// Command Help
+const uint8_t Set_helpText[] = 
+  "Usage: Set <Def-Name> <Type dependent arguments or ?>";
+// CommandHelp (detailed)
+const uint8_t Set_helpDetailText[] = 
+  "Usagebwrebwerb: define <name> <type> <options>, to define a device";
 
 providedByCommand_t Set_ProvidedByCommand =
   {
-   "set"					// Command-Name of command -> should be same name as libfilename.so !
+   "Set"					// Command-Name of command -> libfilename.so !
   ,3						// length of cmd
   ,Set_InitializeCommandFn			// Initialize Fn
   ,Set_CommandFn				// the Fn code
-  ,&shelpText
-  ,sizeof(shelpText)
-  ,&shelpDetailText
-  ,sizeof(shelpDetailText)
+  ,&Set_helpText
+  ,sizeof(Set_helpText)
+  ,&Set_helpDetailText
+  ,sizeof(Set_helpDetailText)
   };
 
 //(const uint8_t *) "Usage: define <name> <type> <options>, to define a device",57);	// CommandHelp, Len

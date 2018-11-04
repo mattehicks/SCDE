@@ -1515,6 +1515,10 @@ app_main(void)
   extern providedByCommand_t Set_ProvidedByCommand;
   CommandActivateCommand(&Set_ProvidedByCommand);
 
+  // Activate Setstate as SCDE built-in Command
+  extern providedByCommand_t Setstate_ProvidedByCommand;
+  CommandActivateCommand(&Setstate_ProvidedByCommand);
+
   // Activate Shutdown as SCDE built-in Command
   extern providedByCommand_t Shutdown_ProvidedByCommand;
   CommandActivateCommand(&Shutdown_ProvidedByCommand);

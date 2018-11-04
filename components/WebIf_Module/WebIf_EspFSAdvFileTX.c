@@ -45,12 +45,11 @@ typedef void (* TplCallback)(WebIf_HTTPDConnSlotData_t *conn, char *token, void 
 
 // Storage for token processing from file
 typedef struct {
-//  EspFsFile *file;
   FILE* file;
   void *tplArg;
   char token[64];	// max allowed len for replacement-token!
   int tokenPos;
-  } TplData;
+} TplData;
 
 
 
@@ -70,7 +69,7 @@ typedef struct {
  */
 int ICACHE_FLASH_ATTR 
 WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn) 
-  {
+{
 
   // RPCData stores pointer to template processing data
   TplData *tpd = conn->PCData;
@@ -119,21 +118,29 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 	// alloc memory for template processing data
 	tpd = (TplData *) malloc(sizeof(TplData));
 
+	// to prepare the filename (path corrections)
+	char *fileName;
+
 	// Option to use alternative file from filesystem	
 	if (conn->AltFSFile != NULL) {
 
-//		tpd->file = espFsOpen(conn->AltFSFile);
-                tpd->file = fopen(conn->AltFSFile, "r");
-
-		}
+		asprintf(&fileName
+			,"/spiffs/webif%s"
+			,conn->AltFSFile);
+	}
 
 	else	{
 
-		// standard use conn->url as requested file
-//		tpd->file = espFsOpen(conn->url);
-                tpd->file = fopen(conn->url, "r");
+		asprintf(&fileName
+			,"/spiffs/webif%s"
+			,conn->url);
+	}
 
-		}
+	// open the file
+	tpd->file = fopen(fileName, "r");
+
+	// free prepared name
+	free(fileName);
 
 	tpd->tplArg = NULL;
 	tpd->tokenPos = -1;
@@ -148,8 +155,7 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 		conn->cgi = NotFoundErr_cgi;
 
 		return HTTPD_CGI_REEXECUTE;
-
-		}
+	}
 
 	// continue processing ...		
 	conn->PCData = tpd;
@@ -178,8 +184,7 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 		CurrTXBufFree = MaxFsReadBlockSize;
 
 	// read till next % (>=1), or max CurrTXBufFree len
-//	len = espFsRead(tpd->file, buff, CurrTXBufFree);
-	len = fread(buff, CurrTXBufFree, 1, tpd->file);
+	len = fread(buff, 1, CurrTXBufFree, tpd->file);
 
  	# if WebIF_EspFSAdvFileTX_DBG >= 4	
  	os_printf("|read:%d, max:%d,TX>"
@@ -216,20 +221,17 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 
 					// Go collect token chars.
 					tpd->tokenPos = 0;
-
-					}
+				}
 
 				// not a token beginning ...
 				else	{
 		
 					sp++;
-
-					}
-
 				}
+			}
 
 			// Inside token ...(tpd->tokenPos == 0)
-			else	{
+			else {
 
 				if (buff[x] == '%') {
 
@@ -238,8 +240,7 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 						// This is the second % of a %% escape string.
 						// Send a single % and resume with the normal program flow.
 						NextTXBufFree = SCDED_Send(conn, "%", 1);
-
-						}
+					}
 
 					// token end '%' detected, executen token replacement
 					else	{
@@ -259,27 +260,24 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 								,&tpd->tplArg);
 
 							NextTXBufFree = SCDED_Send(conn, NULL, 0);
-
-							}
 						}
+					}
 
 					// continue, now outside token in ordinary text ...
 					e = &buff[x+1];
 
 					tpd->tokenPos = -1;
-
-					}
+				}
 
 				// token continuing, copy out token to token buffer
-		 		else	{
+		 		else {
 
 					if (tpd->tokenPos < (sizeof(tpd->token)-1))
 						tpd->token[tpd->tokenPos++] = buff[x];
-
-					}
 				}
 			}
 		}
+	}
 
 	// Send remaining data ..
 	if (sp != 0) NextTXBufFree = SCDED_Send(conn, e, sp);
@@ -292,7 +290,6 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 		((TplCallback)(conn->PCArg))(conn, NULL, &tpd->tplArg);
 
 		// We're done.
-//		espFsClose(tpd->file);
 		fclose(tpd->file);
 
 		// free memory for template processing data
@@ -303,17 +300,14 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 		# endif
 
 		return HTTPD_CGI_DISCONNECT_CONN;
-
-		}
+	}
 
 	// prepare value of free bytes for next cycle
 	CurrTXBufFree = NextTXBufFree;	
-
-	}
+  }
 
   // no free bytes in TX-Buf left. continue next time ...
   return HTTPD_CGI_PROCESS_CONN;
-
-  }
+}
 
 

@@ -2847,9 +2847,10 @@ SCDED_XmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 */
 
 
+
 /* --------------------------------------------------------------------------------------------------
  *  FName: SCDED_TransmitSendBuff
- *  Desc: Function to finally transmitts the data in the Send-Buffer (conn->sendBuff - if any)
+ *  Desc: Function to finally transmit the data stored in the Send-Buffer (conn->sendBuff, if any)
  *
  *  Para: SCDED_DConnSlotData_t *conn -> ptr to connection slot
  *  Rets: -/-
@@ -2857,13 +2858,10 @@ SCDED_XmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
  */
 void ICACHE_FLASH_ATTR 
 SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t *conn) 
-
-  {
+{
 
   // do we have an allocated Send-Buffer -> there is something to send in the Send-Buffer !
-  if (conn->sendBuff) //(conn->sendBuffLen)
-
-	{
+  if (conn->sendBuff) {
 
 	# if SCDED_DBG >= 3
 	os_printf("|TX SendBuff, slot %d, to remote:%d.%d.%d.%d:%d from local port:%d, len=%d. mem:%d>",
@@ -2889,16 +2887,13 @@ SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 		(uint16_t)conn->sendBuffLen);
 
 	// show error on debug term...
- 	if (Result)
-
-		{
+ 	if (Result) {
 
 		# if SCDED_DBG >= 1
 		os_printf("\n|TX-Err:%d!>"
 			,Result);
 		# endif
-
-		}
+	}
 
 	// free Send-Buffer
 	free(conn->sendBuff);
@@ -2909,25 +2904,19 @@ SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 	// init length for next usage
 	conn->sendBuffLen = 0;
 
-			// incompatibility? alter code ?
-			// We sent data. We are not allowed to send again till SentCb is fired.
-			// Indicate this by F_TXED_CALLBACK_PENDING in ConCtrl
-			conn->ConnCtrlFlags |= F_TXED_CALLBACK_PENDING;
+	// incompatibility? alter code ?
+	// We sent data. We are not allowed to send again till SentCb is fired.
+	// Indicate this by F_TXED_CALLBACK_PENDING in ConCtrl
+	conn->ConnCtrlFlags |= F_TXED_CALLBACK_PENDING;
+  }
 
-	}
-
-  else
-
-	{
+  else {
 
 	# if SCDED_DBG >= 3
 	os_printf("|no allocated SendBuff, no TX!>");
 	# endif
-
-	}
-
   }
-
+}
 
 
 
@@ -2944,13 +2933,10 @@ SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
  */
 bool ICACHE_FLASH_ATTR 
 SCDED_LoadSerializer(WebIf_HTTPDConnSlotData_t *conn)
+{
 
-  {
-
-  // if no Load, mark this connection as "process"
-  if (!(conn->conn->HTTPD_InstCfg->LoadSerializer &= ~(1<<(conn->SlotNo))) )
-
-	{
+  // if no load, mark this connection as "process"
+  if (!(conn->conn->HTTPD_InstCfg->LoadSerializer &= ~(1<<(conn->SlotNo))) ) {
 
 	conn->conn->HTTPD_InstCfg->LoadSerializer |= 1 << (conn->SlotNo);
 
@@ -2961,12 +2947,9 @@ SCDED_LoadSerializer(WebIf_HTTPDConnSlotData_t *conn)
 	#endif
 
 	return false;
+  }
 
-	}
-
-  else
-
-	{
+  else  {
 
 	#if SCDED_DBG >= 3
 	printf("LS:%u, Slot %d delayed\n",
@@ -2975,9 +2958,7 @@ SCDED_LoadSerializer(WebIf_HTTPDConnSlotData_t *conn)
 	#endif
 
 	return true;
-
-	}
-
+  }
 }
 
 
@@ -10382,14 +10363,17 @@ int ICACHE_FLASH_ATTR
 WebIf_sent(WebIf_Definition_t *WebIf_Definition
 	,uint8_t *Buff
 	,uint Len)
-  {
+{
+  # if SCDED_DBG >= 5
+  os_printf("\n|WebIf_Sent len:%d!>"
+	,Len);
+  # endif
 
   // select for want writing (F_WANTS_WRITE), because maybe we have more data to send ...
   WebIf_Definition->common.Common_CtrlRegA |= F_WANTS_WRITE;
 
   return (write(WebIf_Definition->common.fd, Buff, Len) >= 0);
-
-  }
+}
 
 
 

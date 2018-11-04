@@ -44,22 +44,25 @@ static SCDEFn_t* SCDEFn;
  *  Data: 
  * -------------------------------------------------------------------------------------------------
  */
-const uint8_t Include_CMDHelpText[] =
-	"Usage: Include <filename>, to read the commands from <filenname>";	// CommandHelp, Len
-const uint8_t Include_CMDHelpDetailText[] =
-	"Usagebwrebwerb: Include <filename>, to read the commands from <filenname>";	// CommandHelp, Len
+
+// Command Help
+const uint8_t Include_helpText[] =
+  "Usage: Include <filename>, to read the commands from <filenname>";
+// CommandHelp (detailed)
+const uint8_t Include_helpDetailText[] =
+  "Usagebwrebwerb: Include <filename>, to read the commands from <filenname>";
 
 
 providedByCommand_t Include_ProvidedByCommand =
   {
-   "include"			// command-name text -> should be same name as libfilename.so !
+   "Include"			// command-name text -> libfilename.so !
   ,7				// command-name text length
   ,Include_InitializeCommandFn	// Initialize Fn
   ,Include_CommandFn		// the Fn code
-  ,&Include_CMDHelpText
-  ,sizeof(Include_CMDHelpText)
-  ,&Include_CMDHelpDetailText
-  ,sizeof(Include_CMDHelpDetailText)
+  ,&Include_helpText
+  ,sizeof(Include_helpText)
+  ,&Include_helpDetailText
+  ,sizeof(Include_helpDetailText)
   };
 
 

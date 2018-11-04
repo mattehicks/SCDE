@@ -46,10 +46,9 @@
  */
 int ICACHE_FLASH_ATTR 
 WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn) 
-  {
+{
 
-//EspFsFile *file = conn->PCData;
-  FILE* file = conn->PCData;
+  FILE *file = conn->PCData;
 
   int len;
 
@@ -58,12 +57,10 @@ WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn)
   // Connection aborted? Clean up.
   if (conn->conn == NULL) {
 
-//	espFsClose(file);
         fclose(file);
 
 	return HTTPD_CGI_DISCONNECT_CONN;
-
-	}
+  }
 
   // Load management ?
   if (SCDED_LoadSerializer(conn)) return HTTPD_CGI_PROCESS_CONN;
@@ -86,8 +83,18 @@ WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn)
   // First call to this cgi. Open the file so we can read it, start response ...
   if (file == NULL) {
 
-//	file = espFsOpen(conn->url);
-	file = fopen(conn->url, "r");
+	// to prepare the filename (path corrections)
+	char *fileName;
+
+	asprintf(&fileName
+		,"/spiffs/webif%s"
+		,conn->url);
+
+	// open the file
+	file = fopen(fileName, "r");
+
+	// free prepared name
+	free(fileName);
 
 	if (file == NULL) {
 
@@ -95,8 +102,7 @@ WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn)
 		conn->cgi = NotFoundErr_cgi;
 
 		return HTTPD_CGI_REEXECUTE;
-
-		}
+	}
 	
 	conn->PCData = file;
 
@@ -104,7 +110,7 @@ WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn)
 	SCDED_StartRespHeader(conn, 200);
 
 	# if WebIF_EspFSStdFileTX_DBG >= 3	
-	os_printf("|URL:%s, mime:%d>"
+	os_printf("|URL:%s, MIME:%d>"
 		,conn->url
 		,SCDED_GetMimeTypeID(conn->url));
 	# endif
@@ -120,8 +126,7 @@ WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn)
 		-1);
 
 	SCDED_EndHeader(conn);
-
-	}
+  }
 
   // get the initial number of bytes free in send buff
   int CurrTXBufFree = SCDED_Send(conn, NULL, 0);
@@ -134,8 +139,7 @@ WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn)
 	if (CurrTXBufFree > MaxFsReadBlockSize) 
 		CurrTXBufFree = MaxFsReadBlockSize;
 
-//	len = espFsRead(file, buff, CurrTXBufFree);
-	len = fread(buff, CurrTXBufFree, 1, file);
+	len = fread(&buff, 1, CurrTXBufFree, file);
 
  	# if WebIF_EspFSStdFileTX_DBG >= 4	
  	os_printf("|read:%d, max:%d,TX>"
@@ -157,7 +161,6 @@ WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn)
 	if (len == 0) {
 
 		// We're done.
-//		espFsClose(file);
 		fclose(file);
 
 		# if WebIF_EspFSStdFileTX_DBG >= 4	
@@ -165,18 +168,15 @@ WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn)
 		# endif
 
 		return HTTPD_CGI_DISCONNECT_CONN;
-
-		}
+	}
 
 	// prepare value of free bytes for next cycle
 	CurrTXBufFree = NextTXBufFree;	
-
-	}
+  }
 
   // no free bytes in TX-Buf left. continue next time ...
   return HTTPD_CGI_PROCESS_CONN;
-
-  }
+}
 
 
 

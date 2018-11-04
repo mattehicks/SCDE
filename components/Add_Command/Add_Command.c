@@ -45,20 +45,24 @@ static SCDEFn_t* SCDEFn;
  * --------------------------------------------------------------------------------------------------
  */
 
-  const uint8_t helpTextadd[] = "Usage: Add <Type-Name> <Name> <Key> <Value>, to add a key=value pair to an device";	// CommandHelp, Len
-  const uint8_t helpDetailTextadd[] = "Usagebwrebwerb: Add <Type-Name> <Name> <Key> <Value>, to add a key=value pair to an device";	// CommandHelp, Len
+// Command Help
+const uint8_t Add_helpText[] = 
+  "Usage: Add <Type-Name> <Name> <Key> <Value>, to add a key=value pair to an device";
+// CommandHelp (detailed)
+const uint8_t Add_helpDetailText[] = 
+  "Usagebwrebwerb: Add <Type-Name> <Name> <Key> <Value>, to add a key=value pair to an device";
 
 
 providedByCommand_t Add_ProvidedByCommand =
   {
-   "Add"					// Command-Name of command -> should be same name as libfilename.so !
+   "Add"					// Command-Name of command -> libfilename.so !
   ,3						// length of cmd
   ,Add_InitializeCommandFn			// Initialize Fn
   ,Add_CommandFn				// the Fn code
-  ,&helpTextadd
-  ,sizeof(helpTextadd)
-  ,&helpDetailTextadd
-  ,sizeof(helpDetailTextadd)
+  ,&Add_helpText
+  ,sizeof(Add_helpText)
+  ,&Add_helpDetailText
+  ,sizeof(Add_helpDetailText)
   };
 
 

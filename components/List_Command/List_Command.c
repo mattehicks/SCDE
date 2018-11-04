@@ -46,22 +46,23 @@ static SCDEFn_t* SCDEFn;
  * --------------------------------------------------------------------------------------------------
  */
 
-  // Usage: define 
-  const uint8_t lxhelpText[] = "<name> <type> <options>";	// CommandHelp, Len
-
-  // to
-  const uint8_t lxhelpDetailText[] = "list definitions and state info";	// CommandHelp, Len
+// Command Help
+const uint8_t List_helpText[] = 
+  "<name> <type> <options>";
+// CommandHelp (detailed)
+const uint8_t List_helpDetailText[] = 
+  "list definitions and state info";
 
 providedByCommand_t List_ProvidedByCommand =
   {
-   "list"					// Command-Name of command -> should be same name as libfilename.so !
+   "List"					// Command-Name of command -> libfilename.so !
   ,4						// length of cmd
   ,List_InitializeCommandFn			// Initialize Fn
   ,List_CommandFn				// the Fn code
-  ,&lxhelpText
-  ,sizeof(lxhelpText)
-  ,&lxhelpDetailText
-  ,sizeof(lxhelpDetailText)
+  ,&List_helpText
+  ,sizeof(List_helpText)
+  ,&List_helpDetailText
+  ,sizeof(List_helpDetailText)
   };
 
 //(const uint8_t *) "Usage: define <name> <type> <options>, to define a device",57);	// CommandHelp, Len

@@ -45,20 +45,24 @@ static SCDEFn_t* SCDEFn;
  * --------------------------------------------------------------------------------------------------
  */
 
-  const uint8_t helpTextSub[] = "Usage: Sub <Type-Name> <Def-Name> <Key>, to delete a key=value pair added to an device";	// CommandHelp, Len
-  const uint8_t helpDetailTextSub[] = "Usagebwrebwerb: Sub <Type-Name> <Name> <Key> <Value>, to Sub a key=value pair to an device";	// CommandHelp, Len
+// Command Help
+const uint8_t Sub_helpText[] = 
+  "Usage: Sub <Type-Name> <Def-Name> <Key>, to delete a key=value pair added to an device";
+// CommandHelp (detailed)
+const uint8_t Sub_helpDetailText[] = 
+  "Usagebwrebwerb: Sub <Type-Name> <Name> <Key> <Value>, to Sub a key=value pair to an device";
 
 
 providedByCommand_t Sub_ProvidedByCommand =
   {
-   "Sub"					// Command-Name of command -> should be same name as libfilename.so !
+   "Sub"					// Command-Name of command -> libfilename.so !
   ,3						// length of cmd
   ,Sub_InitializeCommandFn			// Initialize Fn
   ,Sub_CommandFn				// the Fn code
-  ,&helpTextSub
-  ,sizeof(helpTextSub)
-  ,&helpDetailTextSub
-  ,sizeof(helpDetailTextSub)
+  ,&Sub_helpText
+  ,sizeof(Sub_helpText)
+  ,&Sub_helpDetailText
+  ,sizeof(Sub_helpDetailText)
   };
 
 

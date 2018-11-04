@@ -45,20 +45,24 @@ static SCDEFn_t* SCDEFn;
  * -------------------------------------------------------------------------------------------------
  */
 
-const uint8_t helpTextu[] = "Usage: Deleteattr <devspec> <attrName>, to delete attribute for <devspec>";	// CommandHelp, Len
-const uint8_t helpDetailTextu[] = "Usagebwrebwerb: DeleteAttr <name> <type> <options>, to Define a device";	// CommandHelp, Len
+// Command Help
+const uint8_t Deleteattr_helpText[] = 
+  "Usage: Deleteattr <devspec> <attrName>, to delete attribute for <devspec>";
+// CommandHelp (detailed)
+const uint8_t Deleteattr_helpDetailText[] = 
+  "Usagebwrebwerb: DeleteAttr <name> <type> <options>, to Define a device";
 
 
 providedByCommand_t Deleteattr_ProvidedByCommand =
   {
-   "Deleteattr"					// Command-Name of command -> should be same name as libfilename.so !
+   "Deleteattr"					// Command-Name of command -> libfilename.so !
   ,10						// length of cmd
   ,Deleteattr_InitializeCommandFn		// Initialize Fn
   ,Deleteattr_CommandFn				// the Fn code
-  ,&helpTextu
-  ,sizeof(helpTextu)
-  ,&helpDetailTextu
-  ,sizeof(helpDetailTextu)
+  ,&Deleteattr_helpText
+  ,sizeof(Deleteattr_helpText)
+  ,&Deleteattr_helpDetailText
+  ,sizeof(Deleteattr_helpDetailText)
   };
 
 

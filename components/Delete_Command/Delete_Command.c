@@ -43,19 +43,24 @@ static SCDEFn_t* SCDEFn;
  *  Data: 
  * --------------------------------------------------------------------------------------------------
  */
-  const uint8_t uhelpText[] = "Usage: delete <name>, to delete a device";					// CommandHelp, Len
-  const uint8_t uhelpDetailText[] = "Usagebwrebwerb: define <name> <type> <options>, to define a device";	// CommandHelp, Len
+
+// Command Help
+const uint8_t Delete_helpText[] = 
+  "Usage: delete <name>, to delete a device";
+// CommandHelp (detailed)
+const uint8_t Delete_helpDetailText[] = 
+  "Usagebwrebwerb: define <name> <type> <options>, to define a device";
 
 providedByCommand_t Delete_ProvidedByCommand =
   {
-   "delete"					// Command-Name of command -> should be same name as libfilename.so !
+   "Delete"					// Command-Name of command -> libfilename.so !
   ,6						// length of cmd
   ,Delete_InitializeCommandFn			// Initialize Fn
   ,Delete_CommandFn				// the Fn code
-  ,&uhelpText
-  ,sizeof(uhelpText)
-  ,&uhelpDetailText
-  ,sizeof(uhelpDetailText)
+  ,&Delete_helpText
+  ,sizeof(Delete_helpText)
+  ,&Delete_helpDetailText
+  ,sizeof(Delete_helpDetailText)
   };
 
 //(const uint8_t *) "Usage: define <name> <type> <options>, to define a device",57);	// CommandHelp, Len

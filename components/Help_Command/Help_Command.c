@@ -130,19 +130,24 @@ static SCDEFn_t* SCDEFn;
  *  Data: 
  * --------------------------------------------------------------------------------------------------
  */
-  const uint8_t helpText[] = "Usage: define <name> <type> <options>, to define a device";	// CommandHelp, Len
-  const uint8_t helpDetailText[] = "Usagebwrebwerb: define <name> <type> <options>, to define a device";	// CommandHelp, Len
+
+// Command Help
+const uint8_t Help_helpText[] = 
+  "Usage: define <name> <type> <options>, to define a device";
+// CommandHelp (detailed)
+const uint8_t Help_helpDetailText[] = 
+  "Usagebwrebwerb: define <name> <type> <options>, to define a device";
 
 providedByCommand_t Help_ProvidedByCommand =
   {
-   "help"					// Command-Name of command -> should be same name as libfilename.so !
+   "Help"					// Command-Name of command -> libfilename.so !
   ,4						// length of cmd
   ,Help_InitializeCommandFn			// Initialize Fn
   ,Help_CommandFn				// the Fn code
-  ,&helpText[0]
-  ,sizeof(helpText)
-  ,&helpDetailText[0]
-  ,sizeof(helpDetailText)
+  ,&Help_helpText[0]
+  ,sizeof(Help_helpText)
+  ,&Help_helpDetailText[0]
+  ,sizeof(Help_helpDetailText)
   };
 
 //(const uint8_t *) "Usage: define <name> <type> <options>, to define a device",57);	// CommandHelp, Len

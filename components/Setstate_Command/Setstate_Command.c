@@ -1,6 +1,6 @@
 ﻿/* #################################################################################################
  *
- *  Function: Attr Command for SCDE (Smart Connected Device Engine)
+ *  Function: Setstate Command for SCDE (Smart Connected Device Engine)
  *
  *  ESP 8266EX & ESP32 SOC Activities ...
  *  Copyright by EcSUHA
@@ -20,7 +20,7 @@
 
 #include <SCDE_s.h>
 
-#include "Attr_Command.h"
+#include "Setstate_Command.h"
 
 
 
@@ -38,37 +38,37 @@ static SCDEFn_t* SCDEFn;
 
 /*
  * -------------------------------------------------------------------------------------------------
- *  DName: Attr_Command
- *  Desc: Data 'Provided By Command' for the Attr Command (functions + infos this command provides
+ *  DName: Setstate_Command
+ *  Desc: Data 'Provided By Command' for the Setstate Command (functions + infos this command provides
  *        to SCDE)
  *  Data: 
  * -------------------------------------------------------------------------------------------------
  */
 
 // Command Help
-const uint8_t Attr_helpText[] = 
-  "Usage: Attr <devspec> <attrName> [<attrVal>], to add attribute for <devspec>";
+const uint8_t Setstate_helpText[] = 
+  "Usage: Setstate <definition> <state>, to set the state shown in the command list";
 // CommandHelp (detailed)
-const uint8_t Attr_helpDetailText[] = 
-  "Usagebwrebwerb: Attr <name> <type> <options>, to Define a device";
+const uint8_t Setstate_helpDetailText[] = 
+  "Usagebwrebwerb: Setstate <definition> <state>, to set the state shown in the command list";
 
 
-providedByCommand_t Attr_ProvidedByCommand =
+providedByCommand_t Setstate_ProvidedByCommand =
   {
-   "Attr"					// Command-Name of command -> libfilename.so !
-  ,4						// length of cmd
-  ,Attr_InitializeCommandFn			// Initialize Fn
-  ,Attr_CommandFn				// the Fn code
-  ,&Attr_helpText
-  ,sizeof(Attr_helpText)
-  ,&Attr_helpDetailText
-  ,sizeof(Attr_helpDetailText)
+   "Setstate"					// Command-Name of command -> libfilename.so !
+  ,8						// length of cmd
+  ,Setstate_InitializeCommandFn			// Initialize Fn
+  ,Setstate_CommandFn				// the Fn code
+  ,&Setstate_helpText
+  ,sizeof(Setstate_helpText)
+  ,&Setstate_helpDetailText
+  ,sizeof(Setstate_helpDetailText)
   };
 
 
 
 /* --------------------------------------------------------------------------------------------------
- *  FName: Attr_Initialize
+ *  FName: Setstate_Initialize
  *  Desc: Initializion of SCDE Function Callback of an new loaded command
  *  Info: Stores Command-Information (Function Callbacks) to SCDE-Root
  *  Para: SCDERoot_t* SCDERootptr -> ptr to SCDE Data Root
@@ -76,8 +76,8 @@ providedByCommand_t Attr_ProvidedByCommand =
  *--------------------------------------------------------------------------------------------------
  */
 int 
-Attr_InitializeCommandFn(SCDERoot_t* SCDERootptr)
-  {
+Setstate_InitializeCommandFn(SCDERoot_t* SCDERootptr)
+{
 
   // make data root locally available
   SCDERoot = SCDERootptr;
@@ -85,51 +85,32 @@ Attr_InitializeCommandFn(SCDERoot_t* SCDERootptr)
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
   SCDEFn = SCDERootptr->SCDEFn;
 
-  SCDEFn->Log3Fn(Attr_ProvidedByCommand.commandNameText
-		  ,Attr_ProvidedByCommand.commandNameTextLen
+  SCDEFn->Log3Fn(Setstate_ProvidedByCommand.commandNameText
+		  ,Setstate_ProvidedByCommand.commandNameTextLen
 		  ,3
 		  ,"InitializeFn called. Command '%.*s' now useable."
-		  ,Attr_ProvidedByCommand.commandNameTextLen
-		  ,Attr_ProvidedByCommand.commandNameText);
+		  ,Setstate_ProvidedByCommand.commandNameTextLen
+		  ,Setstate_ProvidedByCommand.commandNameText);
 
   return 0;
-
-  }
-
-/*
-Device specification (devspec)
-
-The commands attr, deleteattr, displayattr, delete, get, list, set, setreading, setstate, trigger can take a more complex device specification as argument, which will be expanded to a list of devices. A device specification (short devspec) can be:
-a single device name. This is the most common case.
-a list of devices, separated by comma (,)
-a regular expression
-a NAME=VALUE pair, where NAME can be an internal value like TYPE, a Reading-Name or an attribute. VALUE is a regexp. To negate the comparison, use NAME!=VALUE. To restrict the search, use i: as prefix for internal values, r: for readings and a: for attributes. See the example below.
-if the spec is followed by the expression :FILTER=NAME=VALUE, then the values found in the first round are filtered by the second expression.
-Examples:
-set lamp1 on
-set lamp1,lamp2,lamp3 on
-set lamp.* on
-set room=kitchen off
-set room=kitchen:FILTER=STATE=on off
-set room=kitchen:FILTER=STATE!=off off
-*/
+}
 
 
 
 /* -------------------------------------------------------------------------------------------------
- *  FName: Attr_CommandFn
- *  Desc: Tries to add an attribute with optional value to an definition
- *        Calls modules AttributeFn with cmd=add, if retMsg.strText != NULL -> module executes veto
- *  Info: 'defName' is an definition name, for that the attribute should be assigned
- *        'attrName' is the attribute name
- *        'attrVal' is the OPTIONAL attribute value
- *  Para: const uint8_t *argsText  -> prt to attr command args text "defName attrName attrVal"
- *        const size_t argsTextLen -> attr command args text length
+ *  FName: Setstate_CommandFn
+ *  Desc: Tries to add an Setstateibute with optional value to an definition
+ *        Calls modules SetstateibuteFn with cmd=add, if retMsg.strText != NULL -> module executes veto
+ *  Info: 'defName' is an definition name, for that the Setstateibute should be assigned
+ *        'SetstateName' is the Setstateibute name
+ *        'SetstateVal' is the OPTIONAL Setstateibute value
+ *  Para: const uint8_t *argsText  -> prt to Setstate command args text "defName SetstateName SetstateVal"
+ *        const size_t argsTextLen -> Setstate command args text length
  *  Rets: struct headRetMsgMultiple_s -> STAILQ head of multiple retMsg, if NULL -> no retMsg-entry
  * -------------------------------------------------------------------------------------------------
  */
-struct headRetMsgMultiple_s ICACHE_FLASH_ATTR
-Attr_CommandFn (const uint8_t *argsText
+struct headRetMsgMultiple_s
+Setstate_CommandFn (const uint8_t *argsText
 		,const size_t argsTextLen)
 {
 
@@ -139,13 +120,13 @@ Attr_CommandFn (const uint8_t *argsText
   // Initialize the queue
   STAILQ_INIT(&headRetMsgMultiple);
 
-	// a seek-counter
+  // a seek-counter
   int i = 0;
 	
-	// set start * of possible def-Name-Text seek-start-pos
+  // set start * of possible def-Name-Text seek-start-pos
   const uint8_t *defNameText = argsText;
 	
-	// seek to start * of attr-Name-Text '\32' after space
+  // seek to start * of attr-Name-Text '\32' after space
   while( (i < argsTextLen) && (*defNameText == ' ') ) {i++;defNameText++;}
 	
   // set start * of possible attr-Name-Text seek-start-pos
@@ -198,7 +179,7 @@ Attr_CommandFn (const uint8_t *argsText
 
 	// response with error text
 	retMsg->strTextLen = asprintf(&retMsg->strText
-		,"Could not interpret command '%.*s'! Usage: Attr <devspec> <attrName> [<attrVal>]"
+		,"Could not interpret command '%.*s'! Usage: Setstate <devspec> <attrName> [<attrVal>]"
 		,argsTextLen
 		,argsText);
 
@@ -250,6 +231,23 @@ Attr_CommandFn (const uint8_t *argsText
 
   // Common_Definition for the requested def-name-text found
   else {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // -------------------------------------------------------------------------------------------------
 

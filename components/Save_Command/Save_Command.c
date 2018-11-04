@@ -44,22 +44,25 @@ static SCDEFn_t* SCDEFn;
  *  Data: 
  * -------------------------------------------------------------------------------------------------
  */
-const uint8_t Save_CMDHelpText[] =
-	"Usage: save <ConfigFileName>, to write the <ConfigFile> and statefile";	// CommandHelp, Len
-const uint8_t Save_CMDHelpDetailText[] =
-	"Usagebwrebwerb: save <filename>, to write the <configfile> and statefile";	// CommandHelp, Len
+
+// Command Help
+const uint8_t Save_helpText[] =
+  "Usage: save <ConfigFileName>, to write the <ConfigFile> and statefile";
+// CommandHelp (detailed)
+const uint8_t Save_helpDetailText[] =
+  "Usagebwrebwerb: save <filename>, to write the <configfile> and statefile";
 
 
 providedByCommand_t Save_ProvidedByCommand =
   {
-   "save"			// command-name text -> should be same name as libfilename.so !
+   "Save"			// command-name text -> libfilename.so !
   ,4				// command-name text length
   ,Save_InitializeCommandFn	// Initialize Fn
   ,Save_CommandFn		// the Fn code
-  ,&Save_CMDHelpText
-  ,sizeof(Save_CMDHelpText)
-  ,&Save_CMDHelpDetailText
-  ,sizeof(Save_CMDHelpDetailText)
+  ,&Save_helpText
+  ,sizeof(Save_helpText)
+  ,&Save_helpDetailText
+  ,sizeof(Save_helpDetailText)
   };
 
 

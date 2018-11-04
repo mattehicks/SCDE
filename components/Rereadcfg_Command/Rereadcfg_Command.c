@@ -44,22 +44,25 @@ static SCDEFn_t* SCDEFn;
  *  Data: 
  * -------------------------------------------------------------------------------------------------
  */
-const uint8_t Rereadcfg_CMDHelpText[] =
-	"Usage: rereadcfg <configfile>, deletes everything, then reads in the <configfile>";	// CommandHelp, Len
-const uint8_t Rereadcfg_CMDHelpDetailText[] =
-	"Usagebwrebwerb: rereadcfg <filename>, to read the commands from <filenname>";	// CommandHelp, Len
+
+// Command Help
+const uint8_t Rereadcfg_helpText[] =
+  "Usage: rereadcfg <configfile>, deletes everything, then reads in the <configfile>";
+// CommandHelp (detailed)
+const uint8_t Rereadcfg_helpDetailText[] =
+  "Usagebwrebwerb: rereadcfg <filename>, to read the commands from <filenname>";
 
 
 providedByCommand_t Rereadcfg_ProvidedByCommand =
   {
-   "rereadcfg"			// command-name text -> should be same name as libfilename.so !
+   "Rereadcfg"			// command-name text -> libfilename.so !
   ,9				// command-name text length
   ,Rereadcfg_InitializeCommandFn	// Initialize Fn
   ,Rereadcfg_CommandFn		// the Fn code
-  ,&Rereadcfg_CMDHelpText
-  ,sizeof(Rereadcfg_CMDHelpText)
-  ,&Rereadcfg_CMDHelpDetailText
-  ,sizeof(Rereadcfg_CMDHelpDetailText)
+  ,&Rereadcfg_helpText
+  ,sizeof(Rereadcfg_helpText)
+  ,&Rereadcfg_helpDetailText
+  ,sizeof(Rereadcfg_helpDetailText)
   };
 
 

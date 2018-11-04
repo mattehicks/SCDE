@@ -45,20 +45,24 @@ static SCDEFn_t* SCDEFn;
  * -------------------------------------------------------------------------------------------------
  */
 
-const uint8_t helpTextzq[] = "Usage: Shutdown [restart], to shutdown engine";	// CommandHelp, Len
-const uint8_t helpDetailTextzq[] = "Usagebwrebwerb: Shutdown [restart], to shutdown engine";	// CommandHelp, Len
+// Command Help
+const uint8_t Shutdown_helpText[] = 
+  "Usage: Shutdown [restart], to shutdown engine";
+// CommandHelp (detailed)
+const uint8_t Shutdown_helpDetailText[] = 
+  "Usagebwrebwerb: Shutdown [restart], to shutdown engine";
 
 
 providedByCommand_t Shutdown_ProvidedByCommand =
   {
-   "Shutdown"					// Command-Name of command -> should be same name as libfilename.so !
+   "Shutdown"					// Command-Name of command -> libfilename.so !
   ,8						// length of cmd
   ,Shutdown_InitializeCommandFn			// Initialize Fn
   ,Shutdown_CommandFn				// the Fn code
-  ,&helpTextzq
-  ,sizeof(helpTextzq)
-  ,&helpDetailTextzq
-  ,sizeof(helpDetailTextzq)
+  ,&Shutdown_helpText
+  ,sizeof(Shutdown_helpText)
+  ,&Shutdown_helpDetailText
+  ,sizeof(Shutdown_helpDetailText)
   };
 
 

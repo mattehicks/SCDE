@@ -46,19 +46,23 @@ static SCDEFn_t* SCDEFn;
  * --------------------------------------------------------------------------------------------------
  */
 
-  const uint8_t helpTexto[] = "Usage: Rename <old> <new>, to rename a definition";	// CommandHelp, Len
-  const uint8_t helpDetailTexto[] = "Usagebwrebwerb: Rename <old> <new>, to rename a definition";	// CommandHelp, Len
+// Command Help
+const uint8_t Rename_helpText[] = 
+  "Usage: Rename <old> <new>, to rename a definition";	// CommandHelp, Len
+// CommandHelp (detailed)
+const uint8_t Rename_helpDetailText[] = 
+  "Usagebwrebwerb: Rename <old> <new>, to rename a definition";	// CommandHelp, Len
 
 
 providedByCommand_t Rename_ProvidedByCommand = {
-  "rename"					// Command-Name of command -> should be same name as libfilename.so !
+  "Rename"					// Command-Name of command -> libfilename.so !
   ,6						// length of cmd
   ,Rename_InitializeCommandFn			// Initialize Fn
   ,Rename_CommandFn				// the Fn code
-  ,&helpTexto
-  ,sizeof(helpTexto)
-  ,&helpDetailTexto
-  ,sizeof(helpDetailTexto)
+  ,&Rename_helpText
+  ,sizeof(Rename_helpText)
+  ,&Rename_helpDetailText
+  ,sizeof(Rename_helpDetailText)
 };
 
 //(const uint8_t *) "Usage: Rename <name> <type> <options>, to Rename a device",57);	// CommandHelp, Len
