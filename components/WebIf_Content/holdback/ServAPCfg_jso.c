@@ -7,9 +7,11 @@
 //###  EcSUHA - ECONOMIC SURVEILLANCE AND HOME AUTOMATION - WWW.EcSUHA.DE
 //##################################################################################################
 #include "ProjectConfig.h"
+#include <esp8266.h>
+#include "WebIf_Module.h"
+#include "Platform.h"
 
-
-
+/*
 #include "c_types.h"
 #include <string.h>
 #include <osapi.h>
@@ -23,6 +25,7 @@
 #include "CGI_WiFi.h"
 
 //#include "CGI_TiStCfg.h"
+*/
 #include "CGI_NoAuthErr.h"
 #include "CGI_NotFoundErr.h"
 
@@ -72,7 +75,7 @@
 */
 
 int ICACHE_FLASH_ATTR 
-ServAPCfg_jso(WebIF_HTTPDConnSlotData_t *conn) 
+ServAPCfg_jso(WebIf_HTTPDConnSlotData_t *conn) 
 {
    // Connection aborted? Nothing to clean up.
   if (conn->conn == NULL)

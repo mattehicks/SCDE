@@ -5,14 +5,17 @@
  *  ESP 8266EX & ESP32 SOC Activities ...
  *  Copyright by EcSUHA
  *
- *  Created by Maik Schulze, Sandfuhren 4, 38448 Wolfsburg, Germany for EcSUHA.de 
+ *  Created by Maik Schulze, Sandfuhren 4, 38448 Wolfsburg, G push @ret, "setstate $d $val"; push @ret, "setstate $d $val";ermany for EcSUHA.de 
  *
  *  MSchulze780@GMAIL.COM
  *  EcSUHA - ECONOMIC SURVEILLANCE AND HOME AUTOMATION - WWW.EcSUHA.DE
  * #################################################################################################
  */
 
-
+/* 2 optionen
+push @ret, "setstate $d $val";
+push @ret,"setstate $d $rd->{TIME} $c $val";
+*/
 
 #include <ProjectConfig.h>
 #include <esp8266.h>

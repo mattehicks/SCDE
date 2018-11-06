@@ -363,11 +363,11 @@ typedef struct ProvidedByModule_s ProvidedByModule_t;
 // typedef for AddFn - experimental - provided my module
 typedef strTextMultiple_t* (* AddFn_t)(Common_Definition_t *Common_Definition, uint8_t *kvArgs, size_t kvArgsLen);
 
-// typedef for AttributeFn - called in case of attribute changes, to check them - provided my module
+// typedef for AttributeFn - called in case of attribute changes for this definition, to check them - provided my module
 typedef strTextMultiple_t* (* AttributeFn_t)(Common_Definition_t* Common_Definition, const uint8_t *attrCmdText, const size_t attrCmdTextLen, const uint8_t *attrNameText, const size_t attrNameTextLen, uint8_t **attrValTextPtr, size_t *attrValTextLenPtr);
 
 // typedef for DefineFn - called to create a new definition of this type - provided my module
-typedef strTextMultiple_t* (* DefineFn_t)(Common_Definition_t *Common_Definition);//, const char *Definition);
+typedef strTextMultiple_t* (* DefineFn_t)(Common_Definition_t *Common_Definition);
 
 //
 typedef int (* DeleteFn_t)(Common_Definition_t *Common_Definition);		
@@ -402,19 +402,19 @@ typedef int (* ReadyFn_t)(Common_Definition_t *Common_Definition);
 // typedef for RenameFn - called to inform the definition about its renameing - provided my module
 typedef strTextMultiple_t* (* RenameFn_t)(Common_Definition_t *Common_Definition, uint8_t *newName, size_t newNameLen, uint8_t *oldName, size_t oldNameLen);
 
-// typedef for SetFn - called to send data to the device (opposite of Get) - provided my module
+// typedef for SetFn - called to send data to the definition (opposite of Get) - provided my module
 typedef strTextMultiple_t* (* SetFn_t)(Common_Definition_t *Common_Definition, uint8_t *setArgs, size_t setArgsLen);
 
 // typedef for ShutdownFn - called to do activities before SCDE shuts down - provided my module
 typedef strTextMultiple_t* (* ShutdownFn_t)(Common_Definition_t *Common_Definition);
 
-//
-typedef int (* StateFn_t)(Common_Definition_t *Common_Definition);
+// typedef for StateFn - called to set an state for this definition e.g. called from setstate cmd for recovery from save
+typedef strTextMultiple_t* (* StateFn_t)(Common_Definition_t *Common_Definition, time_t readingTiSt, uint8_t *readingName, size_t readingNameLen, uint8_t *readingValue, size_t readingValueLen);
 
 // typedef for SubFn - experimental - provided my module
 typedef strTextMultiple_t* (* SubFn_t)(Common_Definition_t *Common_Definition, uint8_t *kArgs, size_t kArgsLen);
 
-// typedef for UndefineFn - called when device is deleted, chance to cleanup - provided my module
+// typedef for UndefineFn - called when an definition is deleted, chance to cleanup - provided my module
 typedef strTextMultiple_t* (* UndefineFn_t)(Common_Definition_t *Common_Definition);		
 
 //
