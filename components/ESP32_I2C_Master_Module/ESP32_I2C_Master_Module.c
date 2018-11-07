@@ -34,15 +34,16 @@
 
 
 
+// -------------------------------------------------------------------------------------------------
+
+// set default build verbose - if no external override
+#ifndef ESP32_I2C_Master_Module_DBG  
+#define ESP32_I2C_Master_Module_DBG  5	// 5 is default
+#endif 
 
 // -------------------------------------------------------------------------------------------------
 
-// ammount of debug information 0 = off 5 max?
-#ifndef ESP32_I2C_Master_DBG
-#define ESP32_I2C_Master_DBG 0
-#endif
 
-// -------------------------------------------------------------------------------------------------
 
 // make data root locally available
 static SCDERoot_t* SCDERoot;
@@ -610,7 +611,7 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
   uint8_t *defArgsText = Common_Definition->definition;
   size_t defArgsTextLen = Common_Definition->definitionLen;
 
-  #if ESP32_I2C_Master_DBG >= 5
+  #if ESP32_I2C_Master_Module_DBG >= 5
   printf("\n|ESP32_I2C_Master_Def, Name:%.*s, got args:%.*s>"
     ,ESP32_I2C_Master_Definition->common.nameLen
     ,ESP32_I2C_Master_Definition->common.name
@@ -718,7 +719,7 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
 
 
 
-  #if ESP32_I2C_Master_DBG >= 5
+  #if ESP32_I2C_Master_Module_DBG >= 5
   printf("|ESP32_I2C_Master_Define, installing i2c driver>");
   #endif
 
@@ -1064,7 +1065,7 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
 
 
 
-  #if ESP32_I2C_Master_DBG >= 5
+  #if ESP32_I2C_Master_Module_DBG >= 5
   printf("|ESP32_I2C_Master_Define, installed i2c driver>");
   #endif
 
@@ -1359,7 +1360,7 @@ ESP32_I2C_Master_IdleCb(Common_Definition_t *Common_Definition)
   ESP32_I2C_Master_Definition_t* ESP32_I2C_Master_Definition =
 		  (ESP32_I2C_Master_Definition_t*) Common_Definition;
 
-  #if ESP32_I2C_Master_DBG >= 5
+  #if ESP32_I2C_Master_Module_DBG >= 5
   printf("\n|ESP32_I2C_Master_IdleCb, Def:%.*s>"
 	,ESP32_I2C_Master_Definition->common.nameLen
 	,ESP32_I2C_Master_Definition->common.name);
@@ -1497,7 +1498,7 @@ ESP32_I2C_Master_Set(Common_Definition_t* Common_Definition
   ESP32_I2C_Master_Definition_t* ESP32_I2C_Master_Definition =
 	(ESP32_I2C_Master_Definition_t*) Common_Definition;
 
-  #if ESP32_I2C_Master_DBG >= 5
+  #if ESP32_I2C_Master_Module_DBG >= 5
   printf("\n|ESP32_I2C_Master_Set, Name:%.*s, got args:%.*s>"
 	,ESP32_I2C_Master_Definition->common.nameLen
 	,ESP32_I2C_Master_Definition->common.name
@@ -1635,7 +1636,7 @@ ESP32_I2C_Master_Shutdown(Common_Definition_t *Common_Definition)
 
 // -------------------------------------------------------------------------------------------------
 
-  #if ESP32_I2C_Master_DBG >= 5
+  #if ESP32_I2C_Master_Module_DBG >= 5
   printf("\n|ESP32_I2C_Master_Shutdown, Name:%.*s>"
 	,ESP32_I2C_Master_Definition->common.nameLen
 	,ESP32_I2C_Master_Definition->common.name);
@@ -1669,7 +1670,7 @@ ESP32_I2C_Master_Undefine(Common_Definition_t *Common_Definition)
   ESP32_I2C_Master_Definition_t* ESP32_I2C_Master_Definition =
 	(ESP32_I2C_Master_Definition_t*) Common_Definition;
 
-  #if ESP32_I2C_Master_DBG >= 5
+  #if ESP32_I2C_Master_Module_DBG >= 5
   printf("\n|ESP32_I2C_Master_Undefine, Name:%.*s>"
 	,ESP32_I2C_Master_Definition->common.nameLen
 	,ESP32_I2C_Master_Definition->common.name);
@@ -2698,7 +2699,7 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
   // check if all required Key=Value components are included -> return with FALSE
   if ( (parsedKVInput->keysFoundBF & parsedKVInput->requiredKVBF) != parsedKVInput->requiredKVBF) {
 
-	#if ESP32_I2C_Master_DBG >= 5
+	#if ESP32_I2C_Master_Module_DBG >= 5
 	printf("|requiredKVBF, no match!>");	
   	#endif
 
@@ -2708,7 +2709,7 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
   // check if forbidden Key=Value components are included -> return with FALSE
   if (parsedKVInput->keysFoundBF & parsedKVInput->forbiddenKVBF) {
 
-	#if ESP32_I2C_Master_DBG >= 5
+	#if ESP32_I2C_Master_Module_DBG >= 5
 	printf("|forbiddenKVBF, match!>");	
   	#endif
 
@@ -2722,7 +2723,7 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
   // block #1 store assigned PWM-Block (low speed / high speed)
   if (parsedKVInput->keysFoundBF | ( (1 << ESP32_I2C_Master_SET_BLOCK) ) ) {
 
-	#if ESP32_I2C_Master_DBG >= 5
+	#if ESP32_I2C_Master_Module_DBG >= 5
 	printf("|W B#01 PWM_Block=%d>"
 		,newBlock);	
   	#endif
@@ -2734,7 +2735,7 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
   // block #2 store assigned PWM Channel
   if (parsedKVInput->keysFoundBF | ( (1 << ESP32_I2C_Master_SET_CHANNEL) ) ) {
 
-	#if ESP32_I2C_Master_DBG >= 5
+	#if ESP32_I2C_Master_Module_DBG >= 5
 	printf("|W B#02 PWM_Channel=%d>"
 		,newChannel);	
   	#endif
@@ -2746,7 +2747,7 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
   // block #3 store assigned PWM Timer
   if (parsedKVInput->keysFoundBF | ( (1 << ESP32_I2C_Master_SET_TIMER) ) ) {
 
-	#if ESP32_I2C_Master_DBG >= 5
+	#if ESP32_I2C_Master_Module_DBG >= 5
 	printf("|W B#03 PWM_Timer=%d>"
 		,newTimer);	
   	#endif
@@ -2758,7 +2759,7 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
   // block #4 store assigned / connected GPIO
   if (parsedKVInput->keysFoundBF | ( (1 << ESP32_I2C_Master_SET_GPIO) ) ) {
 
-	#if ESP32_I2C_Master_DBG >= 5
+	#if ESP32_I2C_Master_Module_DBG >= 5
 	printf("|W B#04 PWM_GPIO=%d>"
 		,newGPIO);	
   	#endif
@@ -2799,7 +2800,7 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
 	// store ESP32 PWM configuration registers
 	memcpy(pPWM_Channel, &newPWM_Channel, sizeof(ESP32_PWM_Channel_t));
 
-	# if ESP32_I2C_Master_DBG >= 5
+	# if ESP32_I2C_Master_Module_DBG >= 5
 	printf("|ESP32_PWM_Channel_s addr=%p>"
 		,pPWM_Channel);
 
@@ -2824,7 +2825,7 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
 	// store ESP32 timer configuration registers
 	memcpy(pPWM_Timer, &newPWM_Timer, sizeof(ESP32_PWM_Timer_t));
 
-	# if ESP32_I2C_Master_DBG >= 5
+	# if ESP32_I2C_Master_Module_DBG >= 5
 	printf("|ESP32_PWM_Timer_s addr=%p>"
 		,pPWM_Timer);
 

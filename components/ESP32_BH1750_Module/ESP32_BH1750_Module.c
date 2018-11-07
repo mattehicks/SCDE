@@ -38,15 +38,16 @@
 
 
 
+// -------------------------------------------------------------------------------------------------
+
+// set default build verbose - if no external override
+#ifndef ESP32_BH1770_Module_DBG  
+#define ESP32_BH1770_Module_DBG  5	// 5 is default
+#endif 
 
 // -------------------------------------------------------------------------------------------------
 
-// ammount of debug information 0 = off 5 max?
-#ifndef ESP32_BH1750_DBG
-#define ESP32_BH1750_DBG 0
-#endif
 
-// -------------------------------------------------------------------------------------------------
 
 // make data root locally available
 static SCDERoot_t* SCDERoot;
@@ -517,7 +518,7 @@ ESP32_BH1750_Define(Common_Definition_t *Common_Definition)
   uint8_t *defArgsText = Common_Definition->definition;
   size_t defArgsTextLen = Common_Definition->definitionLen;
 
-  #if ESP32_BH1750_DBG >= 5
+  #if ESP32_BH1770_Module_DBG >= 5
   printf("\n|ESP32_BH1750_Def, Name:%.*s, got args:%.*s>"
     ,ESP32_BH1750_Definition->common.nameLen
     ,ESP32_BH1750_Definition->common.name
@@ -710,7 +711,7 @@ ESP32_BH1750_IdleCb(Common_Definition_t *Common_Definition)
   ESP32_BH1750_Definition_t* ESP32_BH1750_Definition =
 		  (ESP32_BH1750_Definition_t*) Common_Definition;
 
-  #if ESP32_BH1750_DBG >= 5
+  #if ESP32_BH1770_Module_DBG >= 5
   printf("\n|ESP32_BH1750_IdleCb, Def-Name:%.*s>"
 	,ESP32_BH1750_Definition->common.nameLen
 	,ESP32_BH1750_Definition->common.name);
@@ -787,7 +788,7 @@ i2c_cmd_link_delete(cmd);
 	// we have a result
         if (ret == ESP_OK) {
 
-        #if ESP32_BH1750_DBG >= 5
+        #if ESP32_BH1770_Module_DBG >= 5
         printf("|Set Mode OK>");
         #endif
 
@@ -798,7 +799,7 @@ i2c_cmd_link_delete(cmd);
         // we have no result / error
         else {
 
-           #if ESP32_BH1750_DBG >= 5
+           #if ESP32_BH1770_Module_DBG >= 5
            printf("|No ack, sensor not connected...skip...>");
            #endif 
 
@@ -832,7 +833,7 @@ i2c_cmd_link_delete(cmd);
 	// we have a result
         if (ret == ESP_OK) {
 
-           #if ESP32_BH1750_DBG >= 5
+           #if ESP32_BH1770_Module_DBG >= 5
            printf("|data_h: %02x, data_l: %02x, sensor val: %f>"
               ,ESP32_BH1750_Definition->sensor_data_h
               ,ESP32_BH1750_Definition->sensor_data_l
@@ -843,7 +844,7 @@ i2c_cmd_link_delete(cmd);
         // we have no result / error
         else {
 
-           #if ESP32_BH1750_DBG >= 5
+           #if ESP32_BH1770_Module_DBG >= 5
            printf("|No ack, sensor not connected...skip...>");
            #endif
 
@@ -1104,7 +1105,7 @@ ESP32_BH1750_Set(Common_Definition_t* Common_Definition
   ESP32_BH1750_Definition_t* ESP32_BH1750_Definition =
 	(ESP32_BH1750_Definition_t*) Common_Definition;
 
-  #if ESP32_BH1750_DBG >= 5
+  #if ESP32_BH1770_Module_DBG >= 5
   printf("\n|ESP32_BH1750_Set, Name:%.*s, got args:%.*s>"
 	,ESP32_BH1750_Definition->common.nameLen
 	,ESP32_BH1750_Definition->common.name
@@ -1242,7 +1243,7 @@ ESP32_BH1750_Shutdown(Common_Definition_t *Common_Definition)
 
 // -------------------------------------------------------------------------------------------------
 
-  #if ESP32_BH1750_DBG >= 5
+  #if ESP32_BH1770_Module_DBG >= 5
   printf("\n|ESP32_BH1750_Shutdown, Name:%.*s>"
 	,ESP32_BH1750_Definition->common.nameLen
 	,ESP32_BH1750_Definition->common.name);
@@ -1276,7 +1277,7 @@ ESP32_BH1750_Undefine(Common_Definition_t *Common_Definition)
   ESP32_BH1750_Definition_t* ESP32_BH1750_Definition =
 	(ESP32_BH1750_Definition_t*) Common_Definition;
 
-  #if ESP32_BH1750_DBG >= 5
+  #if ESP32_BH1770_Module_DBG >= 5
   printf("\n|ESP32_BH1750_Undefine, Name:%.*s>"
 	,ESP32_BH1750_Definition->common.nameLen
 	,ESP32_BH1750_Definition->common.name);
@@ -2304,7 +2305,7 @@ ESP32_BH1750_ProcessKVInputArgs(ESP32_BH1750_Definition_t *ESP32_BH1750_Definiti
   // check if all required Key=Value components are included -> return with FALSE
   if ( (parsedKVInput->keysFoundBF & parsedKVInput->requiredKVBF) != parsedKVInput->requiredKVBF) {
 
-	#if ESP32_BH1750_DBG >= 5
+	#if ESP32_BH1770_Module_DBG >= 5
 	printf("|requiredKVBF, no match!>");	
   	#endif
 
@@ -2314,7 +2315,7 @@ ESP32_BH1750_ProcessKVInputArgs(ESP32_BH1750_Definition_t *ESP32_BH1750_Definiti
   // check if forbidden Key=Value components are included -> return with FALSE
   if (parsedKVInput->keysFoundBF & parsedKVInput->forbiddenKVBF) {
 
-	#if ESP32_BH1750_DBG >= 5
+	#if ESP32_BH1770_Module_DBG >= 5
 	printf("|forbiddenKVBF, match!>");	
   	#endif
 
@@ -2328,7 +2329,7 @@ ESP32_BH1750_ProcessKVInputArgs(ESP32_BH1750_Definition_t *ESP32_BH1750_Definiti
   // block #1 store assigned PWM-Block (low speed / high speed)
   if (parsedKVInput->keysFoundBF | ( (1 << ESP32_BH1750_SET_BLOCK) ) ) {
 
-	#if ESP32_BH1750_DBG >= 5
+	#if ESP32_BH1770_Module_DBG >= 5
 	printf("|W B#01 PWM_Block=%d>"
 		,newBlock);	
   	#endif
@@ -2340,7 +2341,7 @@ ESP32_BH1750_ProcessKVInputArgs(ESP32_BH1750_Definition_t *ESP32_BH1750_Definiti
   // block #2 store assigned PWM Channel
   if (parsedKVInput->keysFoundBF | ( (1 << ESP32_BH1750_SET_CHANNEL) ) ) {
 
-	#if ESP32_BH1750_DBG >= 5
+	#if ESP32_BH1770_Module_DBG >= 5
 	printf("|W B#02 PWM_Channel=%d>"
 		,newChannel);	
   	#endif
@@ -2352,7 +2353,7 @@ ESP32_BH1750_ProcessKVInputArgs(ESP32_BH1750_Definition_t *ESP32_BH1750_Definiti
   // block #3 store assigned PWM Timer
   if (parsedKVInput->keysFoundBF | ( (1 << ESP32_BH1750_SET_TIMER) ) ) {
 
-	#if ESP32_BH1750_DBG >= 5
+	#if ESP32_BH1770_Module_DBG >= 5
 	printf("|W B#03 PWM_Timer=%d>"
 		,newTimer);	
   	#endif
@@ -2364,7 +2365,7 @@ ESP32_BH1750_ProcessKVInputArgs(ESP32_BH1750_Definition_t *ESP32_BH1750_Definiti
   // block #4 store assigned / connected GPIO
   if (parsedKVInput->keysFoundBF | ( (1 << ESP32_BH1750_SET_GPIO) ) ) {
 
-	#if ESP32_BH1750_DBG >= 5
+	#if ESP32_BH1770_Module_DBG >= 5
 	printf("|W B#04 PWM_GPIO=%d>"
 		,newGPIO);	
   	#endif
@@ -2404,7 +2405,7 @@ ESP32_BH1750_ProcessKVInputArgs(ESP32_BH1750_Definition_t *ESP32_BH1750_Definiti
 	// store ESP32 PWM configuration registers
 	memcpy(pPWM_Channel, &newPWM_Channel, sizeof(ESP32_PWM_Channel_t));
 
-	# if ESP32_BH1750_DBG >= 5
+	# if ESP32_BH1770_Module_DBG >= 5
 	printf("|ESP32_PWM_Channel_s addr=%p>"
 		,pPWM_Channel);
 
@@ -2429,7 +2430,7 @@ ESP32_BH1750_ProcessKVInputArgs(ESP32_BH1750_Definition_t *ESP32_BH1750_Definiti
 	// store ESP32 timer configuration registers
 	memcpy(pPWM_Timer, &newPWM_Timer, sizeof(ESP32_PWM_Timer_t));
 
-	# if ESP32_BH1750_DBG >= 5
+	# if ESP32_BH1770_Module_DBG >= 5
 	printf("|ESP32_PWM_Timer_s addr=%p>"
 		,pPWM_Timer);
 

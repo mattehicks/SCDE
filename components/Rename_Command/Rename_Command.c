@@ -26,6 +26,13 @@
 
 
 
+// set default build verbose - if no external override
+#ifndef Rename_Command_DBG  
+#define Rename_Command_DBG  5	// 5 is default
+#endif
+
+
+
 // --------------------------------------------------------------------------------------------------
 
 // make data root locally available

@@ -591,9 +591,11 @@ struct Common_Definition_s {
 
   Module_t *module;		// Ptr to the Module_t (assigned when module is loaded)
 
+// the 'STATE' reading		// the STATE reading is obligatory for every definition !
 // strText_t state; NEU
-  uint8_t *state;//stateText	// Ptr to allocated memory filled with oneliner-string describing its state
-  size_t stateLen;//stateTextLen
+  uint8_t *state;//stateValue	// Ptr to allocated memory filled with oneliner-text describing its STATE
+  size_t stateLen;//stateValueLen;// and the length of the oneliner-text
+  time_t stateTiSt;		// SCDE has also a time-stamp for STATE
 
 // strText_t definition; NEU
   uint8_t *definition;//definitionText	// Ptr to allocated memory filled with users definition string

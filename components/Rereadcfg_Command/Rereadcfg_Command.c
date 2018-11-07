@@ -24,6 +24,13 @@
 
 
 
+// set default build verbose - if no external override
+#ifndef Rereadcfg_Command_DBG  
+#define Rereadcfg_Command_DBG  5	// 5 is default
+#endif
+
+
+
 // -------------------------------------------------------------------------------------------------
 
 // make data root locally available

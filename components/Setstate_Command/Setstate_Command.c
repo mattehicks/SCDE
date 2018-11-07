@@ -24,7 +24,13 @@
 
 #include <regex.h>
 
-#define Setstate_DBG  5
+
+
+// set default build verbose - if no external override
+#ifndef Setstate_Command_DBG  
+#define Setstate_Command_DBG  5	// 5 is default
+#endif 
+
 
 
 // -------------------------------------------------------------------------------------------------
@@ -57,16 +63,16 @@ const uint8_t Setstate_helpDetailText[] =
 
 
 providedByCommand_t Setstate_ProvidedByCommand =
-  {
+{
    "Setstate"					// Command-Name of command -> libfilename.so !
-  ,8						// length of cmd
+  ,sizeof("Setstate")-1				// length of cmd
   ,Setstate_InitializeCommandFn			// Initialize Fn
   ,Setstate_CommandFn				// the Fn code
   ,&Setstate_helpText
   ,sizeof(Setstate_helpText)
   ,&Setstate_helpDetailText
   ,sizeof(Setstate_helpDetailText)
-  };
+};
 
 
 
@@ -88,12 +94,14 @@ Setstate_InitializeCommandFn(SCDERoot_t* SCDERootptr)
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
   SCDEFn = SCDERootptr->SCDEFn;
 
+  #if Setstate_Command_DBG >= 5
   SCDEFn->Log3Fn(Setstate_ProvidedByCommand.commandNameText
 		  ,Setstate_ProvidedByCommand.commandNameTextLen
-		  ,3
+		  ,5
 		  ,"InitializeFn called. Command '%.*s' now useable."
 		  ,Setstate_ProvidedByCommand.commandNameTextLen
 		  ,Setstate_ProvidedByCommand.commandNameText);
+  #endif
 
   return 0;
 }
@@ -163,7 +171,8 @@ Setstate_CommandFn (const uint8_t *args
 
 	// response with error text
 	retMsg->strTextLen = asprintf(&retMsg->strText
-		,"Command Setstate could not interpret args '%.*s'! Usage: Setstate <devspec> <state-sub-args>"
+		,"Command Setstate could not interpret args '%.*s'!"
+		 " Usage: Setstate <devspec> <state-sub-args>"
 		,argsLen
 		,args);
 
@@ -177,7 +186,10 @@ Setstate_CommandFn (const uint8_t *args
 // -------------------------------------------------------------------------------------------------
 
 // create list of definitions which meet devspec here
-// and loop them here {
+// and loop them here 
+//	{
+
+// -------------------------------------------------------------------------------------------------
 
   	// search for the Common_Definition for the requested Definition-Name
   	Common_Definition_t *Common_Definition = STAILQ_FIRST(&SCDERoot->HeadCommon_Definitions);
@@ -197,7 +209,7 @@ Setstate_CommandFn (const uint8_t *args
 
 // -------------------------------------------------------------------------------------------------
 
-  // Definition for the requested Definition-Name NOT found
+	// Definition for the given Definition-Name NOT found
   	if ( Common_Definition == NULL ) {
 
 		// alloc mem for retMsg
@@ -213,20 +225,27 @@ Setstate_CommandFn (const uint8_t *args
 		// insert retMsg in stail-queue
 		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
 
-		// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-		return headRetMsgMultiple;
+		// -> continue processing 'definitions that meet devspec' loop
   	}
 
- 	// Definition for the requested Definition-Name found
+// -------------------------------------------------------------------------------------------------
+
+ 	// Definition for the given Definition-Name found
   	else {
 
+		// infos needed for calling the StateFn
+		time_t readingTiSt;
+		uint8_t *readingName;
+		size_t readingNameLen;
+		uint8_t *readingValue;
+		size_t readingValueLen;
 
+// -------------------------------------------------------------------------------------------------
 
-
-
-
-
-
+		// check if detailed state with timestamp can be rebuilt - via regex
+		if (NULL) { //  regex check here
+	
+			
 
 
 
@@ -272,15 +291,15 @@ push @ret,"setstate $d $rd->{TIME} $c $val";
 // typedef for StateFn - called to set an state for this definition e.g. called from setstate cmd for recovery from save
 //typedef strTextMultiple_t* (* StateFn_t)(Common_Definition_t *Common_Definition, time_t readingTiSt, uint8_t *readingName, size_t readingNameLen, uint8_t *readingValue, size_t readingValueLen);
 
- char aa[] = "maik";
- char ab[] = "otto";
+			char aa[] = "maik";
+			char ab[] = "otto";
 
-  // Detailed state with timestamp ?
-  time_t readingTiSt = 99;
-  uint8_t *readingName = (uint8_t) &aa;
-  size_t readingNameLen = 4;
-  uint8_t *readingValue = (uint8_t) &ab;
-  size_t readingValueLen = 4;
+			// Detailed state with timestamp ?
+			readingTiSt = 99;
+			readingName = (uint8_t *) &aa;
+			readingNameLen = 4;
+			readingValue = (uint8_t *) &ab;
+			readingValueLen = 4;
 
 
 
@@ -399,15 +418,7 @@ push @ret,"setstate $d $rd->{TIME} $c $val";
 		my ($sname, $sval) = split(" ", $nameval, 2);
     		 $sval = "" if(!defined($sval));*/
 
-// detect wrong chars in reading
- /*   		 Log3 $d, 3, "WARNING: unsupported character in reading $sname ".
-            	 "(not A-Za-z/\\d_\\.-), notify the $d->{TYPE} module maintainer."
-       		 if(!goodReadingName($sname));
-     		 if(!defined($d->{READINGS}{$sname}) ||
-      		   !defined($d->{READINGS}{$sname}{TIME}) ||
-      		   $d->{READINGS}{$sname}{TIME} lt $tim) {
-     		   $d->{READINGS}{$sname}{VAL} = $sval;
-      		  $d->{READINGS}{$sname}{TIME} = $tim; } */
+
 /*
 exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 
@@ -432,33 +443,74 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 
 
 
+			// detect wrong chars in reading
+ /*   		 Log3 $d, 3, "WARNING: unsupported character in reading $sname ".
+            	 "(not A-Za-z/\\d_\\.-), notify the $d->{TYPE} module maintainer."
+       		 if(!goodReadingName($sname));
+     		 if(!defined($d->{READINGS}{$sname}) ||
+      		   !defined($d->{READINGS}{$sname}{TIME}) ||
+      		   $d->{READINGS}{$sname}{TIME} lt $tim) {
+     		   $d->{READINGS}{$sname}{VAL} = $sval;
+      		  $d->{READINGS}{$sname}{TIME} = $tim; } 
+*/
+
+
+// end of detailed rebuilt
+		}
 
 
 
 
+// -------------------------------------------------------------------------------------------------
 
+		// an detailed reading could NOT be rebuilt
+		// assuming this is the general, required STATE reading
+		else {
 
+			// get current time
+			time(&readingTiSt);
 
+			// we are dealing with STATE reading here
+			readingName = (uint8_t *) "STATE";
+			readingNameLen = sizeof("STATE")-1;
 
+			// to do: extract Time-Stamp and Value for reading 'STATE'
+ //			$a[1] =~ s/\\(...)/chr(oct($1))/ge if($a[1] =~ m/^(\\011|\\040)+$/);
+			char ad[] = "henn";
+			readingValue = (uint8_t *) &ad;
+			readingValueLen = 4;
 
+			// we have a value for 'STATE'
+			if (readingValue) {
 
+				// do not overwrite state like "opened" or "initialized"
+				if ( ( SCDERoot->globalCtrlRegA | F_INIT_DONE ) || 
+				     ( ( Common_Definition->stateLen == 3 ) && 
+				       ( strncmp((char*)Common_Definition->state, "???", 3 ) ) ) ) {
 
+					// free old value
+					if (Common_Definition->state)
+						free(Common_Definition->state);
 
+					// store new value
+					Common_Definition->stateLen = 
+						asprintf((char**) &Common_Definition->state
+							,"%.*s"
+							,readingValueLen
+							,readingValue);
 
+					// store new tiST
+					Common_Definition->stateTiSt = readingTiSt;
+				}
+			}
+		}
 
+// -------------------------------------------------------------------------------------------------
 
 		// call State Fn to execute the update - if provided by Type
 		if (Common_Definition->module->ProvidedByModule->StateFn) {
 
-//			// build attribute command text
-//			uint8_t *attrCmd;
-//			size_t attrCmdLen = (size_t) asprintf((char **) &attrCmd
-//				,"add");
-
-
-
-
-			#if Setstate_DBG >= 5
+			#if Setstate_Command_DBG >= 7
 			// prepare TiSt for LogFn
 			strText_t strText =
   				SCDEFn->FmtDateTimeFn(readingTiSt);
@@ -466,7 +518,8 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 			SCDEFn->Log3Fn(Common_Definition->name
 				,Common_Definition->nameLen
 				,5
-				,"Calling StateFn of Module '%.*s' for Definition '%.*s'. Reading '%.*s' should get new Value '%.*s' with TimeStamp '%.*s'."
+				,"Calling StateFn of Module '%.*s' for Definition '%.*s'."
+				 " Reading '%.*s' should get new Value '%.*s' with TimeStamp '%.*s'."
 				,Common_Definition->module->ProvidedByModule->typeNameLen
 				,Common_Definition->module->ProvidedByModule->typeName
 				,Common_Definition->nameLen
@@ -483,112 +536,27 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 			#endif
 
 			// call modules StateFn, if retMsg != NULL -> interpret as veto
-			strTextMultiple_t *retMsg =  NULL;
-	/*			Common_Definition->module->ProvidedByModule->StateFn(Common_Definition
+			strTextMultiple_t *retMsg =
+				Common_Definition->module->ProvidedByModule->StateFn(Common_Definition
 					,readingTiSt
 					,readingName
 					,readingNameLen
 					,readingValue
 					,readingValueLen);
-*/
+
 			// got an error msg? Insert retMsg in stail-queue
 			if (retMsg) STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-//			free(attrCmdText);
 		}
 
 // -------------------------------------------------------------------------------------------------
 
-		// veto from Types attributeFn? Do NOT add attribute
-		if (!STAILQ_EMPTY(&headRetMsgMultiple)) {
-
-//			if (newAttrValText) free(newAttrValText);
-
-			// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-			return headRetMsgMultiple;
-		}
-
-// -------------------------------------------------------------------------------------------------
-
-/*	// loop through assigned attributes and try to find the existing attribute and replace it. Or add it as new attribute.
-	attribute_t *attribute = STAILQ_FIRST(&SCDERoot->headAttributes);
-	while (true) {
-
-		// no old attribute found ?
-		if (attribute == NULL) {
-
-			// alloc mem for attribute structure (attribute_t)
-			attribute
-				= malloc(sizeof(attribute_t));
-
-//			// zero the struct
-//			memset(attribute, 0, sizeof(attribute_t));
-
-			// the def
-			attribute->attrAssignedDef = Common_Definition;
-
-			// the name
-			attribute->attrNameTextLen = attrNameTextLen;
-			attribute->attrNameText = malloc(attrNameTextLen);
-			memcpy(attribute->attrNameText, attrNameText, attrNameTextLen);
-
-			// the value - already in allocated mem
-			attribute->attrValTextLen = newAttrValTextLen;
-			attribute->attrValText = newAttrValText;
-	
-			// add new attribute at tail
-			STAILQ_INSERT_HEAD(&SCDERoot->headAttributes, attribute, entries);
-
-			printf("Added new attribute - defName:%.*s, attrName:%.*s, attrVal:%.*sx\n"
-				,attribute->attrAssignedDef->nameLen
-				,attribute->attrAssignedDef->name
-				,attribute->attrNameTextLen
-				,attribute->attrNameText
-				,attribute->attrValTextLen
-				,attribute->attrValText);
-
-			// added new, break
-			break;
-		}
-
-		// is this an old value for this attribute?
-		if ( (attribute->attrAssignedDef == Common_Definition)
-			&& (attribute->attrNameTextLen == attrNameTextLen)
-			&& (!strncmp((const char*) attribute->attrNameText, (const char*) attrNameText, attrNameTextLen)) ) {
-
-			// free old value for this attribute
-			if (attribute->attrValText) free(attribute->attrValText);
-
-			// the new value
-			attribute->attrValTextLen = newAttrValTextLen;
-			attribute->attrValText = newAttrValText;
-
-			printf("Updated old attribute - defName:%.*s, attrName:%.*s, attrVal:%.*s\n"
-				,attribute->attrAssignedDef->nameLen
-				,attribute->attrAssignedDef->name
-				,attribute->attrNameTextLen
-				,attribute->attrNameText
-				,attribute->attrValTextLen
-				,attribute->attrValText);
-
-			// found, break
-			break;
-		}
-
-		// get next attribute for processing
-		attribute = STAILQ_NEXT(attribute, entries);
 	}
-*/
 
+// end of loop for list of definitions which meet devspec here
+//}
 
-
-		 // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-		return headRetMsgMultiple;
-		}
-
+  // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+  return headRetMsgMultiple;
 }
-
-
-
 
 

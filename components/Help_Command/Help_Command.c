@@ -111,6 +111,13 @@ LOG_TAG("Help_Command");
 
 
 
+// set default build verbose - if no external override
+#ifndef Help_Command_DBG  
+#define Help_Command_DBG  5	// 5 is default
+#endif 
+
+
+
 // -------------------------------------------------------------------------------------------------
 
 // make data root locally available

@@ -143,6 +143,19 @@ LOG_TAG("Telnet_Module");
 
 // -------------------------------------------------------------------------------------------------
 
+
+
+
+// -------------------------------------------------------------------------------------------------
+
+// set default build verbose - if no external override
+#ifndef ESP32_Telnet_Module_DBG  
+#define ESP32_Telnet_Module_DBG  5	// 5 is default
+#endif 
+
+// -------------------------------------------------------------------------------------------------
+
+
 // make data root locally available
 static SCDERoot_t* SCDERoot;
 

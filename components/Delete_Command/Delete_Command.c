@@ -24,6 +24,13 @@
 
 
 
+// set default build verbose - if no external override
+#ifndef Delete_Command_DBG  
+#define Delete_Command_DBG  5	// 5 is default
+#endif
+
+
+
 // -------------------------------------------------------------------------------------------------
 
 // make data root locally available

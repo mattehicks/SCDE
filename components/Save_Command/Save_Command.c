@@ -24,6 +24,13 @@
 
 
 
+// set default build verbose - if no external override
+#ifndef Save_Command_DBG  
+#define Save_Command_DBG  5	// 5 is default
+#endif 
+
+
+
 // -------------------------------------------------------------------------------------------------
 
 // make data root locally available
@@ -54,16 +61,16 @@ const uint8_t Save_helpDetailText[] =
 
 
 providedByCommand_t Save_ProvidedByCommand =
-  {
+{
    "Save"			// command-name text -> libfilename.so !
-  ,4				// command-name text length
+  ,sizeof("Save")-1		// command-name text length
   ,Save_InitializeCommandFn	// Initialize Fn
   ,Save_CommandFn		// the Fn code
   ,&Save_helpText
   ,sizeof(Save_helpText)
   ,&Save_helpDetailText
   ,sizeof(Save_helpDetailText)
-  };
+};
 
 
 
@@ -77,7 +84,7 @@ providedByCommand_t Save_ProvidedByCommand =
  */
 int 
 Save_InitializeCommandFn(SCDERoot_t* SCDERootptr)
-  {
+{
 
   // make data root locally available
   SCDERoot = SCDERootptr;
@@ -85,16 +92,17 @@ Save_InitializeCommandFn(SCDERoot_t* SCDERootptr)
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
   SCDEFn = SCDERootptr->SCDEFn;
 
+  #if Save_Command_DBG >= 5
   SCDEFn->Log3Fn(Save_ProvidedByCommand.commandNameText
 		,Save_ProvidedByCommand.commandNameTextLen
-	  ,3
+	  ,5
 	  ,"InitializeFn called. Command '%.*s' now useable."
 	  ,Save_ProvidedByCommand.commandNameTextLen
 	  ,Save_ProvidedByCommand.commandNameText);
+  #endif
 
   return 0;
-
-  }
+}
 
 
 
