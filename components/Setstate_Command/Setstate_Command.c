@@ -5,17 +5,14 @@
  *  ESP 8266EX & ESP32 SOC Activities ...
  *  Copyright by EcSUHA
  *
- *  Created by Maik Schulze, Sandfuhren 4, 38448 Wolfsburg, G push @ret, "setstate $d $val"; push @ret, "setstate $d $val";ermany for EcSUHA.de 
+ *  Created by Maik Schulze, Sandfuhren 4, 38448 Wolfsburg, Germany for EcSUHA.de 
  *
  *  MSchulze780@GMAIL.COM
  *  EcSUHA - ECONOMIC SURVEILLANCE AND HOME AUTOMATION - WWW.EcSUHA.DE
  * #################################################################################################
  */
 
-/* 2 optionen
-push @ret, "setstate $d $val";
-push @ret,"setstate $d $rd->{TIME} $c $val";
-*/
+
 
 #include <ProjectConfig.h>
 #include <esp8266.h>
@@ -25,6 +22,9 @@ push @ret,"setstate $d $rd->{TIME} $c $val";
 
 #include "Setstate_Command.h"
 
+#include <regex.h>
+
+#define Setstate_DBG  5
 
 
 // -------------------------------------------------------------------------------------------------
@@ -102,20 +102,49 @@ Setstate_InitializeCommandFn(SCDERoot_t* SCDERootptr)
 
 /* -------------------------------------------------------------------------------------------------
  *  FName: Setstate_CommandFn
- *  Desc: Tries to add an Setstateibute with optional value to an definition
+ *  Desc: Tries to add an Setstate with optional value to an definition
  *        Calls modules SetstateibuteFn with cmd=add, if retMsg.strText != NULL -> module executes veto
  *  Info: 'defName' is an definition name, for that the Setstateibute should be assigned
  *        'SetstateName' is the Setstateibute name
  *        'SetstateVal' is the OPTIONAL Setstateibute value
- *  Para: const uint8_t *argsText  -> prt to Setstate command args text "defName SetstateName SetstateVal"
- *        const size_t argsTextLen -> Setstate command args text length
+ *  Para: const uint8_t *args  -> prt to Setstate command args text "definition reading value"
+ *                                                         or "definition timestamp reading value"
+ *        const size_t argsLen -> Setstate command args text length
  *  Rets: struct headRetMsgMultiple_s -> STAILQ head of multiple retMsg, if NULL -> no retMsg-entry
  * -------------------------------------------------------------------------------------------------
  */
 struct headRetMsgMultiple_s
-Setstate_CommandFn (const uint8_t *argsText
-		,const size_t argsTextLen)
+Setstate_CommandFn (const uint8_t *args
+		,const size_t argsLen)
 {
+  // first seek-counter
+  int i = 0;
+	
+  // start seek with new * (seek starts at args *)
+  const uint8_t *defName = args;
+
+  // seek * to start of Definition Name '\32' (after space)
+  while( (i < argsLen) && (*defName == ' ') ) {i++;defName++;}
+	
+  // continue seek with new * (seek starts at defName *)
+  const uint8_t *tiStReadingValue = defName;
+
+  // second seek-counter
+  int j = 0;
+
+  // seek * to end of Definition Name '\32' (after space)
+  while( (i < argsLen) && (*tiStReadingValue != ' ') ) {i++;j++;tiStReadingValue++;}
+
+  // length of Definition-Name determined
+  size_t defNameLen = j;
+
+  // seek * to start of Timestamp-Reading-Value '\32' (after space)
+  while( (i < argsLen) && (*tiStReadingValue == ' ') ) {i++;tiStReadingValue++;}
+
+  // length of Timestamp-Reading-Value determined (assuming: rest of the args)
+  size_t tiStReadingValueLen = argsLen - i;
+
+// -------------------------------------------------------------------------------------------------
 
   // prepare STAILQ head for multiple RetMsg storage
   struct headRetMsgMultiple_s headRetMsgMultiple;
@@ -123,58 +152,10 @@ Setstate_CommandFn (const uint8_t *argsText
   // Initialize the queue
   STAILQ_INIT(&headRetMsgMultiple);
 
-  // a seek-counter
-  int i = 0;
-	
-  // set start * of possible def-Name-Text seek-start-pos
-  const uint8_t *defNameText = argsText;
-	
-  // seek to start * of attr-Name-Text '\32' after space
-  while( (i < argsTextLen) && (*defNameText == ' ') ) {i++;defNameText++;}
-	
-  // set start * of possible attr-Name-Text seek-start-pos
-  const uint8_t *attrNameText = defNameText;
-
-  // seek to next space '\32'
-  while( (i < argsTextLen) && (*attrNameText != ' ') ) {i++;attrNameText++;}
-
-  // length of def-Name-Text determined
-  size_t defNameTextLen = i;
-
-  // seek to start * of attr-Name-Text '\32' after space
-  while( (i < argsTextLen) && (*attrNameText == ' ') ) {i++;attrNameText++;}
-
-  // set start * of possible attr-Val seek-start-pos
-  const uint8_t *attrValText = attrNameText;
-
-  // a second seek-counter
-  int j = 0;
-
-  // seek to next space '\32'
-  while( (i < argsTextLen) && (*attrValText != ' ') ) {i++,j++;attrValText++;}
-
-  // length of attr-Name-Text determined
-  size_t attrNameTextLen = j;
-
-  // start * of attr-Val-Text '\32' after space
-  while( (i < argsTextLen) && (*attrValText == ' ') ) {i++;attrValText++;}
-		
-	 // set start * of possible attr-Va-end seek-start-pos
-  const uint8_t *attrValTextEnd = attrValText;
-	
-	// a third seek-counter
-  int k = 0;
-
-  // seek to next space '\32'
-  while( (i < argsTextLen) && (*attrValTextEnd != ' ') ) {i++,k++;attrValTextEnd++;}
-
-  // length of attr-Val-Text determined
-  size_t attrValTextLen = k;
-
 // -------------------------------------------------------------------------------------------------
 
-  // veryfy lengths > 0, definition 0 allowed
-  if ( (defNameTextLen == 0) || (attrNameTextLen == 0) ) {
+  // check usage by verifying lengths
+  if ( ( defNameLen == 0 ) || ( tiStReadingValueLen == 0 ) ) {
 
 	// alloc mem for retMsg
 	strTextMultiple_t *retMsg =
@@ -182,9 +163,9 @@ Setstate_CommandFn (const uint8_t *argsText
 
 	// response with error text
 	retMsg->strTextLen = asprintf(&retMsg->strText
-		,"Could not interpret command '%.*s'! Usage: Setstate <devspec> <attrName> [<attrVal>]"
-		,argsTextLen
-		,argsText);
+		,"Command Setstate could not interpret args '%.*s'! Usage: Setstate <devspec> <state-sub-args>"
+		,argsLen
+		,args);
 
 	// insert retMsg in stail-queue
 	STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
@@ -195,47 +176,49 @@ Setstate_CommandFn (const uint8_t *argsText
 
 // -------------------------------------------------------------------------------------------------
 
-  // search for the Common_Definition for the requested def-name-text
-  Common_Definition_t *Common_Definition = STAILQ_FIRST(&SCDERoot->HeadCommon_Definitions);
-  while (Common_Definition != NULL) {
+// create list of definitions which meet devspec here
+// and loop them here {
 
-	if ( (Common_Definition->nameLen == defNameTextLen)
-		&& (!strncasecmp((const char*) Common_Definition->name, (const char*) defNameText, defNameTextLen)) ) {
+  	// search for the Common_Definition for the requested Definition-Name
+  	Common_Definition_t *Common_Definition = STAILQ_FIRST(&SCDERoot->HeadCommon_Definitions);
 
-		// found, break and keep prt
-		break;
-	}
+ 	 while ( Common_Definition != NULL ) {
 
-	// get next Common_Definition for processing
-	Common_Definition = STAILQ_NEXT(Common_Definition, entries);
-  }
+		if ( ( Common_Definition->nameLen == defNameLen )
+			&& ( !strncasecmp((const char*) Common_Definition->name, (const char*) defName, defNameLen) ) ) {
+
+			// found, break and keep current
+			break;
+		}
+
+		// get next Common_Definition to process it
+		Common_Definition = STAILQ_NEXT(Common_Definition, entries);
+ 	 }
 
 // -------------------------------------------------------------------------------------------------
 
-  // Common_Definition for the requested definition-name not found
-  if (Common_Definition == NULL) {
+  // Definition for the requested Definition-Name NOT found
+  	if ( Common_Definition == NULL ) {
 
-	// alloc mem for retMsg
-	strTextMultiple_t *retMsg =
-		 malloc(sizeof(strTextMultiple_t));
+		// alloc mem for retMsg
+		strTextMultiple_t *retMsg =
+			 malloc(sizeof(strTextMultiple_t));
 
-	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
-		,"Error, could not find <defName>: %.*s!\r\n"
-		,defNameTextLen
-		,defNameText);
+		// response with error text
+		retMsg->strTextLen = asprintf(&retMsg->strText
+			,"Error, could not find <defName>: %.*s!\r\n"
+			,defNameLen
+			,defName);
 
-	// insert retMsg in stail-queue
-	STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+		// insert retMsg in stail-queue
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
 
-	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-	return headRetMsgMultiple;
-  }
+		// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+		return headRetMsgMultiple;
+  	}
 
-  // Common_Definition for the requested def-name-text found
-  else {
-
-
+ 	// Definition for the requested Definition-Name found
+  	else {
 
 
 
@@ -251,7 +234,7 @@ Setstate_CommandFn (const uint8_t *argsText
 
 
 
-
+/*
 // -------------------------------------------------------------------------------------------------
 
 	// make the attrValText writeable / changeable for attributeFn
@@ -274,61 +257,260 @@ Setstate_CommandFn (const uint8_t *argsText
 	}
 
 // -------------------------------------------------------------------------------------------------
+*/
 
-	// call Attribute Fn to notify changes - if provided by Type
-	if (Common_Definition->module->ProvidedByModule->AttributeFn) {
+/* 2 optionen
+push @ret, "setstate $d $val";
+push @ret,"setstate $d $rd->{TIME} $c $val";
+*/
 
-		// build attribute command text
-		uint8_t *attrCmdText;
-		size_t attrCmdTextLen = (size_t) asprintf((char **) &attrCmdText
-			,"add");
 
-		printf("Calling AttributeFN of typeName:%.*s for defName:%.*s -> attrCmd:%.*s attrName:%.*s attrVal:%.*s\n"
-			,Common_Definition->module->ProvidedByModule->typeNameLen
-			,Common_Definition->module->ProvidedByModule->typeName
-			,Common_Definition->nameLen
-			,Common_Definition->name
-			,attrCmdTextLen
-			,attrCmdText
-  			,attrNameTextLen
-			,attrNameText
-			,newAttrValTextLen
-			,newAttrValText);
+//https://regexr.com/
+//https://gist.github.com/ianmackinnon/3294587
+//http://pubs.opengroup.org/onlinepubs/009695399/functions/regcomp.html
 
-		// call modules AttributeFn, if retMsg != NULL -> interpret as veto
-		strTextMultiple_t *retMsg =  
-			Common_Definition->module->ProvidedByModule->AttributeFn(Common_Definition
-			,attrCmdText
-			,attrCmdTextLen
-			,attrNameText
-			,attrNameTextLen
-			,&newAttrValText
-			,&newAttrValTextLen);
+// typedef for StateFn - called to set an state for this definition e.g. called from setstate cmd for recovery from save
+//typedef strTextMultiple_t* (* StateFn_t)(Common_Definition_t *Common_Definition, time_t readingTiSt, uint8_t *readingName, size_t readingNameLen, uint8_t *readingValue, size_t readingValueLen);
 
-		// got an error msg?
-		if (retMsg) {
+ char aa[] = "maik";
+ char ab[] = "otto";
 
-			// insert retMsg in stail-queue
-			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+  // Detailed state with timestamp ?
+  time_t readingTiSt = 99;
+  uint8_t *readingName = (uint8_t) &aa;
+  size_t readingNameLen = 4;
+  uint8_t *readingValue = (uint8_t) &ab;
+  size_t readingValueLen = 4;
+
+
+
+/*
+        char inputStr2[100]="12:34:04";
+        char inputStr[100]="12:34";
+
+	// for regex processing
+	regex_t regex;
+        int reti;
+        char msgbuf[100];
+
+	// compile regular expression
+        reti = regcomp(&regex, "^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) +([^ ].*)$", 0);
+
+        if( reti ){
+
+	        fprintf(stderr, "Could not compile regex\n");
+        }
+*/
+
+
+
+
+
+
+/*
+
+	char *source = "___ abc123def ___ ghi456 ___";
+
+ 	char *regexString = "^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) +([^ ].*)$";
+	size_t maxMatches = 8;
+	size_t maxGroups = 2;
+  
+	regex_t regexCompiled;
+	regmatch_t groupArray[maxGroups];
+	unsigned int m;
+	char *cursor;
+
+	if (regcomp(&regexCompiled, regexString, REG_EXTENDED)) {
+
+		printf("Could not compile regular expression.\n");
+
+//		return 1;
+	};
+
+
+
+	// match cnt for loop
+	m = 0;
+
+	// seek *
+	cursor = source;
+
+	for ( m = 0 ; m < maxMatches ; m ++ ) {
+
+		if (regexec(&regexCompiled, cursor, maxGroups, groupArray, 0))
+		        break;  // No more matches
+
+		// group cnt for loop
+		unsigned int g = 0;
+
+		unsigned int offset = 0;
+
+		for ( g = 0 ; g < maxGroups ; g++ ) {
+
+			if ( groupArray[g].rm_so == (size_t)-1 )
+            			break;  // No more groups
+
+			if ( g == 0 )
+ 				offset = groupArray[g].rm_eo;
+
+			// build a copy
+		//	char cursorCopy[strlen(cursor) + 1];
+		//	strcpy(cursorCopy, cursor);
+		//	cursorCopy[groupArray[g].rm_eo] = 0;
+
+			printf("RegEx Match %u, Group %u: [%2u-%2u]: '%.*s'\n"
+				,m
+				,g
+				,(unsigned int) groupArray[g].rm_so
+				,(unsigned int) groupArray[g].rm_eo
+		//		,cursorCopy + groupArray[g].rm_so);
+
+				,(int) groupArray[g].rm_eo
+				,cursor); 
 		}
 
-		free(attrCmdText);
+		cursor += offset;
 	}
+
+	regfree(&regexCompiled);
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+/*
+	// execute regular expression
+	printf("%s is the string\n",inputStr);
+	reti = regexec(&regex, inputStr, 0, NULL, 0);
+
+	// MATCH - contains tiSt and nameValue
+	if( !reti ) {
+
+		puts("Match");
+
+		my ($sname, $sval) = split(" ", $nameval, 2);
+    		 $sval = "" if(!defined($sval));*/
+
+// detect wrong chars in reading
+ /*   		 Log3 $d, 3, "WARNING: unsupported character in reading $sname ".
+            	 "(not A-Za-z/\\d_\\.-), notify the $d->{TYPE} module maintainer."
+       		 if(!goodReadingName($sname));
+     		 if(!defined($d->{READINGS}{$sname}) ||
+      		   !defined($d->{READINGS}{$sname}{TIME}) ||
+      		   $d->{READINGS}{$sname}{TIME} lt $tim) {
+     		   $d->{READINGS}{$sname}{VAL} = $sval;
+      		  $d->{READINGS}{$sname}{TIME} = $tim; } */
+/*
+exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
+
+	}
+
+	// NO MATCH - contains NO tiSt and nameValue
+        else if ( reti == REG_NOMATCH ) {
+
+                puts("No match");
+        }
+
+	// error, failed ...
+        else {
+                regerror(reti, &regex, msgbuf, sizeof(msgbuf));
+                fprintf(stderr, "Regex match failed: %s\n", msgbuf);
+        }
+
+	// free compiled regular expression
+	regfree(&regex);
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		// call State Fn to execute the update - if provided by Type
+		if (Common_Definition->module->ProvidedByModule->StateFn) {
+
+//			// build attribute command text
+//			uint8_t *attrCmd;
+//			size_t attrCmdLen = (size_t) asprintf((char **) &attrCmd
+//				,"add");
+
+
+
+
+			#if Setstate_DBG >= 5
+			// prepare TiSt for LogFn
+			strText_t strText =
+  				SCDEFn->FmtDateTimeFn(readingTiSt);
+
+			SCDEFn->Log3Fn(Common_Definition->name
+				,Common_Definition->nameLen
+				,5
+				,"Calling StateFn of Module '%.*s' for Definition '%.*s'. Reading '%.*s' should get new Value '%.*s' with TimeStamp '%.*s'."
+				,Common_Definition->module->ProvidedByModule->typeNameLen
+				,Common_Definition->module->ProvidedByModule->typeName
+				,Common_Definition->nameLen
+				,Common_Definition->name
+				,readingNameLen
+				,readingName
+				,readingValueLen
+				,readingValue
+				,strText.strTextLen
+				,strText.strText);
+
+			// free TiSt from LogFn
+			free(strText.strText);
+			#endif
+
+			// call modules StateFn, if retMsg != NULL -> interpret as veto
+			strTextMultiple_t *retMsg =  NULL;
+	/*			Common_Definition->module->ProvidedByModule->StateFn(Common_Definition
+					,readingTiSt
+					,readingName
+					,readingNameLen
+					,readingValue
+					,readingValueLen);
+*/
+			// got an error msg? Insert retMsg in stail-queue
+			if (retMsg) STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
+//			free(attrCmdText);
+		}
 
 // -------------------------------------------------------------------------------------------------
 
-	// veto from Types attributeFn? Do NOT add attribute
-	if (!STAILQ_EMPTY(&headRetMsgMultiple)) {
+		// veto from Types attributeFn? Do NOT add attribute
+		if (!STAILQ_EMPTY(&headRetMsgMultiple)) {
 
-		if (newAttrValText) free(newAttrValText);
+//			if (newAttrValText) free(newAttrValText);
 
-		// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-		return headRetMsgMultiple;
-	}
+			// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+			return headRetMsgMultiple;
+		}
 
 // -------------------------------------------------------------------------------------------------
 
-	// loop through assigned attributes and try to find the existing attribute and replace it. Or add it as new attribute.
+/*	// loop through assigned attributes and try to find the existing attribute and replace it. Or add it as new attribute.
 	attribute_t *attribute = STAILQ_FIRST(&SCDERoot->headAttributes);
 	while (true) {
 
@@ -396,13 +578,17 @@ Setstate_CommandFn (const uint8_t *argsText
 		// get next attribute for processing
 		attribute = STAILQ_NEXT(attribute, entries);
 	}
+*/
 
-	 // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-	return headRetMsgMultiple;
 
-  }
+
+		 // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+		return headRetMsgMultiple;
+		}
 
 }
+
+
 
 
 

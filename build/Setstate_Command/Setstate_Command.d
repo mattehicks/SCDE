@@ -145,7 +145,8 @@ Setstate_Command.o: \
  /home/maikschulze/esp/SCDE/main/include/Platform.h \
  /home/maikschulze/esp/SCDE/main/include/SCDE_s.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h \
- /home/maikschulze/esp/SCDE/components/Setstate_Command/include/Setstate_Command.h
+ /home/maikschulze/esp/SCDE/components/Setstate_Command/include/Setstate_Command.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/regex.h
 
 /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h:
 
@@ -438,4 +439,6 @@ Setstate_Command.o: \
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h:
 
 /home/maikschulze/esp/SCDE/components/Setstate_Command/include/Setstate_Command.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/regex.h:
 /home/maikschulze/esp/SCDE/components/Setstate_Command/./Setstate_Command.c:
