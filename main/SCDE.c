@@ -425,7 +425,7 @@ GetAllReadings(Common_Definition_t *Common_Definition)
 
 		// write line to allocated memory and store to queue
 		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
-			,"setstate %.*s %d.%d.%d %d:%d:%d %.*s %.*s TXT\r\n"
+			,"setstate %.*s %d-%d-%d %d:%d:%d %.*s %.*s TXT\r\n"
 			,Common_Definition->nameLen
 			,Common_Definition->name
 			,timeinfo.tm_year+1900
@@ -2438,14 +2438,13 @@ FmtDateTime(time_t tiSt)
   strText.strTextLen = asprintf((char**) &strText.strText
 	,"%04d-%02d-%02d %02d:%02d:%02d"
 	,timeinfo.tm_year+1900
-	,timeinfo.tm_mday
 	,timeinfo.tm_mon+1
+	,timeinfo.tm_mday
 	,timeinfo.tm_hour
 	,timeinfo.tm_min
 	,timeinfo.tm_sec);
 
   return strText;
-
 }
 		
 

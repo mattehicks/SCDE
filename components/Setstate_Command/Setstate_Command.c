@@ -233,25 +233,66 @@ Setstate_CommandFn (const uint8_t *args
  	// Definition for the given Definition-Name found
   	else {
 
+		// to store the time components
+		struct tm timeComp;
+
+		// to store extracted readings
+		char reading[128];				// !!! 64??
+		char value[128];				// !!! 64??
+		char mime[16];					// !!! 64??
+
+		// create temorary string
+		char *tiStReadingValueString;
+
+		asprintf(&tiStReadingValueString
+				,"%.*s"
+				,tiStReadingValueLen
+				,tiStReadingValue);
+
 		// infos needed for calling the StateFn
 		time_t readingTiSt;
 		uint8_t *readingName;
 		size_t readingNameLen;
 		uint8_t *readingValue;
 		size_t readingValueLen;
+		uint8_t *readingMime;
+		size_t readingMimeLen;
 
 // -------------------------------------------------------------------------------------------------
 
-		// check if detailed state with timestamp can be rebuilt - via regex
-		if (NULL) { //  regex check here
-	
-			
+		// check if detailed reading with timestamp and MIME can be rebuilt - via regex
+		// e.g. definitionname 2017-08-08 22:42:25 myreading active TXT
+		if ( 9 == sscanf(tiStReadingValueString
+			,"%d-%d-%d %d:%d:%d %s %s %s"
+				,&timeComp.tm_year
+				,&timeComp.tm_mon
+				,&timeComp.tm_mday
+				,&timeComp.tm_hour
+				,&timeComp.tm_min
+				,&timeComp.tm_sec
+				,reading
+				,value
+				,mime ) ) {
+
+				timeComp.tm_year -= 1900;
+				timeComp.tm_mon -= 1;
+
+				readingTiSt = mktime(&timeComp);
+
+				if ( readingTiSt == -1 ) {
+					printf("Error: unable to make time using mktime\n");
+
+					// use current time
+					time(&readingTiSt);
+				}
 
 
-
-
-
-
+			readingName = &reading;
+			readingNameLen = strlen(reading);
+			readingValue = &value;
+			readingValueLen = strlen(value);
+			readingMime = &mime;
+			readingMimeLen = strlen(mime);
 
 /*
 // -------------------------------------------------------------------------------------------------
@@ -291,7 +332,7 @@ push @ret,"setstate $d $rd->{TIME} $c $val";
 // typedef for StateFn - called to set an state for this definition e.g. called from setstate cmd for recovery from save
 //typedef strTextMultiple_t* (* StateFn_t)(Common_Definition_t *Common_Definition, time_t readingTiSt, uint8_t *readingName, size_t readingNameLen, uint8_t *readingValue, size_t readingValueLen);
 
-			char aa[] = "maik";
+	/*		char aa[] = "maik";
 			char ab[] = "otto";
 
 			// Detailed state with timestamp ?
@@ -300,6 +341,8 @@ push @ret,"setstate $d $rd->{TIME} $c $val";
 			readingNameLen = 4;
 			readingValue = (uint8_t *) &ab;
 			readingValueLen = 4;
+			readingMime = (uint8_t *) &ab;
+			readingMimeLen = 4;*/
 
 
 
@@ -467,21 +510,60 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 		// assuming this is the general, required STATE reading
 		else {
 
-			// get current time
-			time(&readingTiSt);
-
 			// we are dealing with STATE reading here
 			readingName = (uint8_t *) "STATE";
 			readingNameLen = sizeof("STATE")-1;
 
-			// to do: extract Time-Stamp and Value for reading 'STATE'
- //			$a[1] =~ s/\\(...)/chr(oct($1))/ge if($a[1] =~ m/^(\\011|\\040)+$/);
-			char ad[] = "henn";
-			readingValue = (uint8_t *) &ad;
-			readingValueLen = 4;
+			// we are dealing with STATE reading here, always MIME TXT
+			readingMime = (uint8_t *) "TXT";
+			readingMimeLen = sizeof("TXT")-1;
+
+			// STATE reading with date ?
+			// e.g. definitionname 2017-08-08 22:42:25 active
+			if ( 7 == sscanf(tiStReadingValueString
+				,"%d-%d-%d %d:%d:%d %s"
+				,&timeComp.tm_year
+				,&timeComp.tm_mon
+				,&timeComp.tm_mday
+				,&timeComp.tm_hour
+				,&timeComp.tm_min
+				,&timeComp.tm_sec
+				,value ) ) {
+
+				timeComp.tm_year -= 1900;
+				timeComp.tm_mon -= 1;
+
+				readingTiSt = mktime(&timeComp);
+
+				if ( readingTiSt == -1 ) {
+					printf("Error: unable to make time using mktime\n");
+
+					// use current time
+					time(&readingTiSt);
+				}
+			}
+
+			// STATE reading without date ?
+			// e.g. definitionname active
+			else if ( 1 == sscanf(tiStReadingValueString
+					,"%s"
+					,value ) ) {
+
+					// use current time
+					time(&readingTiSt);
+			}
+
+			else {
+
+			// no value will be detected in length zero
+
+			}
+
+			readingValue = &value;
+			readingValueLen = strlen(value);
 
 			// we have a value for 'STATE'
-			if (readingValue) {
+			if (readingValueLen) {
 
 				// do not overwrite state like "opened" or "initialized"
 				if ( ( SCDERoot->globalCtrlRegA | F_INIT_DONE ) || 
@@ -515,11 +597,11 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 			strText_t strText =
   				SCDEFn->FmtDateTimeFn(readingTiSt);
 
-			SCDEFn->Log3Fn(Common_Definition->name
-				,Common_Definition->nameLen
+			SCDEFn->Log3Fn(Setstate_ProvidedByCommand.commandNameText
+		  		,Setstate_ProvidedByCommand.commandNameTextLen
 				,5
-				,"Calling StateFn of Module '%.*s' for Definition '%.*s'."
-				 " Reading '%.*s' should get new Value '%.*s' with TimeStamp '%.*s'."
+				,"Calling StateFn of Module '%.*s' for Definition '%.*s'. "
+				 "Reading '%.*s' gets new Value '%.*s', Mime '%.*s', TimeStamp '%.*s'."
 				,Common_Definition->module->ProvidedByModule->typeNameLen
 				,Common_Definition->module->ProvidedByModule->typeName
 				,Common_Definition->nameLen
@@ -528,6 +610,8 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 				,readingName
 				,readingValueLen
 				,readingValue
+				,readingMimeLen
+				,readingMime
 				,strText.strTextLen
 				,strText.strText);
 
@@ -542,11 +626,18 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 					,readingName
 					,readingNameLen
 					,readingValue
-					,readingValueLen);
+					,readingValueLen
+					,readingMime
+					,readingMimeLen);
 
 			// got an error msg? Insert retMsg in stail-queue
 			if (retMsg) STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+
 		}
+
+
+		// free this temp string
+		free(tiStReadingValueString);
 
 // -------------------------------------------------------------------------------------------------
 

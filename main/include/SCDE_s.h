@@ -409,7 +409,7 @@ typedef strTextMultiple_t* (* SetFn_t)(Common_Definition_t *Common_Definition, u
 typedef strTextMultiple_t* (* ShutdownFn_t)(Common_Definition_t *Common_Definition);
 
 // typedef for StateFn - called to set an state for this definition e.g. called from setstate cmd for recovery from save
-typedef strTextMultiple_t* (* StateFn_t)(Common_Definition_t *Common_Definition, time_t readingTiSt, uint8_t *readingName, size_t readingNameLen, uint8_t *readingValue, size_t readingValueLen);
+typedef strTextMultiple_t* (* StateFn_t)(Common_Definition_t *Common_Definition, time_t readingTiSt, uint8_t *readingName, size_t readingNameLen, uint8_t *readingValue, size_t readingValueLen, uint8_t *readingMime, size_t readingMimeLen);
 
 // typedef for SubFn - experimental - provided my module
 typedef strTextMultiple_t* (* SubFn_t)(Common_Definition_t *Common_Definition, uint8_t *kArgs, size_t kArgsLen);
