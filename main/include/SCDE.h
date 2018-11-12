@@ -20,13 +20,13 @@ void InitA();
  */
 
 //
-void Log (char *Device, int LogLevel, char *Text);
+void Log                    (char *Device, int LogLevel, char *Text);
 
 //
-void Log3 (const uint8_t *name, const size_t nameLen, const uint8_t LogLevel, const char *format, ...);
+void Log3                   (const uint8_t *name, const size_t nameLen, const uint8_t LogLevel, const char *format, ...);
 
 //
-void Log4 (char *text);
+void Log4                   (char *text);
 
 // returns ALL Readings of the Definition
 struct headRetMsgMultiple_s GetAllReadings (Common_Definition_t *Common_Definition);
@@ -41,28 +41,29 @@ struct headRetMsgMultiple_s AnalyzeCommandChain(const uint8_t *args, const size_
 struct headRetMsgMultiple_s AnalyzeCommand(const uint8_t *args, const size_t argsLen);
 
 // internal Fn
-Module_t* CommandActivateModule (ProvidedByModule_t* ProvidedByNEWModule);
-command_t* CommandActivateCommand (providedByCommand_t* providedByNEWCommand);
+Module_t*                   CommandActivateModule (ProvidedByModule_t* ProvidedByNEWModule);
+command_t*                  CommandActivateCommand (providedByCommand_t* providedByNEWCommand);
 
 // internal Fn, but made available to Modules and Commands
-Module_t* GetLoadedModulePtrByName(const uint8_t *typeName, const size_t typeNameLen);
+Common_Definition_t*        GetDefinitionPtrByName(const size_t definitionNameLen, const uint8_t *definitionName);
+Module_t*                   GetLoadedModulePtrByName(const uint8_t *typeName, const size_t typeNameLen);
 //deleted Common_Definition_t* AddDefineForModuleWithName(Module_t* ModulePtr, const char* Name);
 
-//Common_Definition_t* AddDefineForModuleWithName(Module_t* ModulePtr, char* Name);
+//Common_Definition_t*      AddDefineForModuleWithName(Module_t* ModulePtr, char* Name);
 
-int CommandLoadCommand(const uint8_t *commandTxt, const size_t commandTxtLen, commandFn_t commandFn, const uint8_t *commandHelp, const size_t commandHelpLen);
+int                         CommandLoadCommand(const uint8_t *commandTxt, const size_t commandTxtLen, commandFn_t commandFn, const uint8_t *commandHelp, const size_t commandHelpLen);
 
-Module_t* CommandReloadModule(const uint8_t *typeName, const size_t typeNameLen);
+Module_t*                   CommandReloadModule(const uint8_t *typeName, const size_t typeNameLen);
 
 //char* CommandDefine (const uint8_t *args, const size_t argsLen);
 //char* CommandSet (const uint8_t *args, const size_t argsLen);
-strTextMultiple_t* CommandUndefine (const uint8_t *args, const size_t argsLen);
+strTextMultiple_t*          CommandUndefine (const uint8_t *args, const size_t argsLen);
 // Attribute Management
-char* GetAttribute(char* Definition, char* AttributeName);
-bool AssignAttribute(char* Definition, char* AttributeName, char* Attribute);
-bool DeleteAttribute(char* Definition, char* AttributeName);
+char*                       GetAttribute(char* Definition, char* AttributeName);
+bool                        AssignAttribute(char* Definition, char* AttributeName, char* Attribute);
+bool                        DeleteAttribute(char* Definition, char* AttributeName);
 
-int CallGetFnByDefName(const uint8_t *nameText, const size_t nameTextLen, Common_Definition_t *sourceCommon_Definition, void *X);
+int                         CallGetFnByDefName(const uint8_t *nameText, const size_t nameTextLen, Common_Definition_t *sourceCommon_Definition, void *X);
 
 // Initializes the global device
 void doGlobalDef(const uint8_t *cfgFileName, const size_t cfgFileNameLen);

@@ -148,6 +148,8 @@ ESP32_BH1750_Module.o: \
  /home/maikschulze/esp/SCDE/components/ESP32_BH1750_Module/include/ESP32_BH1750_Module.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
+ /home/maikschulze/esp/SCDE/components/ESP32_I2C_Master_Module/include/ESP32_I2C_Master_Module.h \
+ /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/ringbuf.h \
  /home/maikschulze/esp/SCDE/main/include/SCDE_Main.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h \
@@ -452,6 +454,10 @@ ESP32_BH1750_Module.o: \
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
+
+/home/maikschulze/esp/SCDE/components/ESP32_I2C_Master_Module/include/ESP32_I2C_Master_Module.h:
+
+/home/maikschulze/esp/esp-idf/components/freertos/include/freertos/ringbuf.h:
 
 /home/maikschulze/esp/SCDE/main/include/SCDE_Main.h:
 

@@ -1,19 +1,33 @@
 SCDE.o: /home/maikschulze/esp/SCDE/main/SCDE.c \
  /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h \
- /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOS.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/sys/reent.h \
+ /home/maikschulze/esp/SCDE/main/include/esp8266.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/newlib.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/config.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/ieeefp.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/features.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core-isa.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/stdio.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/sys/cdefs.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/machine/_default_types.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/sys/reent.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_types.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/_types.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/machine/_default_types.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/lock.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/sys/types.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/stdlib.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/machine/stdlib.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/alloca.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/string.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/sys/string.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdint.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_intsup.h \
+ /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOS.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOSConfig.h \
  /home/maikschulze/esp/SCDE/build/include/sdkconfig.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_config.h \
@@ -26,11 +40,6 @@ SCDE.o: /home/maikschulze/esp/SCDE/main/SCDE.c \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_context.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/corebits.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/xtruntime-frames.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/stdlib.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/sys/cdefs.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/machine/stdlib.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/alloca.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/soc.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_assert.h \
@@ -45,11 +54,6 @@ SCDE.o: /home/maikschulze/esp/SCDE/main/SCDE.c \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/xtruntime-core-state.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_crosscore_int.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_timer.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/stdio.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/sys/types.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_err.h \
  /home/maikschulze/esp/esp-idf/components/heap/include/esp_heap_caps.h \
  /home/maikschulze/esp/esp-idf/components/heap/include/multi_heap.h \
@@ -82,18 +86,7 @@ SCDE.o: /home/maikschulze/esp/SCDE/main/SCDE.c \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/list.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/semphr.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/queue.h \
- /home/maikschulze/esp/esp-idf/components/log/include/esp_log.h \
- /home/maikschulze/esp/esp-idf/components/log/include/esp_log_internal.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/rom/queue.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_types.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/esp_interface.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_crypto_types.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/esp_event.h \
- /home/maikschulze/esp/esp-idf/components/tcpip_adapter/include/tcpip_adapter.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/rom/queue.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_types.h \
- /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip_addr.h \
+ /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/opt.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/port/lwipopts.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/time.h \
@@ -116,13 +109,11 @@ SCDE.o: /home/maikschulze/esp/SCDE/main/SCDE.c \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/port/arch/sys_arch.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/port/arch/vfs_lwip.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/def.h \
- /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip4_addr.h \
- /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip6_addr.h \
- /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/apps/dhcpserver.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_os_adapter.h \
- /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/pbuf.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/err.h \
+ /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip_addr.h \
+ /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip4_addr.h \
+ /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip6_addr.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/netif.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/stats.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/mem.h \
@@ -131,27 +122,36 @@ SCDE.o: /home/maikschulze/esp/SCDE/main/SCDE.c \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/priv/memp_priv.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip4.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip6.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/esp_deep_sleep.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_event.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_types.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/rom/queue.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/esp_interface.h \
+ /home/maikschulze/esp/esp-idf/components/tcpip_adapter/include/tcpip_adapter.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/rom/queue.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_types.h \
+ /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/apps/dhcpserver.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_event_loop.h \
- /home/maikschulze/esp/esp-idf/components/heap/include/esp_heap_alloc_caps.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/esp_event.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_ipc.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_ssc.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/inttypes.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/string.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/sys/string.h \
- /home/maikschulze/esp/SCDE/main/include/logging.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_crypto_types.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_os_adapter.h \
+ /home/maikschulze/esp/esp-idf/components/log/include/esp_log.h \
+ /home/maikschulze/esp/esp-idf/components/log/include/esp_log_internal.h \
+ /home/maikschulze/esp/SCDE/main/include/Platform.h \
+ /home/maikschulze/esp/SCDE/main/include/espmissingincludes.h \
  /home/maikschulze/esp/SCDE/main/include/SCDE_s.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h \
- /home/maikschulze/esp/SCDE/main/include/SCDE_Main.h \
- /home/maikschulze/esp/SCDE/main/include/SCDE.h
+ /home/maikschulze/esp/SCDE/main/include/SCDE.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/inttypes.h \
+ /home/maikschulze/esp/SCDE/main/include/logging.h
 
 /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h:
 
-/home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOS.h:
+/home/maikschulze/esp/SCDE/main/include/esp8266.h:
 
-/home/maikschulze/esp/esp-idf/components/newlib/include/sys/reent.h:
+/home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h:
 
@@ -165,17 +165,45 @@ SCDE.o: /home/maikschulze/esp/SCDE/main/SCDE.c \
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core-isa.h:
 
+/home/maikschulze/esp/esp-idf/components/newlib/include/stdio.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/sys/cdefs.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/machine/_default_types.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/sys/reent.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h:
+
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_types.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/machine/_types.h:
 
-/home/maikschulze/esp/esp-idf/components/newlib/include/machine/_default_types.h:
-
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/lock.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/sys/types.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/stdlib.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/machine/stdlib.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/alloca.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/string.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/sys/string.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/stdint.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_intsup.h:
+
+/home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOS.h:
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOSConfig.h:
 
@@ -200,16 +228,6 @@ SCDE.o: /home/maikschulze/esp/SCDE/main/SCDE.c \
 /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/corebits.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/xtruntime-frames.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/stdlib.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/sys/cdefs.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/machine/stdlib.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/alloca.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h:
 
@@ -238,16 +256,6 @@ SCDE.o: /home/maikschulze/esp/SCDE/main/SCDE.c \
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_crosscore_int.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_timer.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/stdio.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/sys/types.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_err.h:
 
@@ -313,29 +321,7 @@ SCDE.o: /home/maikschulze/esp/SCDE/main/SCDE.c \
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/queue.h:
 
-/home/maikschulze/esp/esp-idf/components/log/include/esp_log.h:
-
-/home/maikschulze/esp/esp-idf/components/log/include/esp_log_internal.h:
-
-/home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi.h:
-
-/home/maikschulze/esp/esp-idf/components/esp32/include/rom/queue.h:
-
-/home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_types.h:
-
-/home/maikschulze/esp/esp-idf/components/esp32/include/esp_interface.h:
-
-/home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_crypto_types.h:
-
-/home/maikschulze/esp/esp-idf/components/esp32/include/esp_event.h:
-
-/home/maikschulze/esp/esp-idf/components/tcpip_adapter/include/tcpip_adapter.h:
-
-/home/maikschulze/esp/esp-idf/components/esp32/include/rom/queue.h:
-
-/home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_types.h:
-
-/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip_addr.h:
+/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip.h:
 
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/opt.h:
 
@@ -381,19 +367,15 @@ SCDE.o: /home/maikschulze/esp/SCDE/main/SCDE.c \
 
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/def.h:
 
-/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip4_addr.h:
-
-/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip6_addr.h:
-
-/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/apps/dhcpserver.h:
-
-/home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_os_adapter.h:
-
-/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip.h:
-
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/pbuf.h:
 
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/err.h:
+
+/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip_addr.h:
+
+/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip4_addr.h:
+
+/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip6_addr.h:
 
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/netif.h:
 
@@ -411,33 +393,51 @@ SCDE.o: /home/maikschulze/esp/SCDE/main/SCDE.c \
 
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip6.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/esp_deep_sleep.h:
-
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_event.h:
+
+/home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_types.h:
+
+/home/maikschulze/esp/esp-idf/components/esp32/include/rom/queue.h:
+
+/home/maikschulze/esp/esp-idf/components/esp32/include/esp_interface.h:
+
+/home/maikschulze/esp/esp-idf/components/tcpip_adapter/include/tcpip_adapter.h:
+
+/home/maikschulze/esp/esp-idf/components/esp32/include/rom/queue.h:
+
+/home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_types.h:
+
+/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/apps/dhcpserver.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_event_loop.h:
 
-/home/maikschulze/esp/esp-idf/components/heap/include/esp_heap_alloc_caps.h:
+/home/maikschulze/esp/esp-idf/components/esp32/include/esp_event.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_ipc.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/esp_ssc.h:
 
-/home/maikschulze/esp/esp-idf/components/newlib/include/inttypes.h:
+/home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi.h:
 
-/home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h:
+/home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_crypto_types.h:
 
-/home/maikschulze/esp/esp-idf/components/newlib/include/string.h:
+/home/maikschulze/esp/esp-idf/components/esp32/include/esp_wifi_os_adapter.h:
 
-/home/maikschulze/esp/esp-idf/components/newlib/include/sys/string.h:
+/home/maikschulze/esp/esp-idf/components/log/include/esp_log.h:
 
-/home/maikschulze/esp/SCDE/main/include/logging.h:
+/home/maikschulze/esp/esp-idf/components/log/include/esp_log_internal.h:
+
+/home/maikschulze/esp/SCDE/main/include/Platform.h:
+
+/home/maikschulze/esp/SCDE/main/include/espmissingincludes.h:
 
 /home/maikschulze/esp/SCDE/main/include/SCDE_s.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h:
 
-/home/maikschulze/esp/SCDE/main/include/SCDE_Main.h:
-
 /home/maikschulze/esp/SCDE/main/include/SCDE.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/inttypes.h:
+
+/home/maikschulze/esp/SCDE/main/include/logging.h:
 /home/maikschulze/esp/SCDE/main/./SCDE.c:

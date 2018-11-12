@@ -27,6 +27,8 @@
 #include <SCDE_s.h>
 
 #include "ESP32_BH1750_Module.h"
+// using 1st stage
+#include "ESP32_I2C_Master_Module.h"
 
 #include "SCDE_Main.h"
 
@@ -488,7 +490,6 @@ ESP32_BH1750_Attribute(Common_Definition_t *Common_Definition
 */
 
   return retMsg;
-
 }
 
 
@@ -514,31 +515,38 @@ ESP32_BH1750_Define(Common_Definition_t *Common_Definition)
   ESP32_BH1750_Definition_t* ESP32_BH1750_Definition =
 		  (ESP32_BH1750_Definition_t*) Common_Definition;
 
-  // new conversation
-  uint8_t *defArgsText = Common_Definition->definition;
-  size_t defArgsTextLen = Common_Definition->definitionLen;
+// -------------------------------------------------------------------------------------------------
 
-  #if ESP32_BH1770_Module_DBG >= 5
-  printf("\n|ESP32_BH1750_Def, Name:%.*s, got args:%.*s>"
-    ,ESP32_BH1750_Definition->common.nameLen
-    ,ESP32_BH1750_Definition->common.name
-    ,defArgsTextLen
-    ,defArgsText);
+  #if ESP32_BH1750_Module_DBG >= 5
+  SCDEFn->Log3Fn(Common_Definition->name
+	,Common_Definition->nameLen
+	,5
+	,"DefineFn of Module '%.*s' is called to continue creation of Definition '%.*s' with args '%.*s'."
+	,ESP32_BH1750_Definition->common.module->ProvidedByModule->typeNameLen
+	,ESP32_BH1750_Definition->common.module->ProvidedByModule->typeName
+	,ESP32_BH1750_Definition->common.nameLen
+	,ESP32_BH1750_Definition->common.name
+	,ESP32_BH1750_Definition->common.definitionLen
+	,ESP32_BH1750_Definition->common.definition);
   #endif
 
 // ------------------------------------------------------------------------------------------------
 
+  // new conversation
+  uint8_t *defArgsText = Common_Definition->definition;
+  size_t defArgsTextLen = Common_Definition->definitionLen;
+
   // Check for args. This type requires args...
   if (!defArgsTextLen) {
 
-    // alloc mem for retMsg
-    retMsg = malloc(sizeof(strTextMultiple_t));
+	// alloc mem for retMsg
+	retMsg = malloc(sizeof(strTextMultiple_t));
 
-    // response with error text
-    retMsg->strTextLen = asprintf(&retMsg->strText
-      ,"Parsing Error! Expected Args!");
+	// response with error text
+	retMsg->strTextLen = asprintf(&retMsg->strText
+		,"Parsing Error! Expected Args!");
 
-    return retMsg;
+	return retMsg;
   }
 
 // ------------------------------------------------------------------------------------------------
@@ -692,7 +700,7 @@ ESP32_BH1750_Define(Common_Definition_t *Common_Definition)
 */
 }
 
-
+//#include "driver/i2c.h"
 
 /*
  * ------------------------------------------------------------------------------------------------
@@ -707,15 +715,67 @@ int
 ESP32_BH1750_IdleCb(Common_Definition_t *Common_Definition)
 {
 
+  // prepare STAILQ head for multiple RetMsg storage
+  struct headRetMsgMultiple_s headRetMsgMultiple;
+
+  // Initialize the queue
+  STAILQ_INIT(&headRetMsgMultiple);
+
   // make common ptr to modul specific ptr
-  ESP32_BH1750_Definition_t* ESP32_BH1750_Definition =
+  ESP32_BH1750_Definition_t *ESP32_BH1750_Definition =
 		  (ESP32_BH1750_Definition_t*) Common_Definition;
+
+// -------------------------------------------------------------------------------------------------
 
   #if ESP32_BH1770_Module_DBG >= 5
   printf("\n|ESP32_BH1750_IdleCb, Def-Name:%.*s>"
 	,ESP32_BH1750_Definition->common.nameLen
 	,ESP32_BH1750_Definition->common.name);
   #endif
+
+// -------------------------------------------------------------------------------------------------
+
+  // get definition of 1st stage definition we want to use for tx/rx
+  ESP32_I2C_Master_Definition_t *ESP32_I2C_Master_Definition_Stage1;
+
+  ESP32_I2C_Master_Definition_Stage1 = SCDEFn->GetDefinitionPtrByNameFn(
+		 ESP32_BH1750_Definition->stage1definitionNameLen
+		,ESP32_BH1750_Definition->stage1definitionName);
+
+  // prepare further specific Stage exchange data
+  ESP32_I2C_Master_StageXCHG_t *ESP32_I2C_Master_StageXCHG = NULL;
+
+  // call stage 1, if found
+  if (ESP32_I2C_Master_Definition_Stage1) {
+/*
+	// and 
+	if (Common_Definition->module->ProvidedByModule->DirectWriteFn) {
+
+		// call modules DirectWriteFn, if retMsg != NULL -> interpret as veto
+		strTextMultiple_t *retMsg =  
+			Common_Definition->module->ProvidedByModule->DirectWriteFn(
+			 ESP32_I2C_Master_Definition_Stage1
+			,ESP32_BH1750_Definition
+			,ESP32_I2C_Master_StageXCHG);
+
+		// got an error msg?
+		if (retMsg) {
+
+			// insert retMsg in stail-queue
+			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+		}
+	}
+*/
+  }
+
+  // stage 1 not found, log note
+  else {
+
+  }
+
+// -------------------------------------------------------------------------------------------------
+
+
 
 // -------------------------------------------------------------------------------------------
 
@@ -740,8 +800,8 @@ ESP32_BH1750_IdleCb(Common_Definition_t *Common_Definition)
  * State5: goto step 3?
  *
  */
-/*
-#include "driver/i2c.h"
+
+
 
 #define BH1750_SENSOR_ADDR  0x23	// slave address for BH1750 sensor
 #define BH1750_CMD_START    0x23	// Command to set measure mode
@@ -752,6 +812,7 @@ ESP32_BH1750_IdleCb(Common_Definition_t *Common_Definition)
 #define ACK_VAL    0x0			// I2C ack value
 #define NACK_VAL   0x1			// I2C nack value
 
+/*
   // storage for our I2C command queue
   i2c_cmd_handle_t cmd;
 
@@ -764,47 +825,56 @@ ESP32_BH1750_IdleCb(Common_Definition_t *Common_Definition)
        (enum ESP32_BH1750_QueryStates) ESP32_BH1750_Definition->BH1750_QueryState;
 
   // enter the state machine for sensor data query
-  switch(p_state) {//ESP32_BH1750_Definition->BH1750_QueryState) {
+  switch (p_state) {// its ESP32_BH1750_Definition->BH1750_QueryState) {
 
-     case s_ESP32_INTIAL_DELAY:	// #00
-     break;
+	case s_ESP32_INTIAL_DELAY:		// #00
 
-     case s_ESP32_BH1750_SET_MODE: 	// #01
+		state = s_ESP32_BH1750_SET_MODE;
+		break;
 
-        cmd = i2c_cmd_link_create();
 
-        i2c_master_start(cmd);
+	// JOB: create + execute set BH1750 mode command
+	case s_ESP32_BH1750_SET_MODE: 		// #01
 
-        i2c_master_write_byte(cmd, BH1750_SENSOR_ADDR << 1 | WRITE_BIT, ACK_CHECK_EN);
+		cmd = i2c_cmd_link_create();
 
-        i2c_master_write_byte(cmd, BH1750_CMD_START, ACK_CHECK_EN);
+		i2c_master_start(cmd);
 
-        i2c_master_stop(cmd);
+		i2c_master_write_byte(cmd, BH1750_SENSOR_ADDR << 1 | WRITE_BIT, ACK_CHECK_EN);
 
-        // call our IO-Device TX
-//        int ret = callIoDev (cmd);
-i2c_cmd_link_delete(cmd);
+		i2c_master_write_byte(cmd, BH1750_CMD_START, ACK_CHECK_EN);
 
-	// we have a result
+		i2c_master_stop(cmd);
+
+		// send job to our IO-Device TX
+//		int ret = callIoDev (cmd);
+
+		state = s_ESP32_BH1750_SET_MODE_EXEC;
+		break;
+
+
+	// JOB: wait till set mode is finnished
+	//      - set a delay
+	case s_ESP32_BH1750_SET_MODE_EXEC: 	// #02
+
+		i2c_cmd_link_delete(cmd);
+
+	// we have a result / OK
         if (ret == ESP_OK) {
 
-        #if ESP32_BH1770_Module_DBG >= 5
-        printf("|Set Mode OK>");
-        #endif
+		#if ESP32_BH1770_Module_DBG >= 5
+ 		printf("|Set Mode OK>");
+		#endif
+	}
 
-//        state = 2;
+	// we have no result / error
+	else {
 
-        }
+		#if ESP32_BH1770_Module_DBG >= 5
+		printf("|No ack, sensor not connected...skip...>");
+		#endif 
 
-        // we have no result / error
-        else {
-
-           #if ESP32_BH1770_Module_DBG >= 5
-           printf("|No ack, sensor not connected...skip...>");
-           #endif 
-
- //          go to state 0 here return ESP_FAIL;
-
+ //		go to state 0 here return ESP_FAIL;
         }
 
      break;

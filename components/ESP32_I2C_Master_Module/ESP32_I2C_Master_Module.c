@@ -483,7 +483,6 @@ ESP32_I2C_Master_Attribute(Common_Definition_t *Common_Definition
 */
 
   return retMsg;
-
 }
 
 
@@ -607,32 +606,38 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
   ESP32_I2C_Master_Definition_t* ESP32_I2C_Master_Definition =
 		  (ESP32_I2C_Master_Definition_t*) Common_Definition;
 
-  // new conversation
-  uint8_t *defArgsText = Common_Definition->definition;
-  size_t defArgsTextLen = Common_Definition->definitionLen;
+// -------------------------------------------------------------------------------------------------
 
   #if ESP32_I2C_Master_Module_DBG >= 5
-  printf("\n|ESP32_I2C_Master_Def, Name:%.*s, got args:%.*s>"
-    ,ESP32_I2C_Master_Definition->common.nameLen
-    ,ESP32_I2C_Master_Definition->common.name
-    ,defArgsTextLen
-    ,defArgsText);
+  SCDEFn->Log3Fn(Common_Definition->name
+	,Common_Definition->nameLen
+	,5
+	,"DefineFn of Module '%.*s' is called to continue creation of Definition '%.*s' with args '%.*s'."
+	,ESP32_I2C_Master_Definition->common.module->ProvidedByModule->typeNameLen
+	,ESP32_I2C_Master_Definition->common.module->ProvidedByModule->typeName
+	,ESP32_I2C_Master_Definition->common.nameLen
+	,ESP32_I2C_Master_Definition->common.name
+	,ESP32_I2C_Master_Definition->common.definitionLen
+	,ESP32_I2C_Master_Definition->common.definition);
   #endif
 
 // ------------------------------------------------------------------------------------------------
 
+  // new conversation
+  uint8_t *defArgsText = Common_Definition->definition;
+  size_t defArgsTextLen = Common_Definition->definitionLen;
+
   // Check for args. This type requires args...
   if (!defArgsTextLen) {
 
-    // alloc mem for retMsg
-    retMsg = malloc(sizeof(strTextMultiple_t));
+	// alloc mem for retMsg
+	retMsg = malloc(sizeof(strTextMultiple_t));
 
-    // response with error text
-    retMsg->strTextLen = asprintf(&retMsg->strText
-      ,"Parsing Error! Expected Args!");
+	// response with error text
+	retMsg->strTextLen = asprintf(&retMsg->strText
+		,"Parsing Error! Expected Args!");
 
-    return retMsg;
-
+	return retMsg;
   }
 
 // ------------------------------------------------------------------------------------------------
@@ -1343,6 +1348,65 @@ esp_err_t i2c_master_sensor_test(i2c_port_t i2c_num, uint8_t* data_h, uint8_t* d
 
 
 
+/**
+ * --------------------------------------------------------------------------------------------------
+ *  FName: ESP32_I2C_Master_DirectWrite
+ *  Desc: for 2 stage designs - called to give write job to 1st stage (this stage)
+ *  Info: 
+ *  Para: ESP32_I2C_Master_Definition_t *ESP32_I2C_Master_Definition -> WebIF Definition that should be removed
+ *  Rets: strTextMultiple_t* -> response text NULL=no text
+ * --------------------------------------------------------------------------------------------------
+ */
+/*
+strTextMultiple_t *
+ESP32_I2C_Master_DirectWrite(
+	 Common_Definition_t *Common_Definition_Stage1
+	,Common_Definition_t *Common_Definition_Stage2
+	,Common_StageXCHG_t *Common_StageXCHG)
+{
+
+  // for Fn response msg
+  strTextMultiple_t *retMsg = NULL;
+
+  // to adress 1st stage definition - make common ptr to modul specific ptr
+  ESP32_I2C_Master_Definition_t *ESP32_I2C_Master_Definition_Stage1 =
+	(ESP32_I2C_Master_Definition_t*) Common_Definition_Stage1;
+
+  // make common ptr to modul specific ptr
+  ESP32_I2C_Master_StageXCHG_t *ESP32_I2C_Master_StageXCHG =
+	(ESP32_I2C_Master_StageXCHG_t*) Common_StageXCHG;
+
+// -------------------------------------------------------------------------------------------------
+
+// check 4 matching modules
+
+// -------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
+  #if ESP32_I2C_Master_Module_DBG >= 5
+  SCDEFn->Log3Fn(
+	 ESP32_I2C_Master_Definition_Stage1->common.name
+	,ESP32_I2C_Master_Definition_Stage1->common.nameLen
+	,5
+	,"DirectWriteFn of Definition '%.*s' (Module '%.*s') is called "
+  	 "from Definition '%.*s' (Module '%.*s') to exec write job."
+	,ESP32_I2C_Master_Definition_Stage1->common.nameLen
+	,ESP32_I2C_Master_Definition_Stage1->common.name
+	,ESP32_I2C_Master_Definition_Stage1->common.module->ProvidedByModule->typeNameLen
+	,ESP32_I2C_Master_Definition_Stage1->common.module->ProvidedByModule->typeName
+	,Common_Definition_Stage2->nameLen
+	,Common_Definition_Stage2->name
+	,Common_Definition_Stage2->module->ProvidedByModule->typeNameLen
+	,Common_Definition_Stage2->module->ProvidedByModule->typeName);
+  #endif
+
+// -------------------------------------------------------------------------------------------------
+
+  return retMsg;
+}
+*/
+
+
 /*
  * ------------------------------------------------------------------------------------------------
  *  FName: ESP32_I2C_Master_IdleCb	
@@ -1485,7 +1549,7 @@ ESP32_I2C_Master_Initialize(SCDERoot_t* SCDERootptr)
  *  Rets: strTextMultiple_t* -> response text in allocated memory, NULL=no text
  * -------------------------------------------------------------------------------------------------
  */
-strTextMultiple_t* ICACHE_FLASH_ATTR
+strTextMultiple_t *
 ESP32_I2C_Master_Set(Common_Definition_t* Common_Definition
 	,uint8_t *setArgsText
 	,size_t setArgsTextLen)

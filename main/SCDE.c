@@ -10,8 +10,26 @@ OK   defName           defName
 */
 
 
+// set default build verbose - if no external override
+#ifndef CORE_SCDE_DBG  
+#define CORE_SCDE_DBG  5	// 5 is default
+#endif 
+
+// set default build verbose - if no external override
+#ifndef Helpers_SCDE_DBG  
+#define Helpers_SCDE_DBG  5	// 5 is default
+#endif 
+
+
+
+
 
 #include "ProjectConfig.h"
+#include <esp8266.h>
+#include "SCDE_s.h"
+
+#include "SCDE.h"
+
 
 #if defined(ESP_PLATFORM)
 
@@ -20,11 +38,12 @@ OK   defName           defName
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
-
+/*
 #include <esp_err.h>
 #include <esp_log.h>
 #include <esp_system.h>
 #include <esp_wifi.h>
+*/
 //#include <spiffs.h>
 
 //#include "lwip/err.h"
@@ -41,7 +60,7 @@ OK   defName           defName
 
 //#include "Platform.h"
 
-
+/*
 #include "lwip/ip.h"
 
 #include <stdint.h>
@@ -60,6 +79,7 @@ OK   defName           defName
 #include "esp_types.h"
 #include "esp_wifi_types.h"
 #include "esp_heap_alloc_caps.h"
+*/
 
 #include "esp_log.h"
 
@@ -83,9 +103,7 @@ OK   defName           defName
 
 //#include "scde_task.h"
 #include "logging.h"
-#include "SCDE_s.h"
-#include "SCDE_Main.h"
-#include "SCDE.h"
+
 
 
 
@@ -156,6 +174,7 @@ SCDEFn_t SCDEFn = {
   ,Log4
   ,AnalyzeCommandChain
   ,AnalyzeCommand
+  ,GetDefinitionPtrByName
   ,GetLoadedModulePtrByName
   ,CommandReloadModule
   ,CommandUndefine
@@ -173,10 +192,8 @@ SCDEFn_t SCDEFn = {
   ,GetDefAndAttr
 
 // added Fn (Perl -> C)
-	,Get_attrVal_by_defName_and_attrName
+  ,Get_attrVal_by_defName_and_attrName
 };
-
-
 
 
 
@@ -192,7 +209,6 @@ SCDEFn_t SCDEFn = {
 void
 InitSCDERoot(void)
 {
-
   SCDERoot.SCDEFn = &SCDEFn;
 
   STAILQ_INIT(&SCDERoot.headAttributes);
@@ -203,7 +219,6 @@ InitSCDERoot(void)
 
   STAILQ_INIT(&SCDERoot.HeadModules);
 }
-
 
 
 
@@ -1131,7 +1146,6 @@ InitA()
 
 
 
-
 /*
  *--------------------------------------------------------------------------------------------------
  *FName: Log
@@ -1145,14 +1159,13 @@ InitA()
  */
 void
 Log (char *Device, int LogLevel, char *Text)
-  {
+{
 
   LOGD("Device:%s, Loglevel:%d, Text:%s",
 	Device,
 	LogLevel,
 	Text);
-
-  }
+}
 
 
 
@@ -1169,20 +1182,10 @@ Log (char *Device, int LogLevel, char *Text)
  */
 void
 Log4 (char *text)
-  {
+{
 
   printf ("%s", text);
-
-  }
-
-
-
-
-
-
-
-
-
+}
 
 
 
@@ -1197,8 +1200,7 @@ Log4 (char *text)
  */
 command_t*
 CommandActivateCommand (providedByCommand_t* providedByNEWCommand)
-  {
-
+{
   // Call the Initialize Function
   providedByNEWCommand->initializeCommandFn(&SCDERoot);
 
@@ -1213,8 +1215,7 @@ CommandActivateCommand (providedByCommand_t* providedByNEWCommand)
   Log("HCTRL",16,"Command xx activated by main Fn\n");
 
   return newCommand;
-
-  }
+}
 
 
 
@@ -1229,8 +1230,7 @@ CommandActivateCommand (providedByCommand_t* providedByNEWCommand)
  */
 Module_t*
 CommandActivateModule (ProvidedByModule_t* ProvidedByNEWModule)
-  {
-
+{
   // Call the Initialize Function
   ProvidedByNEWModule->InitializeFn(&SCDERoot);
 
@@ -1245,8 +1245,7 @@ CommandActivateModule (ProvidedByModule_t* ProvidedByNEWModule)
   Log("HCTRL",16,"Module xx activated by main Fn\n");
 
   return NewModule;
-
-  }
+}
 
 
 
@@ -1263,8 +1262,7 @@ CommandActivateModule (ProvidedByModule_t* ProvidedByNEWModule)
 Module_t*
 CommandReloadModule(const uint8_t *typeName
 	,const size_t typeNameLen)
-  {
-
+{
   //  printf ("Command Reload called. Loading Module Type: %s", text);
   Log("HCTRL",16,"Loading Module/n");
 
@@ -1343,8 +1341,7 @@ CommandReloadModule(const uint8_t *typeName
 	}
 
   return NewModule;
-
-  }
+}
 
 
 
@@ -1366,7 +1363,6 @@ CallGetFnByDefName(const uint8_t *nameText
 	,Common_Definition_t *sourceCommon_Definition
 	, void *X)
 {
-
   int retInt = 0;
 
   // get the Common_Definition by Name
@@ -1396,290 +1392,6 @@ CallGetFnByDefName(const uint8_t *nameText
 
 
 
-
-		
-
-
-/* --------------------------------------------------------------------------------------------------
- *  FName: CommandDefine
- *  Desc: Creates a new common define with name "Name", and Module "Type-Name", prevills some common
- *        values and calls Modules DefFn with for further module-specific initialization.
- *  Info: 'Name' is custom definition name. Allowed: [azAZ09._], uint8_t[32]
- *        'Type-Name' is module name
- *        'Definition ...' is custom and passed to modules DefineFn, stored in Definition->Definition
- *  Para: const uint8_t *args  -> prt to space seperated define text string "Name Type-Name Definition ..."
- *        const size_t argsLen -> length of args
- *  Rets: char* -> error-text-string in allocated mem, or NULL = OK
- * --------------------------------------------------------------------------------------------------
- */
-/*
-char* ICACHE_FLASH_ATTR
-CommandDefine (const uint8_t *args
-		, const size_t argsLen)
-  {
-
-  // for Fn response msg
-  char *retMsg = NULL;
-
-  // set start of possible Name
-  const uint8_t *name = args;
-
-  // set start of possible Type-Name
-  const uint8_t *typeName = args;
-
-  // a seek-counter
-  int i = 0;
-
-  // seek to next space !'\32'
-  while( (i < argsLen) && (*typeName != ' ') ) {i++;typeName++;}
-
-  // length of Name
-  size_t nameLen = i;
-
-  // seek to start position of Type-Name '\32'
-  while( (i < argsLen) && (*typeName == ' ') ) {i++;typeName++;}
-
-  // set start of possible Definition
-  const uint8_t *definition = typeName;
-
-  // a 2nd seek-counter
-  int j = 0;
-
-  // seek to next space !'\32'
-  while( (i < argsLen) && (*definition != ' ') ) {i++,j++;definition++;}
-
-  // length of Type-Name
-  size_t typeNameLen = j;
-
-  // start position of Definition
-  while( (i < argsLen) && (*definition == ' ') ) {i++;definition++;}
-
-  // length of Type-Name
-  size_t definitionLen = argsLen - i;
-
-  // veryfy lengths > 0, definition 0 allowed
-  if ( (nameLen) == 0 || (typeNameLen == 0) )
-
-		{
-
-		// response with error text
-		asprintf(char**) &retMsg
-				,"Could not interpret command '%.*s'! Usage: define <name> <type-name> <type dependent arguments>"
-			   	,argsLen
-				,args);
-
-		return retMsg;
-
-		}
-*/
- /*
-   if(defined($defs{$name}));
-   asprintf(char**) &RetMsg, "%s already defined, delete it first\n", name);
-   return RetMsg;
-
-   if($name !~ m/^[a-z0-9.:_]*$/i);
-   asprintf(char**) &RetMsg, "Invalid characters in name (not A-Za-z0-9._): %s\n", name);
-   return RetMsg;
-  */
-/*
-
-   // get the module ptr by name
-   Module_t* Module = GetLoadedModulePtrByName(typeName
-		   , typeNameLen);
-
-  // do we need to reload Module?
-  if (!Module) // NOT FUNCTIONAL!
-	Module = CommandReload(typeName
-		   , typeNameLen);
-
-  // alloc mem for modul specific definition structure (Common_Definition_t + X)
-  Common_Definition_t *NewCommon_Definition
-	= malloc(Module->ProvidedByModule->SizeOfDefinition);
-
-  // zero the struct
-  memset(NewCommon_Definition, 0, Module->ProvidedByModule->SizeOfDefinition);
-
-  // prepare default fields in definition
-
-  // copy ptr to associated module
-  NewCommon_Definition->module = Module;
-
-  // copy custom name
-  NewCommon_Definition->name = malloc(nameLen);
-  memcpy(NewCommon_Definition->name, name, nameLen);
-  NewCommon_Definition->nameLen = nameLen;
-
-  // store new definition to SCDE-Root
-  STAILQ_INSERT_HEAD(&SCDERoot.HeadCommon_Definitions, NewCommon_Definition, entries);
-
-  printf("Defined Name:%.*s TypeName:%.*s\n"
-		,NewCommon_Definition->nameLen
-  		,NewCommon_Definition->name
-  		,NewCommon_Definition->module->ProvidedByModule->typeNameLen
-		,NewCommon_Definition->module->ProvidedByModule->typeName);
-
-  // store Definition string in Defp->Definition
-  NewCommon_Definition->definition = malloc(definitionLen);
-  memcpy(NewCommon_Definition->definition, definition, definitionLen);
-  NewCommon_Definition->definitionLen = definitionLen;
-
-  // assign an internal number
-  NewCommon_Definition->nr = SCDERoot.DevCount++;
-
-  // do we need initial state? or NULL ? store initial state
-  NewCommon_Definition->stateLen = asprintf((char**)&NewCommon_Definition->state, "???");
-
-  printf("Calling DefineFN for Name:%.*s TypeName:%.*s Definition:%.*s cnt:%d state:%.*s\n"
-		  ,NewCommon_Definition->nameLen
-		  ,NewCommon_Definition->name
-		  ,NewCommon_Definition->module->ProvidedByModule->typeNameLen
-		  ,NewCommon_Definition->module->ProvidedByModule->typeName
-		  ,NewCommon_Definition->definitionLen
-		  ,NewCommon_Definition->definition
-  	  	  ,NewCommon_Definition->nr
-		  ,NewCommon_Definition->stateLen
-		  ,NewCommon_Definition->state);
-
-  // call modules DefineFn, if retMsg != NULL -> veto
-  retMsg = NewCommon_Definition->module->ProvidedByModule->DefineFn(NewCommon_Definition);
-
-  // do we have an error msg? Interpret it as veto!
-  if (retMsg)
-
-	{
-
-	printf("Got error from DefineFN %s \n"
-			  ,retMsg);
-
-	//Log 1, "define $def: $ret";
-//	DeleteDefinition(Name);	//delete $defs{$name};                            # Veto
-//	DeleteAttribute(Name);	//delete $attr{$name};
-
-	}
-
-  // char error* or NULL
-  return retMsg;
-
-  }
-*/
-
-
-/**
-  * --------------------------------------------------------------------------------------------------
-  * FName: CommandSet -> gets arguments from SET 'Name Args'
-  * Desc: Passes args "Args" to the SetFn of the define with name "Name"
-  *
-  * , and Module "TypeName" and calls Modules SetFn with
-  *       args "Args"
-  * Info: SET 'Name' 'Args'
-  *       'Name' is a valid definition name [azAZ09._] char[31]
-  *       'Args' are passed to modules SetFn for processing
-  * Para: char* Args -> prt to space seperated txt string "Name TypeName Definition..."
-  * Rets: char* -> error-text-string in allocated mem, or NULL=OK
-  * --------------------------------------------------------------------------------------------------
-  **/
-
-/*
-char* ICACHE_FLASH_ATTR
-CommandSet(const uint8_t *args, const size_t argsLen)	//SET 'Name Args' -> Args = 'Name Args'
-  {
-
-	char *Args = (char*) args;
-
-  int ArgsLen = strlen(Args);
-
-  // did we get any args ?
-  if (!ArgsLen) return NULL;
-
-  // copy args to ram for modifications
-  char* Input = malloc (ArgsLen + 1);
-  strcpy(Input, Args);
-
-  // prepare the sting* containing the Name
-  char* Name = Input;
-
-  // if ' ' is found next steps -> zero terminate Name*
-  // + use ptr as start of sting* for the Args*
-  char* SetArgs = strchr(Input, ' ');
-
-  if (SetArgs != NULL)
-
-	{
-
-	*SetArgs++ = '\0';
-
-	}
-
-  else
-
-	// we need SetArgs ! -> error
-	{
-
-	free(Input);
-
-	return NULL;
-
-	}
-
-   // optimize error msg
-   //-> my @a = split("[ \t][ \t]*", $param);
-   //->return "Usage: set <name> <type-dependent-options>\n $namedef" if(int(@a)<1);
-
-
-  // get the Common_Definition by Name
-  Common_Definition_t *Common_Definition;
-
-  STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries)
-
-	{
-
-	if (!strcmp((char*)Common_Definition->name,Name))
-		break;
-
-	}
-
-  // did we get no Common_Definition?
-  if (strcmp((char*)Common_Definition->name,Name))
-
-  	  {
-
-		free(Input);
-
-		return NULL;
-
-  	  }
-
-  printf("\nCalling SetFN for Name:%.*s TypeName:%.*s Set-args:%s"
-		  ,Common_Definition->nameLen
-		  ,Common_Definition->name
-		  ,Common_Definition->module->ProvidedByModule->typeNameLen
-		  ,Common_Definition->module->ProvidedByModule->typeName
-		  ,SetArgs);
-
-  // call modules SetFn with set-args
-  char* ret = Common_Definition->module->ProvidedByModule->SetFn(Common_Definition, SetArgs);
-
-  // free resources
-  free(Input);
-
-  // do we have an error msg?
-  if (ret)
-
-	{
-
-	printf("Got error from SetFN %s \n"
-			  ,ret);
-
-
-	}
-
-  // char error* or NULL
-  return ret;
-
-  }
-*/
-
-
 /**
   * --------------------------------------------------------------------------------------------------
   * FName: CommandUndefine -> gets arguments from SET 'Name Args'
@@ -1696,8 +1408,7 @@ CommandSet(const uint8_t *args, const size_t argsLen)	//SET 'Name Args' -> Args 
   **/
 strTextMultiple_t*
 CommandUndefine (const uint8_t *args, const size_t argsLen)	//Undefine 'Name' -> Args = 'Name'
-  {
-
+{
   // for Fn response msg
   strTextMultiple_t *retMsg = NULL;
 
@@ -1711,23 +1422,17 @@ CommandUndefine (const uint8_t *args, const size_t argsLen)	//Undefine 'Name' ->
   // get the Common_Definition by Name
   Common_Definition_t *Common_Definition;
 
-  STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries)
-
-	{
+  STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries) {
 
 	if (!strcmp((char*)Common_Definition->name, Args))
 		break;
-
-	}
+  }
 
   // did we get no Common_Definition?
-  if (strcmp((char*)Common_Definition->name,Args))
+  if (strcmp((char*)Common_Definition->name,Args)) {
 
-  	  {
-
-		return retMsg;
-
-  	  }
+	return retMsg;
+  }
 
   LOGD("\nCalling UndefineFN for Name:%.*s TypeName:%.*s\n"
 		  ,Common_Definition->nameLen
@@ -1741,78 +1446,55 @@ CommandUndefine (const uint8_t *args, const size_t argsLen)	//Undefine 'Name' ->
   retMsg = Common_Definition->module->ProvidedByModule->UndefineFn(Common_Definition);
 
   // do we have an error msg?
-  if (retMsg)
-
-	{
+  if (retMsg) {
 
 	LOGD("Got error from UndefineFN %.*s \n"
-			  ,retMsg->strTextLen
-				,retMsg->strText);
+		,retMsg->strTextLen
+		,retMsg->strText);
 
-	}
+  }
 
   // char error* or NULL
   return retMsg;
+}
 
+/* --------------------------------------------------------------------------------------------------
+ *  FName: GetDefinitionPtrByName
+ *  Desc: 
+ *  Para: const size_t definitionNameLen -> length of the Definition name
+ *        const uint8_t *definitionName -> Definition name
+ *  Rets: Common_Definition_t* -> Pointer to Definition / NULL if not found
+ * --------------------------------------------------------------------------------------------------
+ */
+Common_Definition_t*
+GetDefinitionPtrByName(const size_t definitionNameLen
+		, const uint8_t *definitionName)
+{
+  Common_Definition_t *Common_Definition;
+
+  STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries) {
+
+	if ( (Common_Definition->nameLen == definitionNameLen) &&
+             (!strncasecmp((const char*) Common_Definition->name, (const char*) definitionName, definitionNameLen)) ) {
+
+ 		#if CORE_SCDE_DBG >= 7
+  		LOGD("GetDefinitionPtrByNameFn(%.*s), got Definition ptr.\n"
+		  	,definitionNameLen
+		  	,definitionName);
+ 		#endif
+
+		return Common_Definition;
+	}
   }
 
-
-
-/*
- *--------------------------------------------------------------------------------------------------
- *FName: CommandAttr
- * Desc: Creates for definition with Name <name> a new AttrName <attrname> with AttrValue <attrvalue>
- *  
- * Info: 'Name' is custom definition name [azAZ09._] char[31]
- *       'TypeName' is module name
- *       'Definition+X' is passed to modules DefineFn, and stored in Definition->Definition
- * Para: char* Args -> prt to space seperated txt string "Name TypeName Definition..."
- * Rets: char* -> error-text-string in allocated mem, or NULL=OK
- *--------------------------------------------------------------------------------------------------
- */
-/* externer Befehl ?
-char*
-CommandAttr (char* Args)
-  {
-
-  // prepare the sting* containing the Name
-  char* Name = Args;
-
-  // prepare the sting* containing the AttrName
-  char* AttrName = strchr(Args, ' ');
-
-  if (AttrName != NULL)
-	*AttrName++ = '\0';
-  else return (NULL);
-
-  // prepare the sting* containing the AttrValue
-  char* AttrValue = strchr(AttrName, ' ');
-  if (AttrValue != NULL)
-	*AttrValue++ = '\0';
-  //else no Definition  (may be ok)
-
-  // required: Name+AttrName
-  if (!((Name) && (AttrName)) )
-	return "Usage: attr <name> <attrname> [<attrvalue>] $namedef";
-
-  Log3((const uint8_t*) Name
-	,sizeof(Name)
-	,1
-	,"CommandAttr called. Creating for definition <%s> a new AttrName <%s> with AttrValue <%s>"
-	,Name
-	,AttrName
-	,AttrValue);
-
-
-
+  #if CORE_SCDE_DBG >= 1
+  LOGD("GetDefinitionPtrByNameFn(%.*s), Definition not found.\n"
+	,definitionNameLen
+	,definitionName);
+  #endif
 
   return NULL;
-
-  }
-*/
-
-
-
+}
 
 
 /* --------------------------------------------------------------------------------------------------
@@ -1826,39 +1508,32 @@ CommandAttr (char* Args)
 Module_t*
 GetLoadedModulePtrByName(const uint8_t *typeName
 		, const size_t typeNameLen)
-  {
-
+{
   Module_t *Module;
 
   STAILQ_FOREACH(Module, &SCDERoot.HeadModules, entries) {
 
-/*  	  printf("chk a:%.*s ax:%d, b:%.*s bx:%d,\n"
-  			,typeNameLen
-  			,typeName
-			,typeNameLen
-  			,Module->ProvidedByModule->typeNameLen
-  			,Module->ProvidedByModule->typeName
-			,Module->ProvidedByModule->typeNameLen);*/
+	if ( (Module->ProvidedByModule->typeNameLen == typeNameLen) &&
+             (!strncasecmp((const char*) Module->ProvidedByModule->typeName, (const char*) typeName, typeNameLen)) ) {
 
-	if ( (Module->ProvidedByModule->typeNameLen == typeNameLen)
-		&& (!strncasecmp((const char*) Module->ProvidedByModule->typeName, (const char*) typeName, typeNameLen)) ) {
-
-		LOGD("Type-Name:%.*s, got loaded module*.\n"
+ 		#if CORE_SCDE_DBG >= 7
+  		LOGD("GetLoadedModulePtrByNameFn(%.*s), got loaded Module ptr.\n"
 		  	,typeNameLen
 		  	,typeName);
+ 		#endif
 
 		return Module;
-
 	}
   }
 
-  LOGD("Type-Name:%.*s, module* NOT loaded!\n"
+  #if CORE_SCDE_DBG >= 1
+  LOGD("GetLoadedModulePtrByNameFn(%.*s), Module name not loaded.\n"
 	,typeNameLen
 	,typeName);
+  #endif
 
   return NULL;
-
-  }
+}
 
 
 
@@ -1923,8 +1598,7 @@ CommandLoadCommand(const uint8_t *commandTxt
 
 */
   return 0;
-
-  }
+}
 
 
 
@@ -2138,7 +1812,6 @@ struct headRetMsgMultiple_s
 AnalyzeCommand(const uint8_t *args
 		, const size_t argsLen)
 {
-
 	LOGD("Fn AnalyzeCommand(%.*s,%d) called.\n"
 		,argsLen
 		,args
@@ -2392,7 +2065,6 @@ AnalyzeCommandChain(const uint8_t *args
 strText_t
 FmtTime(time_t tiSt)
 {
-
   // our msg-text data packet
   strText_t strText;
 
@@ -2408,7 +2080,6 @@ FmtTime(time_t tiSt)
 	,timeinfo.tm_sec);
 
   return strText;
-
 }
 
 
@@ -2426,7 +2097,6 @@ FmtTime(time_t tiSt)
 strText_t
 FmtDateTime(time_t tiSt)
 {
-
   // our msg-text data packet
   strText_t strText;
 
@@ -2478,8 +2148,7 @@ GetLogLevel (char *Device
 
 
   return NULL;
-
-  }
+}
 
 /*
 No output
@@ -2516,7 +2185,6 @@ Log3 (const uint8_t *name
 		,const char *format
 		,...)
 {
-
   // for current time
   time_t nowTist;
 
@@ -2540,12 +2208,12 @@ Log3 (const uint8_t *name
 		,name);
 
   // the variable arguments
-	va_list list;
+  va_list list;
   va_start(list, format);
   vprintf(format, list);
   va_end(list);
 
-	// finalize line
+  // finalize line
   printf("\n");
 
 
@@ -2599,7 +2267,6 @@ Log3 (const uint8_t *name
 time_t
 TimeNow()
 {
-
   // for time stamp storage
   time_t timeNow;
 
@@ -2623,7 +2290,6 @@ TimeNow()
 struct headRetMsgMultiple_s
 WriteStatefile()
 {
-
   // prepare multiple RetMsg storage
   struct headRetMsgMultiple_s headRetMsgMultiple;
 
@@ -2881,7 +2547,7 @@ if (file) {
 void
 doGlobalDef(const uint8_t *cfgFileName
 		, const size_t cfgFileNameLen)
-  {
+{
 
   LOGD("doGlobalDef - cfgFileName:%.*s\n"
 	,cfgFileNameLen
@@ -2913,8 +2579,7 @@ doGlobalDef(const uint8_t *cfgFileName
   AnalyzeCommand((const uint8_t *) "attr global logfile -", 21);
 
   return;
-
-  }	
+}	
 		
 
 		

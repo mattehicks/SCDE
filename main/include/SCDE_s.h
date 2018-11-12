@@ -6,9 +6,13 @@
 #include <sys/queue.h>
 
 
-
+// nach unten verschieben ? doppelt ?
 typedef struct Common_Definition_s Common_Definition_t;
+
+typedef struct Common_StageXCHG_s Common_StageXCHG_t;
+
 typedef struct SCDERoot_s SCDERoot_t;
+
 typedef struct Module_s Module_t;
 
 // -------------------------------------------------------------------------------------------------
@@ -135,14 +139,11 @@ typedef struct headRetMsgMultiple_s (* AnalyzeCommandChainFn_t) (const uint8_t *
 
 
 
-
-
-
-
-
-
 // typedef for AnalyzeCommandFn - analyzes + processes one command row
 typedef struct headRetMsgMultiple_s (* AnalyzeCommandFn_t) (const uint8_t *args, const size_t argsLen);
+
+//
+typedef Common_Definition_t* (* GetDefinitionPtrByNameFn_t) (const size_t definitionNameLen, const uint8_t *definitionName);
 
 //
 typedef Module_t* (* GetLoadedModulePtrByNameFn_t)(const uint8_t *typeName, const size_t typeNameLen);
@@ -257,45 +258,47 @@ typedef strTextMultiple_t* (* CommandUndefineFn_t) (const uint8_t *args, const s
 typedef struct SCDEFn_s
   {
 
-  LogFn_t LogFn;				// Log -> This is the main logging function
+  LogFn_t LogFn;                                           // Log -> This is the main logging function
 
-  Log3Fn_t Log3Fn;				// Log -> This is the main logging function
+  Log3Fn_t Log3Fn;                                         // Log -> This is the main logging function
 
-  Log4Fn_t Log4Fn;				// Log -> This is the main logging function
+  Log4Fn_t Log4Fn;                                         // Log -> This is the main logging function
 
-  AnalyzeCommandChainFn_t AnalyzeCommandChainFn;// analyzes + processes an configuration file
+  AnalyzeCommandChainFn_t AnalyzeCommandChainFn;           // analyzes + processes an configuration file
 
-  AnalyzeCommandFn_t AnalyzeCommandFn;		// analyzes + processes one command row
+  AnalyzeCommandFn_t AnalyzeCommandFn;                     // analyzes + processes one command row
 
-  GetLoadedModulePtrByNameFn_t GetLoadedModulePtrByNameFn;
+  GetDefinitionPtrByNameFn_t GetDefinitionPtrByNameFn;     //
 
-  CommandReloadModuleFn_t CommandReloadModuleFn;
+  GetLoadedModulePtrByNameFn_t GetLoadedModulePtrByNameFn; //
 
-  CommandUndefineFn_t CommandUndefineFn;
+  CommandReloadModuleFn_t CommandReloadModuleFn;           //
 
-  readingsBeginUpdateFn_t readingsBeginUpdateFn;// call this before updating readings
+  CommandUndefineFn_t CommandUndefineFn;                   //
 
-  readingsBulkUpdateFn_t readingsBulkUpdateFn;	// call this for every reading (bulk-update)
+  readingsBeginUpdateFn_t readingsBeginUpdateFn;           // call this before updating readings
 
-  readingsEndUpdateFn_t readingsEndUpdateFn;	// call this to after bulk-update to process readings
+  readingsBulkUpdateFn_t readingsBulkUpdateFn;	           // call this for every reading (bulk-update)
 
-  TimeNowFn_t TimeNowFn;			// returns current time stamp
+  readingsEndUpdateFn_t readingsEndUpdateFn;               // call this to after bulk-update to process readings
 
-  FmtDateTimeFn_t FmtDateTimeFn;		// returns formated text of Date-Time from tist
+  TimeNowFn_t TimeNowFn;                                   // returns current time stamp
 
-  FmtTimeFn_t FmtTimeFn;			// returns formated text of Time from tist
+  FmtDateTimeFn_t FmtDateTimeFn;                           // returns formated text of Date-Time from tist
 
-  HexDumpOutFn_t HexDumpOutFn;			// prints data as Hex-Dump to debug terminal
+  FmtTimeFn_t FmtTimeFn;                                   // returns formated text of Time from tist
 
-  ParseKVInputArgsFn_t ParseKVInputArgsFn;	// parses Key=Value(@) input arguments into array
+  HexDumpOutFn_t HexDumpOutFn;                             // prints data as Hex-Dump to debug terminal
 
-  CallGetFnByDefNameFn_t CallGetFnByDefNameFn;  // original CallFn
+  ParseKVInputArgsFn_t ParseKVInputArgsFn;                 // parses Key=Value(@) input arguments into array
 
-  GetAllReadingsFn_t GetAllReadingsFn;		// returns all readings of an definition
+  CallGetFnByDefNameFn_t CallGetFnByDefNameFn;             // original CallFn
 
-  WriteStatefileFn_t WriteStatefileFn;		// 
+  GetAllReadingsFn_t GetAllReadingsFn;                     // returns all readings of an definition
 
-  GetDefAndAttrFn_t GetDefAndAttrFn;		//
+  WriteStatefileFn_t WriteStatefileFn;                     // 
+
+  GetDefAndAttrFn_t GetDefAndAttrFn;                       //
 
   // added Fn (Perl -> C)
   Get_attrVal_by_defName_and_attrNameFn_t Get_attrVal_by_defName_and_attrNameFn;
@@ -380,6 +383,7 @@ typedef int (* FingerprintFn_t)(Common_Definition_t *Common_Definition);
 
 // typedef for GetFn - for 2 stage designs - called to get data from this type - provided my module
 typedef int (* GetFn_t)(Common_Definition_t *Common_Definition, Common_Definition_t *sourceCommon_Definition, void *X);
+//typedef int (* GetFn_t)(Common_StageXCHG_t *Common_StageXCHG);
 
 //
 typedef int (* IdleCbFn_t)(Common_Definition_t *Common_Definition);
@@ -390,8 +394,8 @@ typedef int (* InitializeFn_t)(SCDERoot_t *SCDERoot);
 //
 typedef int (* NotifyFn_t)(Common_Definition_t *Common_Definition);
 
-//
-typedef int (* ParseFn_t)(Common_Definition_t *Common_Definition);
+// typedef for ParseFn - for 2 stage designs - called to give job data to 2nd stage - provided my module
+typedef strTextMultiple_t* (* ParseFn_t)(Common_StageXCHG_t *Common_StageXCHG);
 
 //
 typedef int (* ReadFn_t)(Common_Definition_t *Common_Definition);
@@ -420,10 +424,10 @@ typedef strTextMultiple_t* (* UndefineFn_t)(Common_Definition_t *Common_Definiti
 //
 typedef int (* DirectReadFn_t)(Common_Definition_t *Common_Definition);
 
-//
+// typedef for DirectWriteFn - for 2 stage designs - called to give write job to 1st stage - provided my module
+/*typedef strTextMultiple_t* (* DirectWriteFn_t)(Common_Definition_t *Common_Definition_Stage1, Common_Definition_t *Common_Definition_Stage2, Common_StageXCHG_t *Common_StageXCHG);*/
+
 typedef int (* DirectWriteFn_t)(Common_Definition_t *Common_Definition);
-
-
 
 /* 
  * ProvidedByModule_s (struct)
@@ -490,8 +494,6 @@ struct ProvidedByModule_s {
 // Module_t stores information of loaded modules, Fns required for module use and operation
 typedef struct Module_s Module_t;
 
-
-
 /*
  * Module_s (struct)
  * - stores information of loaded modules, Fns required for module use and operation
@@ -505,7 +507,6 @@ struct Module_s {
   ProvidedByModule_t *ProvidedByModule;	// Ptr to Provided by Module Info
 
   void *LibHandle;			// Handle to this loaded Module
-
 };
 
 
@@ -517,8 +518,6 @@ struct Module_s {
 // bulkUpdateReadings_t stores bulk update information and the link to updated readings
 typedef struct bulkUpdateReadings_s bulkUpdateReadings_t;
 
-
-
 /* 
  * bulkUpdateReadings_s (struct)
  * - stores bulk update information and the link to updated readings
@@ -528,7 +527,6 @@ struct bulkUpdateReadings_s {
   STAILQ_HEAD (stailhead7, reading_s) headReadings;	// Link to assigned reading
 
   time_t bulkUpdateTist;		// timestamp of bulk update
-
 };
 
 
@@ -539,8 +537,6 @@ struct bulkUpdateReadings_s {
 
 // reading_t stores one reading
 typedef struct reading_s reading_t;
-
-
 
 /* 
  * reading_s (struct)
@@ -557,7 +553,6 @@ struct reading_s {
   size_t readingValueTextLen;		// text-len of reading-value
 
   time_t readingTist;			// timestamp of reading
-
 };
 
 
@@ -568,8 +563,6 @@ struct reading_s {
 
 // Common_Definition_t stores values for operation of an definition (device)
 typedef struct Common_Definition_s Common_Definition_t;
-
-
 
 /* 
  * Common_Definition_s (struct)
@@ -622,54 +615,57 @@ struct Common_Definition_s {
 # VOLATILE- Set if the definition should be saved to the "statefile"
 # NOTIFYDEV - if set, the notifyFn will only be called for this device
 */
-
 };
 
-// Information Flags - for Definition Control
+// Information Flags, stored in Common_Definition_s - for Definition Control
 enum Common_DefCtrlRegA {
+//hinzu CDCRA_Flag
     F_TEMPORARY		= 1 << 0	// indicates:Definition is temporary e.g. WEBIf connection
   , F_VOLATILE		= 1 << 1	// indicates:Definition is volatile -> saved to statefile
-  , F_xRESYX			= 1 << 2	//   
-  , F_xRESYZ			= 1 << 3	// 
-  , F_xRESYA			= 1 << 4
-  , F_xRESYB			= 1 << 5
-  , F_xRESYC			= 1 << 6
-  , F_xRESYD			= 1 << 7
-  , F_xRESYE			= 1 << 8
-  , F_xRESYF			= 1 << 9
-  , F_xRESYG			= 1 << 10
-  , F_xRESYH			= 1 << 11
-  , F_xRESYI			= 1 << 12
-  , F_xRESYJ			= 1 << 13
-  , F_xRESYK			= 1 << 14
-  , F_xRESYL			= 1 << 15
+  , CDCRA_F_weitere	= 1 << 2	//   
 };
 
-
-
-// Information Flags - for Connection Control
+// Information Flags, stored in Common_Definition_s - for Connection Control
 enum Common_CtrlRegA {
+//hinzu CCRA_Flag
     F_WANTS_WRITE		= 1 << 0	// indicates: define (FD) wants to write data (call DirectWriteFn), if ready
   , F_WANTS_IDLE_TASK		= 1 << 1	// indicates: define (FD) wants idle-task to be called (call IdleTaskFn)
-  , F_xRESXX			= 1 << 2	//   
-  , F_xRESXZ			= 1 << 3	// 
-  , F_xRESXA			= 1 << 4
-  , F_xRESXB			= 1 << 5
-  , F_xRESXC			= 1 << 6
-  , F_xRESXD			= 1 << 7
-  , F_xRESXE			= 1 << 8
-  , F_xRESXF			= 1 << 9
-  , F_xRESXG			= 1 << 10
-  , F_xRESXH			= 1 << 11
-  , F_xRESXI			= 1 << 12
-  , F_xRESXJ			= 1 << 13
-  , F_xRESXK			= 1 << 14
-  , F_xRESXL			= 1 << 15
+  , CCRA_F_weitere		= 1 << 2	//   
 };
 
 
 
 // -------------------------------------------------------------------------------------------------
+
+
+// oder Common_DirectWriteJob_t
+// Common_StageXCHG_t stores values for operation of 2. stage design Modules
+typedef struct Common_StageXCHG_s Common_StageXCHG_t;
+
+/* 
+ * Common_StageXCHG_s (struct)
+ * - stores values for operation of 2. stage design Modules (stage exchange)
+ * - the definitions for callbacks
+ */
+struct Common_StageXCHG_s {
+
+  Common_Definition_t *definitionStage1;	// ptr to the definition that is 1 st stage
+  Common_Definition_t *definitionStage2;	// ptr to the definition that is 2 nd stage
+
+  int stageCtrlRegA;		// Stage processing Control Register A (enum Common_stageCtrlRegA)
+};
+
+// Information Flags, stored in Common_Definition_s - for Connection Control
+enum stageCtrlRegA {
+    SCRA_F_JOB_DONE			= 1 << 0	// indicates: the job is done
+  , SCRA_F_ERROR			= 1 << 1	// indicates: ?
+  , SCRA_F_weitere			= 1 << 2	// indicates: ?
+};
+
+
+
+// -------------------------------------------------------------------------------------------------
+// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ typedefs and structs for Command operation ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 
 
 
@@ -686,8 +682,6 @@ typedef struct headRetMsgMultiple_s (* commandFn_t) (const uint8_t *args, const 
 
 // providedByCommand_t stores function callbacks and information for command operation
 typedef struct providedByCommand_s providedByCommand_t;
-
-
 
 /* 
  * providedByCommand_s (struct)
@@ -713,7 +707,6 @@ struct providedByCommand_s {
 // const strText_t helpDetail; NEU		// detailed help text
   const uint8_t *helpDetailText;		// the detailed help text
   const size_t helpDetailTextLen;		// and detailed help text length
-
 };
 
 
@@ -725,8 +718,6 @@ struct providedByCommand_s {
 // command_t stores commands made available for operation.
 typedef struct command_s command_t;
 
-
-
 /* 
  * commands_s (struct)
  * - stores commands made available for operation.
@@ -737,7 +728,6 @@ struct command_s {
   STAILQ_ENTRY (command_s) entries;		// link to next loaded command
 
   providedByCommand_t *providedByCommand;	// ptr to provided-by-command Info
-
 };
 
 
@@ -748,8 +738,6 @@ struct command_s {
 
 // attribute_t holds attributes assigned to definitions, for operation and customization.
 typedef struct attribute_s attribute_t;
-
-
 
 /*
  * attribute_s (struct)
@@ -769,7 +757,6 @@ struct attribute_s {
 // strText_t value; NEU
   uint8_t *attrValText;			// ptr to the attribute value text (text in allocated mem!)
   size_t   attrValTextLen;
-
 };
 
 
@@ -780,8 +767,6 @@ struct attribute_s {
 
 // SCDERoot_t holds the Smart Connected Devices Engine - root data
 typedef struct SCDERoot_s SCDERoot_t;
-
-
 
 /* 
  * SCDERoot_s (struct)
@@ -823,28 +808,17 @@ struct SCDERoot_s {
 //use vars qw(@authenticate);     # List of authentication devices
 //use vars qw(@authorize);        # List of authorization devices
 //use vars qw(@structChangeHist); # Contains the last 10 structural changes
-
 };
-
 
 // global - information flags - for Connection Control
 enum Global_CtrlRegA
-  { F_RECEIVED_QUIT		= 1 << 0	// indicates: quit the include processing
+{
+// GCRA_Flag ändern
+    F_RECEIVED_QUIT		= 1 << 0	// indicates: quit the include processing
   , F_INIT_DONE			= 1 << 1	// indicates: the SCDE has fiinished the init process
-  , F_RESGM			= 1 << 2	//   
-  , F_RESGN			= 1 << 3	// 
-  , F_RESGA			= 1 << 4
-  , F_RESGB			= 1 << 5
-  , F_RESGC			= 1 << 6
-  , F_RESGD			= 1 << 7
-  , F_RESGE			= 1 << 8
-  , F_RESGF			= 1 << 9
-  , F_RESGG			= 1 << 10
-  , F_RESGH			= 1 << 11
-  , F_RESGI			= 1 << 12
-  , F_RESGJ			= 1 << 13
-  , F_RESGK			= 1 << 14
-  , F_RESGL			= 1 << 15
-  };
+  , GCRA_F_weitere		= 1 << 2	//   
+};
+
+
 
 #endif /*_SCDE_S_H_*/

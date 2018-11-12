@@ -30,6 +30,9 @@ typedef struct ESP32_BH1750_Definition_s {
 
   WebIf_Provided_t WebIf_Provided;	// provided data for WebIf
 
+  size_t stage1definitionNameLen;	// Stange 1 name assigned by def
+  uint8_t *stage1definitionName;	// Stange 1 nameLen assigned by def
+
   uint8_t BH1750_QueryState;		// enum BH1750QueryState -> state machine state for sensor data query
 
   uint8_t sensor_data_h, sensor_data_l; // sensor data coming from I2C
