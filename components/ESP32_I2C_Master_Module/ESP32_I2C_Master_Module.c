@@ -19,6 +19,7 @@
  */
 //http://www.elektronik-magazin.de/page/der-i2c-bus-was-ist-das-21
 
+//define I2CM.1 ESP32_I2C_Master I2C_NUM=1&I2C_MODE=MASTER&SDA_IO=18&SDA_IO_PULLUP=ENABLED&SDA_IO=19&SCL_IO_PULLUP=ENABLED
 
 #include <ProjectConfig.h>
 #include <esp8266.h>
@@ -77,6 +78,7 @@ SelectAData ESP32_I2C_Master_DisEna[] = {  //ID, Text MAX CGI LEN BEACHTEN!!!
   {0, NULL}
   };
 
+/*
 // ESP32_I2C_Master_SET_IDLE_LV -> 'IDLE_LV' -> Low|High
 SelectAData ESP32_I2C_Master_LoHi[] = {  //ID, Text MAX CGI LEN BEACHTEN!!!
   {0,"Low"},
@@ -97,6 +99,7 @@ SelectAData ESP32_I2C_Master_TICK_SOURCE[] = {  //ID, Text MAX CGI LEN BEACHTEN!
   {1,"APB_SLOW"}, 
   {0, NULL}
   };
+*/
 
 
 
@@ -109,7 +112,7 @@ SelectAData ESP32_I2C_Master_TICK_SOURCE[] = {  //ID, Text MAX CGI LEN BEACHTEN!
 enum ESP32_I2C_Master_SET_IK {				// Bit #XX for debugging
 
   // S0 calculation configuration
-    ESP32_I2C_Master_SET_ON		= 0			// Bit #00 'ON'  -> 
+    ESP32_I2C_Master_SET_ON		= 0		// Bit #00 'ON'  -> 
   , ESP32_I2C_Master_SET_OFF				// Bit #01 'OFF'  -> 
 
   , ESP32_I2C_Master_SET_MAX				// Bit #02 'MAX'  -> 
@@ -121,33 +124,32 @@ enum ESP32_I2C_Master_SET_IK {				// Bit #XX for debugging
   , ESP32_I2C_Master_SET_NAME				// Bit #06 'NAME'  -> 
   , ESP32_I2C_Master_SET_CAPS				// Bit #07 'CAPS'  -> 
 
-  // Block #01 PWM configuration
-  , ESP32_I2C_Master_SET_GPIO				// Bit #08 'GPIO' -> 
-  , ESP32_I2C_Master_SET_BLOCK				// Bit #09 'BLOCK' -> 
-  , ESP32_I2C_Master_SET_CHANNEL				// Bit #10 'CHANNEL' -> 
-  , ESP32_I2C_Master_SET_TIMER				// Bit #11 'TIMER' -> 
+  // Block #?all one? I2C configuration
+  , ESP32_I2C_Master_SET_I2C_NUM			// Bit #08 'I2C_NUM' -> 
+  , ESP32_I2C_Master_SET_I2C_MODE			// Bit #09 'I2C_MODE' -> 
+  , ESP32_I2C_Master_SET_SDA_IO				// Bit #10 'SDA_IO' -> 
+  , ESP32_I2C_Master_SET_SDA_IO_PULLUP			// Bit #11 'SDA_IO_PULLUP' -> 
+  , ESP32_I2C_Master_SET_SCL_IO				// Bit #12 'SCL_IO' ->
+  , ESP32_I2C_Master_SET_SCL_IO_PULLUP			// Bit #13 'SCL_IO_PULLUP' ->
 
-  , ESP32_I2C_Master_SET_DUTY				// Bit #12 'DUTY' ->
-  , ESP32_I2C_Master_SET_HPOINT				// Bit #13 'HPOINT' ->
-  , ESP32_I2C_Master_SET_SIG_OUT_EN				// Bit #14 'SIG_OUT_EN' ->
-  , ESP32_I2C_Master_SET_IDLE_LV				// Bit #15 'IDLE_LV' ->
 
+  , ESP32_I2C_Master_SET_SIG_OUT_EN			// Bit #14 'SIG_OUT_EN' ->
+  , ESP32_I2C_Master_SET_IDLE_LV			// Bit #15 'IDLE_LV' ->
   , ESP32_I2C_Master_SET_RESOLUTION			// Bit #16 'RESOLUTION' -> 
   , ESP32_I2C_Master_SET_TICK_SOURCE			// Bit #17 'TICK_SOURCE' ->
-  , ESP32_I2C_Master_SET_FREQ_HZ				// Bit #18 'FREQ_HZ' ->
-
+  , ESP32_I2C_Master_SET_FREQ_HZ			// Bit #18 'FREQ_HZ' ->
   , ESP32_I2C_Master_SET_THR_L_LIM_EN			// Bit #19 'THR_L_LIM_EN' -> DIS/ENA
   , ESP32_I2C_Master_SET_THR_H_LIM_EN			// Bit #20 'THR_H_LIM_EN' -> DIS/ENA
   , ESP32_I2C_Master_SET_THR_ZERO_EN			// Bit #21 'THR_ZERO_EN' -> DIS/ENA
-  , ESP32_I2C_Master_SET_FILTER_EN				// Bit #22 'FILTER_EN' -> DIS/ENA
+  , ESP32_I2C_Master_SET_FILTER_EN			// Bit #22 'FILTER_EN' -> DIS/ENA
   , ESP32_I2C_Master_SET_FILTER_THRES			// Bit #23 'FILTER_THRES' -> decval 10 bit zahl
-  , ESP32_I2C_Master_SET_CNT_THRES1				// Bit #24 'CNT_THRES1' -> decval 16 bit zahl
-  , ESP32_I2C_Master_SET_CNT_THRES0				// Bit #25 'CNT_THRES0' -> decval 16 bit zahl
-  , ESP32_I2C_Master_SET_CNT_L_LIM				// Bit #26 'CNT_L_LIM' -> decval 10 bit zahl
-  , ESP32_I2C_Master_SET_CNT_H_LIM				// Bit #27 'CNT_H_LIM' -> decval 10 bit zahl
+  , ESP32_I2C_Master_SET_CNT_THRES1			// Bit #24 'CNT_THRES1' -> decval 16 bit zahl
+  , ESP32_I2C_Master_SET_CNT_THRES0			// Bit #25 'CNT_THRES0' -> decval 16 bit zahl
+  , ESP32_I2C_Master_SET_CNT_L_LIM			// Bit #26 'CNT_L_LIM' -> decval 10 bit zahl
+  , ESP32_I2C_Master_SET_CNT_H_LIM			// Bit #27 'CNT_H_LIM' -> decval 10 bit zahl
 
 // end marker
-  , ESP32_I2C_Master_SET_IK_Number_of_keys			// Bit #27 MAX 64 IMPLEMENTED !
+  , ESP32_I2C_Master_SET_IK_Number_of_keys		// Bit #27 MAX 64 IMPLEMENTED !
 
 };
 
@@ -178,42 +180,41 @@ enum ESP32_I2C_Master_Readings {			// Bit #XX for debugging
  * Result is stored in struct SCDE_XX_parsedKVInput
  */
 kvParseImplementedKeys_t ESP32_I2C_Master_Set_ImplementedKeys[] = {
-// |                                                          affected readings										              	|  CMD
+// |                                                          affected readings										       	|  CMD
 
-// for usage 
-   { ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION															, "ON" }		// #00
-  ,{ ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION															, "OFF" }		// #01
-  ,{ ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION															, "MAX" }		// #02
-  ,{ ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION															, "MIN" }		// #03
-  ,{ ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION															, "VAL" }		// #04
-  ,{ ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION															, "DIM" }		// #05
+// for usage
+   { ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION													, "ON" }		// #00
+  ,{ ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION													, "OFF" }		// #01
+  ,{ ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION													, "MAX" }		// #02
+  ,{ ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION													, "MIN" }		// #03
+  ,{ ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION													, "VAL" }		// #04
+  ,{ ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION													, "DIM" }		// #05
 
-  ,{ ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION | ESP32_I2C_Master_R_NAME												, "NAME" }		// #06
-  ,{ ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION | ESP32_I2C_Master_R_NAME												, "CAPS" }		// #07
+  ,{ ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION | ESP32_I2C_Master_R_NAME										, "NAME" }		// #06
+  ,{ ESP32_I2C_Master_R_DUTY | ESP32_I2C_Master_R_RESOLUTION | ESP32_I2C_Master_R_NAME										, "CAPS" }		// #07
 
 // for configuration
-  ,{ 0																					, "GPIO" }		// #08
-  ,{ 0																					, "BLOCK" }		// #09
-  ,{ 0																					, "CHANNEL" }		// #10
-  ,{ 0																					, "TIMER" }		// #11
-  ,{ 0																					, "DUTY" }		// #12
-  ,{ 0																					, "HPOINT" }		// #13
-  ,{ 0																					, "SIG_OUT_EN" }	// #14
-  ,{ 0																					, "IDLE_LV" }		// #15
+  ,{ 0																				, "I2C_NUM" }		// #08
+  ,{ 0																				, "I2C_MODE" }		// #09
+  ,{ 0																				, "SDA_IO" }		// #10
+  ,{ 0																				, "SDA_IO_PULLUP" }	// #11
+  ,{ 0																				, "SCL_IO" }		// #12
+  ,{ 0																				, "SCL_IO_PULLUP" }	// #13
 
-  ,{ 0																					, "RESOLUTION" }		// #16
-  ,{ 0																					, "TICK_SOURCE" }	// #17
-  ,{ 0																					, "FREQ_HZ" }		// #18
-
-  ,{ 0																					, "THR_L_LIM_EN" }	// #19
-  ,{ 0																					, "THR_H_LIM_EN" }	// #20
-  ,{ 0																					, "THR_ZERO_EN" }	// #21
-  ,{ 0																					, "FILTER_EN" }		// #22
-  ,{ 0																					, "FILTER_THRES" }	// #23
-  ,{ 0																					, "CNT_THRES1" }	// #24
-  ,{ 0																					, "CNT_THRES0" }	// #25
-  ,{ 0																					, "CNT_L_LIM" }		// #26
-  ,{ 0																					, "CNT_H_LIM" }		// #27
+  ,{ 0																				, "SIG_OUT_EN" }	// #14
+  ,{ 0																				, "IDLE_LV" }		// #15
+  ,{ 0																				, "RESOLUTION" }	// #16
+  ,{ 0																				, "TICK_SOURCE" }	// #17
+  ,{ 0																				, "FREQ_HZ" }		// #18
+  ,{ 0																				, "THR_L_LIM_EN" }	// #19
+  ,{ 0																				, "THR_H_LIM_EN" }	// #20
+  ,{ 0																				, "THR_ZERO_EN" }	// #21
+  ,{ 0																				, "FILTER_EN" }		// #22
+  ,{ 0																				, "FILTER_THRES" }	// #23
+  ,{ 0																				, "CNT_THRES1" }	// #24
+  ,{ 0																				, "CNT_THRES0" }	// #25
+  ,{ 0																				, "CNT_L_LIM" }		// #26
+  ,{ 0																				, "CNT_H_LIM" }		// #27
 
 }; // number of elements should be equal with XX_SET_IK_Number_of_keys, LIMIT IS 64 ELEMENTS !
 
@@ -668,8 +669,7 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
 
 	ESP32_I2C_Master_Definition->WebIf_Provided.ActiveResourcesDataB =
 		(WebIf_ActiveResourcesDataB_t *) &ESP32_I2C_Master_ActiveResourcesDataB_forWebIf;
-
-	}
+  }
 
   else	{
 
@@ -681,42 +681,38 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
 		,ESP32_I2C_Master_Definition->common.name
 		,ESP32_I2C_Master_Definition->common.module->ProvidedByModule->typeNameLen
 		,ESP32_I2C_Master_Definition->common.module->ProvidedByModule->typeName);
-	}
+  }
 
 // ------------------------------------------------------------------------------------------------
 
   // Parse define-args (KEY=VALUE) protocol -> gets parsedKVInput in allocated mem, NULL = ERROR
   parsedKVInput = 
-    SCDEFn->ParseKVInputArgsFn(ESP32_I2C_Master_SET_IK_Number_of_keys	// Num Implementated KEYs MAX
-    ,ESP32_I2C_Master_Set_ImplementedKeys				// Implementated Keys
-    ,defArgsText							// our args text
-    ,defArgsTextLen);							// our args text len
+	SCDEFn->ParseKVInputArgsFn(ESP32_I2C_Master_SET_IK_Number_of_keys	// Num Implementated KEYs MAX
+	,ESP32_I2C_Master_Set_ImplementedKeys					// Implementated Keys
+	,defArgsText								// our args text
+	,defArgsTextLen);							// our args text len
 
   // parsing may report an problem. args contain: unknown keys, double keys, ...?
   if (!parsedKVInput) {
 
-    // alloc mem for retMsg
-    retMsg = malloc(sizeof(strTextMultiple_t));
+	// alloc mem for retMsg
+	retMsg = malloc(sizeof(strTextMultiple_t));
 
-    // response with error text
-    retMsg->strTextLen = asprintf(&retMsg->strText
-      ,"Parsing Error! Args '%.*s' not taken! Check the KEYs!"
-      ,defArgsTextLen
-      ,defArgsText);
+	// response with error text
+	retMsg->strTextLen = asprintf(&retMsg->strText
+		,"Parsing Error! Args '%.*s' not taken! Check the KEYs!"
+		,defArgsTextLen
+		,defArgsText);
 
-    if (parsedKVInput) {
+	if (parsedKVInput) {
 
-      free(parsedKVInput);
+		free(parsedKVInput);
+	}
 
-    }
-
-    return retMsg;
-
+	return retMsg;
   }
 
 // ------------------------------------------------------------------------------------------------
-
-
 
 
 
@@ -1222,29 +1218,15 @@ esp_err_t i2c_master_sensor_test(i2c_port_t i2c_num, uint8_t* data_h, uint8_t* d
 
 
 
-
-
-
-
-
-
-
-
-
 // ------------------------------------------------------------------------------------------------
 
   // set required Keys -> Keys that should be there in this request
-  parsedKVInput->requiredKVBF = ( (1 << ESP32_I2C_Master_SET_GPIO)
-			        | (1 << ESP32_I2C_Master_SET_BLOCK)
-			        | (1 << ESP32_I2C_Master_SET_CHANNEL)
-			        | (1 << ESP32_I2C_Master_SET_TIMER)
-			        | (1 << ESP32_I2C_Master_SET_DUTY)
-			        | (1 << ESP32_I2C_Master_SET_HPOINT)
-			        | (1 << ESP32_I2C_Master_SET_SIG_OUT_EN)
-			        | (1 << ESP32_I2C_Master_SET_IDLE_LV)
-			        | (1 << ESP32_I2C_Master_SET_RESOLUTION)
-			        | (1 << ESP32_I2C_Master_SET_TICK_SOURCE)
-			        | (1 << ESP32_I2C_Master_SET_FREQ_HZ) );
+  parsedKVInput->requiredKVBF = ( (1 << ESP32_I2C_Master_SET_I2C_NUM)
+			        | (1 << ESP32_I2C_Master_SET_I2C_MODE)
+			        | (1 << ESP32_I2C_Master_SET_SDA_IO)
+			        | (1 << ESP32_I2C_Master_SET_SDA_IO_PULLUP)
+			        | (1 << ESP32_I2C_Master_SET_SCL_IO)
+			        | (1 << ESP32_I2C_Master_SET_SCL_IO_PULLUP) );
 
   // set forbidden Keys -> Keys that are not allowed in this request
   parsedKVInput->forbiddenKVBF = 0;
@@ -1270,7 +1252,6 @@ esp_err_t i2c_master_sensor_test(i2c_port_t i2c_num, uint8_t* data_h, uint8_t* d
     free(parsedKVInput);
 
     return retMsg;
-
   }
 
 // ------------------------------------------------------------------------------------------------
