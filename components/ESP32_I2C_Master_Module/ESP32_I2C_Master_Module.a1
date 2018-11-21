@@ -1,4 +1,4 @@
-/* #################################################################################################
+﻿/* #################################################################################################
  *
  *      Name: ESP32_I2C_Master Module
  *  Function: This is used to set up GPIOs as a switch with the goal to control switching hardware
@@ -32,32 +32,6 @@
 #include "SCDE_Main.h"
 
 #include "driver/gpio.h"
-
-
-
-// ptr zur Fehlermeldung in allokierter strTextMultiple_t WENN NOCH KEIN FEHLER WAR
-#define SCDE_OK  NULL
-
-/*
-static const char* I2S_TAG = "I2S";
-#define SCDE_CHECK(a, str, ret) if (!(a)) {                                              \
-        ESP_LOGE(I2S_TAG,"%s:%d (%s):%s", __FILE__, __LINE__, __FUNCTION__, str);       \
-        return (ret);                                                                   \
-        }
-//  I2C_CHECK(i2c_num < I2C_NUM_MAX, I2C_NUM_ERROR_STR, ESP_ERR_INVALID_ARG);
-*/
-
-// SCDE_CHECK MAKRO: Prüft Bedingung und gibt Fehler in allokierter strTextMultiple_t zurück
-#define SCDE_CHECK(a, str) if (!(a)) {							\
-	retMsg = malloc(sizeof(strTextMultiple_t));					\
-	retMsg->strTextLen = asprintf(&retMsg->strText					\
-		,"Error! '%s'"								\
-		,str);									\
-	return retMsg;									\
-	}
-
-
-
 
 
 
@@ -111,12 +85,14 @@ SelectAData ESP32_I2C_Master_LoHi[] = {  //ID, Text MAX CGI LEN BEACHTEN!!!
   {1,"High"}, 
   {0, NULL}
   };
+
 // ESP32_I2C_Master_SET_BLOCK -> 'PWM_BLOCK'-> High_Speed|Low_Speed
 SelectAData ESP32_I2C_Master_PWM_BLOCK[] = {  //ID, Text MAX CGI LEN BEACHTEN!!!
   {0,"High_Speed"},
   {1,"Low_Speed"},
   {0, NULL}
   };
+
 // ESP32_I2C_Master_SET_TICK_SOURCE -> 'TICK_SOURCE'-> REF|APB_SLOW
 SelectAData ESP32_I2C_Master_TICK_SOURCE[] = {  //ID, Text MAX CGI LEN BEACHTEN!!!
   {0,"REF"},
@@ -148,31 +124,18 @@ enum ESP32_I2C_Master_SET_IK {				// Bit #XX for debugging
   , ESP32_I2C_Master_SET_NAME				// Bit #06 'NAME'  -> 
   , ESP32_I2C_Master_SET_CAPS				// Bit #07 'CAPS'  -> 
 
-
-
-  // Block #1 I2C Block to use
+  // Block #?all one? I2C configuration
   , ESP32_I2C_Master_SET_I2C_NUM			// Bit #08 'I2C_NUM' -> 
-
-  // Block #2 I2C Master/Slave ?
   , ESP32_I2C_Master_SET_I2C_MODE			// Bit #09 'I2C_MODE' -> 
-
-  // Block #3 I2C Pin connections
   , ESP32_I2C_Master_SET_SDA_IO				// Bit #10 'SDA_IO' -> 
   , ESP32_I2C_Master_SET_SDA_IO_PULLUP			// Bit #11 'SDA_IO_PULLUP' -> 
   , ESP32_I2C_Master_SET_SCL_IO				// Bit #12 'SCL_IO' ->
   , ESP32_I2C_Master_SET_SCL_IO_PULLUP			// Bit #13 'SCL_IO_PULLUP' ->
 
-  // Block #4 I2C Pin connections
-  , ESP32_I2C_Master_SET_MASTER_CLOCK			// Bit #14 'MASTER_CLOCK' ->
 
-  // Block #5 I2C Pin connections
-  , ESP32_I2C_Master_SET_SLAVE_10BIT_ENA		// Bit #15 'SLAVE_10BIT_ENA' ->
-
-  // Block #6 I2C Pin connections
-  , ESP32_I2C_Master_SET_SLAVE_ADRESS			// Bit #16 'SLAVE_ADRESS' ->
-
-
-
+  , ESP32_I2C_Master_SET_SIG_OUT_EN			// Bit #14 'SIG_OUT_EN' ->
+  , ESP32_I2C_Master_SET_IDLE_LV			// Bit #15 'IDLE_LV' ->
+  , ESP32_I2C_Master_SET_RESOLUTION			// Bit #16 'RESOLUTION' -> 
   , ESP32_I2C_Master_SET_TICK_SOURCE			// Bit #17 'TICK_SOURCE' ->
   , ESP32_I2C_Master_SET_FREQ_HZ			// Bit #18 'FREQ_HZ' ->
   , ESP32_I2C_Master_SET_THR_L_LIM_EN			// Bit #19 'THR_L_LIM_EN' -> DIS/ENA
@@ -212,6 +175,7 @@ enum ESP32_I2C_Master_Readings {			// Bit #XX for debugging
 /**
  * For Type: ESP32_I2C_Master
  * Implemented KEYS and assigned readings for this query - analyzed by by http_parser_parse_url()
+
  * Num should meet enum XX_QueryFields
  * Result is stored in struct SCDE_XX_parsedKVInput
  */
@@ -236,9 +200,10 @@ kvParseImplementedKeys_t ESP32_I2C_Master_Set_ImplementedKeys[] = {
   ,{ 0																				, "SDA_IO_PULLUP" }	// #11
   ,{ 0																				, "SCL_IO" }		// #12
   ,{ 0																				, "SCL_IO_PULLUP" }	// #13
-  ,{ 0																				, "MASTER_CLOCK" }	// #14
-  ,{ 0																				, "SLAVE_10BIT_ENA" }	// #15
-  ,{ 0																				, "SLAVE_ADRESS" }	// #16
+
+  ,{ 0																				, "SIG_OUT_EN" }	// #14
+  ,{ 0																				, "IDLE_LV" }		// #15
+  ,{ 0																				, "RESOLUTION" }	// #16
   ,{ 0																				, "TICK_SOURCE" }	// #17
   ,{ 0																				, "FREQ_HZ" }		// #18
   ,{ 0																				, "THR_L_LIM_EN" }	// #19
@@ -466,36 +431,55 @@ ESP32_I2C_Master_Attribute(Common_Definition_t *Common_Definition
 /*
   // set start of possible def-Name
   const uint8_t *defName = args;
+
   // set start of possible attr-Name
   const uint8_t *attrName = args;
+
   // a seek-counter
+
   int i = 0;
+
   // seek to next space !'\32'
   while( (i < argsLen) && (*attrName != ' ') ) {i++;attrName++;}
+
   // length of def-Name
   size_t defNameLen = i;
+
   // seek to start position of attr-Name '\32'
   while( (i < argsLen) && (*attrName == ' ') ) {i++;attrName++;}
+
   // set start of possible attr-Val
   const uint8_t *attrVal = attrName;
+
   // a 2nd seek-counter
   int j = 0;
+
   // seek to next space !'\32'
   while( (i < argsLen) && (*attrVal != ' ') ) {i++,j++;attrVal++;}
+
   // length of attr-Name
   size_t attrNameLen = j;
+
   // start position of attr-Val
   while( (i < argsLen) && (*attrVal == ' ') ) {i++;attrVal++;}
+
+
   // length of attr-Val
   size_t attrValLen = argsLen - i;
+
   // veryfy lengths > 0, definition 0 allowed
   if ( (defNameLen == 0) || (attrNameLen == 0) )
+
 		{
+
 		// response with error text
 		asprintf(&retMsg
 				,"Could not interpret command ''! Usage: Attr <defname> <attrname> [<attrval>]");
+
 		return retMsg;
+
 	//	}
+
 // -------------------------------------------------------------------------------------------------
 */
 
@@ -529,6 +513,8 @@ static const char* I2C_TAG = "i2c";
 
 
 static portMUX_TYPE i2c_spinlock[I2C_NUM_MAX] = {portMUX_INITIALIZER_UNLOCKED, portMUX_INITIALIZER_UNLOCKED};
+
+
 
 /* I2C module adressing array (1,2), ACCESSED FROM IRQ - keep in RAM! */
 static DRAM_ATTR i2c_dev_t* const I2C[I2C_NUM_MAX] = { &I2C0, &I2C1 };
@@ -607,12 +593,12 @@ static void IRAM_ATTR i2c_master_cmd_begin_static(i2c_obj_t* p_i2c);
  *  Rets: strTextMultiple_t* -> response text NULL=no text
  * -------------------------------------------------------------------------------------------------
  */
-strTextMultiple_t*
+strTextMultiple_t* ICACHE_FLASH_ATTR 
 ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
 {
 
   // for Fn response msg
-  strTextMultiple_t *retMsg = SCDE_OK;
+  strTextMultiple_t *retMsg = NULL;
 
   // for parsing input args
   parsedKVInputArgs_t *parsedKVInput = NULL;
@@ -728,50 +714,6 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
 
 // ------------------------------------------------------------------------------------------------
 
-  // try 1 - arguments for configuration as i2c master ?
-
-  // set required Keys -> Keys that should be there in this request
-  parsedKVInput->requiredKVBF = 	( (1 << ESP32_I2C_Master_SET_I2C_NUM)
-					| (1 << ESP32_I2C_Master_SET_I2C_MODE)
-					| (1 << ESP32_I2C_Master_SET_SDA_IO)
-					| (1 << ESP32_I2C_Master_SET_SDA_IO_PULLUP)
-					| (1 << ESP32_I2C_Master_SET_SCL_IO)
-					| (1 << ESP32_I2C_Master_SET_SCL_IO_PULLUP)
-					| (1 << ESP32_I2C_Master_SET_MASTER_CLOCK)
-					);
-
-  // set forbidden Keys -> Keys that are not allowed in this request
-  parsedKVInput->forbiddenKVBF = 	( (1 << ESP32_I2C_Master_SET_SLAVE_10BIT_ENA)
-					| (1 << ESP32_I2C_Master_SET_SLAVE_ADRESS)
- 					);
-
-  // process the set-args (key=value@) protocol
-  retMsg = ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition
-		,parsedKVInput		// KVInput parsed
-		,defArgsText		// our args text
-		,defArgsTextLen);	// our args text len
-
-  // processing reports an problem. Args not taken. Return with MSG
-  if (retMsg != SCDE_OK) {
-
-	// free allocated memory for query result key-field
-	free(parsedKVInput);
-
-	return retMsg;
-  }
-
-// ------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -782,17 +724,17 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
   printf("|ESP32_I2C_Master_Define, installing i2c driver>");
   #endif
 
-//#define I2C_MASTER_NUM I2C_NUM_1   /*!< I2C port number for master dev */
-//#define I2C_MASTER_SDA_IO    18    /*!< gpio number for I2C master data  */
-//#define I2C_MASTER_SCL_IO    19    /*!< gpio number for I2C master clock */
+#define I2C_MASTER_NUM I2C_NUM_1   /*!< I2C port number for master dev */
+#define I2C_MASTER_SDA_IO    18    /*!< gpio number for I2C master data  */
+#define I2C_MASTER_SCL_IO    19    /*!< gpio number for I2C master clock */
 #define I2C_MASTER_TX_BUF_DISABLE   0   /*!< I2C master do not need buffer */
 #define I2C_MASTER_RX_BUF_DISABLE   0   /*!< I2C master do not need buffer */
-//#define I2C_MASTER_FREQ_HZ    100000     /*!< I2C master clock frequency */
+#define I2C_MASTER_FREQ_HZ    100000     /*!< I2C master clock frequency */
 
-/*
+
 //Temp fill of struct
 
-    ESP32_I2C_Master_Definition->i2c_num =
+    ESP32_I2C_Master_Definition->i2c_master_port =
 	I2C_MASTER_NUM;
     ESP32_I2C_Master_Definition->i2c_config.mode =
 	I2C_MODE_MASTER;
@@ -808,27 +750,26 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
 	I2C_MASTER_FREQ_HZ;
 
 
-// ------------------------------------------------------------------------------------------------
+  // ??
 
-  // setup GPIOS, activate i2c, ...
-  retMsg = i2c_param_config(ESP32_I2C_Master_Definition->i2c_num
+  i2c_param_config(ESP32_I2C_Master_Definition->i2c_master_port
 	,&ESP32_I2C_Master_Definition->i2c_config);
 
- // error during config ? return with MSG
-  if (retMsg != SCDE_OK) {
-
-	return retMsg;
-  }
-*/
-// ------------------------------------------------------------------------------------------------
 
 /*
   // install the I2C driver
-  i2c_driver_install(ESP32_I2C_Master_Definition->i2c_num
+
+  i2c_driver_install(ESP32_I2C_Master_Definition->i2c_master_port
+
 	,ESP32_I2C_Master_Definition->i2c_config.mode
+
 	,I2C_MASTER_RX_BUF_DISABLE
+
 	,I2C_MASTER_TX_BUF_DISABLE
+
 	,0);
+
+
 */
 
 
@@ -852,31 +793,6 @@ we should free or modify the source data only after the i2c_master_cmd_begin fun
 has only 32 bytes.
 */
 
-
-
-
-
-
-
-
-
-//xxxxxxxxxxxxx entry
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
 esp_err_t i2c_driver_install(i2c_port_t i2c_num, i2c_mode_t mode, size_t slv_rx_buf_len, size_t slv_tx_buf_len,
     int intr_alloc_flags)
@@ -886,7 +802,7 @@ esp_err_t i2c_driver_install(i2c_port_t i2c_num, i2c_mode_t mode, size_t slv_rx_
         ESP_ERR_INVALID_ARG);
 */
 
-
+//xxxxxxxxxxxxx entry
 
   // check:
   // mode			-> I2C_MODE_MASTER or I2C_MODE_SLAVE
@@ -1038,9 +954,9 @@ int intr_alloc_flags = 0;
 /*
 esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
 {
-
     I2C_CHECK(i2c_num < I2C_NUM_MAX, I2C_NUM_ERROR_STR, ESP_ERR_INVALID_ARG);
     I2C_CHECK(p_i2c_obj[i2c_num] != NULL, I2C_DRIVER_ERR_STR, ESP_FAIL);
+
     i2c_obj_t* p_i2c = p_i2c_obj[i2c_num];
 
     uint32_t intr_mask = I2C_MASTER_TRAN_COMP_INT_ENA_M |
@@ -1053,11 +969,8 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
                          I2C_RXFIFO_OVF_INT_ENA_M |
                          I2C_RX_REC_FULL_INT_ENA_M |
                          I2C_SLAVE_TRAN_COMP_INT_ENA_M;
-
     CLEAR_PERI_REG_MASK(I2C_INT_ENA_REG(i2c_num), intr_mask);
-
     esp_intr_free(p_i2c->intr_handle);
-
     p_i2c->intr_handle = NULL;
 
     if (p_i2c->cmd_mux) {
@@ -1073,6 +986,7 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
     if (p_i2c->slv_tx_mux) {
         vSemaphoreDelete(p_i2c->slv_tx_mux);
     }
+
     if (p_i2c->rx_ring_buf) {
         vRingbufferDelete(p_i2c->rx_ring_buf);
         p_i2c->rx_ring_buf = NULL;
@@ -1086,9 +1000,9 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
 
     free(p_i2c_obj[i2c_num]);
     p_i2c_obj[i2c_num] = NULL;
-
     return ESP_OK;
 }
+
 */
 
 
@@ -1267,13 +1181,18 @@ esp_err_t i2c_master_sensor_test(i2c_port_t i2c_num, uint8_t* data_h, uint8_t* d
     i2c_master_write_byte(cmd, BH1750_SENSOR_ADDR << 1 | WRITE_BIT, ACK_CHECK_EN);
     i2c_master_write_byte(cmd, BH1750_CMD_START, ACK_CHECK_EN);
     i2c_master_stop(cmd);
+
+
   // part in I.O. Device
     int ret = i2c_master_cmd_begin(i2c_num, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
     if (ret == ESP_FAIL) {
         return ret;
     }
+
+
     vTaskDelay(30 / portTICK_RATE_MS);
+
     cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, BH1750_SENSOR_ADDR << 1 | READ_BIT, ACK_CHECK_EN);
@@ -1298,7 +1217,7 @@ esp_err_t i2c_master_sensor_test(i2c_port_t i2c_num, uint8_t* data_h, uint8_t* d
 
 
 
-/*
+
 // ------------------------------------------------------------------------------------------------
 
   // set required Keys -> Keys that should be there in this request
@@ -1336,7 +1255,7 @@ esp_err_t i2c_master_sensor_test(i2c_port_t i2c_num, uint8_t* data_h, uint8_t* d
   }
 
 // ------------------------------------------------------------------------------------------------
-*/
+
   // set affected readings
   ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition
     ,parsedKVInput->affectedReadingsBF);
@@ -1426,18 +1345,25 @@ ESP32_I2C_Master_DirectWrite(
 	,Common_Definition_t *Common_Definition_Stage2
 	,Common_StageXCHG_t *Common_StageXCHG)
 {
+
   // for Fn response msg
   strTextMultiple_t *retMsg = NULL;
+
   // to adress 1st stage definition - make common ptr to modul specific ptr
   ESP32_I2C_Master_Definition_t *ESP32_I2C_Master_Definition_Stage1 =
 	(ESP32_I2C_Master_Definition_t*) Common_Definition_Stage1;
+
   // make common ptr to modul specific ptr
   ESP32_I2C_Master_StageXCHG_t *ESP32_I2C_Master_StageXCHG =
 	(ESP32_I2C_Master_StageXCHG_t*) Common_StageXCHG;
+
 // -------------------------------------------------------------------------------------------------
+
 // check 4 matching modules
+
 // -------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
+
   #if ESP32_I2C_Master_Module_DBG >= 5
   SCDEFn->Log3Fn(
 	 ESP32_I2C_Master_Definition_Stage1->common.name
@@ -1454,7 +1380,9 @@ ESP32_I2C_Master_DirectWrite(
 	,Common_Definition_Stage2->module->ProvidedByModule->typeNameLen
 	,Common_Definition_Stage2->module->ProvidedByModule->typeName);
   #endif
+
 // -------------------------------------------------------------------------------------------------
+
   return retMsg;
 }
 */
@@ -1490,12 +1418,16 @@ ESP32_I2C_Master_IdleCb(Common_Definition_t *Common_Definition)
   // build pointer to make the hardware counter accessible
   ESP32_PWM_Channel_t *pPWM_Channel =
 	(ESP32_PWM_Channel_t*) (0x3FF59000 + (0x14 * ESP32_I2C_Master_Definition->Channel));
+
   // access low speed channels (instead of high speed channels)?
   if (ESP32_I2C_Master_Definition->Block) pPWM_Channel =
 	(ESP32_PWM_Channel_t*) ( (uint8_t*) pPWM_Channel + 0xa0);
+
+
   // build pointer to make the hardware timer accessible
   ESP32_PWM_Timer_t *pPWM_Timer =
 	(ESP32_PWM_Timer_t*) (0x3FF59140 + (0x08 * ESP32_I2C_Master_Definition->Timer));
+
   // access low speed timers (instead of high speed timers)?
   if (ESP32_I2C_Master_Definition->Block) pPWM_Timer =
 	(ESP32_PWM_Timer_t*) ( (uint8_t*) pPWM_Timer + 0x20);
@@ -1510,27 +1442,38 @@ ESP32_I2C_Master_IdleCb(Common_Definition_t *Common_Definition)
   // build ptr to access hw-counter
   ESP32_I2C_Master_CNT_CNT_REG_t *pESP32_I2C_Master_CNT_CNT_REG =
 	(ESP32_I2C_Master_CNT_CNT_REG_t*) 0x3FF57060;
+
   printf("|STATUS: Using ctr-unit:%u, old HW-Ctr:%d, new ATT:%u, gpio:%u>"
 	,ESP32_I2C_Master_Definition->counterUnit
 	,pESP32_I2C_Master_CNT_CNT_REG[ESP32_I2C_Master_Definition->counterUnit].CNT_PULS_CNT
 	,ESP32_I2C_Master_Definition->ATTShiftBuf[0]
 	,gpio_get_level(22) ); //=att ?
+
+
   ESP32_I2C_Master_CNT_CONF_REG_t *pESP32_I2C_Master_CNT_CONF_REG = (ESP32_I2C_Master_CNT_CONF_REG_t*) 0x3FF57000;
+
 	SCDEFn->HexDumpOutFn ("verify:"
 		,&pESP32_I2C_Master_CNT_CONF_REG[0]
 		, 0x80);  //sizeof(0x80) ); //ESP32_I2C_Master_CNT_CONF_REG_t) );
 */
 /*
  if (WebIf_Definition->reverse) {
+
+
   // get assigned HTTPD-Connection-Slot-Data
   WebIf_HTTPDConnSlotData_t *conn
 	= WebIf_Definition->reverse;
+
   // execute disconnection (indicated by NEEDS_CLOSE flag) or send more data ...
   if (conn->ConnCtrlFlags & F_GENERATE_IDLE_CALLBACK)
+
 	{
+
 	// execute Idle Callback
 	WebIf_IdleCb(WebIf_Definition);
+
 	}
+
 }
 */
 
@@ -1811,61 +1754,18 @@ ESP32_I2C_Master_Undefine(Common_Definition_t *Common_Definition)
  *        parsedKVInputArgs_t *parsedKVInput -> ptr to allocated mem filled with results from parse
  *        uint8_t *argsText -> the ArgsText
  *        size_t argsTextLen -> length of the ArgsText
- *  Rets: strTextMultiple_t* -> SCDE_OK, or error txts - for log
+ *  Rets: Bool -> TRUE = input parsed successful, FALSE = input parsed, but NOT successful, CANCELED
  * -------------------------------------------------------------------------------------------------
  */
-strTextMultiple_t*
+bool ICACHE_FLASH_ATTR
 ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Master_Definition
 	,parsedKVInputArgs_t *parsedKVInput
 	,uint8_t *argsText
 	,size_t argsTextLen)
 {
 
-  // start without error
-  strTextMultiple_t *retMsg = SCDE_OK;
-
 // 1. Step: Prepare structures with current values from TYPE & SYSTEM 
 //          (to allow an abort if values not complete or in case of processing errors)
-
-  // block #1 get current values for I2C Block (0 / 1)
-  uint8_t new_i2c_num = 
-	ESP32_I2C_Master_Definition->i2c_num;
-
-  // block #2 get current values for I2C Mode (Master/Slave)
-  i2c_mode_t new_mode = 
-	ESP32_I2C_Master_Definition->i2c_config.mode;
-
-  // block #3 get current values for I2C Pin connections
-  gpio_num_t new_sda_io_num = 
-	ESP32_I2C_Master_Definition->i2c_config.sda_io_num;
-  gpio_pullup_t new_sda_pullup_en = 
-	ESP32_I2C_Master_Definition->i2c_config.sda_pullup_en;
-  gpio_num_t new_scl_io_num = 
-	ESP32_I2C_Master_Definition->i2c_config.scl_io_num;
-  gpio_pullup_t new_scl_pullup_en = 
-	ESP32_I2C_Master_Definition->i2c_config.scl_pullup_en;
-
-  // block #4 get current values for I2C clock speed (when use as master only!)
-  uint32_t new_clk_speed = 
-	ESP32_I2C_Master_Definition->i2c_config.master.clk_speed;
-
-  // block #5 get current values for I2C 10bit enable (when use as slave only!)
-  uint8_t new_addr_10bit_en = 
-	ESP32_I2C_Master_Definition->i2c_config.slave.addr_10bit_en;
-
-  // block #6 get current values for I2C slave adress (when use as slave only!)
-  uint8_t new_slave_addr = 
-	ESP32_I2C_Master_Definition->i2c_config.slave.slave_addr;
-
-
-
-
-
-
-
-
-
-
 
   // block #1 get current assigned PWM-Block (low speed / high speed)
 //  uint8_t newBlock = ESP32_I2C_Master_Definition->Block;
@@ -1879,31 +1779,42 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
 // ------------------------------------------------------------------------------------------------
 /*  
   // we need to process the 'Block' KEY in advance here, because we need this information early
+
   // Block=High_Speed|Low_Speed
   // -> Setzt den Hardware-PWM-Block des ESP32 (0=HighSpeed / 1= LowSpeed) der verwendet werden soll
   // -> Sets the hardware-PWM-Block of the ESP32 (0=HighSpeed / 1= LowSpeed) that should be used
   if (parsedKVInput->keysFoundBF & ( (uint64_t) 1 << ESP32_I2C_Master_SET_BLOCK) ) {
+
 	// valid input happened ?
 	if (SCDEH_GetQueryKeyID((uint8_t*) argsText + parsedKVInput->keyData_t[ESP32_I2C_Master_SET_BLOCK].off
 		,parsedKVInput->keyData_t[ESP32_I2C_Master_SET_BLOCK].len, &newBlock, ESP32_I2C_Master_PWM_BLOCK)
 		&& (newBlock <= 1) ) {
 */
 /*
+
 		// save new value, from input
 		SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].ATTShiftBuf[0]
 			= NewVal;
+
 		// save mirror
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_att].affectedReadings;
+
+
 		// New Timestamp
 		SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=att");
+
+
 */
 /*
 		}
+
 	// invalid input detected ?
 	else return true;
   }
@@ -1911,31 +1822,42 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
 // ------------------------------------------------------------------------------------------------
   /*
   // we need to process the 'CHANNEL' KEY in advance here, because we need this information early
+
   // CHANNEL=[0-7]
   // -> Setzt den Hardware-PWM-Kanal des ESP32 (0-7) der verwendet werden soll
   // -> Sets the hardware-pwm-channel of the ESP32 (0-7) that should be used
   if (parsedKVInput->keysFoundBF & ( (uint64_t) 1 << ESP32_I2C_Master_SET_CHANNEL) ) {
+
 	// valid input happened ?
 	if (SCDEH_GetDecUInt8Val((uint8_t*) argsText + parsedKVInput->keyData_t[ESP32_I2C_Master_SET_CHANNEL].off
 		,parsedKVInput->keyData_t[ESP32_I2C_Master_SET_CHANNEL].len, &newChannel) 
 		&& (newChannel <= 7) ) {
 */
 /*
+
 		// save new value, from input
 		SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].ATTShiftBuf[0]
 			= NewVal;
+
 		// save mirror
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_att].affectedReadings;
+
+
 		// New Timestamp
 		SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=att");
+
+
 */
 /*
 		}
+
 	// invalid input detected ?
 	else return true;
   }
@@ -1943,31 +1865,42 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
 // ------------------------------------------------------------------------------------------------
 /*  
   // we need to process the 'TIMER' KEY in advance here, because we need this information early
+
   // TIMER=[0-3]
-  // -> Setzt den Hardware-Timer f\FCr den gew\E4hlten PWM-Kanal des ESP32 (0-3) der verwendet werden soll
+  // -> Setzt den Hardware-Timer für den gewählten PWM-Kanal des ESP32 (0-3) der verwendet werden soll
   // -> Sets the hardware-timer for the choosen pwm-channel of the ESP32 (0-3) that should be used
   if (parsedKVInput->keysFoundBF & ( (uint64_t) 1 << ESP32_I2C_Master_SET_TIMER) ) {
+
 	// valid input happened ?
 	if (SCDEH_GetDecUInt8Val((uint8_t*) argsText + parsedKVInput->keyData_t[ESP32_I2C_Master_SET_TIMER].off
 		,parsedKVInput->keyData_t[ESP32_I2C_Master_SET_TIMER].len, &newTimer) 
 		&& (newTimer <= 3) ) {
 */
 /*
+
 		// save new value, from input
 		SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].ATTShiftBuf[0]
 			= NewVal;
+
 		// save mirror
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_att].affectedReadings;
+
+
 		// New Timestamp
 		SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=att");
+
+
 */
 /*
 		}
+
 	// invalid input detected ?
 	else return true;
   }
@@ -1976,10 +1909,13 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
 /*
   // block #4 get current assigned / connected GPIO
   uint8_t newGPIO = ESP32_I2C_Master_Definition->GPIO;
+
   // block #5 reserve for new ATT
   uint32_t newATTVal;
+
   // block #6 reserve for new AVU
   char newAverageUnit[3];	
+
   // block #7  get ESP32 PWM channel configuration from selected channel
   // this stores our temp values
   ESP32_PWM_Channel_t newPWM_Channel;
@@ -1991,6 +1927,7 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
 	(ESP32_PWM_Channel_t*) ( (uint8_t*) pPWM_Channel + 0xa0);
   // move data to temp storage
   memcpy(&newPWM_Channel, pPWM_Channel, sizeof(ESP32_PWM_Channel_t));
+
   // block #8  get ESP32 PWM timer configuration from selected timer
   // this stores our temp values
   ESP32_PWM_Timer_t newPWM_Timer;
@@ -2002,6 +1939,8 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
 	(ESP32_PWM_Timer_t*) ( (uint8_t*) pPWM_Timer + 0x20);
   // move data to temp storage
   memcpy(&newPWM_Timer, pPWM_Timer, sizeof(ESP32_PWM_Timer_t));
+
+
   // store choosen timer in choosen channel
   newPWM_Channel.TIMER_SEL = newTimer;
 */
@@ -2023,298 +1962,456 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
 
 /*
 //>Caps Bit 0---------------------------------------------------------------------------------------
+
   // on=[ ] -> Setze Kanal an (0-x)
   // on=[ ] -> Set channel on (0-x)
+
  if (QueryResultKF->KeyField_Set == (uint64_t) 1 << SwITCH_QF_on)
+
 	{
+
 	// new val, save mirror
 	SCDE_WriteUInt32toSysCfgRamRtcMirrored(&SysCfgRamRtcMirrored->MySwITCH_FeatCfgRamRtcMirrored[ADID].RB01_Val,
 		SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_SwValMax);
+
 	// mark affected readings for TX
 	AffectedReadings |= QueryResultKF->KeyField_Data_t[SwITCH_QF_on].AffectedReadings;
+
 	// New Timestamp
 	SysCfgRamNoMirror->MySwITCH_FeatCfgRamNoMirror[ADID].RB01_X_TiSt =
 		GetUniqueTIST();
+
 	// Push processed CMD to to Response ...
 	RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=on");
+
 	}
+
 //--------------------------------------------------------------------------------------------------
+
   // off=[ ] -> Setze Kanal aus (0-x)
   // off=[ ] -> Set channel off (0-x)
+
   else if (QueryResultKF->KeyField_Set == (uint64_t) 1 << SwITCH_QF_off)
+
 	{
+
 	// new val, save mirror
 	SCDE_WriteUInt32toSysCfgRamRtcMirrored(&SysCfgRamRtcMirrored->MySwITCH_FeatCfgRamRtcMirrored[ADID].RB01_Val,
 		SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_SwValMin);
+
 	// mark affected readings for TX
 	AffectedReadings |= QueryResultKF->KeyField_Data_t[SwITCH_QF_off].AffectedReadings;
+
 	// New Timestamp
 	SysCfgRamNoMirror->MySwITCH_FeatCfgRamNoMirror[ADID].RB01_X_TiSt =
 		GetUniqueTIST();
+
 	// Push processed CMD to to Response ...
 	RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=off");
+
 	}
+
 //>Caps Bit 1---------------------------------------------------------------------------------------
+
   // max=[ ] -> Setze Kanal maximal (0-x)
   // max=[ ] -> Set channel maximum (0-x) 
+
   else if (QueryResultKF->KeyField_Set == (uint64_t) 1 << SwITCH_QF_max)
+
 	{
+
 	// new val, save mirror
 	SCDE_WriteUInt32toSysCfgRamRtcMirrored(&SysCfgRamRtcMirrored->MySwITCH_FeatCfgRamRtcMirrored[ADID].RB01_Val,
 		SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_SwValMax);
+
 	// mark affected readings for TX
 	AffectedReadings |= QueryResultKF->KeyField_Data_t[SwITCH_QF_max].AffectedReadings;
+
 	// New Timestamp
 	SysCfgRamNoMirror->MySwITCH_FeatCfgRamNoMirror[ADID].RB01_X_TiSt =
 		GetUniqueTIST();
+
 	// Push processed CMD to to Response ...
 	RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=max");
+
 	}
+
 //--------------------------------------------------------------------------------------------------
+
   // min=[ ] -> Setze Kanal minimal (0-x)
   // min=[ ] -> Set channel minimal (0-x)
+
   else if (QueryResultKF->KeyField_Set == (uint64_t) 1 << SwITCH_QF_min)
+
 	{
+
 	// New Value = Min
 	SCDE_WriteUInt32toSysCfgRamRtcMirrored(&SysCfgRamRtcMirrored->MySwITCH_FeatCfgRamRtcMirrored[ADID].RB01_Val,
 		SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_SwValMin);
+
 	// mark affected readings for TX
 	AffectedReadings |= QueryResultKF->KeyField_Data_t[SwITCH_QF_min].AffectedReadings;
+
 	// New Timestamp
 	SysCfgRamNoMirror->MySwITCH_FeatCfgRamNoMirror[ADID].RB01_X_TiSt =
 		GetUniqueTIST();
+
 	// Push processed CMD to to Response ...
 	RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=min");
+
 	}
+
 //>Caps Bit 2---------------------------------------------------------------------------------------
-  // val=[0-9] -> Setze Wert f\FCr Kanal (uint8) (0-x)
+
+  // val=[0-9] -> Setze Wert für Kanal (uint8) (0-x)
   // val=[0-9] -> Set value for channel (uint8) (0-x)
+
  else if (QueryResultKF->KeyField_Set == (uint64_t) 1 << SwITCH_QF_val)
 	{
+
 	uint32_t NewVal;
+
 	// valid input happened ?
 	if (SCDEH_GetDecUInt32Val((uint8*)Args+QueryResultKF->KeyField_Data_t[SwITCH_QF_val].off
 		,QueryResultKF->KeyField_Data_t[SwITCH_QF_val].len, &NewVal))
+
 		{
+
 		// val input value clipping
 		if (NewVal > SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_SwValMax)
+
 			{
+
 			NewVal = SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_SwValMax;
+
 			}
+
 		else if (NewVal < SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_SwValMin)
+
 			{
+
 			NewVal = SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_SwValMin;
+
 			}
+
 		// save mirror
 		SCDE_WriteUInt32toSysCfgRamRtcMirrored(&SysCfgRamRtcMirrored->MySwITCH_FeatCfgRamRtcMirrored[ADID].RB01_Val,
 			NewVal);
+
 		// mark affected readings for TX
 		AffectedReadings |= QueryResultKF->KeyField_Data_t[SwITCH_QF_val].AffectedReadings;
+
 		// New Timestamp
 		SysCfgRamNoMirror->MySwITCH_FeatCfgRamNoMirror[ADID].RB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=val");
+
 		}
+
 	}
+
 //>Caps Bit 3---------------------------------------------------------------------------------------
-  // dim=[0-9] -> Setze dimmer f\FCr Kanal (uint8) (0-x)
+
+  // dim=[0-9] -> Setze dimmer für Kanal (uint8) (0-x)
   // dim=[0-9] -> Set dimming for channel (uint8) (0-x)
+
   else if (QueryResultKF->KeyField_Set == (uint64_t) 1 << SwITCH_QF_dim)
 	{
+
 	uint32_t NewVal;
+
 	// valid input happened ?
 	if (SCDEH_GetDecUInt32Val((uint8*)Args+QueryResultKF->KeyField_Data_t[SwITCH_QF_dim].off
 		,QueryResultKF->KeyField_Data_t[SwITCH_QF_dim].len, &NewVal))
 		
 		{
+
 		// dim input value clipping
 		if (NewVal > 100) NewVal = 100;
 		else if (NewVal < 0) NewVal = 0;
+
 		// calculate val from dim
 		NewVal = ( (NewVal *
 			(SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_SwValMax - 
 			SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_SwValMin) ) /
 			100 );
+
 		// New Value = calculated from input
 		SCDE_WriteUInt32toSysCfgRamRtcMirrored(&SysCfgRamRtcMirrored->MySwITCH_FeatCfgRamRtcMirrored[ADID].RB01_Val,
 			NewVal);
+
 		// save mirror
 		AffectedReadings |= QueryResultKF->KeyField_Data_t[SwITCH_QF_dim].AffectedReadings;
+
 		// New Timestamp
 		SysCfgRamNoMirror->MySwITCH_FeatCfgRamNoMirror[ADID].RB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=dim");
+
 		}
+
 	}
+
 //>Caps Bit n.a.------------------------------------------------------------------------------------
+
   // name=[a-zA-Z0-9_.] -> Setze einen neuen Feature Namen (char[31]) (0-x)
   // name=[a-zA-Z0-9_.] -> Set a new Feature Name (char[31]) (0-x)
+
   else if (QueryResultKF->KeyField_Set == (uint64_t) 1 << SwITCH_QF_name)
+
 	{
+
 	// valid input happened ?
 	if (SCDEH_GetSpecialStrVal((uint8_t*)Args+QueryResultKF->KeyField_Data_t[SwITCH_QF_name].off
 		,QueryResultKF->KeyField_Data_t[SwITCH_QF_name].len
 		,(char*) &SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_Name
 		,sizeof (SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_Name)
 		,2) )
+
 		{	
+
 		// save mirror
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		AffectedReadings |= QueryResultKF->KeyField_Data_t[SwITCH_QF_name].AffectedReadings;
+
 		// New Timestamp
 		SysCfgRamNoMirror->MySwITCH_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=name");
+
 		}
+
 	}
+
 //>Caps Bit n.a.------------------------------------------------------------------------------------
-  // caps=[ ] -> Fragt nach den F\E4higkeiten-Bits (0-x)
+
+  // caps=[ ] -> Fragt nach den Fähigkeiten-Bits (0-x)
   // caps=[ ] -> Request for Capabilities-Bits (0-x)
+
  if (QueryResultKF->KeyField_Set == (uint64_t) 1 << SwITCH_QF_caps)
+
 	{
+
 	// mark affected readings for TX
 	AffectedReadings |= QueryResultKF->KeyField_Data_t[SwITCH_QF_caps].AffectedReadings;
+
 	// New Timestamp
 	SysCfgRamNoMirror->MySwITCH_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 		GetUniqueTIST();
+
 	// Push processed CMD to to Response ...
 	RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=on");
+
 	}
+
 */
 
 /*
   // ATT=[0-9]
-  // -> Setze Allzeit-Gesamt-Impulse passend zum aktuellen Z\E4hlerstand
+  // -> Setze Allzeit-Gesamt-Impulse passend zum aktuellen Zählerstand
   // -> Set alltime-total-tics meeting the currend meter-reading
+
   if (parsedKVInput->keysFoundBF & ( (uint64_t) 1 << ESP32_I2C_Master_SET_ATT) ) {
+
 	// valid input happened ?
 	if (SCDEH_GetDecUInt32Val((uint8*)Args+QueryResultKF->KeyField_Data_t[S0_QF_att].off
 		,QueryResultKF->KeyField_Data_t[S0_QF_att].len, &newATTVal)) {
+
+
+
+
+
 		// save new value, from input
 		SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].ATTShiftBuf[0]
 			= newATTVal;
+
 		// save mirror
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_att].affectedReadings;
+
 		// New Timestamp
 		SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=att");
+
 		}
+
 	// invalid input detected ?
 	else return true;
   }
+
 //>Caps Bit 1,2,3,4,5,6-----------------------------------------------------------------------------
+
   // AVU=[a-zA-Z0-9_.]
-  // -> Setze Einheit f\FCr den Durchschnitts-Verbrauchs-Wert (char[3])
+  // -> Setze Einheit für den Durchschnitts-Verbrauchs-Wert (char[3])
   // -> Set unit for average-consumption-value (char[3])
+
   if (parsedKVInput->keysFoundBF & ( (uint64_t) 1 << ESP32_I2C_Master_SET_AVU) ) {
+
 	// valid input happened ?
 	if (SCDEH_GetSpecialStrVal((uint8_t*)Args+QueryResultKF->KeyField_Data_t[S0_QF_avu].off
 		,QueryResultKF->KeyField_Data_t[S0_QF_avu].len
 		,(char*) &newAverageUnit
-		,sizeof (newAverageUnit) // -> case 3 = (Alpha+Num+"\B3") for Unit Name
+		,sizeof (newAverageUnit) // -> case 3 = (Alpha+Num+"³") for Unit Name
 		,3) ) {
+
+
 		// SAVE Value
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_avu].affectedReadings;
+
 		// New Timestamp
 		SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=avu");
+
 		}
+
 	// invalid input detected ?
 	else return true;
   }
+
 //>Caps Bit 1---------------------------------------------------------------------------------------
+
   // AVF=[0-9.]
   // -> Setze Durchschnittsverbrauch Berechnungsfaktor (float)
   // -> Set average consumption calculation factor (float)
+
   if (parsedKVInput->keysFoundBF & ( (uint64_t) 1 << ESP32_I2C_Master_SET_AVF) ) {
+
 	double NewVal;
+
 	// valid input happened ?
 	if (SCDEH_GetFloatVal((uint8*)Args+QueryResultKF->KeyField_Data_t[S0_QF_avf].off
 		,QueryResultKF->KeyField_Data_t[S0_QF_avf].len, &NewVal)) {
+
 		// store the value to temp
 		//befehl hier!;
+
+
 		// save new value, from input
 		SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].IB01_AverageFactor
 			= NewVal;
+
 		// save mirror
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_avf].affectedReadings;
+
 		// New Timestamp
 		SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=avf");
+
 		}
+
 	// invalid input detected ?
 	else return true;
   }
+
 //--------------------------------------------------------------------------------------------------
+
   // ATU=[a-zA-Z0-9_.]
-  // -> Setze Einheit f\FCr den Allzeit-Gesamt-Wert (char[3])
+  // -> Setze Einheit für den Allzeit-Gesamt-Wert (char[3])
   // -> Set unit for alltime-total-value (char[3])
+
   if (parsedKVInput->keysFoundBF & ( (uint64_t) 1 << ESP32_I2C_Master_SET_ATU) ) {
+
 	// valid input happened ?
 	if (SCDEH_GetSpecialStrVal((uint8_t*)Args+QueryResultKF->KeyField_Data_t[S0_QF_atu].off
 		,QueryResultKF->KeyField_Data_t[S0_QF_atu].len
 		,(char*) &SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].IB01_AlltimeTotalUnit
 		,sizeof (SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].IB01_AlltimeTotalUnit)
-		,3) ) // -> case 3 = (Alpha+Num+"\B3") for Unit Name
+		,3) ) // -> case 3 = (Alpha+Num+"³") for Unit Name
+
 		 {
+
 		// store the value to temp
 		//befehl hier!;
+
+
+
 		// SAVE Value
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_atu].affectedReadings;
+
 		// New Timestamp
 		SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=atu");
+
 		}
+
 	// invalid input detected ?
 	else return true;
   }
+
 //>Caps Bit 2---------------------------------------------------------------------------------------
+
   // ATF=[0-9.]
-  // -> Setze Umrechnungsfaktor f\FCr den Allzeit-Total-Wert (float)
+  // -> Setze Umrechnungsfaktor für den Allzeit-Total-Wert (float)
   // -> Set factor for alltime total value (float)
+
   if (parsedKVInput->keysFoundBF & ( (uint64_t) 1 << ESP32_I2C_Master_SET_ATF) ) {
+
 	double NewVal;
+
 	// valid input happened ?
 	if (SCDEH_GetFloatVal((uint8*)Args+QueryResultKF->KeyField_Data_t[S0_QF_atf].off
 		,QueryResultKF->KeyField_Data_t[S0_QF_atf].len, &NewVal)) {
+
 		// store the value to temp
 		//befehl hier!;
+
+
+
 		// save new value, from input
 		SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].IB01_AlltimeTotalFactor
 			= NewVal;
+
 		// save mirror
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_atf].affectedReadings;
+
 		// New Timestamp
 		SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=atf");
+
 		}
+
 	// invalid input detected ?
 	else return true;
   }
+
+
 */
 
 
@@ -2336,26 +2433,40 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
   // -> ?? Setzt den Hardware-Counter des ESP32 (0-7) der verwendet werden soll
   // -> ?? Sets the hardware counter of the ESP32 (0-7) that should be used
   if (parsedKVInput->keysFoundBF & ( (uint64_t) 1 << ESP32_I2C_Master_SET_CH1_LCTRL_MODE) ) {
+
 	uint8_t newMode;
+
 	// valid input happened ?
 	if (SCDEH_GetQueryKeyID((uint8_t*) argsText + parsedKVInput->keyData_t[ESP32_I2C_Master_SET_CH1_LCTRL_MODE].off
 		,parsedKVInput->keyData_t[ESP32_I2C_Master_SET_CH1_LCTRL_MODE].len, &newMode, &ESP32_I2C_Master_CTRL_MODE)
 		&& (newMode <= 3) ) {
+
 		// store the value to temp
 		ESP32_I2C_Master_CNT_CONF_REG.CNT_CH1_LCTRL_MODE = newMode;
+
+
+
 		// save new value, from input
 		SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].ATTShiftBuf[0]
 			= NewVal;
+
 		// save mirror
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_att].affectedReadings;
+
+
 		// New Timestamp
 		SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=att");
+
+
 		}
+
 	// invalid input detected ?
 	else return true;
   }
@@ -2382,69 +2493,106 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
 
 
 /*
+
 //>Caps Bit 3---------------------------------------------------------------------------------------
+
   // deb=[0-9] -> Setze debounce Wert, 10-200 recommended (0-x)
   // deb=[0-9] -> Set debounce value, 10-200 recommended (0-x)
+
   else if (QueryResultKF->KeyField_Set == (uint64_t) 1 << S0_QF_deb)
+
 	{
+
 	uint32_t NewVal;
+
 	// valid input happened ?
 	if (SCDEH_GetDecUInt32Val((uint8*)Args+QueryResultKF->KeyField_Data_t[S0_QF_deb].off
 		,QueryResultKF->KeyField_Data_t[S0_QF_deb].len, &NewVal))
+
 		{
+
 		// deb input value clipping
 		if (NewVal > 1000) NewVal = 1000;
 		else if (NewVal < 0) NewVal = 10;
+
 		// save new value, from input
 		SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].IB01_Debounce
 			= NewVal;
+
 		// save mirror
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_deb].affectedReadings;
+
 		// New Timestamp
 		SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=deb");
+
 		}
+
 	}
+
+
 //>Caps Bit n.a.------------------------------------------------------------------------------------
+
   // name=[a-zA-Z0-9_.] -> Setze einen neuen Feature Namen (char[31]) (0-x)
   // name=[a-zA-Z0-9_.] -> Set a new Feature Name (char[31]) (0-x)
+
   else if (QueryResultKF->KeyField_Set == (uint64_t) 1 << S0_QF_name)
+
 	{
+
 	// valid input happened ?
 	if (SCDEH_GetSpecialStrVal((uint8_t*)Args+QueryResultKF->KeyField_Data_t[S0_QF_name].off
 		,QueryResultKF->KeyField_Data_t[S0_QF_name].len
 		,(char*) &SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].IB01_Name
 		,sizeof (SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].IB01_Name)
 		,2) ) // NAME=[a-zA-Z0-9_.] -> Set a new Feature Name (char[31]) (0-x)
+
 		{	
+
 		// SAVE Value
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_name].affectedReadings;
+
 		// New Timestamp
 		SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=name");
+
 		}
+
 	}
+
 //>Caps Bit n.a.------------------------------------------------------------------------------------
-  // caps=[ ] -> Fragt nach den F\E4higkeiten-Bits (0-x)
+
+  // caps=[ ] -> Fragt nach den Fähigkeiten-Bits (0-x)
   // caps=[ ] -> Request for Capabilities-Bits (0-x)
+
+
  if (QueryResultKF->KeyField_Set == (uint64_t) 1 << S0_QF_caps)
 	{
+
 	// mark affected readings for TX
 	affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_caps].affectedReadings;
+
 //	// New Timestamp
 //	WriteInt32toSysCfgRamRtcMirrored(&SysCfgRamRtcMirrored->MyS0FeatureCfgRamRtcMirrored[ADID].IB01_X_TiSt,
 //		GetUniqueTIST());
+
 	// Push processed CMD to to Response ...
 	RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=caps");
+
 	}
+
 */
 
 
@@ -2460,26 +2608,40 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
   // -> ?? Setzt den Hardware-Counter des ESP32 (0-7) der verwendet werden soll
   // -> ?? Sets the hardware counter of the ESP32 (0-7) that should be used
   if (parsedKVInput->keysFoundBF & ( (uint64_t) 1 << ESP32_I2C_Master_SET_CH1_LCTRL_MODE) ) {
+
 	uint8_t newMode;
+
 	// valid input happened ?
 	if (SCDEH_GetQueryKeyID((uint8_t*) argsText + parsedKVInput->keyData_t[ESP32_I2C_Master_SET_CH1_LCTRL_MODE].off
 		,parsedKVInput->keyData_t[ESP32_I2C_Master_SET_CH1_LCTRL_MODE].len, &newMode, &ESP32_I2C_Master_CTRL_MODE)
 		&& (newMode <= 3) ) {
+
 		// store the value to temp
 		ESP32_I2C_Master_CNT_CONF_REG.CNT_CH1_LCTRL_MODE = newMode;
+
+
+
 		// save new value, from input
 		SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].ATTShiftBuf[0]
 			= NewVal;
+
 		// save mirror
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_att].affectedReadings;
+
+
 		// New Timestamp
 		SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=att");
+
+
 		}
+
 	// invalid input detected ?
 	else return true;
   }
@@ -2490,25 +2652,37 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
   // -> ?? Setzt den Hardware-Counter des ESP32 (0-7) der verwendet werden soll
   // -> ?? Sets the hardware counter of the ESP32 (0-7) that should be used
   if (parsedKVInput->keysFoundBF & ( (uint64_t) 1 << ESP32_I2C_Master_SET_CH1_HCTRL_MODE) ) {
+
 	uint8_t NewMode;
+
 	// valid input happened ?
 	if (SCDEH_GetQueryKeyID((uint8_t*) argsText + parsedKVInput->keyData_t[ESP32_I2C_Master_SET_CH1_HCTRL_MODE].off
 		,parsedKVInput->keyData_t[ESP32_I2C_Master_SET_CH1_HCTRL_MODE].len, &NewMode, ESP32_I2C_Master_CTRL_MODE) ) {
+
 		// store ne value
 		ESP32_I2C_Master_CNT_CONF_REG.CNT_CH1_LCTRL_MODE = NewMode;
+
+
 		// save new value, from input
 		SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].ATTShiftBuf[0]
 			= NewVal;
+
 		// save mirror
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_att].affectedReadings;
+
 		// New Timestamp
 		SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=att");
+
+
 		}
+
 	// invalid input detected ?
 	else return true;
   }
@@ -2519,25 +2693,37 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
   // -> ?? Setzt den Hardware-Counter des ESP32 (0-7) der verwendet werden soll
   // -> ?? Sets the hardware counter of the ESP32 (0-7) that should be used
   if (parsedKVInput->keysFoundBF & ( (uint64_t) 1 << ESP32_I2C_Master_SET_CH1_POS_MODE) ) {
+
 	uint8_t NewMode;
+
 	// valid input happened ?
 	if (SCDEH_GetQueryKeyID((uint8_t*) argsText + parsedKVInput->keyData_t[ESP32_I2C_Master_SET_CH1_POS_MODE].off
 		,parsedKVInput->keyData_t[ESP32_I2C_Master_SET_CH1_POS_MODE].len, &NewMode, ESP32_I2C_Master_CH_MODE) ) {
+
 		// store ne value
 		ESP32_I2C_Master_CNT_CONF_REG.CNT_CH1_POS_MODE = NewMode;
+
+
 		// save new value, from input
 		SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].ATTShiftBuf[0]
 			= NewVal;
+
 		// save mirror
 		SCDE_SaveSysCfgRamFlashMirroredToMirror();
+
 		// mark affected readings for TX
 		affectedReadings |= QueryResultKF->KeyField_Data_t[S0_QF_att].affectedReadings;
+
 		// New Timestamp
 		SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
 			GetUniqueTIST();
+
 		// Push processed CMD to to Response ...
 		RespArgsWPos += os_sprintf(RespArgsWPos,"cmd=att");
+
+
 		}
+
 	// invalid input detected ?
 	else return true;
   }
@@ -2547,581 +2733,157 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
 
 
 
-/*
-  // Block #1 I2C Block to use ( 0 / 1)
-  , ESP32_I2C_Master_SET_I2C_NUM			// Bit #08 'I2C_NUM' -> 
 
-  // Block #2 I2C Mode (Master/Slave)
-  , ESP32_I2C_Master_SET_I2C_MODE			// Bit #09 'I2C_MODE' -> 
 
-  // Block #3 I2C Pin connections
-  , ESP32_I2C_Master_SET_SDA_IO				// Bit #10 'SDA_IO' -> 
-  , ESP32_I2C_Master_SET_SDA_IO_PULLUP			// Bit #11 'SDA_IO_PULLUP' -> 
-  , ESP32_I2C_Master_SET_SCL_IO				// Bit #12 'SCL_IO' ->
-  , ESP32_I2C_Master_SET_SCL_IO_PULLUP			// Bit #13 'SCL_IO_PULLUP' ->
-*/
+
 
 // ------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-// manipulate 4 debugging
-
-  parsedKVInput->keysFoundBF =    	( (1 << ESP32_I2C_Master_SET_I2C_NUM)
-					| (1 << ESP32_I2C_Master_SET_I2C_MODE) 
-					| (1 << ESP32_I2C_Master_SET_SDA_IO)
-			       		| (1 << ESP32_I2C_Master_SET_SDA_IO_PULLUP)
-			       		| (1 << ESP32_I2C_Master_SET_SCL_IO)
-			       		| (1 << ESP32_I2C_Master_SET_SCL_IO_PULLUP)
-					| (1 << ESP32_I2C_Master_SET_MASTER_CLOCK)
-				//	| (1 << ESP32_I2C_Master_SET_SLAVE_10BIT_ENA)
-				//	| (1 << ESP32_I2C_Master_SET_SLAVE_ADRESS)
-					); 
-
-#define I2C_MASTER_NUM I2C_NUM_1   /*!< I2C port number for master dev */
-#define I2C_MASTER_SDA_IO    18    /*!< gpio number for I2C master data  */
-#define I2C_MASTER_SCL_IO    19    /*!< gpio number for I2C master clock */
-#define I2C_MASTER_TX_BUF_DISABLE   0   /*!< I2C master do not need buffer */
-#define I2C_MASTER_RX_BUF_DISABLE   0   /*!< I2C master do not need buffer */
-#define I2C_MASTER_FREQ_HZ    100000     /*!< I2C master clock frequency */
-
-//Temp fill of struct
-
-    new_i2c_num = I2C_MASTER_NUM;
-    new_mode = I2C_MODE_MASTER;
-    new_sda_io_num = I2C_MASTER_SDA_IO;
-    new_sda_pullup_en = GPIO_PULLUP_ENABLE;
-    new_scl_io_num = I2C_MASTER_SCL_IO;
-    new_scl_pullup_en = GPIO_PULLUP_ENABLE;
-    new_clk_speed = I2C_MASTER_FREQ_HZ;
-
-
-		
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // 3. Step: Check if the ammount of input elements meets our criteria
 
-  // OPTION: check if all required Key=Value components for operation are included
-  //         -> if not, return with msg
+  // check if all required Key=Value components are included -> return with FALSE
   if ( (parsedKVInput->keysFoundBF & parsedKVInput->requiredKVBF) != parsedKVInput->requiredKVBF) {
 
-	// alloc mem for retMsg
-	retMsg = malloc(sizeof(strTextMultiple_t));
+	#if ESP32_I2C_Master_Module_DBG >= 5
+	printf("|requiredKVBF, no match!>");	
+  	#endif
 
-	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
-		,"Parsing Error! NOT all required Key=Value args found!");
-
-	return retMsg;
+	return true;
   }
 
-  // OPTION: check if forbidden Key=Value components are included
-  //         -> if yes, return with msg
+  // check if forbidden Key=Value components are included -> return with FALSE
   if (parsedKVInput->keysFoundBF & parsedKVInput->forbiddenKVBF) {
 
-	// alloc mem for retMsg
-	retMsg = malloc(sizeof(strTextMultiple_t));
+	#if ESP32_I2C_Master_Module_DBG >= 5
+	printf("|forbiddenKVBF, match!>");	
+  	#endif
 
-	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
-		,"Parsing Error! FORBIDDEN Key=Value args found!");
-
-	return retMsg;
+	return true;
   }
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ------------------------------------------------------------------------------------------------
 
-// 4. Step: Changes will happen, deinit old?
-
-
-/*
-
-esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
-{
-
-    I2C_CHECK(i2c_num < I2C_NUM_MAX, I2C_NUM_ERROR_STR, ESP_ERR_INVALID_ARG);
-    I2C_CHECK(p_i2c_obj[i2c_num] != NULL, I2C_DRIVER_ERR_STR, ESP_FAIL);
-    i2c_obj_t* p_i2c = p_i2c_obj[i2c_num];
-
-    uint32_t intr_mask = I2C_MASTER_TRAN_COMP_INT_ENA_M |
-                         I2C_TIME_OUT_INT_ENA_M |
-                         I2C_TRANS_COMPLETE_INT_ENA_M |
-                         I2C_TRANS_START_INT_ENA_M |
-                         I2C_TX_SEND_EMPTY_INT_ENA_M |
-                         I2C_ARBITRATION_LOST_INT_ENA_M |
-                         I2C_ACK_ERR_INT_ENA_M |
-                         I2C_RXFIFO_OVF_INT_ENA_M |
-                         I2C_RX_REC_FULL_INT_ENA_M |
-                         I2C_SLAVE_TRAN_COMP_INT_ENA_M;
-
-    CLEAR_PERI_REG_MASK(I2C_INT_ENA_REG(i2c_num), intr_mask);
-
-    esp_intr_free(p_i2c->intr_handle);
-
-    p_i2c->intr_handle = NULL;
-
-    if (p_i2c->cmd_mux) {
-        xSemaphoreTake(p_i2c->cmd_mux, portMAX_DELAY);
-        vSemaphoreDelete(p_i2c->cmd_mux);
-    }
-    if (p_i2c->cmd_sem) {
-        vSemaphoreDelete(p_i2c->cmd_sem);
-    }
-    if (p_i2c->slv_rx_mux) {
-        vSemaphoreDelete(p_i2c->slv_rx_mux);
-    }
-    if (p_i2c->slv_tx_mux) {
-        vSemaphoreDelete(p_i2c->slv_tx_mux);
-    }
-    if (p_i2c->rx_ring_buf) {
-        vRingbufferDelete(p_i2c->rx_ring_buf);
-        p_i2c->rx_ring_buf = NULL;
-        p_i2c->rx_buf_length = 0;
-    }
-    if (p_i2c->tx_ring_buf) {
-        vRingbufferDelete(p_i2c->tx_ring_buf);
-        p_i2c->tx_ring_buf = NULL;
-        p_i2c->tx_buf_length = 0;
-    }
-
-    free(p_i2c_obj[i2c_num]);
-    p_i2c_obj[i2c_num] = NULL;
-
-    return ESP_OK;
-}
-*/
-
-
-
-
-
-// ------------------------------------------------------------------------------------------------
-
-// 4. Step: Store the new values of each block (if block information is complete)
-
-  // block #1 store/use I2C Block (0 / 1)
-  if (parsedKVInput->keysFoundBF |   	( (1 << ESP32_I2C_Master_SET_I2C_NUM) ) ) {
-
-	#if ESP32_I2C_Master_Module_DBG >= 5
-	printf("|W B#01 I2C_NUM=%d>"
-		,new_i2c_num);	
-  	#endif
-
-	// store assigned I2C Block
-	ESP32_I2C_Master_Definition->i2c_num = 
-		new_i2c_num;
-
-	// enable i2c 0
-	if (new_i2c_num == I2C_NUM_0) {
-
-		periph_module_enable(PERIPH_I2C0_MODULE);
-	}
-
-	// enable i2c 1
-	else if (new_i2c_num == I2C_NUM_1) {
-
-		periph_module_enable(PERIPH_I2C1_MODULE);
-	}
-  }
-
-  // block #2 store/use I2C Mode (Master/Slave)
-  if (parsedKVInput->keysFoundBF |   	( (1 << ESP32_I2C_Master_SET_I2C_MODE) ) ) {
-
-	#if ESP32_I2C_Master_Module_DBG >= 5
-	printf("|W B#01 I2C_MODE=%d>"
-		,new_mode);	
-  	#endif
-
-	// store assigned I2C Mode
-	ESP32_I2C_Master_Definition->i2c_config.mode
-		= new_mode;
-
-	// ??
-	I2C_ENTER_CRITICAL(&i2c_spinlock[new_i2c_num]);
-
-	// set rx data msb first
-	I2C[new_i2c_num]->ctr.rx_lsb_first = I2C_DATA_MODE_MSB_FIRST;
-
-	// set tx data msb first
-	I2C[new_i2c_num]->ctr.tx_lsb_first = I2C_DATA_MODE_MSB_FIRST;
-
-	// mode for master or slave
-	I2C[new_i2c_num]->ctr.ms_mode = new_mode;
-
-	// set open-drain output mode
-	I2C[new_i2c_num]->ctr.sda_force_out = 1;
-
-	// set open-drain output mode
-	I2C[new_i2c_num]->ctr.scl_force_out = 1;
-
-	// sample at high level of clock
-	I2C[new_i2c_num]->ctr.sample_scl_level = 0;
-
-	// slave mode ?
-	if (new_mode == I2C_MODE_SLAVE) {
-
-		I2C[new_i2c_num]->fifo_conf.nonfifo_en = 0;
-
-		I2C[new_i2c_num]->fifo_conf.fifo_addr_cfg_en = 0;
-
-		I2C[new_i2c_num]->fifo_conf.rx_fifo_full_thrhd =
-			I2C_FIFO_FULL_THRESH_VAL;
-
-		I2C[new_i2c_num]->fifo_conf.tx_fifo_empty_thrhd =
-			I2C_FIFO_EMPTY_THRESH_VAL;
-
-		I2C[new_i2c_num]->int_ena.rx_fifo_full = 1;
-
-		I2C[new_i2c_num]->ctr.trans_start = 0;
-	}
-
-	// master mode ?
-	else {
-
-		I2C[new_i2c_num]->fifo_conf.nonfifo_en = 0;
-	}
-
-	// ??
-	I2C_EXIT_CRITICAL(&i2c_spinlock[new_i2c_num]);
-  }
-
-  // block #3 store/use I2C Pin connections
-  if (parsedKVInput->keysFoundBF |   	( (1 << ESP32_I2C_Master_SET_SDA_IO)
-			       		| (1 << ESP32_I2C_Master_SET_SDA_IO_PULLUP)
-			       		| (1 << ESP32_I2C_Master_SET_SCL_IO)
-			       		| (1 << ESP32_I2C_Master_SET_SCL_IO_PULLUP) ) ) {
-
-	#if ESP32_I2C_Master_Module_DBG >= 5
-	printf("|W B#01 I2C Pins SDA_IO=%d, SDA_IO_PULLUP=%d,SCL_IO=%d, SCL_IO_PULLUP=%d,>"
-		,new_sda_io_num,new_sda_pullup_en,new_scl_io_num,new_scl_pullup_en);	
-  	#endif
-
-	// store assigned I2C Pin connections
-	ESP32_I2C_Master_Definition->i2c_config.sda_io_num
-		= new_sda_io_num;
-
-	ESP32_I2C_Master_Definition->i2c_config.sda_pullup_en
-		= new_sda_pullup_en;
-
-	ESP32_I2C_Master_Definition->i2c_config.scl_io_num
-		= new_scl_io_num;
-
-	ESP32_I2C_Master_Definition->i2c_config.scl_pullup_en
-		= new_scl_pullup_en;
-
-
-
-
-/*
-
-
-  SCDE_CHECK(( i2c_num < I2C_NUM_MAX ), I2C_NUM_ERROR_STR);
-  SCDE_CHECK(((GPIO_IS_VALID_OUTPUT_GPIO(sda_io_num))), I2C_SDA_IO_ERR_STR);
-  SCDE_CHECK((GPIO_IS_VALID_OUTPUT_GPIO(scl_io_num)) ||
-              (GPIO_IS_VALID_GPIO(scl_io_num) && mode == I2C_MODE_SLAVE),
-              I2C_SCL_IO_ERR_STR);
-  SCDE_CHECK((sda_pullup_en == GPIO_PULLUP_ENABLE && GPIO_IS_VALID_OUTPUT_GPIO(sda_io_num)) ||
-               sda_pullup_en == GPIO_PULLUP_DISABLE, I2C_GPIO_PULLUP_ERR_STR);
-  SCDE_CHECK((scl_pullup_en == GPIO_PULLUP_ENABLE && GPIO_IS_VALID_OUTPUT_GPIO(scl_io_num)) ||
-               scl_pullup_en == GPIO_PULLUP_DISABLE, I2C_GPIO_PULLUP_ERR_STR);
-*/
-	int sda_in_sig, sda_out_sig, scl_in_sig, scl_out_sig;
-
-	// prepare the i2c settings according to used hardware 
-	switch (new_i2c_num) {
-
-		case I2C_NUM_1:
-			sda_out_sig = I2CEXT1_SDA_OUT_IDX;
-			sda_in_sig = I2CEXT1_SDA_IN_IDX;
-			scl_out_sig = I2CEXT1_SCL_OUT_IDX;
-			scl_in_sig = I2CEXT1_SCL_IN_IDX;
-			break;
-
-		case I2C_NUM_0:
-			default:
-			sda_out_sig = I2CEXT0_SDA_OUT_IDX;
-			sda_in_sig = I2CEXT0_SDA_IN_IDX;
-			scl_out_sig = I2CEXT0_SCL_OUT_IDX;
-			scl_in_sig = I2CEXT0_SCL_IN_IDX;
-			break;
-	}
-
-	// sda cfg ..
-	if (new_sda_io_num >= 0) {
-
-		gpio_set_level(new_sda_io_num, I2C_IO_INIT_LEVEL);
-
-		PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[new_sda_io_num], PIN_FUNC_GPIO);
-
-		gpio_set_direction(new_sda_io_num, GPIO_MODE_INPUT_OUTPUT_OD);
-
-		if (new_sda_pullup_en == GPIO_PULLUP_ENABLE) {
-
-			gpio_set_pull_mode(new_sda_io_num, GPIO_PULLUP_ONLY);
-		 } 
-
-		else {
-
-			gpio_set_pull_mode(new_sda_io_num, GPIO_FLOATING);
- 		}
-
-		gpio_matrix_out(new_sda_io_num, sda_out_sig, 0, 0);
-
-		gpio_matrix_in(new_sda_io_num, sda_in_sig, 0);
-	}
-
-	// scl cfg ...
-	if (new_scl_io_num >= 0) {
-
-		gpio_set_level(new_scl_io_num, I2C_IO_INIT_LEVEL);
-
-		PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[new_scl_io_num], PIN_FUNC_GPIO);
-
-		if (new_mode == I2C_MODE_MASTER) {
-
-			gpio_set_direction(new_scl_io_num, GPIO_MODE_INPUT_OUTPUT_OD);
-
-			gpio_matrix_out(new_scl_io_num, scl_out_sig, 0, 0);
-		}
-
-		else {
-
-			gpio_set_direction(new_scl_io_num, GPIO_MODE_INPUT);
-		}
-
-		if (new_scl_pullup_en == GPIO_PULLUP_ENABLE) {
-
-			gpio_set_pull_mode(new_scl_io_num, GPIO_PULLUP_ONLY);
-		}
-
-		else {
-
-			gpio_set_pull_mode(new_scl_io_num, GPIO_FLOATING);
-		}
-
-		gpio_matrix_in(new_scl_io_num, scl_in_sig, 0);
- 	}
-  }
-
-  // block #4 store/use I2C clock speed (when use as master only!)
-  if (parsedKVInput->keysFoundBF |   	( (1 << ESP32_I2C_Master_SET_MASTER_CLOCK) ) ) {
-
-	#if ESP32_I2C_Master_Module_DBG >= 5
-	printf("|W B#01 MASTER_CLOCK=%d>"
-		,new_clk_speed);	
-  	#endif
-
-	// store assigned I2C Pin connections
-	ESP32_I2C_Master_Definition->i2c_config.master.clk_speed =
-		new_clk_speed;
-
-	// ??
-	I2C_ENTER_CRITICAL(&i2c_spinlock[new_i2c_num]);
-
-	// set frequency
-	int half_cycle = ( I2C_APB_CLK_FREQ / new_clk_speed ) / 2;
-	I2C[new_i2c_num]->scl_low_period.period =
-		 half_cycle - 1;
-	I2C[new_i2c_num]->scl_high_period.period =
-		( I2C_APB_CLK_FREQ / new_clk_speed ) - half_cycle - 1;
-
-	// set timing for start signal
-	I2C[new_i2c_num]->scl_start_hold.time = half_cycle;
-	I2C[new_i2c_num]->scl_rstart_setup.time = half_cycle;
-
-	// set timing for stop signal
-	I2C[new_i2c_num]->scl_stop_hold.time = half_cycle;
-	I2C[new_i2c_num]->scl_stop_setup.time = half_cycle;
-
-	// set timing for data
-	I2C[new_i2c_num]->sda_hold.time = half_cycle / 2;
-	I2C[new_i2c_num]->sda_sample.time = half_cycle / 2;
-
-	// set timeout of receving data
-	I2C[new_i2c_num]->timeout.tout = 200000;
-
-	// ???
-	I2C_EXIT_CRITICAL(&i2c_spinlock[new_i2c_num]);
-  }
-
-  // block #5 store/use I2C 10bit enable (when use as slave only!)
-  if (parsedKVInput->keysFoundBF |   	( (1 << ESP32_I2C_Master_SET_SLAVE_10BIT_ENA) ) ) {
-
-/*	#if ESP32_I2C_Master_Module_DBG >= 5
-	printf("|W B#01 PWM_Block=%d>"
-		,newBlock);	
-  	#endif*/
-
-	// store assigned I2C Pin connections
-	ESP32_I2C_Master_Definition->i2c_config.slave.addr_10bit_en =
-		new_addr_10bit_en;
-
-	// slave mode ?
-	if (new_mode == I2C_MODE_SLAVE) {
-
-		// ??
-		I2C_ENTER_CRITICAL(&i2c_spinlock[new_i2c_num]);
-
-		I2C[new_i2c_num]->slave_addr.en_10bit =
-			new_addr_10bit_en;
-
-		// ???
-		I2C_EXIT_CRITICAL(&i2c_spinlock[new_i2c_num]);
-	}
-  }
-
-  // block #6 store/use I2C slave adress (when use as slave only!)
-  if (parsedKVInput->keysFoundBF |   	( (1 << ESP32_I2C_Master_SET_SLAVE_ADRESS) ) ) {
-
-/*	#if ESP32_I2C_Master_Module_DBG >= 5
-	printf("|W B#01 PWM_Block=%d>"
-		,newBlock);	
-  	#endif*/
-
-	// store assigned I2C Pin connections
-	ESP32_I2C_Master_Definition->i2c_config.slave.slave_addr =
-		new_slave_addr;
-
-	// slave mode ?
-	if (new_mode == I2C_MODE_SLAVE) {
-
-		// ??
-		I2C_ENTER_CRITICAL(&i2c_spinlock[new_i2c_num]);
-
-		I2C[new_i2c_num]->slave_addr.addr =
-			new_slave_addr;
-
-		// ???
-		I2C_EXIT_CRITICAL(&i2c_spinlock[new_i2c_num]);
-	}
-  }
-
-
-
-
-
-
-
-
-
+// 4. Step: Passed. Store the new values
 /*
   // block #1 store assigned PWM-Block (low speed / high speed)
   if (parsedKVInput->keysFoundBF | ( (1 << ESP32_I2C_Master_SET_BLOCK) ) ) {
+
 	#if ESP32_I2C_Master_Module_DBG >= 5
 	printf("|W B#01 PWM_Block=%d>"
 		,newBlock);	
   	#endif
+
 	// store assigned PWM-Block
 	ESP32_I2C_Master_Definition->Block = newBlock;
   }
+
   // block #2 store assigned PWM Channel
   if (parsedKVInput->keysFoundBF | ( (1 << ESP32_I2C_Master_SET_CHANNEL) ) ) {
+
 	#if ESP32_I2C_Master_Module_DBG >= 5
 	printf("|W B#02 PWM_Channel=%d>"
 		,newChannel);	
   	#endif
+
 	// store assigned PWM Channel
 	ESP32_I2C_Master_Definition->Channel = newChannel;
   }
+
   // block #3 store assigned PWM Timer
   if (parsedKVInput->keysFoundBF | ( (1 << ESP32_I2C_Master_SET_TIMER) ) ) {
+
 	#if ESP32_I2C_Master_Module_DBG >= 5
 	printf("|W B#03 PWM_Timer=%d>"
 		,newTimer);	
   	#endif
+
 	// store assigned PWM Timer
 	ESP32_I2C_Master_Definition->Timer = newTimer;
   }
+
   // block #4 store assigned / connected GPIO
   if (parsedKVInput->keysFoundBF | ( (1 << ESP32_I2C_Master_SET_GPIO) ) ) {
+
 	#if ESP32_I2C_Master_Module_DBG >= 5
 	printf("|W B#04 PWM_GPIO=%d>"
 		,newGPIO);	
   	#endif
+
 	// store assigned GPIO
 	ESP32_I2C_Master_Definition->GPIO = newGPIO;
+
 	PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[newGPIO], PIN_FUNC_GPIO);
+
 	// set GPIO as output
 	gpio_set_direction(newGPIO, GPIO_MODE_OUTPUT);
+
 	// configure for high-speed or low-speed ?
 	if (newBlock) {
+
 		// setup gpio matrix for low speed
 	}
+
 	else {
+
 		// setup gpio matrix for high speed
 		gpio_matrix_out(newGPIO, LEDC_HS_SIG_OUT0_IDX + newChannel, 0, 0);
 		
 	}
   }
+
   // block #5 store ESP32 pwm configuration registers
   if (parsedKVInput->keysFoundBF & ( (1 << ESP32_I2C_Master_SET_TIMER)
 				   | (1 << ESP32_I2C_Master_SET_SIG_OUT_EN)
 				   | (1 << ESP32_I2C_Master_SET_IDLE_LV)
 				   | (1 << ESP32_I2C_Master_SET_HPOINT)
 				   | (1 << ESP32_I2C_Master_SET_DUTY) ) ) {
+
+
+
+
+
 	// store ESP32 PWM configuration registers
 	memcpy(pPWM_Channel, &newPWM_Channel, sizeof(ESP32_PWM_Channel_t));
+
 	# if ESP32_I2C_Master_Module_DBG >= 5
 	printf("|ESP32_PWM_Channel_s addr=%p>"
 		,pPWM_Channel);
+
 	SCDEFn->HexDumpOutFn ("dump"
 		,pPWM_Channel
 		, sizeof(ESP32_PWM_Channel_t) );
 	# endif
   }
+
   // block #6 store ESP32 pwm-timer configuration registers
   if (parsedKVInput->keysFoundBF & ( (1 << ESP32_I2C_Master_SET_TIMER)
 				   | (1 << ESP32_I2C_Master_SET_RESOLUTION )
 				   | (1 << ESP32_I2C_Master_SET_TICK_SOURCE)
 			   	   | (1 << ESP32_I2C_Master_SET_FREQ_HZ) ) ) {
+
 	// reset? It seems that a reset is needed to start timer
 	newPWM_Timer.RESET = 0;
+
 	// low speed timer? -> needs 'LOW_SPEED_UPDATE' bit set to take settings
 	if (!newBlock) newPWM_Timer.LOW_SPEED_UPDATE = 1;
+
 	// store ESP32 timer configuration registers
 	memcpy(pPWM_Timer, &newPWM_Timer, sizeof(ESP32_PWM_Timer_t));
+
 	# if ESP32_I2C_Master_Module_DBG >= 5
 	printf("|ESP32_PWM_Timer_s addr=%p>"
 		,pPWM_Timer);
+
 	SCDEFn->HexDumpOutFn ("dump"
 		,pPWM_Timer
 		, sizeof(ESP32_PWM_Timer_t) );
 	# endif
   }
 */
-  return retMsg;
+  return false;
 
 }
+
 
 
 
@@ -3140,41 +2902,64 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
 
 /*
 //>Add Readings Bit 00 -----------------------------------------------------------------------------
+
   if (AffectedReadings & SwITCH_R_val)
+
 	{
+
 	RespArgsWPos += os_sprintf(RespArgsWPos,
 		"&val=%u",(uint) SysCfgRamRtcMirrored->MySwITCH_FeatCfgRamRtcMirrored[ADID].RB01_Val);
+
 	}
+
 //>Add Readings Bit 01 -----------------------------------------------------------------------------
+
   if (AffectedReadings & SwITCH_R_dim)
+
 	{
+
 	RespArgsWPos += os_sprintf(RespArgsWPos,
 		"&dim=%u",(100 *
 		(SysCfgRamRtcMirrored->MySwITCH_FeatCfgRamRtcMirrored[ADID].RB01_Val -
 		SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_SwValMin) / 
 		(SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_SwValMax - 
 		SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_SwValMin) ) );
+
 	}
+
 //>Add Readings Bit 02 -----------------------------------------------------------------------------
+
   if (AffectedReadings & SwITCH_R_name)
+
 	{
+
 	// add Unique-Feature-ID for identification purposes (Name-Change, ...)
 	RespArgsWPos += SwITCH_UFID(RespArgsWPos, ADID);
+
+
 	// add capabilities of this feature ...
 	RespArgsWPos += os_sprintf(RespArgsWPos,
 		"&caps=000F");						// 0b1111 <-16BIT-HEX
+
 	// add current name of this feature
 	RespArgsWPos += os_sprintf(RespArgsWPos,
 		"&name=%s",SysCfgRamFlashMirrored->MySwITCH_FeatCfgRamFlashMirrored[ADID].IB01_Name);
+
 	}
+
 //>always add Reading - state ----------------------------------------------------------------------
+
 	// are we adding ?
 	if (RespArgsWPos) RespArgsWPos += os_sprintf(RespArgsWPos,"&");
+
 	// always add state ! on / off
 	if (SysCfgRamRtcMirrored->MySwITCH_FeatCfgRamRtcMirrored[ADID].RB01_Val == 0)
 		RespArgsWPos += os_sprintf(RespArgsWPos, "state=off");
+
 	else  RespArgsWPos += os_sprintf(RespArgsWPos, "state=on");
+
 //--------------------------------------------------------------------------------------------------
+
 */
 
 
@@ -3208,52 +2993,70 @@ ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition_t* ESP32_I2C_Ma
 {
 /*
  affectedReadings = 0xfffffffffffffff;
+
   // do we have updates?
   if (affectedReadings) {
+
   SCDEFn->readingsBeginUpdateFn((Common_Definition_t*) ESP32_I2C_Master_Definition);
+
   }
+
   // we have no updates
   else return false;
+
 // -----------------------------------------------------------------------------------------------
+
   // temp for reading creation
   uint8_t *readingNameText;
   size_t readingNameTextLen;
   uint8_t *readingValueText;
   size_t readingValueTextLen;
+
   // pointer to make the hardware counters accessible
   ESP32_PWM_Channel_t *pPWM_Channel =
 	(ESP32_PWM_Channel_t*) (0x3FF59000 + (0x14 * ESP32_I2C_Master_Definition->Channel));
   // access low speed channels (instead of high speed channels)?
   if (ESP32_I2C_Master_Definition->Block) pPWM_Channel =
 	(ESP32_PWM_Channel_t*) ( (uint8_t*) pPWM_Channel + 0xa0);
+
   // pointer to make the hardware timers accessible
   ESP32_PWM_Timer_t *pPWM_Timer =
 	(ESP32_PWM_Timer_t*) (0x3FF59140 + (0x08 * ESP32_I2C_Master_Definition->Timer));
   // access low speed timers (instead of high speed timers)?
   if (ESP32_I2C_Master_Definition->Block) pPWM_Timer =
 	(ESP32_PWM_Timer_t*) ( (uint8_t*) pPWM_Timer + 0x20);
+
 //>Add Readings Bit 00 -----------------------------------------------------------------------------
+
   // add reading 'Duty'
   if (affectedReadings & ESP32_I2C_Master_R_DUTY) {
+
 	readingNameTextLen = asprintf((char **) &readingNameText
 		,"Duty");
+
 	readingValueTextLen = asprintf((char **) &readingValueText
 		,"%u"
 		,pPWM_Channel->DUTY);
+
 	SCDEFn->readingsBulkUpdateFn((Common_Definition_t*) ESP32_I2C_Master_Definition
 		,readingNameText
 		,readingNameTextLen
 		,readingValueText
 		,readingValueTextLen);
   }
+
 //>Add Readings Bit 01 -----------------------------------------------------------------------------
+
   // add reading 'Resolution'
   if (affectedReadings & ESP32_I2C_Master_R_RESOLUTION) {
+
 	readingNameTextLen = asprintf((char **) &readingNameText
 		,"Resolution");
+
 	readingValueTextLen = asprintf((char **) &readingValueText
 		,"%u"
 		,(1 << pPWM_Timer->RESOLUTION) );
+
 	SCDEFn->readingsBulkUpdateFn((Common_Definition_t*) ESP32_I2C_Master_Definition
 		,readingNameText
 		,readingNameTextLen
@@ -3264,53 +3067,71 @@ ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition_t* ESP32_I2C_Ma
 //>Add Readings Bit 02 -----------------------------------------------------------------------------
 /*
   if (affectedReadings & ESP32_I2C_Master_R_AV01_AV05_AV15) {
+
 	int ThisS0CounterCaps = 0b11100000000000000000000000000000;
 	// Add readings depending on CAPS ...
+
 	// AV01 = AVerage last 01 Min (calculated), zwingt AVF = AVerageFactor und AVU  = AVerageUnit	
 	if (ThisS0CounterCaps & 0b10000000000000000000000000000000)	// AV01 Caps avail?
+
 		{
+
 		RespArgsWPos += os_sprintf(RespArgsWPos // 'AV01' -> AVerage01min (calculated)
 			,"&av01=%d.%03d"
 			,(int)(SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].RB01_Average01Min)	
 			,(int)((SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].RB01_Average01Min - 
 			 (int)SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].RB01_Average01Min)*1000) );
+
 		}
+
 	// AV05 = AVerage last 05 Min (calculated), zwingt AVF = AVerageFactor und AVU  = AVerageUnit		
 	if (ThisS0CounterCaps & 0b01000000000000000000000000000000)	// AV05 Caps avail?
+
 		{
+
 		RespArgsWPos += os_sprintf(RespArgsWPos	// 'AV05' -> AVerage05min (calculated)
 			,"&av05=%d.%03d"
 			,(int)(SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].RB01_Average05Min)	
 			,(int)((SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].RB01_Average05Min -
 			 (int)SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].RB01_Average05Min)*1000) );
+
 		}
+
 	// AV15 = AVerage last 15 Min (calculated), zwingt AVF = AVerageFactor und AVU  = AVerageUnit
 	if (ThisS0CounterCaps & 0b00100000000000000000000000000000)	// AV15 Caps avail?
+
 		{
+
 		RespArgsWPos += os_sprintf(RespArgsWPos	// 'AV15' -> AVerage15min (calculated)
 			,"&av15=%d.%03d"
 			,(int)(SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].RB01_Average15Min)	
 			,(int)((SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].RB01_Average15Min -
 			 (int)SysCfgRamNoMirror->MyS0_FeatCfgRamNoMirror[ADID].RB01_Average15Min)*1000) );	
+
 		}
+
 	}
 */
 //>Add Readings Bit 03 -----------------------------------------------------------------------------
 /*
   // add reading 'Average_Factor' //avf'
   if (affectedReadings & ESP32_I2C_Master_R_AVF) {
+
 	readingNameTextLen = asprintf((char **) &readingNameText
 		,"Average_Factor");
+
 	readingValueTextLen = asprintf((char **) &readingValueText
 		,"%d.%04d"
 		,(int) ESP32_I2C_Master_Definition->IB01_AverageFactor	
 		,(int) ( (ESP32_I2C_Master_Definition->IB01_AverageFactor -
 		(int) ESP32_I2C_Master_Definition->IB01_AverageFactor) * 10000) );
+
 	SCDEFn->readingsBulkUpdateFn((Common_Definition_t*) ESP32_I2C_Master_Definition
 		,readingNameText
 		,readingNameTextLen
 		,readingValueText
 		,readingValueTextLen);
+
   }
 */
 //	RespArgsWPos += os_sprintf(RespArgsWPos
@@ -3324,17 +3145,22 @@ ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition_t* ESP32_I2C_Ma
 /*
   // add reading 'Average_Unit' //avu'
   if (affectedReadings & ESP32_I2C_Master_R_AVU) {
+
 	readingNameTextLen = asprintf((char **) &readingNameText
 		,"Average_Unit");
+
 	readingValueTextLen = asprintf((char **) &readingValueText
 		,"%s"
 		,ESP32_I2C_Master_Definition->IB01_AverageUnit);
+
 	SCDEFn->readingsBulkUpdateFn((Common_Definition_t*) ESP32_I2C_Master_Definition
 		,readingNameText
 		,readingNameTextLen
 		,readingValueText
 		,readingValueTextLen);
+
   }
+
 */
 //	RespArgsWPos += os_sprintf(RespArgsWPos
 //		,"&avu=%s"
@@ -3346,18 +3172,22 @@ ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition_t* ESP32_I2C_Ma
 /*
   // add reading 'Alltime_Total_Factor' //atf'
   if (affectedReadings & ESP32_I2C_Master_R_ATF) {
+
 	readingNameTextLen = asprintf((char **) &readingNameText
 		,"Alltime_Total_Factor");
+
 	readingValueTextLen = asprintf((char **) &readingValueText
 		,"%d.%04d"
 		,(int) (ESP32_I2C_Master_Definition->IB01_AlltimeTotalFactor)	
 		,(int) ( (ESP32_I2C_Master_Definition->IB01_AlltimeTotalFactor -
 		(int) ESP32_I2C_Master_Definition->IB01_AlltimeTotalFactor) * 10000) );
+
 	SCDEFn->readingsBulkUpdateFn((Common_Definition_t*) ESP32_I2C_Master_Definition
 		,readingNameText
 		,readingNameTextLen
 		,readingValueText
 		,readingValueTextLen);
+
   }
 */
 //	RespArgsWPos += os_sprintf(RespArgsWPos
@@ -3371,16 +3201,20 @@ ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition_t* ESP32_I2C_Ma
 /*
   // add reading 'Alltime_Total_Unit' //atu'
   if (affectedReadings & ESP32_I2C_Master_R_ATU) {
+
 	readingNameTextLen = asprintf((char **) &readingNameText
 		,"Alltime_Total_Unit");
+
 	readingValueTextLen = asprintf((char **) &readingValueText
 		,"%s"
 		,ESP32_I2C_Master_Definition->IB01_AlltimeTotalUnit);
+
 	SCDEFn->readingsBulkUpdateFn((Common_Definition_t*) ESP32_I2C_Master_Definition
 		,readingNameText
 		,readingNameTextLen
 		,readingValueText
 		,readingValueTextLen);
+
   }
 */
 //	RespArgsWPos += os_sprintf(RespArgsWPos
@@ -3392,17 +3226,22 @@ ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition_t* ESP32_I2C_Ma
 /*
   // add reading 'Debounce' //deb'
   if (affectedReadings & ESP32_I2C_Master_R_DEB) {
+
 	readingNameTextLen = asprintf((char **) &readingNameText
 		,"Debounce");
+
 	readingValueTextLen = asprintf((char **) &readingValueText
 		,"%u"
 		,ESP32_I2C_Master_Definition->IB01_Debounce);
+
 	SCDEFn->readingsBulkUpdateFn((Common_Definition_t*) ESP32_I2C_Master_Definition
 		,readingNameText
 		,readingNameTextLen
 		,readingValueText
 		,readingValueTextLen);
+
   }
+
 */
 //	RespArgsWPos += os_sprintf(RespArgsWPos
 //		,"&deb=%u"
@@ -3413,14 +3252,18 @@ ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition_t* ESP32_I2C_Ma
 /*
   if (affectedReadings & ESP32_I2C_Master_R_name)
 	{
+
 	// add Unique-Feature-ID for identification purposes (Name-Change, ...)
 	RespArgsWPos += S0_UFID(RespArgsWPos, ADID);
+
 	// add capabilities of this feature ...
 	RespArgsWPos += os_sprintf(RespArgsWPos,
 		"&caps=0007");						// 0b11110 <-16BIT-HEX
+
 	// add current name of this feature
 	RespArgsWPos += os_sprintf(RespArgsWPos,
 		"&name=%s",SysCfgRamFlashMirrored->MyS0_FeatCfgRamFlashMirrored[ADID].IB01_Name);
+
 	}
 */
 
@@ -3428,6 +3271,7 @@ ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition_t* ESP32_I2C_Ma
 /*
 	// are we adding ?
 	if (RespArgsWPos) RespArgsWPos += os_sprintf(RespArgsWPos,"&");
+
 	// always add state ! on / off
 	RespArgsWPos += os_sprintf(RespArgsWPos,
 		"state=on");
@@ -3460,6 +3304,7 @@ static void i2c_isr_handler_default(void* arg)
 /*  // we got ptr to ESP32_I2C_Master_Definition_t
   ESP32_I2C_Master_Definition_t* ESP32_I2C_Master_Definition =
 		  (ESP32_I2C_Master_Definition_t*) arg;
+
   // create ptr to i2c_obj_t
   i2c_obj_t* p_i2c = &ESP32_I2C_Master_Definition->i2c_obj;
 */
@@ -3633,6 +3478,7 @@ static void i2c_isr_handler_default(void* arg)
 
 
 
+
 /**
  * -------------------------------------------------------------------------------------------------
  *  DName: i2c_isr_register
@@ -3680,242 +3526,72 @@ esp_err_t i2c_isr_register(i2c_port_t i2c_num, void (*fn)(void*), void * arg, in
  */
 esp_err_t i2c_isr_free(intr_handle_t handle)
 {
+
   return esp_intr_free(handle);
+
 }
 
 
-/**
- * -------------------------------------------------------------------------------------------------
- *  FName: i2c_param_config
- *  Desc: Config the GPIO-pin,
- *  Info: 
- *  Para: i2c_port_t i2c_num -> the number of i2c-HW to use
- *  const i2c_config_t *i2c_conf -> ptr to filled cfg-data
- *  Rets: strTextMultiple_t* -> SCDE_OK, or error txts - for log
- * -------------------------------------------------------------------------------------------------
- */
-strTextMultiple_t*
-i2c_param_config(i2c_port_t i2c_num
-				,const i2c_config_t *i2c_conf)
+
+
+
+esp_err_t i2c_param_config(i2c_port_t i2c_num, const i2c_config_t* i2c_conf)
 {
+    I2C_CHECK(i2c_num < I2C_NUM_MAX, I2C_NUM_ERROR_STR, ESP_ERR_INVALID_ARG);
+    I2C_CHECK(i2c_conf != NULL, I2C_ADDR_ERROR_STR, ESP_ERR_INVALID_ARG);
+    I2C_CHECK(i2c_conf->mode < I2C_MODE_MAX, I2C_MODE_ERR_STR, ESP_ERR_INVALID_ARG);
 
-  // start without error
-  strTextMultiple_t* retMsg = SCDE_OK;
+    esp_err_t ret = i2c_set_pin(i2c_num, i2c_conf->sda_io_num, i2c_conf->scl_io_num,
+                                i2c_conf->sda_pullup_en, i2c_conf->scl_pullup_en, i2c_conf->mode);
+    if (ret != ESP_OK) {
+        return ret;
+    }
+    if (i2c_num == I2C_NUM_0) {
+        periph_module_enable(PERIPH_I2C0_MODULE);
+    } else if (i2c_num == I2C_NUM_1) {
+        periph_module_enable(PERIPH_I2C1_MODULE);
+    }
 
-  SCDE_CHECK(i2c_num < I2C_NUM_MAX, I2C_NUM_ERROR_STR);
-  SCDE_CHECK(i2c_conf != NULL, I2C_ADDR_ERROR_STR);
-  SCDE_CHECK(i2c_conf->mode < I2C_MODE_MAX, I2C_MODE_ERR_STR);
+    I2C_ENTER_CRITICAL(&i2c_spinlock[i2c_num]);
+    I2C[i2c_num]->ctr.rx_lsb_first = I2C_DATA_MODE_MSB_FIRST; //set rx data msb first
+    I2C[i2c_num]->ctr.tx_lsb_first = I2C_DATA_MODE_MSB_FIRST; //set tx data msb first
+    I2C[i2c_num]->ctr.ms_mode = i2c_conf->mode; //mode for master or slave
+    I2C[i2c_num]->ctr.sda_force_out = 1; // set open-drain output mode
+    I2C[i2c_num]->ctr.scl_force_out = 1; // set open-drain output mode
+    I2C[i2c_num]->ctr.sample_scl_level = 0; //sample at high level of clock
 
-  // config the GPIO-pin,
-  retMsg = i2c_set_pin(i2c_num, i2c_conf->sda_io_num, i2c_conf->scl_io_num,
-			i2c_conf->sda_pullup_en, i2c_conf->scl_pullup_en, i2c_conf->mode);
-  // error during config ? return with MSG
-  if (retMsg != SCDE_OK) {
-
-	return retMsg;
-  }
-
-  // enable i2c 0
-  if (i2c_num == I2C_NUM_0) {
-
-	periph_module_enable(PERIPH_I2C0_MODULE);
-  }
-
-  // enable i2c 1
-  else if (i2c_num == I2C_NUM_1) {
-
-	periph_module_enable(PERIPH_I2C1_MODULE);
-  }
-
-  // ??
-  I2C_ENTER_CRITICAL(&i2c_spinlock[i2c_num]);
-
-  // set rx data msb first
-  I2C[i2c_num]->ctr.rx_lsb_first = I2C_DATA_MODE_MSB_FIRST;
-
-  // set tx data msb first
-  I2C[i2c_num]->ctr.tx_lsb_first = I2C_DATA_MODE_MSB_FIRST;
-
-  // mode for master or slave
-  I2C[i2c_num]->ctr.ms_mode = i2c_conf->mode;
-
-  // set open-drain output mode
-  I2C[i2c_num]->ctr.sda_force_out = 1;
-
-  // set open-drain output mode
-  I2C[i2c_num]->ctr.scl_force_out = 1;
-
-  // sample at high level of clock
-  I2C[i2c_num]->ctr.sample_scl_level = 0;
-
-  // slave mode ?
-  if (i2c_conf->mode == I2C_MODE_SLAVE) {
-
-	I2C[i2c_num]->slave_addr.addr = i2c_conf->slave.slave_addr;
-	I2C[i2c_num]->slave_addr.en_10bit = i2c_conf->slave.addr_10bit_en;
-	I2C[i2c_num]->fifo_conf.nonfifo_en = 0;
-	I2C[i2c_num]->fifo_conf.fifo_addr_cfg_en = 0;
-	I2C[i2c_num]->fifo_conf.rx_fifo_full_thrhd = I2C_FIFO_FULL_THRESH_VAL;
-	I2C[i2c_num]->fifo_conf.tx_fifo_empty_thrhd = I2C_FIFO_EMPTY_THRESH_VAL;
-	I2C[i2c_num]->int_ena.rx_fifo_full = 1;
-	I2C[i2c_num]->ctr.trans_start = 0;
-  }
-
-  // master mode ?
-  else {
-
-	I2C[i2c_num]->fifo_conf.nonfifo_en = 0;
-  }
-
-  // set frequency
-  int half_cycle = ( I2C_APB_CLK_FREQ / i2c_conf->master.clk_speed ) / 2;
-  I2C[i2c_num]->scl_low_period.period = half_cycle - 1;
-  I2C[i2c_num]->scl_high_period.period = ( I2C_APB_CLK_FREQ / i2c_conf->master.clk_speed ) - half_cycle - 1;
-
-  // set timing for start signal
-  I2C[i2c_num]->scl_start_hold.time = half_cycle;
-  I2C[i2c_num]->scl_rstart_setup.time = half_cycle;
-
-  // set timing for stop signal
-  I2C[i2c_num]->scl_stop_hold.time = half_cycle;
-  I2C[i2c_num]->scl_stop_setup.time = half_cycle;
-
-  // set timing for data
-  I2C[i2c_num]->sda_hold.time = half_cycle / 2;
-  I2C[i2c_num]->sda_sample.time = half_cycle / 2;
-
-  // set timeout of receving data
-  I2C[i2c_num]->timeout.tout = 200000;
-
-  // ???
-  I2C_EXIT_CRITICAL(&i2c_spinlock[i2c_num]);
-
-  return retMsg;
-
+    if (i2c_conf->mode == I2C_MODE_SLAVE) {  //slave mode
+        I2C[i2c_num]->slave_addr.addr = i2c_conf->slave.slave_addr;
+        I2C[i2c_num]->slave_addr.en_10bit = i2c_conf->slave.addr_10bit_en;
+        I2C[i2c_num]->fifo_conf.nonfifo_en = 0;
+        I2C[i2c_num]->fifo_conf.fifo_addr_cfg_en = 0;
+        I2C[i2c_num]->fifo_conf.rx_fifo_full_thrhd = I2C_FIFO_FULL_THRESH_VAL;
+        I2C[i2c_num]->fifo_conf.tx_fifo_empty_thrhd = I2C_FIFO_EMPTY_THRESH_VAL;
+        I2C[i2c_num]->int_ena.rx_fifo_full = 1;
+        I2C[i2c_num]->ctr.trans_start = 0;
+    } else {
+        I2C[i2c_num]->fifo_conf.nonfifo_en = 0;
+    }
+    //set frequency
+    int half_cycle = ( I2C_APB_CLK_FREQ / i2c_conf->master.clk_speed ) / 2;
+    I2C[i2c_num]->scl_low_period.period = half_cycle - 1;
+    I2C[i2c_num]->scl_high_period.period = ( I2C_APB_CLK_FREQ / i2c_conf->master.clk_speed ) - half_cycle - 1;
+    //set timing for start signal
+    I2C[i2c_num]->scl_start_hold.time = half_cycle;
+    I2C[i2c_num]->scl_rstart_setup.time = half_cycle;
+    //set timing for stop signal
+    I2C[i2c_num]->scl_stop_hold.time = half_cycle;
+    I2C[i2c_num]->scl_stop_setup.time = half_cycle;
+    //set timing for data
+    I2C[i2c_num]->sda_hold.time = half_cycle / 2;
+    I2C[i2c_num]->sda_sample.time = half_cycle / 2;
+    //set timeout of receving data
+    I2C[i2c_num]->timeout.tout = 200000;
+    I2C_EXIT_CRITICAL(&i2c_spinlock[i2c_num]);
+    return ESP_OK;
 }
 
 
-
-/**
- * -------------------------------------------------------------------------------------------------
- *  FName: i2c_set_pin
- *  Desc: Setup the i2c GPIO pin
- *  Info: 
- *  Para: i2c_obj_t *p_i2c -> ptr to the i2c processing object for this i2c num
- *        gpio_num_t sda_io_num -> 
- *        gpio_num_t scl_io_num -> 
- *        gpio_pullup_t sda_pullup_en -> 
- *        gpio_pullup_t scl_pullup_en -> 
- *        i2c_mode_t mode -> 
- *  Rets: strTextMultiple_t* -> SCDE_OK, or error txts - for log
- * -------------------------------------------------------------------------------------------------
- */
-strTextMultiple_t*
-i2c_set_pin(i2c_port_t i2c_num
-			,gpio_num_t sda_io_num
-			,gpio_num_t scl_io_num
-			,gpio_pullup_t sda_pullup_en
-			,gpio_pullup_t scl_pullup_en
-			,i2c_mode_t mode)
-{
-
-  // start without error
-  strTextMultiple_t* retMsg = SCDE_OK;
-
-  SCDE_CHECK(( i2c_num < I2C_NUM_MAX ), I2C_NUM_ERROR_STR);
-  SCDE_CHECK(((GPIO_IS_VALID_OUTPUT_GPIO(sda_io_num))), I2C_SDA_IO_ERR_STR);
-  SCDE_CHECK((GPIO_IS_VALID_OUTPUT_GPIO(scl_io_num)) ||
-              (GPIO_IS_VALID_GPIO(scl_io_num) && mode == I2C_MODE_SLAVE),
-              I2C_SCL_IO_ERR_STR);
-  SCDE_CHECK((sda_pullup_en == GPIO_PULLUP_ENABLE && GPIO_IS_VALID_OUTPUT_GPIO(sda_io_num)) ||
-               sda_pullup_en == GPIO_PULLUP_DISABLE, I2C_GPIO_PULLUP_ERR_STR);
-  SCDE_CHECK((scl_pullup_en == GPIO_PULLUP_ENABLE && GPIO_IS_VALID_OUTPUT_GPIO(scl_io_num)) ||
-               scl_pullup_en == GPIO_PULLUP_DISABLE, I2C_GPIO_PULLUP_ERR_STR);
-
-  int sda_in_sig, sda_out_sig, scl_in_sig, scl_out_sig;
-
-  // prepare the i2c settings according to used hardware 
-  switch (i2c_num) {
-
-	case I2C_NUM_1:
-		sda_out_sig = I2CEXT1_SDA_OUT_IDX;
-		sda_in_sig = I2CEXT1_SDA_IN_IDX;
-		scl_out_sig = I2CEXT1_SCL_OUT_IDX;
-		scl_in_sig = I2CEXT1_SCL_IN_IDX;
-		break;
-
-	case I2C_NUM_0:
-		default:
-		sda_out_sig = I2CEXT0_SDA_OUT_IDX;
-		sda_in_sig = I2CEXT0_SDA_IN_IDX;
-		scl_out_sig = I2CEXT0_SCL_OUT_IDX;
-		scl_in_sig = I2CEXT0_SCL_IN_IDX;
-		break;
-  }
-
-  if (sda_io_num >= 0) {
-
-	gpio_set_level(sda_io_num, I2C_IO_INIT_LEVEL);
-
-	PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[sda_io_num], PIN_FUNC_GPIO);
-
-	gpio_set_direction(sda_io_num, GPIO_MODE_INPUT_OUTPUT_OD);
-
-	if (sda_pullup_en == GPIO_PULLUP_ENABLE) {
-
-		gpio_set_pull_mode(sda_io_num, GPIO_PULLUP_ONLY);
-
-        } 
-
-	else {
-
-		gpio_set_pull_mode(sda_io_num, GPIO_FLOATING);
-        }
-
-	gpio_matrix_out(sda_io_num, sda_out_sig, 0, 0);
-
-	gpio_matrix_in(sda_io_num, sda_in_sig, 0);
-
-  }
-
-  if (scl_io_num >= 0) {
-
-	gpio_set_level(scl_io_num, I2C_IO_INIT_LEVEL);
-
-	PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[scl_io_num], PIN_FUNC_GPIO);
-
-	if (mode == I2C_MODE_MASTER) {
-
-		gpio_set_direction(scl_io_num, GPIO_MODE_INPUT_OUTPUT_OD);
-
-		gpio_matrix_out(scl_io_num, scl_out_sig, 0, 0);
-
-	}
-
-	else {
-
-		gpio_set_direction(scl_io_num, GPIO_MODE_INPUT);
-
-	}
-
-	if (scl_pullup_en == GPIO_PULLUP_ENABLE) {
-
-		gpio_set_pull_mode(scl_io_num, GPIO_PULLUP_ONLY);
-
-	}
-
-	else {
-
-		gpio_set_pull_mode(scl_io_num, GPIO_FLOATING);
-
-	}
-
-	gpio_matrix_in(scl_io_num, scl_in_sig, 0);
-  }
-
-  return retMsg;
-
-}
 
 
 
@@ -3971,180 +3647,255 @@ esp_err_t i2c_reset_rx_fifo(i2c_port_t i2c_num)
 
 
 
+
+
+
+
+
+
+
+
+
+
+esp_err_t i2c_set_pin(i2c_port_t i2c_num, gpio_num_t sda_io_num, gpio_num_t scl_io_num, gpio_pullup_t sda_pullup_en, gpio_pullup_t scl_pullup_en, i2c_mode_t mode)
+{
+    I2C_CHECK(( i2c_num < I2C_NUM_MAX ), I2C_NUM_ERROR_STR, ESP_ERR_INVALID_ARG);
+    I2C_CHECK(((GPIO_IS_VALID_OUTPUT_GPIO(sda_io_num))), I2C_SDA_IO_ERR_STR, ESP_ERR_INVALID_ARG);
+    I2C_CHECK((GPIO_IS_VALID_OUTPUT_GPIO(scl_io_num)) ||
+              (GPIO_IS_VALID_GPIO(scl_io_num) && mode == I2C_MODE_SLAVE),
+              I2C_SCL_IO_ERR_STR,
+              ESP_ERR_INVALID_ARG);
+    I2C_CHECK((sda_pullup_en == GPIO_PULLUP_ENABLE && GPIO_IS_VALID_OUTPUT_GPIO(sda_io_num)) ||
+               sda_pullup_en == GPIO_PULLUP_DISABLE, I2C_GPIO_PULLUP_ERR_STR, ESP_ERR_INVALID_ARG);
+    I2C_CHECK((scl_pullup_en == GPIO_PULLUP_ENABLE && GPIO_IS_VALID_OUTPUT_GPIO(scl_io_num)) ||
+               scl_pullup_en == GPIO_PULLUP_DISABLE, I2C_GPIO_PULLUP_ERR_STR, ESP_ERR_INVALID_ARG);
+
+    int sda_in_sig, sda_out_sig, scl_in_sig, scl_out_sig;
+    switch (i2c_num) {
+        case I2C_NUM_1:
+            sda_out_sig = I2CEXT1_SDA_OUT_IDX;
+            sda_in_sig = I2CEXT1_SDA_IN_IDX;
+            scl_out_sig = I2CEXT1_SCL_OUT_IDX;
+            scl_in_sig = I2CEXT1_SCL_IN_IDX;
+            break;
+        case I2C_NUM_0:
+            default:
+            sda_out_sig = I2CEXT0_SDA_OUT_IDX;
+            sda_in_sig = I2CEXT0_SDA_IN_IDX;
+            scl_out_sig = I2CEXT0_SCL_OUT_IDX;
+            scl_in_sig = I2CEXT0_SCL_IN_IDX;
+            break;
+    }
+    if (sda_io_num >= 0) {
+        gpio_set_level(sda_io_num, I2C_IO_INIT_LEVEL);
+        PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[sda_io_num], PIN_FUNC_GPIO);
+        gpio_set_direction(sda_io_num, GPIO_MODE_INPUT_OUTPUT_OD);
+        if (sda_pullup_en == GPIO_PULLUP_ENABLE) {
+            gpio_set_pull_mode(sda_io_num, GPIO_PULLUP_ONLY);
+        } else {
+            gpio_set_pull_mode(sda_io_num, GPIO_FLOATING);
+        }
+        gpio_matrix_out(sda_io_num, sda_out_sig, 0, 0);
+        gpio_matrix_in(sda_io_num, sda_in_sig, 0);
+    }
+
+    if (scl_io_num >= 0) {
+        gpio_set_level(scl_io_num, I2C_IO_INIT_LEVEL);
+        PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[scl_io_num], PIN_FUNC_GPIO);
+        if (mode == I2C_MODE_MASTER) {
+            gpio_set_direction(scl_io_num, GPIO_MODE_INPUT_OUTPUT_OD);
+            gpio_matrix_out(scl_io_num, scl_out_sig, 0, 0);
+        } else {
+            gpio_set_direction(scl_io_num, GPIO_MODE_INPUT);
+        }
+        if (scl_pullup_en == GPIO_PULLUP_ENABLE) {
+            gpio_set_pull_mode(scl_io_num, GPIO_PULLUP_ONLY);
+        } else {
+            gpio_set_pull_mode(scl_io_num, GPIO_FLOATING);
+        }
+        gpio_matrix_in(scl_io_num, scl_in_sig, 0);
+    }
+    return ESP_OK;
+}
+
+
+
+
+
+
+
+
+
+
+
 /**
  * -------------------------------------------------------------------------------------------------
- *  FName: i2c_master_cmd_begin_static
+ *  DName: i2c_master_cmd_begin_static
  *  Desc: 
- *  Info: RUNS IN INTERRUPT !
- *  Para: i2c_obj_t *p_i2c -> ptr to the i2c processing object for this i2c num
- *  Rets: void
+ *  Data: 
  * -------------------------------------------------------------------------------------------------
  */
-static void IRAM_ATTR 
-i2c_master_cmd_begin_static(i2c_obj_t* p_i2c)
+static void IRAM_ATTR i2c_master_cmd_begin_static(i2c_obj_t* p_i2c) //i2c_port_t i2c_num)
 {
 
-  // get the assigned i2c num.
+//  i2c_obj_t* p_i2c = p_i2c_obj[i2c_num];
   int i2c_num = p_i2c->i2c_num;
 
   portBASE_TYPE HPTaskAwoken = pdFALSE;
 
-  // This should never happen
+  //This should never happen
   if (p_i2c->mode == I2C_MODE_SLAVE) {
 
         return;
+
   }
 
   if (p_i2c->status == I2C_STATUS_DONE) {
 
-	return;
-  }
+    return;
 
-  else if (p_i2c->status == I2C_STATUS_ACK_ERROR) {
+  } else if (p_i2c->status == I2C_STATUS_ACK_ERROR) {
 
-	I2C[i2c_num]->int_ena.end_detect = 0;
-	I2C[i2c_num]->int_clr.end_detect = 1;
-	I2C[i2c_num]->int_ena.master_tran_comp = 0;
-	xSemaphoreGiveFromISR(p_i2c->cmd_sem, &HPTaskAwoken);
+    I2C[i2c_num]->int_ena.end_detect = 0;
+    I2C[i2c_num]->int_clr.end_detect = 1;
+    I2C[i2c_num]->int_ena.master_tran_comp = 0;
+    xSemaphoreGiveFromISR(p_i2c->cmd_sem, &HPTaskAwoken);
 
-	if (HPTaskAwoken == pdTRUE) {
+    if (HPTaskAwoken == pdTRUE) {
 
-		portYIELD_FROM_ISR();
-	}
+      portYIELD_FROM_ISR();
 
-	return;
+    }
 
-  }
+    return;
 
-  else if (p_i2c->status == I2C_STATUS_READ) {
+  } else if (p_i2c->status == I2C_STATUS_READ) {
 
-	i2c_cmd_t *cmd = &p_i2c->cmd_link.head->cmd;
+    i2c_cmd_t *cmd = &p_i2c->cmd_link.head->cmd;
 
-	while (p_i2c->rx_cnt-- > 0) {
+    while (p_i2c->rx_cnt-- > 0) {
 
-		*cmd->data++ = READ_PERI_REG(I2C_DATA_APB_REG(i2c_num));
+      *cmd->data++ = READ_PERI_REG(I2C_DATA_APB_REG(i2c_num));
 
-	}
+    }
 
-	if (cmd->byte_num > 0) {
+    if (cmd->byte_num > 0) {
 
-		p_i2c->rx_fifo_remain = I2C_FIFO_LEN;
+      p_i2c->rx_fifo_remain = I2C_FIFO_LEN;
 
-		p_i2c->cmd_idx = 0;
-	}
+      p_i2c->cmd_idx = 0;
 
-	else {
+    } else {
 
-		p_i2c->cmd_link.head = p_i2c->cmd_link.head->next;
-	}
+      p_i2c->cmd_link.head = p_i2c->cmd_link.head->next;
+
+    }
 
   }
 
   if (p_i2c->cmd_link.head == NULL) {
 
-	p_i2c->cmd_link.cur = NULL;
+    p_i2c->cmd_link.cur = NULL;
 
-	xSemaphoreGiveFromISR(p_i2c->cmd_sem, &HPTaskAwoken);
+    xSemaphoreGiveFromISR(p_i2c->cmd_sem, &HPTaskAwoken);
 
-	if (HPTaskAwoken == pdTRUE) {
+    if (HPTaskAwoken == pdTRUE) {
 
-		portYIELD_FROM_ISR();
-	}
+      portYIELD_FROM_ISR();
+
+    }
 
     return;
+
   }
 
   while (p_i2c->cmd_link.head) {
 
-	i2c_cmd_t *cmd = &p_i2c->cmd_link.head->cmd;
+    i2c_cmd_t *cmd = &p_i2c->cmd_link.head->cmd;
 
-	I2C[i2c_num]->command[p_i2c->cmd_idx].val = 0;
-	I2C[i2c_num]->command[p_i2c->cmd_idx].ack_en = cmd->ack_en;
-	I2C[i2c_num]->command[p_i2c->cmd_idx].ack_exp = cmd->ack_exp;
-	I2C[i2c_num]->command[p_i2c->cmd_idx].ack_val = cmd->ack_val;
-	I2C[i2c_num]->command[p_i2c->cmd_idx].byte_num = cmd->byte_num;
-	I2C[i2c_num]->command[p_i2c->cmd_idx].op_code = cmd->op_code;
+    I2C[i2c_num]->command[p_i2c->cmd_idx].val = 0;
+    I2C[i2c_num]->command[p_i2c->cmd_idx].ack_en = cmd->ack_en;
+    I2C[i2c_num]->command[p_i2c->cmd_idx].ack_exp = cmd->ack_exp;
+    I2C[i2c_num]->command[p_i2c->cmd_idx].ack_val = cmd->ack_val;
+    I2C[i2c_num]->command[p_i2c->cmd_idx].byte_num = cmd->byte_num;
+    I2C[i2c_num]->command[p_i2c->cmd_idx].op_code = cmd->op_code;
 
-	if (cmd->op_code == I2C_CMD_WRITE) {
+    if (cmd->op_code == I2C_CMD_WRITE) {
 
-		uint32_t wr_filled = 0;
+      uint32_t wr_filled = 0;
 
-		//TODO: to reduce interrupt number
-		if (cmd->data) {
+      //TODO: to reduce interrupt number
+      if (cmd->data) {
 
-			while (p_i2c->tx_fifo_remain > 0 && cmd->byte_num > 0) {
+        while (p_i2c->tx_fifo_remain > 0 && cmd->byte_num > 0) {
 
-				WRITE_PERI_REG(I2C_DATA_APB_REG(i2c_num), *cmd->data++);
-				p_i2c->tx_fifo_remain--;
-				cmd->byte_num--;
-				wr_filled++;
-			}
-		}
+          WRITE_PERI_REG(I2C_DATA_APB_REG(i2c_num), *cmd->data++);
+          p_i2c->tx_fifo_remain--;
+          cmd->byte_num--;
+          wr_filled++;
 
-		else {
+        }
 
-			WRITE_PERI_REG(I2C_DATA_APB_REG(i2c_num), cmd->byte_cmd);
-			p_i2c->tx_fifo_remain--;
-			cmd->byte_num--;
-			wr_filled ++;
-		}
+      } else {
 
-		// Workaround for register field operation.
-		I2C[i2c_num]->command[p_i2c->cmd_idx].byte_num = wr_filled;
-		I2C[i2c_num]->command[p_i2c->cmd_idx + 1].val = 0;
-		I2C[i2c_num]->command[p_i2c->cmd_idx + 1].op_code = I2C_CMD_END;
-		p_i2c->tx_fifo_remain = I2C_FIFO_LEN;
-		p_i2c->cmd_idx = 0;
+        WRITE_PERI_REG(I2C_DATA_APB_REG(i2c_num), cmd->byte_cmd);
+        p_i2c->tx_fifo_remain--;
+        cmd->byte_num--;
+        wr_filled ++;
 
-		if (cmd->byte_num > 0) {
+      }
 
-			}
+      // Workaround for register field operation.
+      I2C[i2c_num]->command[p_i2c->cmd_idx].byte_num = wr_filled;
+      I2C[i2c_num]->command[p_i2c->cmd_idx + 1].val = 0;
+      I2C[i2c_num]->command[p_i2c->cmd_idx + 1].op_code = I2C_CMD_END;
+      p_i2c->tx_fifo_remain = I2C_FIFO_LEN;
+      p_i2c->cmd_idx = 0;
 
-		else {
+      if (cmd->byte_num > 0) {
 
-			p_i2c->cmd_link.head = p_i2c->cmd_link.head->next;
-		}
+      } else {
 
-		p_i2c->status = I2C_STATUS_WRITE;
+        p_i2c->cmd_link.head = p_i2c->cmd_link.head->next;
 
-		break;
+      }
 
-	}
+      p_i2c->status = I2C_STATUS_WRITE;
 
-	else if (cmd->op_code == I2C_CMD_READ) {
+      break;
 
-		// TODO: to reduce interrupt number
-		p_i2c->rx_cnt = cmd->byte_num > p_i2c->rx_fifo_remain ? p_i2c->rx_fifo_remain : cmd->byte_num;
+    } else if(cmd->op_code == I2C_CMD_READ) {
 
-		cmd->byte_num -= p_i2c->rx_cnt;
+      //TODO: to reduce interrupt number
+      p_i2c->rx_cnt = cmd->byte_num > p_i2c->rx_fifo_remain ? p_i2c->rx_fifo_remain : cmd->byte_num;
 
-		I2C[i2c_num]->command[p_i2c->cmd_idx].byte_num = p_i2c->rx_cnt;
-		I2C[i2c_num]->command[p_i2c->cmd_idx].ack_val = cmd->ack_val;
-		I2C[i2c_num]->command[p_i2c->cmd_idx + 1].val = 0;
-		I2C[i2c_num]->command[p_i2c->cmd_idx + 1].op_code = I2C_CMD_END;
+      cmd->byte_num -= p_i2c->rx_cnt;
 
-		p_i2c->status = I2C_STATUS_READ;
+      I2C[i2c_num]->command[p_i2c->cmd_idx].byte_num = p_i2c->rx_cnt;
+      I2C[i2c_num]->command[p_i2c->cmd_idx].ack_val = cmd->ack_val;
+      I2C[i2c_num]->command[p_i2c->cmd_idx + 1].val = 0;
+      I2C[i2c_num]->command[p_i2c->cmd_idx + 1].op_code = I2C_CMD_END;
 
-		break;
+      p_i2c->status = I2C_STATUS_READ;
 
-	}
+      break;
 
-	else {
+    } else {
 
-	}
+    }
 
-	p_i2c->cmd_idx++;
-	p_i2c->cmd_link.head = p_i2c->cmd_link.head->next;
+    p_i2c->cmd_idx++;
+    p_i2c->cmd_link.head = p_i2c->cmd_link.head->next;
 
-	if (p_i2c->cmd_link.head == NULL || p_i2c->cmd_idx >= 15) {
+    if (p_i2c->cmd_link.head == NULL || p_i2c->cmd_idx >= 15) {
 
-		p_i2c->tx_fifo_remain = I2C_FIFO_LEN;
-		p_i2c->cmd_idx = 0;
-		p_i2c->status = I2C_STATUS_IDLE;
+      p_i2c->tx_fifo_remain = I2C_FIFO_LEN;
+      p_i2c->cmd_idx = 0;
+      p_i2c->status = I2C_STATUS_IDLE;
 
-		break;
+      break;
 
-	}
+    }
   }
 
   I2C[i2c_num]->int_clr.end_detect = 1;
@@ -4155,7 +3906,6 @@ i2c_master_cmd_begin_static(i2c_obj_t* p_i2c)
   I2C[i2c_num]->ctr.trans_start = 1;
 
   return;
-
 }
 
 
@@ -4163,20 +3913,18 @@ i2c_master_cmd_begin_static(i2c_obj_t* p_i2c)
 /**
  * -------------------------------------------------------------------------------------------------
  *  FName: i2c_master_cmd_begin
- *  Desc: Starts the processing of the i2c command linked list. Will continue in interrupt
+ *  Desc: Starts processing the i2c command linked list
  *  Info: NOT called from interrupt
- *  Para: i2c_obj_t* p_i2c -> ptr to the i2c processing object for this i2c num
+ *  Para: i2c_obj_t* p_i2c -> ptr to the main i2c processing object
  *        i2c_cmd_handle_t cmd_handle -> head of linked list that stores the i2c commands
  *        portBASE_TYPE ticks_to_wait -> ???
  *  Rets: esp_err_t ->
  * -------------------------------------------------------------------------------------------------
  */
-esp_err_t i2c_master_cmd_begin(i2c_obj_t *p_i2c
-				,i2c_cmd_handle_t cmd_handle
-				,portBASE_TYPE ticks_to_wait)
+//esp_err_t i2c_master_cmd_begin(i2c_port_t i2c_num, i2c_cmd_handle_t cmd_handle, portBASE_TYPE ticks_to_wait)
+esp_err_t i2c_master_cmd_begin(i2c_obj_t* p_i2c, i2c_cmd_handle_t cmd_handle, portBASE_TYPE ticks_to_wait)
 {
 
-  // get the assigned i2c num.
   int i2c_num = p_i2c->i2c_num;
 
   I2C_CHECK(( i2c_num < I2C_NUM_MAX ), I2C_NUM_ERROR_STR, ESP_ERR_INVALID_ARG);
@@ -4186,13 +3934,16 @@ esp_err_t i2c_master_cmd_begin(i2c_obj_t *p_i2c
 
   esp_err_t ret;
 
+ //   i2c_obj_t* p_i2c = p_i2c_obj[i2c_num];
+
   portTickType ticks_end = xTaskGetTickCount() + ticks_to_wait;
 
   portBASE_TYPE res = xSemaphoreTake(p_i2c->cmd_mux, ticks_to_wait);
 
   if (res == pdFALSE) {
 
-	return ESP_ERR_TIMEOUT;
+    return ESP_ERR_TIMEOUT;
+
   }
 
   xSemaphoreTake(p_i2c->cmd_sem, 0);
@@ -4224,17 +3975,16 @@ esp_err_t i2c_master_cmd_begin(i2c_obj_t *p_i2c
 
   if (res == pdFALSE) {
 
-	ret = ESP_ERR_TIMEOUT;
-  }
+    ret = ESP_ERR_TIMEOUT;
 
-  else if (p_i2c->status == I2C_STATUS_ACK_ERROR) {
+  } else if (p_i2c->status == I2C_STATUS_ACK_ERROR) {
 
-	ret = ESP_FAIL;
-  }
+    ret = ESP_FAIL;
 
-  else {
+  } else {
 
-	ret = ESP_OK;
+    ret = ESP_OK;
+
   }
 
   p_i2c->status = I2C_STATUS_DONE;
@@ -4247,9 +3997,11 @@ esp_err_t i2c_master_cmd_begin(i2c_obj_t *p_i2c
 
 
 
+
+
 // XXXXXXXXXXXXXXXXXXXXXXXXXX CLIENT MODULE I2C COMMAND LINKED LIST FILL FN XXXXXXXXXXXXXXXXXXXXXXXX
 
-/** to stage 2 module!
+/**
  * -------------------------------------------------------------------------------------------------
  *  FName: i2c_cmd_link_create
  *  Desc: Allocates a linked list head - without elements 
@@ -4270,7 +4022,7 @@ i2c_cmd_handle_t i2c_cmd_link_create()
 
 
 
-/** to stage 2 module!??
+/**
  * -------------------------------------------------------------------------------------------------
  *  FName: i2c_cmd_link_delete
  *  Desc: Frees linked list: All linked list elements + head
@@ -4286,6 +4038,7 @@ void i2c_cmd_link_delete(i2c_cmd_handle_t cmd_handle)
   if (cmd_handle == NULL) {
 
     return;
+
   }
 
   // get ptr to linked list head 
@@ -4299,6 +4052,7 @@ void i2c_cmd_link_delete(i2c_cmd_handle_t cmd_handle)
     cmd->free = cmd->free->next;
 
     free(ptmp);
+
   }
 
   // makes no sense? its freed...
@@ -4310,12 +4064,11 @@ void i2c_cmd_link_delete(i2c_cmd_handle_t cmd_handle)
   free(cmd_handle);
 
   return;
-
 }
 
 
 
-/** to stage 2 module!
+/**
  * -------------------------------------------------------------------------------------------------
  *  FName: i2c_cmd_link_append
  *  Desc: Append to linked list: Adds a command i2c_cmd_t at the given ptr to the linked i2c cmd list
@@ -4325,10 +4078,8 @@ void i2c_cmd_link_delete(i2c_cmd_handle_t cmd_handle)
  *  Rets: esp_err_t ->
  * -------------------------------------------------------------------------------------------------
  */
-static esp_err_t i2c_cmd_link_append(i2c_cmd_handle_t cmd_handle
-					,i2c_cmd_t* cmd)
+static esp_err_t i2c_cmd_link_append(i2c_cmd_handle_t cmd_handle, i2c_cmd_t* cmd)
 {
-
   // get ptr to linked list head 
   i2c_cmd_desc_t* cmd_desc = (i2c_cmd_desc_t*) cmd_handle;
 
@@ -4343,6 +4094,7 @@ static esp_err_t i2c_cmd_link_append(i2c_cmd_handle_t cmd_handle
     if (cmd_desc->head == NULL) {
       ESP_LOGE(I2C_TAG, I2C_CMD_MALLOC_ERR_STR);
       goto err;
+
     }
 
     // initialize - the first -
@@ -4360,10 +4112,12 @@ static esp_err_t i2c_cmd_link_append(i2c_cmd_handle_t cmd_handle
     if (cmd_desc->cur->next == NULL) {
       ESP_LOGE(I2C_TAG, I2C_CMD_MALLOC_ERR_STR);
       goto err;
+
     }
 
     // update new last list element in head
     cmd_desc->cur = cmd_desc->cur->next;
+
   }
 
   // now copy the i2c command data to allocated memory
@@ -4382,7 +4136,7 @@ static esp_err_t i2c_cmd_link_append(i2c_cmd_handle_t cmd_handle
 
 
 
-/** to stage 2 module!
+/**
  * -------------------------------------------------------------------------------------------------
  *  FName: i2c_master_start
  *  Desc: Append to linked list: initial start cmd with cmd.op_code = I2C_CMD_START 
@@ -4411,7 +4165,7 @@ esp_err_t i2c_master_start(i2c_cmd_handle_t cmd_handle)
 
 
 
-/** to stage 2 module!
+/**
  * -------------------------------------------------------------------------------------------------
  *  FName: i2c_master_stop
  *  Desc: Append to linked list: final stop cmd with cmd.op_code = I2C_CMD_STOP 
@@ -4440,7 +4194,7 @@ esp_err_t i2c_master_stop(i2c_cmd_handle_t cmd_handle)
 
 
 
-/** to stage 2 module!
+/**
  * -------------------------------------------------------------------------------------------------
  *  FName: i2c_master_write
  *  Desc: append to linked list: write len bytes from source ptr to master cmd with 
@@ -4453,10 +4207,7 @@ esp_err_t i2c_master_stop(i2c_cmd_handle_t cmd_handle)
  *  Rets: esp_err_t ->
  * -------------------------------------------------------------------------------------------------
  */
-esp_err_t i2c_master_write(i2c_cmd_handle_t cmd_handle
-				,uint8_t* data
-				,size_t data_len
-				,bool ack_en)
+esp_err_t i2c_master_write(i2c_cmd_handle_t cmd_handle, uint8_t* data, size_t data_len, bool ack_en)
 {
 
   I2C_CHECK((data != NULL), I2C_ADDR_ERROR_STR, ESP_ERR_INVALID_ARG);
@@ -4488,6 +4239,7 @@ esp_err_t i2c_master_write(i2c_cmd_handle_t cmd_handle
     if (ret != ESP_OK) {
 
       return ret;
+
     }
   }
 
@@ -4497,7 +4249,7 @@ esp_err_t i2c_master_write(i2c_cmd_handle_t cmd_handle
 
 
 
-/** to stage 2 module!
+/**
  * -------------------------------------------------------------------------------------------------
  *  FName: i2c_master_write_byte
  *  Desc: append to linked list: write the given byte to master cmd with cmd.op_code = I2C_CMD_WRITE
@@ -4508,9 +4260,7 @@ esp_err_t i2c_master_write(i2c_cmd_handle_t cmd_handle
  *  Rets: esp_err_t ->
  * -------------------------------------------------------------------------------------------------
  */
-esp_err_t i2c_master_write_byte(i2c_cmd_handle_t cmd_handle
-				,uint8_t data
-				,bool ack_en)
+esp_err_t i2c_master_write_byte(i2c_cmd_handle_t cmd_handle, uint8_t data, bool ack_en)
 {
 
   I2C_CHECK(cmd_handle != NULL, I2C_CMD_LINK_INIT_ERR_STR, ESP_ERR_INVALID_ARG);
@@ -4531,7 +4281,7 @@ esp_err_t i2c_master_write_byte(i2c_cmd_handle_t cmd_handle
 
 
 
-/** to stage 2 module!
+/**
  * -------------------------------------------------------------------------------------------------
  *  FName: i2c_master_read
  *  Desc: append to linked list: read len bytes from master cmd with cmd.op_code = I2C_CMD_READ
@@ -4544,12 +4294,8 @@ esp_err_t i2c_master_write_byte(i2c_cmd_handle_t cmd_handle
  *  Rets: esp_err_t ->
  * -------------------------------------------------------------------------------------------------
  */
-esp_err_t i2c_master_read(i2c_cmd_handle_t cmd_handle
-				,uint8_t* data
-				,size_t data_len
-				,int ack)
+esp_err_t i2c_master_read(i2c_cmd_handle_t cmd_handle, uint8_t* data, size_t data_len, int ack)
 {
-
   I2C_CHECK((data != NULL), I2C_ADDR_ERROR_STR, ESP_ERR_INVALID_ARG);
   I2C_CHECK(cmd_handle != NULL, I2C_CMD_LINK_INIT_ERR_STR, ESP_ERR_INVALID_ARG);
 
@@ -4578,6 +4324,7 @@ esp_err_t i2c_master_read(i2c_cmd_handle_t cmd_handle
     if (ret != ESP_OK) {
 
       return ret;
+
     }
   }
 
@@ -4587,29 +4334,26 @@ esp_err_t i2c_master_read(i2c_cmd_handle_t cmd_handle
 
 
 
-/** to stage 2 module!
+/**
  * -------------------------------------------------------------------------------------------------
  *  FName: i2c_master_read_byte
- *  Desc: Append to linked list: Operation "Read one byte from master"
- *        - build operation "read one byte from master via cmd.op_code = I2C_CMD_READ"
- *          to the data destination adress
- *        - append this operation to linked list
+ *  Desc: append to linked list: read one byte from master cmd with cmd.op_code = I2C_CMD_READ
+ *        to the data destination adress
  *  Info:
  *  Para: i2c_cmd_handle_t cmd_handle -> head of linked list - i2c commands
  *        uint8_t* data -> destination ptr for the byte to read
  *        int ack ->
- *  Rets: esp_err_t -> from "i2c_cmd_link_append" FN
+ *  Rets: esp_err_t ->
  * -------------------------------------------------------------------------------------------------
  */
-esp_err_t
-i2c_master_read_byte(i2c_cmd_handle_t cmd_handle
-			, uint8_t* data, int ack)
+esp_err_t i2c_master_read_byte(i2c_cmd_handle_t cmd_handle, uint8_t* data, int ack)
 {
 
   I2C_CHECK((data != NULL), I2C_ADDR_ERROR_STR, ESP_ERR_INVALID_ARG);
   I2C_CHECK(cmd_handle != NULL, I2C_CMD_LINK_INIT_ERR_STR, ESP_ERR_INVALID_ARG);
 
   i2c_cmd_t cmd;
+
 
   cmd.ack_en = 0;
   cmd.ack_exp = 0;
@@ -4621,3 +4365,6 @@ i2c_master_read_byte(i2c_cmd_handle_t cmd_handle
   return i2c_cmd_link_append(cmd_handle, &cmd);
 
 }
+
+
+

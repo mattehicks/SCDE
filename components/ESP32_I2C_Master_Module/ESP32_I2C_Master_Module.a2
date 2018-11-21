@@ -148,31 +148,18 @@ enum ESP32_I2C_Master_SET_IK {				// Bit #XX for debugging
   , ESP32_I2C_Master_SET_NAME				// Bit #06 'NAME'  -> 
   , ESP32_I2C_Master_SET_CAPS				// Bit #07 'CAPS'  -> 
 
-
-
-  // Block #1 I2C Block to use
+  // Block #1 I2C configuration
   , ESP32_I2C_Master_SET_I2C_NUM			// Bit #08 'I2C_NUM' -> 
-
-  // Block #2 I2C Master/Slave ?
   , ESP32_I2C_Master_SET_I2C_MODE			// Bit #09 'I2C_MODE' -> 
-
-  // Block #3 I2C Pin connections
   , ESP32_I2C_Master_SET_SDA_IO				// Bit #10 'SDA_IO' -> 
   , ESP32_I2C_Master_SET_SDA_IO_PULLUP			// Bit #11 'SDA_IO_PULLUP' -> 
   , ESP32_I2C_Master_SET_SCL_IO				// Bit #12 'SCL_IO' ->
   , ESP32_I2C_Master_SET_SCL_IO_PULLUP			// Bit #13 'SCL_IO_PULLUP' ->
 
-  // Block #4 I2C Pin connections
-  , ESP32_I2C_Master_SET_MASTER_CLOCK			// Bit #14 'MASTER_CLOCK' ->
 
-  // Block #5 I2C Pin connections
-  , ESP32_I2C_Master_SET_SLAVE_10BIT_ENA		// Bit #15 'SLAVE_10BIT_ENA' ->
-
-  // Block #6 I2C Pin connections
-  , ESP32_I2C_Master_SET_SLAVE_ADRESS			// Bit #16 'SLAVE_ADRESS' ->
-
-
-
+  , ESP32_I2C_Master_SET_SIG_OUT_EN			// Bit #14 'SIG_OUT_EN' ->
+  , ESP32_I2C_Master_SET_IDLE_LV			// Bit #15 'IDLE_LV' ->
+  , ESP32_I2C_Master_SET_RESOLUTION			// Bit #16 'RESOLUTION' -> 
   , ESP32_I2C_Master_SET_TICK_SOURCE			// Bit #17 'TICK_SOURCE' ->
   , ESP32_I2C_Master_SET_FREQ_HZ			// Bit #18 'FREQ_HZ' ->
   , ESP32_I2C_Master_SET_THR_L_LIM_EN			// Bit #19 'THR_L_LIM_EN' -> DIS/ENA
@@ -236,9 +223,10 @@ kvParseImplementedKeys_t ESP32_I2C_Master_Set_ImplementedKeys[] = {
   ,{ 0																				, "SDA_IO_PULLUP" }	// #11
   ,{ 0																				, "SCL_IO" }		// #12
   ,{ 0																				, "SCL_IO_PULLUP" }	// #13
-  ,{ 0																				, "MASTER_CLOCK" }	// #14
-  ,{ 0																				, "SLAVE_10BIT_ENA" }	// #15
-  ,{ 0																				, "SLAVE_ADRESS" }	// #16
+
+  ,{ 0																				, "SIG_OUT_EN" }	// #14
+  ,{ 0																				, "IDLE_LV" }		// #15
+  ,{ 0																				, "RESOLUTION" }	// #16
   ,{ 0																				, "TICK_SOURCE" }	// #17
   ,{ 0																				, "FREQ_HZ" }		// #18
   ,{ 0																				, "THR_L_LIM_EN" }	// #19
@@ -530,6 +518,8 @@ static const char* I2C_TAG = "i2c";
 
 static portMUX_TYPE i2c_spinlock[I2C_NUM_MAX] = {portMUX_INITIALIZER_UNLOCKED, portMUX_INITIALIZER_UNLOCKED};
 
+
+
 /* I2C module adressing array (1,2), ACCESSED FROM IRQ - keep in RAM! */
 static DRAM_ATTR i2c_dev_t* const I2C[I2C_NUM_MAX] = { &I2C0, &I2C1 };
 
@@ -612,7 +602,7 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
 {
 
   // for Fn response msg
-  strTextMultiple_t *retMsg = SCDE_OK;
+  strTextMultiple_t *retMsg = NULL;
 
   // for parsing input args
   parsedKVInputArgs_t *parsedKVInput = NULL;
@@ -728,50 +718,6 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
 
 // ------------------------------------------------------------------------------------------------
 
-  // try 1 - arguments for configuration as i2c master ?
-
-  // set required Keys -> Keys that should be there in this request
-  parsedKVInput->requiredKVBF = 	( (1 << ESP32_I2C_Master_SET_I2C_NUM)
-					| (1 << ESP32_I2C_Master_SET_I2C_MODE)
-					| (1 << ESP32_I2C_Master_SET_SDA_IO)
-					| (1 << ESP32_I2C_Master_SET_SDA_IO_PULLUP)
-					| (1 << ESP32_I2C_Master_SET_SCL_IO)
-					| (1 << ESP32_I2C_Master_SET_SCL_IO_PULLUP)
-					| (1 << ESP32_I2C_Master_SET_MASTER_CLOCK)
-					);
-
-  // set forbidden Keys -> Keys that are not allowed in this request
-  parsedKVInput->forbiddenKVBF = 	( (1 << ESP32_I2C_Master_SET_SLAVE_10BIT_ENA)
-					| (1 << ESP32_I2C_Master_SET_SLAVE_ADRESS)
- 					);
-
-  // process the set-args (key=value@) protocol
-  retMsg = ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition
-		,parsedKVInput		// KVInput parsed
-		,defArgsText		// our args text
-		,defArgsTextLen);	// our args text len
-
-  // processing reports an problem. Args not taken. Return with MSG
-  if (retMsg != SCDE_OK) {
-
-	// free allocated memory for query result key-field
-	free(parsedKVInput);
-
-	return retMsg;
-  }
-
-// ------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -782,17 +728,17 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
   printf("|ESP32_I2C_Master_Define, installing i2c driver>");
   #endif
 
-//#define I2C_MASTER_NUM I2C_NUM_1   /*!< I2C port number for master dev */
-//#define I2C_MASTER_SDA_IO    18    /*!< gpio number for I2C master data  */
-//#define I2C_MASTER_SCL_IO    19    /*!< gpio number for I2C master clock */
+#define I2C_MASTER_NUM I2C_NUM_1   /*!< I2C port number for master dev */
+#define I2C_MASTER_SDA_IO    18    /*!< gpio number for I2C master data  */
+#define I2C_MASTER_SCL_IO    19    /*!< gpio number for I2C master clock */
 #define I2C_MASTER_TX_BUF_DISABLE   0   /*!< I2C master do not need buffer */
 #define I2C_MASTER_RX_BUF_DISABLE   0   /*!< I2C master do not need buffer */
-//#define I2C_MASTER_FREQ_HZ    100000     /*!< I2C master clock frequency */
+#define I2C_MASTER_FREQ_HZ    100000     /*!< I2C master clock frequency */
 
-/*
+
 //Temp fill of struct
 
-    ESP32_I2C_Master_Definition->i2c_num =
+    ESP32_I2C_Master_Definition->i2c_master_port =
 	I2C_MASTER_NUM;
     ESP32_I2C_Master_Definition->i2c_config.mode =
 	I2C_MODE_MASTER;
@@ -811,7 +757,7 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
 // ------------------------------------------------------------------------------------------------
 
   // setup GPIOS, activate i2c, ...
-  retMsg = i2c_param_config(ESP32_I2C_Master_Definition->i2c_num
+  retMsg = i2c_param_config(ESP32_I2C_Master_Definition->i2c_master_port
 	,&ESP32_I2C_Master_Definition->i2c_config);
 
  // error during config ? return with MSG
@@ -819,12 +765,12 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
 
 	return retMsg;
   }
-*/
+
 // ------------------------------------------------------------------------------------------------
 
 /*
   // install the I2C driver
-  i2c_driver_install(ESP32_I2C_Master_Definition->i2c_num
+  i2c_driver_install(ESP32_I2C_Master_Definition->i2c_master_port
 	,ESP32_I2C_Master_Definition->i2c_config.mode
 	,I2C_MASTER_RX_BUF_DISABLE
 	,I2C_MASTER_TX_BUF_DISABLE
@@ -852,31 +798,6 @@ we should free or modify the source data only after the i2c_master_cmd_begin fun
 has only 32 bytes.
 */
 
-
-
-
-
-
-
-
-
-//xxxxxxxxxxxxx entry
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
 esp_err_t i2c_driver_install(i2c_port_t i2c_num, i2c_mode_t mode, size_t slv_rx_buf_len, size_t slv_tx_buf_len,
     int intr_alloc_flags)
@@ -886,7 +807,7 @@ esp_err_t i2c_driver_install(i2c_port_t i2c_num, i2c_mode_t mode, size_t slv_rx_
         ESP_ERR_INVALID_ARG);
 */
 
-
+//xxxxxxxxxxxxx entry
 
   // check:
   // mode			-> I2C_MODE_MASTER or I2C_MODE_SLAVE
@@ -1038,11 +959,9 @@ int intr_alloc_flags = 0;
 /*
 esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
 {
-
     I2C_CHECK(i2c_num < I2C_NUM_MAX, I2C_NUM_ERROR_STR, ESP_ERR_INVALID_ARG);
     I2C_CHECK(p_i2c_obj[i2c_num] != NULL, I2C_DRIVER_ERR_STR, ESP_FAIL);
     i2c_obj_t* p_i2c = p_i2c_obj[i2c_num];
-
     uint32_t intr_mask = I2C_MASTER_TRAN_COMP_INT_ENA_M |
                          I2C_TIME_OUT_INT_ENA_M |
                          I2C_TRANS_COMPLETE_INT_ENA_M |
@@ -1053,13 +972,9 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
                          I2C_RXFIFO_OVF_INT_ENA_M |
                          I2C_RX_REC_FULL_INT_ENA_M |
                          I2C_SLAVE_TRAN_COMP_INT_ENA_M;
-
     CLEAR_PERI_REG_MASK(I2C_INT_ENA_REG(i2c_num), intr_mask);
-
     esp_intr_free(p_i2c->intr_handle);
-
     p_i2c->intr_handle = NULL;
-
     if (p_i2c->cmd_mux) {
         xSemaphoreTake(p_i2c->cmd_mux, portMAX_DELAY);
         vSemaphoreDelete(p_i2c->cmd_mux);
@@ -1083,10 +998,8 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
         p_i2c->tx_ring_buf = NULL;
         p_i2c->tx_buf_length = 0;
     }
-
     free(p_i2c_obj[i2c_num]);
     p_i2c_obj[i2c_num] = NULL;
-
     return ESP_OK;
 }
 */
@@ -1298,7 +1211,7 @@ esp_err_t i2c_master_sensor_test(i2c_port_t i2c_num, uint8_t* data_h, uint8_t* d
 
 
 
-/*
+
 // ------------------------------------------------------------------------------------------------
 
   // set required Keys -> Keys that should be there in this request
@@ -1336,7 +1249,7 @@ esp_err_t i2c_master_sensor_test(i2c_port_t i2c_num, uint8_t* data_h, uint8_t* d
   }
 
 // ------------------------------------------------------------------------------------------------
-*/
+
   // set affected readings
   ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition
     ,parsedKVInput->affectedReadingsBF);
@@ -1811,53 +1724,39 @@ ESP32_I2C_Master_Undefine(Common_Definition_t *Common_Definition)
  *        parsedKVInputArgs_t *parsedKVInput -> ptr to allocated mem filled with results from parse
  *        uint8_t *argsText -> the ArgsText
  *        size_t argsTextLen -> length of the ArgsText
- *  Rets: strTextMultiple_t* -> SCDE_OK, or error txts - for log
+ *  Rets: Bool -> TRUE = input parsed successful, FALSE = input parsed, but NOT successful, CANCELED
  * -------------------------------------------------------------------------------------------------
  */
-strTextMultiple_t*
+bool ICACHE_FLASH_ATTR
 ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Master_Definition
 	,parsedKVInputArgs_t *parsedKVInput
 	,uint8_t *argsText
 	,size_t argsTextLen)
 {
 
-  // start without error
-  strTextMultiple_t *retMsg = SCDE_OK;
-
 // 1. Step: Prepare structures with current values from TYPE & SYSTEM 
 //          (to allow an abort if values not complete or in case of processing errors)
 
-  // block #1 get current values for I2C Block (0 / 1)
-  uint8_t new_i2c_num = 
-	ESP32_I2C_Master_Definition->i2c_num;
-
-  // block #2 get current values for I2C Mode (Master/Slave)
-  i2c_mode_t new_mode = 
-	ESP32_I2C_Master_Definition->i2c_config.mode;
-
-  // block #3 get current values for I2C Pin connections
-  gpio_num_t new_sda_io_num = 
-	ESP32_I2C_Master_Definition->i2c_config.sda_io_num;
-  gpio_pullup_t new_sda_pullup_en = 
-	ESP32_I2C_Master_Definition->i2c_config.sda_pullup_en;
-  gpio_num_t new_scl_io_num = 
-	ESP32_I2C_Master_Definition->i2c_config.scl_io_num;
-  gpio_pullup_t new_scl_pullup_en = 
-	ESP32_I2C_Master_Definition->i2c_config.scl_pullup_en;
-
-  // block #4 get current values for I2C clock speed (when use as master only!)
-  uint32_t new_clk_speed = 
-	ESP32_I2C_Master_Definition->i2c_config.master.clk_speed;
-
-  // block #5 get current values for I2C 10bit enable (when use as slave only!)
-  uint8_t new_addr_10bit_en = 
-	ESP32_I2C_Master_Definition->i2c_config.slave.addr_10bit_en;
-
-  // block #6 get current values for I2C slave adress (when use as slave only!)
-  uint8_t new_slave_addr = 
-	ESP32_I2C_Master_Definition->i2c_config.slave.slave_addr;
 
 
+  // block #1 get current values for
+
+  uint8_t new_i2c_master_port = 
+	ESP32_I2C_Master_Definition->i2c_master_port;
+
+  i2c_config_t new_i2c_config = 
+	ESP32_I2C_Master_Definition->i2c_config;
+
+
+/*
+ // Block #1 I2C configuration
+  , ESP32_I2C_Master_SET_I2C_NUM			// Bit #08 'I2C_NUM' -> 
+  , ESP32_I2C_Master_SET_I2C_MODE			// Bit #09 'I2C_MODE' -> 
+  , ESP32_I2C_Master_SET_SDA_IO				// Bit #10 'SDA_IO' -> 
+  , ESP32_I2C_Master_SET_SDA_IO_PULLUP			// Bit #11 'SDA_IO_PULLUP' -> 
+  , ESP32_I2C_Master_SET_SCL_IO				// Bit #12 'SCL_IO' ->
+  , ESP32_I2C_Master_SET_SCL_IO_PULLUP			// Bit #13 'SCL_IO_PULLUP' ->
+*/
 
 
 
@@ -2548,13 +2447,9 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
 
 
 /*
-  // Block #1 I2C Block to use ( 0 / 1)
+ // Block #1 I2C configuration
   , ESP32_I2C_Master_SET_I2C_NUM			// Bit #08 'I2C_NUM' -> 
-
-  // Block #2 I2C Mode (Master/Slave)
   , ESP32_I2C_Master_SET_I2C_MODE			// Bit #09 'I2C_MODE' -> 
-
-  // Block #3 I2C Pin connections
   , ESP32_I2C_Master_SET_SDA_IO				// Bit #10 'SDA_IO' -> 
   , ESP32_I2C_Master_SET_SDA_IO_PULLUP			// Bit #11 'SDA_IO_PULLUP' -> 
   , ESP32_I2C_Master_SET_SCL_IO				// Bit #12 'SCL_IO' ->
@@ -2563,477 +2458,31 @@ ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t *ESP32_I2C_Mas
 
 // ------------------------------------------------------------------------------------------------
 
-
-
-
-
-
-
-
-// manipulate 4 debugging
-
-  parsedKVInput->keysFoundBF =    	( (1 << ESP32_I2C_Master_SET_I2C_NUM)
-					| (1 << ESP32_I2C_Master_SET_I2C_MODE) 
-					| (1 << ESP32_I2C_Master_SET_SDA_IO)
-			       		| (1 << ESP32_I2C_Master_SET_SDA_IO_PULLUP)
-			       		| (1 << ESP32_I2C_Master_SET_SCL_IO)
-			       		| (1 << ESP32_I2C_Master_SET_SCL_IO_PULLUP)
-					| (1 << ESP32_I2C_Master_SET_MASTER_CLOCK)
-				//	| (1 << ESP32_I2C_Master_SET_SLAVE_10BIT_ENA)
-				//	| (1 << ESP32_I2C_Master_SET_SLAVE_ADRESS)
-					); 
-
-#define I2C_MASTER_NUM I2C_NUM_1   /*!< I2C port number for master dev */
-#define I2C_MASTER_SDA_IO    18    /*!< gpio number for I2C master data  */
-#define I2C_MASTER_SCL_IO    19    /*!< gpio number for I2C master clock */
-#define I2C_MASTER_TX_BUF_DISABLE   0   /*!< I2C master do not need buffer */
-#define I2C_MASTER_RX_BUF_DISABLE   0   /*!< I2C master do not need buffer */
-#define I2C_MASTER_FREQ_HZ    100000     /*!< I2C master clock frequency */
-
-//Temp fill of struct
-
-    new_i2c_num = I2C_MASTER_NUM;
-    new_mode = I2C_MODE_MASTER;
-    new_sda_io_num = I2C_MASTER_SDA_IO;
-    new_sda_pullup_en = GPIO_PULLUP_ENABLE;
-    new_scl_io_num = I2C_MASTER_SCL_IO;
-    new_scl_pullup_en = GPIO_PULLUP_ENABLE;
-    new_clk_speed = I2C_MASTER_FREQ_HZ;
-
-
-		
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // 3. Step: Check if the ammount of input elements meets our criteria
 
-  // OPTION: check if all required Key=Value components for operation are included
-  //         -> if not, return with msg
+  // check if all required Key=Value components are included -> return with FALSE
   if ( (parsedKVInput->keysFoundBF & parsedKVInput->requiredKVBF) != parsedKVInput->requiredKVBF) {
 
-	// alloc mem for retMsg
-	retMsg = malloc(sizeof(strTextMultiple_t));
+	#if ESP32_I2C_Master_Module_DBG >= 5
+	printf("|requiredKVBF, no match!>");	
+  	#endif
 
-	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
-		,"Parsing Error! NOT all required Key=Value args found!");
-
-	return retMsg;
+	return true;
   }
 
-  // OPTION: check if forbidden Key=Value components are included
-  //         -> if yes, return with msg
+  // check if forbidden Key=Value components are included -> return with FALSE
   if (parsedKVInput->keysFoundBF & parsedKVInput->forbiddenKVBF) {
 
-	// alloc mem for retMsg
-	retMsg = malloc(sizeof(strTextMultiple_t));
+	#if ESP32_I2C_Master_Module_DBG >= 5
+	printf("|forbiddenKVBF, match!>");	
+  	#endif
 
-	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
-		,"Parsing Error! FORBIDDEN Key=Value args found!");
-
-	return retMsg;
+	return true;
   }
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ------------------------------------------------------------------------------------------------
 
-// 4. Step: Changes will happen, deinit old?
-
-
-/*
-
-esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
-{
-
-    I2C_CHECK(i2c_num < I2C_NUM_MAX, I2C_NUM_ERROR_STR, ESP_ERR_INVALID_ARG);
-    I2C_CHECK(p_i2c_obj[i2c_num] != NULL, I2C_DRIVER_ERR_STR, ESP_FAIL);
-    i2c_obj_t* p_i2c = p_i2c_obj[i2c_num];
-
-    uint32_t intr_mask = I2C_MASTER_TRAN_COMP_INT_ENA_M |
-                         I2C_TIME_OUT_INT_ENA_M |
-                         I2C_TRANS_COMPLETE_INT_ENA_M |
-                         I2C_TRANS_START_INT_ENA_M |
-                         I2C_TX_SEND_EMPTY_INT_ENA_M |
-                         I2C_ARBITRATION_LOST_INT_ENA_M |
-                         I2C_ACK_ERR_INT_ENA_M |
-                         I2C_RXFIFO_OVF_INT_ENA_M |
-                         I2C_RX_REC_FULL_INT_ENA_M |
-                         I2C_SLAVE_TRAN_COMP_INT_ENA_M;
-
-    CLEAR_PERI_REG_MASK(I2C_INT_ENA_REG(i2c_num), intr_mask);
-
-    esp_intr_free(p_i2c->intr_handle);
-
-    p_i2c->intr_handle = NULL;
-
-    if (p_i2c->cmd_mux) {
-        xSemaphoreTake(p_i2c->cmd_mux, portMAX_DELAY);
-        vSemaphoreDelete(p_i2c->cmd_mux);
-    }
-    if (p_i2c->cmd_sem) {
-        vSemaphoreDelete(p_i2c->cmd_sem);
-    }
-    if (p_i2c->slv_rx_mux) {
-        vSemaphoreDelete(p_i2c->slv_rx_mux);
-    }
-    if (p_i2c->slv_tx_mux) {
-        vSemaphoreDelete(p_i2c->slv_tx_mux);
-    }
-    if (p_i2c->rx_ring_buf) {
-        vRingbufferDelete(p_i2c->rx_ring_buf);
-        p_i2c->rx_ring_buf = NULL;
-        p_i2c->rx_buf_length = 0;
-    }
-    if (p_i2c->tx_ring_buf) {
-        vRingbufferDelete(p_i2c->tx_ring_buf);
-        p_i2c->tx_ring_buf = NULL;
-        p_i2c->tx_buf_length = 0;
-    }
-
-    free(p_i2c_obj[i2c_num]);
-    p_i2c_obj[i2c_num] = NULL;
-
-    return ESP_OK;
-}
-*/
-
-
-
-
-
-// ------------------------------------------------------------------------------------------------
-
-// 4. Step: Store the new values of each block (if block information is complete)
-
-  // block #1 store/use I2C Block (0 / 1)
-  if (parsedKVInput->keysFoundBF |   	( (1 << ESP32_I2C_Master_SET_I2C_NUM) ) ) {
-
-	#if ESP32_I2C_Master_Module_DBG >= 5
-	printf("|W B#01 I2C_NUM=%d>"
-		,new_i2c_num);	
-  	#endif
-
-	// store assigned I2C Block
-	ESP32_I2C_Master_Definition->i2c_num = 
-		new_i2c_num;
-
-	// enable i2c 0
-	if (new_i2c_num == I2C_NUM_0) {
-
-		periph_module_enable(PERIPH_I2C0_MODULE);
-	}
-
-	// enable i2c 1
-	else if (new_i2c_num == I2C_NUM_1) {
-
-		periph_module_enable(PERIPH_I2C1_MODULE);
-	}
-  }
-
-  // block #2 store/use I2C Mode (Master/Slave)
-  if (parsedKVInput->keysFoundBF |   	( (1 << ESP32_I2C_Master_SET_I2C_MODE) ) ) {
-
-	#if ESP32_I2C_Master_Module_DBG >= 5
-	printf("|W B#01 I2C_MODE=%d>"
-		,new_mode);	
-  	#endif
-
-	// store assigned I2C Mode
-	ESP32_I2C_Master_Definition->i2c_config.mode
-		= new_mode;
-
-	// ??
-	I2C_ENTER_CRITICAL(&i2c_spinlock[new_i2c_num]);
-
-	// set rx data msb first
-	I2C[new_i2c_num]->ctr.rx_lsb_first = I2C_DATA_MODE_MSB_FIRST;
-
-	// set tx data msb first
-	I2C[new_i2c_num]->ctr.tx_lsb_first = I2C_DATA_MODE_MSB_FIRST;
-
-	// mode for master or slave
-	I2C[new_i2c_num]->ctr.ms_mode = new_mode;
-
-	// set open-drain output mode
-	I2C[new_i2c_num]->ctr.sda_force_out = 1;
-
-	// set open-drain output mode
-	I2C[new_i2c_num]->ctr.scl_force_out = 1;
-
-	// sample at high level of clock
-	I2C[new_i2c_num]->ctr.sample_scl_level = 0;
-
-	// slave mode ?
-	if (new_mode == I2C_MODE_SLAVE) {
-
-		I2C[new_i2c_num]->fifo_conf.nonfifo_en = 0;
-
-		I2C[new_i2c_num]->fifo_conf.fifo_addr_cfg_en = 0;
-
-		I2C[new_i2c_num]->fifo_conf.rx_fifo_full_thrhd =
-			I2C_FIFO_FULL_THRESH_VAL;
-
-		I2C[new_i2c_num]->fifo_conf.tx_fifo_empty_thrhd =
-			I2C_FIFO_EMPTY_THRESH_VAL;
-
-		I2C[new_i2c_num]->int_ena.rx_fifo_full = 1;
-
-		I2C[new_i2c_num]->ctr.trans_start = 0;
-	}
-
-	// master mode ?
-	else {
-
-		I2C[new_i2c_num]->fifo_conf.nonfifo_en = 0;
-	}
-
-	// ??
-	I2C_EXIT_CRITICAL(&i2c_spinlock[new_i2c_num]);
-  }
-
-  // block #3 store/use I2C Pin connections
-  if (parsedKVInput->keysFoundBF |   	( (1 << ESP32_I2C_Master_SET_SDA_IO)
-			       		| (1 << ESP32_I2C_Master_SET_SDA_IO_PULLUP)
-			       		| (1 << ESP32_I2C_Master_SET_SCL_IO)
-			       		| (1 << ESP32_I2C_Master_SET_SCL_IO_PULLUP) ) ) {
-
-	#if ESP32_I2C_Master_Module_DBG >= 5
-	printf("|W B#01 I2C Pins SDA_IO=%d, SDA_IO_PULLUP=%d,SCL_IO=%d, SCL_IO_PULLUP=%d,>"
-		,new_sda_io_num,new_sda_pullup_en,new_scl_io_num,new_scl_pullup_en);	
-  	#endif
-
-	// store assigned I2C Pin connections
-	ESP32_I2C_Master_Definition->i2c_config.sda_io_num
-		= new_sda_io_num;
-
-	ESP32_I2C_Master_Definition->i2c_config.sda_pullup_en
-		= new_sda_pullup_en;
-
-	ESP32_I2C_Master_Definition->i2c_config.scl_io_num
-		= new_scl_io_num;
-
-	ESP32_I2C_Master_Definition->i2c_config.scl_pullup_en
-		= new_scl_pullup_en;
-
-
-
-
-/*
-
-
-  SCDE_CHECK(( i2c_num < I2C_NUM_MAX ), I2C_NUM_ERROR_STR);
-  SCDE_CHECK(((GPIO_IS_VALID_OUTPUT_GPIO(sda_io_num))), I2C_SDA_IO_ERR_STR);
-  SCDE_CHECK((GPIO_IS_VALID_OUTPUT_GPIO(scl_io_num)) ||
-              (GPIO_IS_VALID_GPIO(scl_io_num) && mode == I2C_MODE_SLAVE),
-              I2C_SCL_IO_ERR_STR);
-  SCDE_CHECK((sda_pullup_en == GPIO_PULLUP_ENABLE && GPIO_IS_VALID_OUTPUT_GPIO(sda_io_num)) ||
-               sda_pullup_en == GPIO_PULLUP_DISABLE, I2C_GPIO_PULLUP_ERR_STR);
-  SCDE_CHECK((scl_pullup_en == GPIO_PULLUP_ENABLE && GPIO_IS_VALID_OUTPUT_GPIO(scl_io_num)) ||
-               scl_pullup_en == GPIO_PULLUP_DISABLE, I2C_GPIO_PULLUP_ERR_STR);
-*/
-	int sda_in_sig, sda_out_sig, scl_in_sig, scl_out_sig;
-
-	// prepare the i2c settings according to used hardware 
-	switch (new_i2c_num) {
-
-		case I2C_NUM_1:
-			sda_out_sig = I2CEXT1_SDA_OUT_IDX;
-			sda_in_sig = I2CEXT1_SDA_IN_IDX;
-			scl_out_sig = I2CEXT1_SCL_OUT_IDX;
-			scl_in_sig = I2CEXT1_SCL_IN_IDX;
-			break;
-
-		case I2C_NUM_0:
-			default:
-			sda_out_sig = I2CEXT0_SDA_OUT_IDX;
-			sda_in_sig = I2CEXT0_SDA_IN_IDX;
-			scl_out_sig = I2CEXT0_SCL_OUT_IDX;
-			scl_in_sig = I2CEXT0_SCL_IN_IDX;
-			break;
-	}
-
-	// sda cfg ..
-	if (new_sda_io_num >= 0) {
-
-		gpio_set_level(new_sda_io_num, I2C_IO_INIT_LEVEL);
-
-		PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[new_sda_io_num], PIN_FUNC_GPIO);
-
-		gpio_set_direction(new_sda_io_num, GPIO_MODE_INPUT_OUTPUT_OD);
-
-		if (new_sda_pullup_en == GPIO_PULLUP_ENABLE) {
-
-			gpio_set_pull_mode(new_sda_io_num, GPIO_PULLUP_ONLY);
-		 } 
-
-		else {
-
-			gpio_set_pull_mode(new_sda_io_num, GPIO_FLOATING);
- 		}
-
-		gpio_matrix_out(new_sda_io_num, sda_out_sig, 0, 0);
-
-		gpio_matrix_in(new_sda_io_num, sda_in_sig, 0);
-	}
-
-	// scl cfg ...
-	if (new_scl_io_num >= 0) {
-
-		gpio_set_level(new_scl_io_num, I2C_IO_INIT_LEVEL);
-
-		PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[new_scl_io_num], PIN_FUNC_GPIO);
-
-		if (new_mode == I2C_MODE_MASTER) {
-
-			gpio_set_direction(new_scl_io_num, GPIO_MODE_INPUT_OUTPUT_OD);
-
-			gpio_matrix_out(new_scl_io_num, scl_out_sig, 0, 0);
-		}
-
-		else {
-
-			gpio_set_direction(new_scl_io_num, GPIO_MODE_INPUT);
-		}
-
-		if (new_scl_pullup_en == GPIO_PULLUP_ENABLE) {
-
-			gpio_set_pull_mode(new_scl_io_num, GPIO_PULLUP_ONLY);
-		}
-
-		else {
-
-			gpio_set_pull_mode(new_scl_io_num, GPIO_FLOATING);
-		}
-
-		gpio_matrix_in(new_scl_io_num, scl_in_sig, 0);
- 	}
-  }
-
-  // block #4 store/use I2C clock speed (when use as master only!)
-  if (parsedKVInput->keysFoundBF |   	( (1 << ESP32_I2C_Master_SET_MASTER_CLOCK) ) ) {
-
-	#if ESP32_I2C_Master_Module_DBG >= 5
-	printf("|W B#01 MASTER_CLOCK=%d>"
-		,new_clk_speed);	
-  	#endif
-
-	// store assigned I2C Pin connections
-	ESP32_I2C_Master_Definition->i2c_config.master.clk_speed =
-		new_clk_speed;
-
-	// ??
-	I2C_ENTER_CRITICAL(&i2c_spinlock[new_i2c_num]);
-
-	// set frequency
-	int half_cycle = ( I2C_APB_CLK_FREQ / new_clk_speed ) / 2;
-	I2C[new_i2c_num]->scl_low_period.period =
-		 half_cycle - 1;
-	I2C[new_i2c_num]->scl_high_period.period =
-		( I2C_APB_CLK_FREQ / new_clk_speed ) - half_cycle - 1;
-
-	// set timing for start signal
-	I2C[new_i2c_num]->scl_start_hold.time = half_cycle;
-	I2C[new_i2c_num]->scl_rstart_setup.time = half_cycle;
-
-	// set timing for stop signal
-	I2C[new_i2c_num]->scl_stop_hold.time = half_cycle;
-	I2C[new_i2c_num]->scl_stop_setup.time = half_cycle;
-
-	// set timing for data
-	I2C[new_i2c_num]->sda_hold.time = half_cycle / 2;
-	I2C[new_i2c_num]->sda_sample.time = half_cycle / 2;
-
-	// set timeout of receving data
-	I2C[new_i2c_num]->timeout.tout = 200000;
-
-	// ???
-	I2C_EXIT_CRITICAL(&i2c_spinlock[new_i2c_num]);
-  }
-
-  // block #5 store/use I2C 10bit enable (when use as slave only!)
-  if (parsedKVInput->keysFoundBF |   	( (1 << ESP32_I2C_Master_SET_SLAVE_10BIT_ENA) ) ) {
-
-/*	#if ESP32_I2C_Master_Module_DBG >= 5
-	printf("|W B#01 PWM_Block=%d>"
-		,newBlock);	
-  	#endif*/
-
-	// store assigned I2C Pin connections
-	ESP32_I2C_Master_Definition->i2c_config.slave.addr_10bit_en =
-		new_addr_10bit_en;
-
-	// slave mode ?
-	if (new_mode == I2C_MODE_SLAVE) {
-
-		// ??
-		I2C_ENTER_CRITICAL(&i2c_spinlock[new_i2c_num]);
-
-		I2C[new_i2c_num]->slave_addr.en_10bit =
-			new_addr_10bit_en;
-
-		// ???
-		I2C_EXIT_CRITICAL(&i2c_spinlock[new_i2c_num]);
-	}
-  }
-
-  // block #6 store/use I2C slave adress (when use as slave only!)
-  if (parsedKVInput->keysFoundBF |   	( (1 << ESP32_I2C_Master_SET_SLAVE_ADRESS) ) ) {
-
-/*	#if ESP32_I2C_Master_Module_DBG >= 5
-	printf("|W B#01 PWM_Block=%d>"
-		,newBlock);	
-  	#endif*/
-
-	// store assigned I2C Pin connections
-	ESP32_I2C_Master_Definition->i2c_config.slave.slave_addr =
-		new_slave_addr;
-
-	// slave mode ?
-	if (new_mode == I2C_MODE_SLAVE) {
-
-		// ??
-		I2C_ENTER_CRITICAL(&i2c_spinlock[new_i2c_num]);
-
-		I2C[new_i2c_num]->slave_addr.addr =
-			new_slave_addr;
-
-		// ???
-		I2C_EXIT_CRITICAL(&i2c_spinlock[new_i2c_num]);
-	}
-  }
-
-
-
-
-
-
-
-
-
+// 4. Step: Passed. Store the new values
 /*
   // block #1 store assigned PWM-Block (low speed / high speed)
   if (parsedKVInput->keysFoundBF | ( (1 << ESP32_I2C_Master_SET_BLOCK) ) ) {
@@ -3119,9 +2568,10 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
 	# endif
   }
 */
-  return retMsg;
+  return false;
 
 }
+
 
 
 

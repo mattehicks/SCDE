@@ -11,6 +11,7 @@
 //#include "driver/i2c.h"
 
 
+
 /* 
  * ESP32 I2C Controller Hardware Configuration Registers (R / W)
  * ESP32 has 2 I2C Controller units. Base adress is (I2C0) 0x3FF53000 (I2C1) 0x3FF67000
@@ -472,11 +473,13 @@ typedef enum {
     I2C_ADDR_BIT_MAX,
 } i2c_addr_mode_t;
 
+
+
 /**
  * @brief I2C initialization parameters
  */
 typedef struct {
-    i2c_mode_t mode;       /*!< I2C mode */
+    i2c_mode_t mode;      	  /*!< I2C mode */
     gpio_num_t sda_io_num;        /*!< GPIO number for I2C sda signal */
     gpio_pullup_t sda_pullup_en;  /*!< Internal GPIO pull mode for I2C sda signal*/
     gpio_num_t scl_io_num;        /*!< GPIO number for I2C scl signal */
@@ -565,7 +568,7 @@ typedef enum {
 
 
 
-// the main i2c processing object
+// i2c processing object
 typedef struct {
   int i2c_num;                     /*!< I2C port number */
   int mode;                        /*!< I2C mode, master or slave */
@@ -580,7 +583,6 @@ typedef struct {
   xSemaphoreHandle cmd_mux;        /*!< semaphore to lock command process */
   size_t tx_fifo_remain;           /*!< tx fifo remain length, for master mode */
   size_t rx_fifo_remain;           /*!< rx fifo remain length, for master mode */
-
   xSemaphoreHandle slv_rx_mux;     /*!< slave rx buffer mux */
   xSemaphoreHandle slv_tx_mux;     /*!< slave tx buffer mux */
   size_t rx_buf_length;            /*!< rx buffer length */
@@ -605,11 +607,11 @@ typedef struct ESP32_I2C_Master_Definition_s {
 
   WebIf_Provided_t WebIf_Provided;	// provided data for WebIf
 
-  uint8_t i2c_master_port;		// the I2C hardware port that should be used
+  uint8_t i2c_num;			// the I2C hardware that should be used
 
-  i2c_config_t i2c_config;		// i2c configuration structure
+  i2c_config_t i2c_config;		// i2c configuration
 
-  i2c_obj_t i2c_obj;			// the i2c object structure
+  i2c_obj_t i2c_obj;			// the current i2c job
 
 } ESP32_I2C_Master_Definition_t;
 
@@ -657,7 +659,7 @@ strTextMultiple_t* ESP32_I2C_Master_Undefine(Common_Definition_t* Common_Definit
 /*
  *  helpers provided to module for type operation
  */
-bool ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t* ESP32_I2C_Master_Definition, parsedKVInputArgs_t *parsedKVInput, uint8_t *argsText, size_t argsTextLen);
+strTextMultiple_t* ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition_t* ESP32_I2C_Master_Definition, parsedKVInputArgs_t *parsedKVInput, uint8_t *argsText, size_t argsTextLen);
 bool ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition_t* ESP32_I2C_Master_Definition, uint64_t affectedReadings);
 
 
@@ -676,8 +678,24 @@ bool ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition_t* ESP32_I
  *     - ESP_OK Success
  *     - ESP_ERR_INVALID_ARG Parameter error
  */
-esp_err_t i2c_param_config(i2c_port_t i2c_num, const i2c_config_t* i2c_conf);
+strTextMultiple_t* i2c_param_config(i2c_port_t i2c_num, const i2c_config_t* i2c_conf);
 
+/**
+ * @brief Configure GPIO signal for I2C sck and sda
+ *
+ * @param i2c_num I2C port number
+ * @param sda_io_num GPIO number for I2C sda signal
+ * @param scl_io_num GPIO number for I2C scl signal
+ * @param sda_pullup_en Whether to enable the internal pullup for sda pin
+ * @param scl_pullup_en Whether to enable the internal pullup for scl pin
+ * @param mode I2C mode
+ *
+ * @return
+ *     - ESP_OK Success
+ *     - ESP_ERR_INVALID_ARG Parameter error
+ */
+strTextMultiple_t* i2c_set_pin(i2c_port_t i2c_num, gpio_num_t sda_io_num, gpio_num_t scl_io_num,
+                      gpio_pullup_t sda_pullup_en, gpio_pullup_t scl_pullup_en, i2c_mode_t mode);
 
 
 /**
@@ -704,23 +722,6 @@ esp_err_t i2c_reset_tx_fifo(i2c_port_t i2c_num);
  */
 esp_err_t i2c_reset_rx_fifo(i2c_port_t i2c_num);
 
-
-/**
- * @brief Configure GPIO signal for I2C sck and sda
- *
- * @param i2c_num I2C port number
- * @param sda_io_num GPIO number for I2C sda signal
- * @param scl_io_num GPIO number for I2C scl signal
- * @param sda_pullup_en Whether to enable the internal pullup for sda pin
- * @param scl_pullup_en Whether to enable the internal pullup for scl pin
- * @param mode I2C mode
- *
- * @return
- *     - ESP_OK Success
- *     - ESP_ERR_INVALID_ARG Parameter error
- */
-esp_err_t i2c_set_pin(i2c_port_t i2c_num, gpio_num_t sda_io_num, gpio_num_t scl_io_num,
-                      gpio_pullup_t sda_pullup_en, gpio_pullup_t scl_pullup_en, i2c_mode_t mode);
 
 
 /**
