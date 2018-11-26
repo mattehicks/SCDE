@@ -48,7 +48,9 @@ typedef struct xMultipleString_s xMultipleString_t;
 
 /*
  * strText_s (struct)
- * - holds a text string with length (not zero terminated)
+ * - holds normally a text string with length (not zero terminated)
+ * - may be raw data too !
+ * - *strText = NULL -> empty, else filled !
  */
 struct strText_s {
 

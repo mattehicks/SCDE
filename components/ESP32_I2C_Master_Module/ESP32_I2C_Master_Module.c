@@ -909,14 +909,14 @@ int intr_alloc_flags = 0;
   // init i2c  
   uint32_t intr_mask = 0;
 
-  i2c_obj_t* p_i2c = &ESP32_I2C_Master_Definition->i2c_obj;
+  i2c_obj_t *p_i2c = &ESP32_I2C_Master_Definition->i2c_obj;
 
+  // init i2c obj
   p_i2c->i2c_num = i2c_num;
   p_i2c->mode = mode;
   p_i2c->cmd_idx = 0;
   p_i2c->rx_cnt = 0;
   p_i2c->status = I2C_STATUS_IDLE;
-
   p_i2c->rx_fifo_remain = I2C_FIFO_LEN;
   p_i2c->tx_fifo_remain = I2C_FIFO_LEN;
 
