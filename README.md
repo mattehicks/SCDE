@@ -38,6 +38,8 @@ ESP32_S0           For S0 counting
 ESP32_SwITCH       For switchig and PWM with internal ESP32 hardware
 
 
+---
+
 
 Created by Maik Schulze, Sandfuhren 4, 38448 Wolfsburg, Germany, for EcSUHA.de
 
@@ -52,6 +54,8 @@ This is part of
 - HoME CoNTROL & Smart Connected Device Engine Activities ...
  
 EcSUHA - ECONOMIC SURVEILLANCE AND HOME AUTOMATION - WWW.EcSUHA.DE
+
+---
 
 
 CMD to clone SCDE (ESP-IDF should be installed and tested)
