@@ -1,23 +1,29 @@
 # SCDE
-Smart Connected Device Engine - Generation 2
+## Smart Connected Device Engine - Generation 2
 
-A tool and a firmware for makers to set up IoT Devices
+### The new tool for makers to set up IoT Devices
 
-IoT Devices setup is stores in the maker.cfg
-IoT Devices state is stores in the state.cfg
+Makers can quickly build a firmware for their IoT-Devices
+based on the Smart Connected Device Engine powered by 
+  * included modules 
+  * own modules
+  * third party modules
+
+IoT Devices setup is stored in the maker.cfg
+IoT Devices state is stored in the state.cfg
 
 Embedded Commands
-Add
-Attr
-Define
-Delete
-Deleteattr
-Help
-Include
-List
-Set
-Shutdown
-Sub
+  * Add
+  * Attr
+  * Define
+  * Delete
+  * Deleteattr
+  * Help
+  * Include
+  * List
+  * Set
+  * Shutdown
+  * Sub
 
 
 Embedded Modules
@@ -31,6 +37,8 @@ ESP32_I2C_Master   Experimental
 ESP32_S0           For S0 counting
 ESP32_SwITCH       For switchig and PWM with internal ESP32 hardware
 
+
+---
 
 
 Created by Maik Schulze, Sandfuhren 4, 38448 Wolfsburg, Germany, for EcSUHA.de
@@ -46,6 +54,8 @@ This is part of
 - HoME CoNTROL & Smart Connected Device Engine Activities ...
  
 EcSUHA - ECONOMIC SURVEILLANCE AND HOME AUTOMATION - WWW.EcSUHA.DE
+
+---
 
 
 CMD to clone SCDE (ESP-IDF should be installed and tested)
