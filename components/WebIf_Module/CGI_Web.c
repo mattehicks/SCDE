@@ -23,6 +23,8 @@
 #include <WebIf_Module global types.h>
 
 
+//test
+void FW_pO(WebIf_HTTPDConnSlotData_t *conn, strText_t out);
 
 /**
  * ---------------------------------------------------------------------------------------------------
@@ -59,14 +61,15 @@ attr apiWEB room hidden
 attr apiWEB webname webhook
 */
 
- strText_t test;
-FW_pO "<div id=\"menu\">$FW_detail details</div>";
+// strText_t test;
 
-    FW_pO "</table>";
-    FW_pO "</td></tr>";
+ //   FW_pO "<div id=\"menu\">$FW_detail details</div>";
 
+  //  FW_pO "</table>";
+ //   FW_pO "</td></tr>";
 
-
+strText_t test = {"xx",2};
+ FW_pO(conn,test);
 
 //--------------------------------------------------------------------------------------------------
 
@@ -92,15 +95,16 @@ FW_pO "<div id=\"menu\">$FW_detail details</div>";
  *  FName: FW_pO
  *  Desc: Print (append to output)
  *  Info: allocated memory in strText_t is freed!
- *  Para: strText_t out -> content to print to output
+ *  Para: WebIf_HTTPDConnSlotData_t *conn -> connection slot
+ *        strText_t out -> content to print to output
  *  Rets: void
  * --------------------------------------------------------------------------------------------------
  */
 void
-FW_pO(strText_t out)
+FW_pO(WebIf_HTTPDConnSlotData_t *conn, strText_t out)
 {
   // empty? -> No write
-  if !(out.strText) return;
+  if (!out.strText) return;
 
   // Write content to send buf
   SCDED_Send(conn, out.strText, out.strTextLen);
@@ -134,6 +138,8 @@ FW_pO(strText_t out)
  *  Rets: strText_t       -> content, only if bool doRet is TRUE
  * --------------------------------------------------------------------------------------------------
  */
+
+/*
 strText_t
 FW_pH(strText_t link
 	,strText_t txt
@@ -250,11 +256,12 @@ FW_pH(strText_t link
   FW_pO(ret);
 
   return;
+
 }
 
 
 
-
+*/
 
 
 
