@@ -1545,6 +1545,10 @@ app_main(void)
   extern ProvidedByModule_t ESP32_Control_ProvidedByModule;
   CommandActivateModule(&ESP32_Control_ProvidedByModule);
 
+  // Activate ESP32_DeVICE as SCDE built-in Module
+  extern ProvidedByModule_t ESP32_DeVICE_ProvidedByModule;
+  CommandActivateModule(&ESP32_DeVICE_ProvidedByModule);
+
   // Activate ESP32_I2C_Master as SCDE built-in Module
   extern ProvidedByModule_t ESP32_I2C_Master_ProvidedByModule;
   CommandActivateModule(&ESP32_I2C_Master_ProvidedByModule);
