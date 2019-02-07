@@ -188,11 +188,17 @@ Setstate_CommandFn (const uint8_t *args
 // create list of definitions which meet devspec here
 // and loop them here 
 //	{
+//foreach my $sdev (devspec2array($a[0],$cl)) {
+//3030	    if(!defined($defs{$sdev})) {
+//3031	      push @rets, "Please define $sdev first";
+//3032	      next;
+//3033	    }
 
 // -------------------------------------------------------------------------------------------------
 
   	// search for the Common_Definition for the requested Definition-Name
-  	Common_Definition_t *Common_Definition = STAILQ_FIRST(&SCDERoot->HeadCommon_Definitions);
+  	Common_Definition_t *Common_Definition = 
+		STAILQ_FIRST(&SCDERoot->HeadCommon_Definitions);
 
  	 while ( Common_Definition != NULL ) {
 
@@ -218,7 +224,7 @@ Setstate_CommandFn (const uint8_t *args
 
 		// response with error text
 		retMsg->strTextLen = asprintf(&retMsg->strText
-			,"Error, could not find <defName>: %.*s!\r\n"
+			,"Please define <defName>: %.*s first!"
 			,defNameLen
 			,defName);
 
