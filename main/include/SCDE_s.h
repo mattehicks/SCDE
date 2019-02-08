@@ -28,25 +28,39 @@ typedef struct Module_s Module_t;
 
 
 
-// strText_t holds a text string with length (not zero terminated)
-typedef struct strText_s strText_t;
-
-// strTextMultiple_t holds multiple text strings with length (not zero terminated) (linked queue)
-typedef struct strTextMultiple_s strTextMultiple_t;
-
-
-
-// xString_t holds a text string
-typedef struct xString_s xString_t;
-
-// xMultipleString_t holds multiple text strings (linked queue)
-typedef struct xMultipleString_s xMultipleString_t;
-
 // -------------------------------------------------------------------------------------------------
 
 
 
 /*
+ * typedefs for string storage and processing
+ */
+
+
+
+// xString_t holds one string. Length information is included (because string is not zero terminated)
+typedef struct xString_s xString_t;
+
+
+
+/*
+ * xString_s (struct)
+ * Holds one string (ptr to characters-array (not zero terminated) and length of this array)
+ */
+struct xString_s {
+
+  uint8_t *characters;		// ptr to allocated memory filled with an character-array
+  size_t length;		// length of the character-array
+};
+
+
+
+// OBSOLETE: use xString_t
+typedef struct strText_s strText_t;
+
+
+
+/* OBSOLETE: use xString_s
  * strText_s (struct)
  * - holds normally a text string with length (not zero terminated)
  * - may be raw data too !
@@ -54,14 +68,36 @@ typedef struct xMultipleString_s xMultipleString_t;
  */
 struct strText_s {
 
-  char *strText;				// ptr to allocated mem filled with text
-  size_t strTextLen;				// length of the text
-
+  char *strText;		// ptr to allocated mem filled with text
+  size_t strTextLen;		// length of the text
 };
 
 
 
+// xMultipleString_t holds multiple strings (in an linked queue). Length information is included (because string is not zero terminated)
+typedef struct xMultipleString_s xMultipleString_t;
+
+
+
 /*
+ * xMultipleString_s (struct)
+ * Holds multiple linked strings (ptr to characters-array (not zero terminated) and length of this array)
+ */
+struct xMultipleString_s {
+
+  STAILQ_ENTRY(xMultipleString_s) entries;	// Link to next xMultipleString
+
+  xString_t string;				// the xString of this entry
+};
+
+
+
+// OBSOLETE: use  xMultipleString_t
+typedef struct strTextMultiple_s strTextMultiple_t;
+
+
+
+/* OBSOLETE: use xMultipleString_s
  * strTextMultiple_s (struct)
  * - holds multiple text strings with length (not zero terminated) (linked queue)
  */
@@ -71,34 +107,6 @@ struct strTextMultiple_s {
 
   char *strText; 				// ptr to allocated mem filled with text
   size_t strTextLen;				// length of the text
-
-};
-
-
-
-/*
- * xString_s (struct)
- * Holds one string ( = character-array[length] - not zero terminated!)
- */
-struct xString_s {
-
-  uint8_t *characters;				// ptr to allocated memory filled with an character-array
-  size_t length;				// length of the character-array
-
-};
-
-
-
-/*
- * xMultipleString_s (struct)
- * Holds multiple strings ( = character-array[length] - not zero terminated!) as an linked queue
- */
-struct xMultipleString_s {
-
-  STAILQ_ENTRY(xMultipleString_s) entries;	// Link to next xMultipleString
-
-  xString_t string;				// the xText of this entry
-
 };
 
 
@@ -108,94 +116,37 @@ struct xMultipleString_s {
 
 
 
-
-
-
-// -------------------------------------------------------------------------------------------------
-
-
-/*
- * typedefs for Fn provided by SCDE (Fn callbacks)
- * This are functions provided for / accessible by modules (for SCDE operation, +helpers )
- */
-
-//
-typedef void (* LogFn_t) (char *Device, int LogLevel, char *Text);
-
-//
-typedef void (* Log3Fn_t) (const uint8_t *name, const size_t nameLen, const uint8_t LogLevel, const char *format, ...);
-
-//
-typedef void (* Log4Fn_t) (char *text);
-
-
-
-// typedef for AnalyzeCommandChainFn - analyzes + processes an configuration file
-//typedef char* (* AnalyzeCommandChainFn_t) (const uint8_t *args, const size_t argsLen);
-
-STAILQ_HEAD(headRetMsgMultiple_s, strTextMultiple_s);// headRetMsgMultiplexxx;
+//warum hier?
+// Constructor for the Stail-Queue xMultipleString
+STAILQ_HEAD(xHeadMultipleString_s, xMultipleString_s);
+// OBSOLETE: use xHeadMultipleString_s
 STAILQ_HEAD(headxMultipleString_s, xMultipleString_s);
-//typedef STAILQ_HEAD (stailhead33, strTextMultiple_s) headRetMsgMultiple (* AnalyzeCommandChainFn_t) (const uint8_t *args, const size_t argsLen);
-typedef struct headRetMsgMultiple_s (* AnalyzeCommandChainFn_t) (const uint8_t *args, const size_t argsLen);
+// OBSOLETE: use xHeadMultipleString_s
+STAILQ_HEAD(headRetMsgMultiple_s, strTextMultiple_s);
 
 
 
 
-// typedef for AnalyzeCommandFn - analyzes + processes one command row
-typedef struct headRetMsgMultiple_s (* AnalyzeCommandFn_t) (const uint8_t *args, const size_t argsLen);
+/*
+ *  ...
+ */
 
-//
-typedef Common_Definition_t* (* GetDefinitionPtrByNameFn_t) (const size_t definitionNameLen, const uint8_t *definitionName);
+// Commands A-Z - will be removed loaded!!
+//typedef char* (* CommandDefineFn_t) (const uint8_t *args, const size_t argsLen);
+//typedef char* (* CommandSetFn_t) (const uint8_t *args, const size_t argsLen);
+typedef strTextMultiple_t* (* CommandUndefineFn_t) (const uint8_t *args, const size_t argsLen);
 
-//
-typedef Module_t* (* GetLoadedModulePtrByNameFn_t)(const uint8_t *typeName, const size_t typeNameLen);
 
-//
-typedef Module_t* (* CommandReloadModuleFn_t)(const uint8_t *typeName, const size_t typeNameLen);
 
-// typedef for readingsBeginUpdateFn - call this before updating readings
-typedef int (* readingsBeginUpdateFn_t) (Common_Definition_t *Common_Definition);
-
-// typedef for readingsBulkUpdateFn - call this for every reading (bulk-update)
-typedef int (* readingsBulkUpdateFn_t) (Common_Definition_t *Common_Definition, uint8_t *readingNameText, size_t readingNameTextLen, uint8_t *readingValueText, size_t readingValueTextLen);
-
-// typedef for readingsEndUpdateFn - call this to after bulk-update to process readings
-typedef int (* readingsEndUpdateFn_t) (Common_Definition_t *Common_Definition);
-
-// typedef for TimeNowFn - returns current time stamp
-typedef time_t (* TimeNowFn_t) ();
-
-// typedef for FmtDateTimeFn - returns formated text of Date-Time from tist
-typedef strText_t (* FmtDateTimeFn_t) (time_t time);
-
-// typedef for FmtTimeFn - returns formated text of Time from tist
-typedef strText_t (* FmtTimeFn_t) (time_t time);
-
-// prints data as Hex-Dump to debug terminal
-typedef void (* HexDumpOutFn_t) (char *desc, void *addr, int len);
-
-// typedef for Call GetFn by Def-Name - for 2 stage desings, requests data
-typedef int (* CallGetFnByDefNameFn_t) (const uint8_t *nameText, const size_t nameTextLen, Common_Definition_t *sourceCommon_Definition, void *X);
-
-// typedef for Call Get All Readings Fn by Def-Name
-typedef struct headRetMsgMultiple_s (* GetAllReadingsFn_t) (Common_Definition_t *Common_Definition);
-
-// typedef for Call Get Definition and Attributes setup lines Fn by Def-Name
-typedef struct headRetMsgMultiple_s (*GetDefAndAttrFn_t) (Common_Definition_t *Common_Definition);
-
-// typedef for WriteStatefileFn - 
-typedef struct headRetMsgMultiple_s (* WriteStatefileFn_t) ();
-
-// added Fn (Perl -> C)
-typedef strText_t* (*Get_attrVal_by_defName_and_attrNameFn_t) (const strText_t *defName
-				,const strText_t *attrName);
+// -------------------------------------------------------------------------------------------------
 
 
 
 /*
  *  Helper routine that parses Key=Value(@) input arguments into an allocated array
  */
-typedef struct kvParseImplementedKeys_s kvParseImplementedKeys_t; // holding the input (IK)
+// holding the input (IK)
+typedef struct kvParseImplementedKeys_s kvParseImplementedKeys_t;
 
 // Data structure that holds the implemented keys and affected readings.
 // Used as input for Key=Value input parsing.
@@ -204,7 +155,6 @@ struct kvParseImplementedKeys_s {
   const uint32_t affectedReadings;
 
   const char *implementedKey;
-
 };
 
 typedef struct parsedKVInputArgs_s parsedKVInputArgs_t; // holds the parsed result in allocated mem
@@ -233,7 +183,6 @@ struct parsedKVInputArgs_s {
 	uint32_t affectedReadings;
 
 	} keyData_t[];		// XX_IK_MAX
-
 };
 
 // Hepler routine that parses Key=Value(@) input arguments into an allocated array
@@ -241,24 +190,130 @@ typedef parsedKVInputArgs_t* (* ParseKVInputArgsFn_t) (int numImplementedKeys, c
 
 
 
-/*
- *  ...
- */
-
-// Commands A-Z - will be removed loaded!!
-//typedef char* (* CommandDefineFn_t) (const uint8_t *args, const size_t argsLen);
-//typedef char* (* CommandSetFn_t) (const uint8_t *args, const size_t argsLen);
-typedef strTextMultiple_t* (* CommandUndefineFn_t) (const uint8_t *args, const size_t argsLen);
-
 //--------------------------------------------------------------------------------------------------
 
 
+// -------------------------------------------------------------------------------------------------
+
+
 
 /*
- * SCDEFn (Functions / callbacks) for operation, provided / made accessible for modules
+ * typedefs of Function Callbacks
+ * This are provided & made accessible for modules and commands - for operation and helpers
  */
-typedef struct SCDEFn_s
-  {
+// typedef for AnalyzeCommandChainFn - analyzes + processes an configuration file
+typedef struct headRetMsgMultiple_s (*AnalyzeCommandChainFn_t) (const uint8_t *args, const size_t argsLen);
+
+// typedef for AnalyzeCommandFn - analyzes + processes one command row
+typedef struct headRetMsgMultiple_s (*AnalyzeCommandFn_t) (const uint8_t *args, const size_t argsLen);
+
+// typedef for Call GetFn by Def-Name - for 2 stage desings, requests data
+typedef int (* CallGetFnByDefNameFn_t) (const uint8_t *nameText, const size_t nameTextLen, Common_Definition_t *sourceCommon_Definition, void *X);
+
+//
+typedef Module_t* (*CommandReloadModuleFn_t)(const uint8_t *typeName, const size_t typeNameLen);
+
+// typedef for Devspec2ArrayFn - returns all definitions that match the given devicespecification (devspec)
+typedef struct xHeadMultipleString_s (*Devspec2ArrayFn_t) (const xString_t devspecString);
+
+// typedef for FmtDateTimeFn - returns formated text of Date-Time from tist
+typedef strText_t (*FmtDateTimeFn_t) (time_t time);
+
+// typedef for FmtTimeFn - returns formated text of Time from tist
+typedef strText_t (*FmtTimeFn_t) (time_t time);
+
+// typedef for Call Get All Readings Fn by Def-Name
+typedef struct headRetMsgMultiple_s (*GetAllReadingsFn_t) (Common_Definition_t *Common_Definition);
+
+// typedef for Call Get Definition and Attributes setup lines Fn by Def-Name
+typedef struct headRetMsgMultiple_s (*GetDefAndAttrFn_t) (Common_Definition_t *Common_Definition);
+
+//
+typedef Common_Definition_t* (*GetDefinitionPtrByNameFn_t) (const size_t definitionNameLen, const uint8_t *definitionName);
+
+//
+typedef Module_t* (*GetLoadedModulePtrByNameFn_t)(const uint8_t *typeName, const size_t typeNameLen);
+
+// typedef for GoodDeviceNameFn - checks the given Device Name for device name rules
+typedef bool (*GoodDeviceNameFn_t) (const xString_t nameString);
+
+// typedef for GoodReadingNameFn - checks the given Reading Name for reading name rules
+typedef bool (*GoodReadingNameFn_t) (const xString_t nameString);
+
+// prints data as Hex-Dump to debug terminal
+typedef void (* HexDumpOutFn_t) (char *desc, void *addr, int len);
+
+//
+typedef void (*LogFn_t) (char *Device, int LogLevel, char *Text);
+
+//
+typedef void (*Log3Fn_t) (const uint8_t *name, const size_t nameLen, const uint8_t LogLevel, const char *format, ...);
+
+//
+typedef void (*Log4Fn_t) (char *text);
+
+// typedef for MakeDeviceNameFn - corrects the given Device Name (overwrites illegal chars with '_')
+typedef void (*MakeDeviceNameFn_t) (const xString_t nameString);
+
+// typedef for MakeReadingNameFn - corrects the given Reading Name (overwrites illegal chars with '_')
+typedef void (*MakeReadingNameFn_t) (const xString_t nameString);
+
+// typedef for readingsBeginUpdateFn - call this before updating readings
+typedef int (*readingsBeginUpdateFn_t) (Common_Definition_t *Common_Definition);
+
+// typedef for readingsBulkUpdateFn - call this for every reading (bulk-update)
+typedef int (*readingsBulkUpdateFn_t) (Common_Definition_t *Common_Definition, uint8_t *readingNameText, size_t readingNameTextLen, uint8_t *readingValueText, size_t readingValueTextLen);
+
+// typedef for readingsEndUpdateFn - call this to after bulk-update to process readings
+typedef int (*readingsEndUpdateFn_t) (Common_Definition_t *Common_Definition);
+
+// typedef for TimeNowFn - returns current time stamp
+typedef time_t (*TimeNowFn_t) ();
+
+// typedef for WriteStatefileFn - 
+typedef struct headRetMsgMultiple_s (*WriteStatefileFn_t) ();
+
+// ----------------
+
+// added Fn (Perl -> C)
+typedef strText_t* (*Get_attrVal_by_defName_and_attrNameFn_t) (const strText_t *defName
+				,const strText_t *attrName);
+
+
+
+/*
+ * SCDEFn (SCDE Functions) typedef
+ * Stores Function callbacks provided & made accessible for modules and commands - for operation and helpers
+ */
+typedef struct SCDEFn_s {
+
+  AnalyzeCommandChainFn_t AnalyzeCommandChainFn;           // analyzes + processes an configuration file
+
+  AnalyzeCommandFn_t AnalyzeCommandFn;                     // analyzes + processes one command row
+
+  CallGetFnByDefNameFn_t CallGetFnByDefNameFn;             // original CallFn
+
+  CommandReloadModuleFn_t CommandReloadModuleFn;           //
+
+  Devspec2ArrayFn_t Devspec2ArrayFn;			   // returns all definitions that match devspec
+
+  FmtDateTimeFn_t FmtDateTimeFn;                           // returns formated text of Date-Time from tist
+
+  FmtTimeFn_t FmtTimeFn;                                   // returns formated text of Time from tist
+
+  GetAllReadingsFn_t GetAllReadingsFn;                     // returns all readings of an definition
+
+  GetDefAndAttrFn_t GetDefAndAttrFn;                       //
+
+  GetDefinitionPtrByNameFn_t GetDefinitionPtrByNameFn;     //
+
+  GetLoadedModulePtrByNameFn_t GetLoadedModulePtrByNameFn; //
+
+  GoodDeviceNameFn_t GoodDeviceNameFn;			   // checks the given Device Name for device name rules
+
+  GoodReadingNameFn_t GoodReadingNameFn;		   // checks the given Reading Name for device name rules
+
+  HexDumpOutFn_t HexDumpOutFn;                             // prints data as Hex-Dump to debug terminal
 
   LogFn_t LogFn;                                           // Log -> This is the main logging function
 
@@ -266,17 +321,9 @@ typedef struct SCDEFn_s
 
   Log4Fn_t Log4Fn;                                         // Log -> This is the main logging function
 
-  AnalyzeCommandChainFn_t AnalyzeCommandChainFn;           // analyzes + processes an configuration file
+  MakeDeviceNameFn_t MakeDeviceNameFn;			   // corrects the given Device Name
 
-  AnalyzeCommandFn_t AnalyzeCommandFn;                     // analyzes + processes one command row
-
-  GetDefinitionPtrByNameFn_t GetDefinitionPtrByNameFn;     //
-
-  GetLoadedModulePtrByNameFn_t GetLoadedModulePtrByNameFn; //
-
-  CommandReloadModuleFn_t CommandReloadModuleFn;           //
-
-  CommandUndefineFn_t CommandUndefineFn;                   //
+  MakeReadingNameFn_t MakeReadingNameFn;		   // corrects the given Reading Name   
 
   readingsBeginUpdateFn_t readingsBeginUpdateFn;           // call this before updating readings
 
@@ -286,25 +333,15 @@ typedef struct SCDEFn_s
 
   TimeNowFn_t TimeNowFn;                                   // returns current time stamp
 
-  FmtDateTimeFn_t FmtDateTimeFn;                           // returns formated text of Date-Time from tist
-
-  FmtTimeFn_t FmtTimeFn;                                   // returns formated text of Time from tist
-
-  HexDumpOutFn_t HexDumpOutFn;                             // prints data as Hex-Dump to debug terminal
-
-  ParseKVInputArgsFn_t ParseKVInputArgsFn;                 // parses Key=Value(@) input arguments into array
-
-  CallGetFnByDefNameFn_t CallGetFnByDefNameFn;             // original CallFn
-
-  GetAllReadingsFn_t GetAllReadingsFn;                     // returns all readings of an definition
-
   WriteStatefileFn_t WriteStatefileFn;                     // 
-
-  GetDefAndAttrFn_t GetDefAndAttrFn;                       //
 
   // added Fn (Perl -> C)
   Get_attrVal_by_defName_and_attrNameFn_t Get_attrVal_by_defName_and_attrNameFn;
 
+  // not final
+  CommandUndefineFn_t CommandUndefineFn;                   //
+
+  ParseKVInputArgsFn_t ParseKVInputArgsFn;                 // parses Key=Value(@) input arguments into array
 } SCDEFn_t;
 
 
@@ -364,6 +401,8 @@ typedef struct SCDEFn_s
 
 // ProvidedByModule_t stores differnt function callbacks (Fn) - the heart of SCDE module operation
 typedef struct ProvidedByModule_s ProvidedByModule_t;
+
+
 
 // typedef for AddFn - experimental - provided my module
 typedef strTextMultiple_t* (* AddFn_t)(Common_Definition_t *Common_Definition, uint8_t *kvArgs, size_t kvArgsLen);
@@ -428,8 +467,9 @@ typedef int (* DirectReadFn_t)(Common_Definition_t *Common_Definition);
 
 // typedef for DirectWriteFn - for 2 stage designs - called to give write job to 1st stage - provided my module
 /*typedef strTextMultiple_t* (* DirectWriteFn_t)(Common_Definition_t *Common_Definition_Stage1, Common_Definition_t *Common_Definition_Stage2, Common_StageXCHG_t *Common_StageXCHG);*/
-
 typedef int (* DirectWriteFn_t)(Common_Definition_t *Common_Definition);
+
+
 
 /* 
  * ProvidedByModule_s (struct)
@@ -496,6 +536,8 @@ struct ProvidedByModule_s {
 // Module_t stores information of loaded modules, Fns required for module use and operation
 typedef struct Module_s Module_t;
 
+
+
 /*
  * Module_s (struct)
  * - stores information of loaded modules, Fns required for module use and operation
@@ -519,6 +561,8 @@ struct Module_s {
 
 // bulkUpdateReadings_t stores bulk update information and the link to updated readings
 typedef struct bulkUpdateReadings_s bulkUpdateReadings_t;
+
+
 
 /* 
  * bulkUpdateReadings_s (struct)
@@ -565,6 +609,8 @@ struct reading_s {
 
 // Common_Definition_t stores values for operation of an definition (device)
 typedef struct Common_Definition_s Common_Definition_t;
+
+
 
 /* 
  * Common_Definition_s (struct)
@@ -619,6 +665,8 @@ struct Common_Definition_s {
 */
 };
 
+
+
 // Information Flags, stored in Common_Definition_s - for Definition Control
 enum Common_DefCtrlRegA {
 //hinzu CDCRA_Flag
@@ -626,6 +674,8 @@ enum Common_DefCtrlRegA {
   , F_VOLATILE		= 1 << 1	// indicates:Definition is volatile -> saved to statefile
   , CDCRA_F_weitere	= 1 << 2	//   
 };
+
+
 
 // Information Flags, stored in Common_Definition_s - for Connection Control
 enum Common_CtrlRegA {
@@ -640,9 +690,12 @@ enum Common_CtrlRegA {
 // -------------------------------------------------------------------------------------------------
 
 
+
 // oder Common_DirectWriteJob_t
 // Common_StageXCHG_t stores values for operation of 2. stage design Modules
 typedef struct Common_StageXCHG_s Common_StageXCHG_t;
+
+
 
 /* 
  * Common_StageXCHG_s (struct)

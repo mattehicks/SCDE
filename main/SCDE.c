@@ -156,7 +156,7 @@ LOG_TAG("SCDE");
 
 /*
  * DName: SCDERoot
- * Desc: Smart Connected Devices Engine - Root Data
+ * Desc: Stores the Root Data for Smart Connected Devices Engine operation
  * Data: 
  */
 SCDERoot_t SCDERoot;
@@ -164,35 +164,43 @@ SCDERoot_t SCDERoot;
 
 
 /*
- * DName: SCDEFn
- * Desc: SCDEFn (functions / callbacks) for operation, provided / made accessible for modules
+ * DName: SCDEFn (SCDE Functions)
+ * Desc: Stores Function callbacks provided & made accessible for modules and commands
+ *       for operation and helpers
  * Data: 
  */
 SCDEFn_t SCDEFn = {
-   Log 
-  ,Log3
-  ,Log4
-  ,AnalyzeCommandChain
+   AnalyzeCommandChain
   ,AnalyzeCommand
+  ,CallGetFnByDefName
+  ,CommandReloadModule
+  ,Devspec2Array
+  ,FmtDateTime
+  ,FmtTime
+  ,GetAllReadings
+  ,GetDefAndAttr
   ,GetDefinitionPtrByName
   ,GetLoadedModulePtrByName
-  ,CommandReloadModule
-  ,CommandUndefine
+  ,GoodDeviceName
+  ,GoodReadingName
+  ,HexDumpOut
+  ,Log 
+  ,Log3
+  ,Log4
+  ,MakeDeviceName
+  ,MakeReadingName
   ,readingsBeginUpdate
   ,readingsBulkUpdate
   ,readingsEndUpdate
   ,TimeNow
-  ,FmtDateTime
-  ,FmtTime
-  ,HexDumpOut
-  ,ParseKVInputArgs
-  ,CallGetFnByDefName
-  ,GetAllReadings
   ,WriteStatefile
-  ,GetDefAndAttr
 
 // added Fn (Perl -> C)
   ,Get_attrVal_by_defName_and_attrName
+
+// not final
+  ,CommandUndefine
+  ,ParseKVInputArgs
 };
 
 
@@ -207,8 +215,7 @@ SCDEFn_t SCDEFn = {
  * -------------------------------------------------------------------------------------------------
  */
 void
-InitSCDERoot(void)
-{
+InitSCDERoot(void) {
   SCDERoot.SCDEFn = &SCDEFn;
 
   STAILQ_INIT(&SCDERoot.headAttributes);
@@ -218,6 +225,138 @@ InitSCDERoot(void)
   STAILQ_INIT(&SCDERoot.HeadCommon_Definitions);
 
   STAILQ_INIT(&SCDERoot.HeadModules);
+}
+
+
+
+/** Category: SCDE Core Fn
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Devspec2Array
+ *  Desc: Returns all (multiple) definitions (name) that match the given devicespecification (devspec)
+ *  Info: devspec should contain data (check in advance!) ; 
+ *  Para: const xString_s devspecString -> the devicespecification (devspec) string
+ *  Rets: xHeadMultipleString_t -> head of STAILQ, stores multiple strings (definition-names)
+ *        that match the requested devicespecification (devspec), NULL => NONE FOUND
+ * -------------------------------------------------------------------------------------------------
+ */
+struct xHeadMultipleString_s
+Devspec2Array(const xString_t devspecString)
+{
+ // prepare STAILQ head for multiple definitions storage
+  struct xHeadMultipleString_s definitionHeadMultipleString;
+
+  // Initialize the queue head
+  STAILQ_INIT(&definitionHeadMultipleString);
+
+//---------------------------------------------------------------------------------------------------
+
+// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
+
+  // alloc an definitionMultipleString queue element
+  xMultipleString_t *definitionMultipleString =
+	malloc(sizeof(xMultipleString_t));
+
+  // fill string in queue element 
+  definitionMultipleString->string.length =
+	asprintf(&definitionMultipleString->string.characters
+		,"%.*s"
+		,devspecString.length
+		,devspecString.characters);
+
+  // insert definitionMultipleString queue element in stail-queue
+  STAILQ_INSERT_TAIL(&definitionHeadMultipleString, definitionMultipleString, entries);
+
+//---------------------------------------------------------------------------------------------------
+
+  // return STAILQ head, stores multiple (all) matching definitions, if STAILQ_EMPTY -> no matching definitions
+  return definitionHeadMultipleString;
+}
+
+
+
+/** Category: SCDE Core Fn
+ * -------------------------------------------------------------------------------------------------
+ *  FName: GoodDeviceName
+ *  Desc: Checks the given Device Name if it is in compliance with the device name rules:
+ *        - normal letters, without special signs (A-Z, a-z)
+ *        - numbers (0-9), point (.) and underscore (_)
+ *  Info: Device Name rules = definition name rules
+ *  Para: const xString_s nameString -> the Device Name string that should be checked
+ *  Rets: bool false -> not good ; bool true -> good device name
+ * -------------------------------------------------------------------------------------------------
+ */
+bool
+GoodDeviceName(const xString_t nameString)
+{
+
+// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
+
+  return true;
+}
+
+
+
+/** Category: SCDE Core Fn
+ * -------------------------------------------------------------------------------------------------
+ *  FName: MakeDeviceName
+ *  Desc: Corrects the given Device Name.Then it is in compliance with the device name rules:
+ *        - normal letters, without special signs (A-Z, a-z)
+ *        - numbers (0-9), point (.) and underscore (_)
+ *  Info: Characters that are not in comliance with the rules will be replaced by and underscore (_)
+ *  Para: const xString_s nameString -> the Device Name string that should be corrected
+ *  Rets: -/-
+ * -------------------------------------------------------------------------------------------------
+ */
+void
+MakeDeviceName(const xString_t nameString)
+{
+
+// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
+
+  return;
+}
+
+
+
+/** Category: SCDE Core Fn
+ * -------------------------------------------------------------------------------------------------
+ *  FName: GoodReadingName
+ *  Desc: Checks the given Reading Name if it is in compliance with the reading name rules
+ *        - normal letters, without special signs (A-Z, a-z)
+ *        - numbers (0-9), point (.), hyphen (-), slash (/) and underscore (_)
+ *  Para: const xString_s nameString -> the Reading Name string that should be checked
+ *  Rets: bool false -> not good ; bool true -> good reading name
+ * -------------------------------------------------------------------------------------------------
+ */
+bool
+GoodReadingName(const xString_t nameString)
+{
+
+// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
+
+  return true;
+}
+
+
+
+/** Category: SCDE Core Fn
+ * -------------------------------------------------------------------------------------------------
+ *  FName: MakeReadingName
+ *  Desc: Corrects the given Reading Name.Then it is in compliance with the reading name rules:
+ *        - normal letters, without special signs (A-Z, a-z)
+ *        - numbers (0-9), point (.), hyphen (-), slash (/) and underscore (_)
+ *  Info: Characters that are not in comliance with the rules will be replaced by and underscore (_)
+ *  Para: const xString_s nameString -> the Reading Name string that should be corrected
+ *  Rets: -/-
+ * -------------------------------------------------------------------------------------------------
+ */
+void
+MakeReadingName(const xString_t nameString)
+{
+
+// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
+
+  return;
 }
 
 

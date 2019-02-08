@@ -947,8 +947,8 @@ ESP32_DeVICE_Define(Common_Definition_t *Common_Definition)
 // ------------------------------------------------------------------------------------------------
 
   // set affected readings
-  ESP32_DeVICE_SetAffectedReadings(ESP32_DeVICE_Definition
-	,parsedKVInput->affectedReadingsBF);
+ // ESP32_DeVICE_SetAffectedReadings(ESP32_DeVICE_Definition
+//	,parsedKVInput->affectedReadingsBF);
 
 // ------------------------------------------------------------------------------------------------
 
@@ -1406,8 +1406,8 @@ ESP32_DeVICE_Set(Common_Definition_t* Common_Definition
 // ------------------------------------------------------------------------------------------------
 
   // set affected readings
-  ESP32_DeVICE_SetAffectedReadings(ESP32_DeVICE_Definition
-	,parsedKVInput->affectedReadingsBF);
+ // ESP32_DeVICE_SetAffectedReadings(ESP32_DeVICE_Definition
+//	,parsedKVInput->affectedReadingsBF);
 
 // ------------------------------------------------------------------------------------------------
 
@@ -2553,12 +2553,12 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Password)
 				   | (1 << ESP32_DeVICE_Set_IK_WSAP_RF_Channel)
 				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections)
-				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Authentication_Method
-				   | (1 << ESP32_DeVICE_Set_IK_WSAP_SSID
+				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Authentication_Method)
+				   | (1 << ESP32_DeVICE_Set_IK_WSAP_SSID)
 				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval) ) ) {
 
 	# if ESP32_SwITCH_Module_DBG >= 5
-	HexDumpOut ("WSAP: ap_wifi_config changed !",
+	SCDEFn->HexDumpOutFn ("WSAP: ap_wifi_config changed !",
 		&ap_wifi_config,
 		sizeof(ap_wifi_config));
 	# endif
@@ -2614,7 +2614,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 
 
-
+/*
 // -------------------------------------------------------------------------------------------------
 // Save changes to SDK
 // -------------------------------------------------------------------------------------------------
@@ -2756,7 +2756,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 // -------------------------------------------------------------------------------------------------
 
-
+*/
 
 
 
@@ -2868,7 +2868,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 
 
-
+/*
   // debugview all readings
   affectedReadings = 0xffffffff;
 
@@ -3447,7 +3447,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 		,readingValueTextLen);
 
   }
-
+*/
 
 
 
@@ -3607,7 +3607,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 //--------------------------------------------------------------------------------------------------
 */
-
+/*
   // free allocated memory for query result key-field
   free(parsedKVInput);
 
@@ -3676,7 +3676,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
   }
 
-
+*/
 
 
 

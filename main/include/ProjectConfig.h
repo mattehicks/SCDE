@@ -9,7 +9,6 @@
 
 
 // new debugging verbose setting starts here
-
 //                                      0 no logging
 //                                        1 fatal message
 //                                          2 very important
@@ -48,6 +47,7 @@
 // Module logging verbose - override    0 1 2 3 4 5 6 7 8 9
 #define ESP32_BH1770_Module_DBG                       7
 #define ESP32_CoNTROL_Module_DBG                      7
+#define ESP32_DeVICE_Module_DBG                       7
 #define ESP32_I2C_Master_Module_DBG                   7
 #define ESP32_S0_Module_DBG                           7
 #define ESP32_SwITCH_Module_DBG                       7
