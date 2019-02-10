@@ -442,14 +442,22 @@ void Telnet_espconn_regist_disconcb(Telnet_Definition_t *conn, espconn_connect_c
 void Telnet_espconn_regist_sentcb(Telnet_Definition_t *conn, espconn_sent_callback SentCb);
 
 
-// move to right place
+
+/*
+ *  Functions provided to SCDE by Module - for type operation (A-Z)
+ */
+strTextMultiple_t* Telnet_Define(Common_Definition_t *Common_Definition);//, const char *Definition);
+
+int Telnet_DirectRead(Common_Definition_t* Common_Definition);
+
+int Telnet_DirectWrite(Common_Definition_t* Common_Definition);
 
 int Telnet_Initialize(SCDERoot_t* SCDERoot);
-strTextMultiple_t* Telnet_Define(Common_Definition_t *Common_Definition);//, const char *Definition);
-int Telnet_DirectRead(Common_Definition_t* Common_Definition);
-int Telnet_DirectWrite(Common_Definition_t* Common_Definition);
+
 strTextMultiple_t* Telnet_Set(Common_Definition_t* Common_Definition, uint8_t *setArgs, size_t setArgsLen);
+
 strTextMultiple_t* Telnet_Undefine(Common_Definition_t* Common_Definition);
+
 
 
 /*
@@ -458,12 +466,11 @@ strTextMultiple_t* Telnet_Undefine(Common_Definition_t* Common_Definition);
 int Telnet_SendToSendBuff(Telnet_DConnSlotData_t *conn, const char *data, int len);
 void Telnet_TransmitSendBuff(Telnet_DConnSlotData_t *conn); 
 
+
+
 /*
  *  helpers
  */
-
-
-
 static char* eventToString(telnet_event_type_t type);
 static void Telnet_LibtelnetEventHandler(telnet_t *thisTelnet, telnet_event_t *event, void *userData);
 

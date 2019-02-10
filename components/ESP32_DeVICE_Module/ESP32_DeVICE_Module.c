@@ -1462,29 +1462,27 @@ ESP32_DeVICE_Shutdown(Common_Definition_t* Common_Definition)
 /**
  * -------------------------------------------------------------------------------------------------
  *  FName: ESP32_DeVICE_State
- *  Desc: FN is called when a Definition of this Module gets an status update of readings. 
- *        e.g. called from setstate cmd for status recovery from save
- *  Info: An FN for State is optional!
- *  Para: ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definition -> Definition that gets an status update
- *        time_t readingTiSt -> time stamp that should be associated to the reading value
- *        uint8_t *readingName -> ptr to the reading name
- *        size_t readingNameLen -> length of the reading name
- *        uint8_t *readingValue -> ptr to the reading value
- *        size_t readingValueLen -> length of the reading Value
- *  Rets: strTextMultiple_t* -> response text in allocated memory, NULL=no text
+ *  Desc: FN is called when a Definition of this Module gets, and should set an state update. 
+ *        Normally called from setstate cmd when executing state (=readings?) recovery from save .cfg
+ *  Info: An FN for State in an Module is optional!
+ *  Para: const Common_Definition_t *ESP32_DeVICE_Definition -> Definition that should execute an status update
+ *        const time_t stateTiSt -> time stamp for status update / reading value
+ *        const xString_t stateNameString -> state Name for status update / reading value
+ *        const xString_t stateValueString -> state Value for the status update / reading value
+ *        const xString_t stateMimeString -> state Mime for the status update / reading value
+ *  Rets: xMultipleStringSLTQE_t -> singly linked tail queue element which stores one xString_t string
+ *                                  as response text in allocated memory. NULL=no response text
  * -------------------------------------------------------------------------------------------------
  */
-strTextMultiple_t*
+xMultipleStringSLTQE_t*
 ESP32_DeVICE_State(Common_Definition_t *Common_Definition
-	,time_t readingTiSt
-	,uint8_t *readingName
-	,size_t readingNameLen
-	,uint8_t *readingValue
-	,size_t readingValueLen)
+	,const time_t stateTiSt
+	,const xString_t stateNameString
+	,const xString_t stateValueString
+	,const xString_t stateMimeString)
 {
-	
-  // for Fn response msg
-  strTextMultiple_t *multipleRetMsg = NULL;
+  // Fn return message. NULL = no return message
+  xMultipleStringSLTQE_t *retMsgMultipleStringSLTQE = NULL;
 	
   // make common ptr to modul specific ptr
   ESP32_DeVICE_Definition_t* ESP32_DeVICE_Definition =
@@ -1492,31 +1490,98 @@ ESP32_DeVICE_State(Common_Definition_t *Common_Definition
 
 // -------------------------------------------------------------------------------------------------
 
-  #if ESP32_DeVICE_DBG >= 5
-  // prepare TiSt for LogFn
-  strText_t strText =
-  	SCDEFn->FmtDateTimeFn(readingTiSt);
+  #if ESP32_DeVICE_Module_DBG >= 5
+  // prepare TiSt-string for LogFn
+  strText_t timeString =
+  	SCDEFn->FmtDateTimeFn(stateTiSt);
 
   SCDEFn->Log3Fn(Common_Definition->name
 	,Common_Definition->nameLen
 	,5
-	,"Executing StateFn of Module '%.*s' for Definition '%.*s'. Reading '%.*s' should get new Value '%.*s' with TimeStamp '%.*s'."
+	,"Executing StateFn of Module '%.*s' for Definition '%.*s'. "
+         "Should set State for '%.*s' with Value '%.*s' and Mime '%.*s'. TimeStamp '%.*s'."
 	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
 	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeName
-	,readingName
-	,readingNameLen
-	,readingValueLen
-	,readingValue
-	,strText.strTextLen
-	,strText.strText);
+	,stateNameString.length
+	,stateNameString.characters
+	,stateValueString.length
+	,stateValueString.characters
+	,stateMimeString.length
+	,stateMimeString.characters
+	,timeString.strTextLen
+	,timeString.strText);
 
-  // free TiSt from LogFn
-  free(strText.strText);
+  // free TiSt-string from LogFn
+  free(timeString.strText);
   #endif
+
+/*
+// ------------------------------------------------------------------------------------------------
+
+  // build an temp KEY=VALUE string
+  xString_t argsString;
+
+  // check if there is a KEY
+  if (!stateNameString.length) {
+
+	// alloc mem for the singly linked tail queue element that stores the Return Message
+	retMsgMultipleStringSLTQE = 
+		malloc(sizeof(xMultipleStringSLTQE_t));
+
+	// fill Return Message with error text
+	retMsgMultipleStringSLTQE->string.length = 
+		asprintf(&retMsgMultipleStringSLTQE->string.characters
+			,"Error in StateFn! Fn called without State Name");
+
+	return retMsgMultipleStringSLTQE;
+  }
+
+  argsString.length = 
+	asprintf(&argsString.characters
+		,"%.*s=%.*s"
+		,stateNameString.length
+		,stateNameString.characters
+		,stateValueString.length
+		,stateValueString.characters);
+
+// ------------------------------------------------------------------------------------------------
+
+  // Parse State-Args (KEY=VALUE) protocol -> gets parsedKVInput in allocated mem, NULL = ERROR
+  parsedKVInputArgs_t *parsedKVInput = 
+	SCDEFn->ParseKVInputArgsFn(ESP32_DeVICE_Set_NUMBER_OF_IK	// Num Implementated KEYs MAX
+		,ESP32_DeVICE_Set_ImplementedKeys			// Implementated Keys
+		,argsString.characters
+		,argsString.length);
+
+  // NULL? Parsing reports an problem. args contain: unknown keys, double keys, ...?
+  if (!parsedKVInput) {
+
+	// alloc mem for the singly linked tail queue element that stores the Return Message
+	retMsgMultipleStringSLTQE = 
+		malloc(sizeof(xMultipleStringSLTQE_t));
+
+	// fill Return Message with error text
+	retMsgMultipleStringSLTQE->string.length = 
+		asprintf(&retMsgMultipleStringSLTQE->string.characters
+			,"Parsing Error! Args '%.*s' not taken! Check the KEYs!"
+			,argsString.length
+			,argsString.characters);
+
+	// free the temp KEY=VALUE string
+	if (argsString.characters) free (argsString.characters);
+
+	return retMsgMultipleStringSLTQE;
+  }
 
 // -------------------------------------------------------------------------------------------------
 
-  return multipleRetMsg;
+  // free allocated memory for query result key-field
+  free(parsedKVInput);
+
+  // free the temp KEY=VALUE string
+  if (argsString.characters) free (argsString.characters);
+*/
+  return retMsgMultipleStringSLTQE;
 }
 
 

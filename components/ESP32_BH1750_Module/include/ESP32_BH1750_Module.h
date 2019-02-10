@@ -42,14 +42,20 @@ typedef struct ESP32_BH1750_Definition_s {
 
 
 /*
- *  Functions provided to SCDE by module for type operation
+ *  Functions provided to SCDE by Module - for type operation (A-Z)
  */
 strTextMultiple_t* ESP32_BH1750_Attribute(Common_Definition_t* Common_Definition, const uint8_t *attrCmdText, const size_t attrCmdTextLen, const uint8_t *attrNameText, const size_t attrNameTextLen, uint8_t **attrValTextPtr, size_t *attrValTextLenPtr);
+
 strTextMultiple_t* ESP32_BH1750_Define(Common_Definition_t *Common_Definition);
+
 int                ESP32_BH1750_IdleCb(Common_Definition_t *Common_Definition);
+
 int                ESP32_BH1750_Initialize(SCDERoot_t* SCDERoot);
+
 strTextMultiple_t* ESP32_BH1750_Set(Common_Definition_t* Common_Definition, uint8_t *setArgs, size_t setArgsLen);
+
 strTextMultiple_t* ESP32_BH1750_Shutdown(Common_Definition_t* Common_Definition);
+
 strTextMultiple_t* ESP32_BH1750_Undefine(Common_Definition_t* Common_Definition);
 
 

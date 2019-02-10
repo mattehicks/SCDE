@@ -40,7 +40,7 @@ int CallGetFnByDefName(const uint8_t *nameText, const size_t nameTextLen, Common
 Module_t* CommandReloadModule(const uint8_t *typeName, const size_t typeNameLen);
 
 // returns all definitions that match devspec
-struct xHeadMultipleString_s Devspec2Array(const xString_t devspecString);
+struct xHeadMultipleStringSLTQ_s Devspec2Array(const xString_t devspecString);
 
 // returns formated text of Date-Time from tist
 strText_t FmtDateTime(time_t tiSt);

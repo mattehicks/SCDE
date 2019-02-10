@@ -235,41 +235,42 @@ InitSCDERoot(void) {
  *  Desc: Returns all (multiple) definitions (name) that match the given devicespecification (devspec)
  *  Info: devspec should contain data (check in advance!) ; 
  *  Para: const xString_s devspecString -> the devicespecification (devspec) string
- *  Rets: xHeadMultipleString_t -> head of STAILQ, stores multiple strings (definition-names)
- *        that match the requested devicespecification (devspec), NULL => NONE FOUND
+ *  Rets: xHeadMultipleStringSLTQ_t -> singly linked tail queue head to store multiple strings
+ *        (definition-names) that match the requested devicespecification (devspec),
+ *        loop string entrys till STAILQ_EMPTY
  * -------------------------------------------------------------------------------------------------
  */
-struct xHeadMultipleString_s
+struct xHeadMultipleStringSLTQ_s
 Devspec2Array(const xString_t devspecString)
 {
  // prepare STAILQ head for multiple definitions storage
-  struct xHeadMultipleString_s definitionHeadMultipleString;
+  struct xHeadMultipleStringSLTQ_s definitionHeadMultipleStringSLTQ;
 
   // Initialize the queue head
-  STAILQ_INIT(&definitionHeadMultipleString);
+  STAILQ_INIT(&definitionHeadMultipleStringSLTQ);
 
 //---------------------------------------------------------------------------------------------------
 
 // CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
 
   // alloc an definitionMultipleString queue element
-  xMultipleString_t *definitionMultipleString =
-	malloc(sizeof(xMultipleString_t));
+  xMultipleStringSLTQE_t *definitionMultipleStringSLTQE =
+	malloc(sizeof(xMultipleStringSLTQE_t));
 
   // fill string in queue element 
-  definitionMultipleString->string.length =
-	asprintf(&definitionMultipleString->string.characters
+  definitionMultipleStringSLTQE->string.length =
+	asprintf(&definitionMultipleStringSLTQE->string.characters
 		,"%.*s"
 		,devspecString.length
 		,devspecString.characters);
 
   // insert definitionMultipleString queue element in stail-queue
-  STAILQ_INSERT_TAIL(&definitionHeadMultipleString, definitionMultipleString, entries);
+  STAILQ_INSERT_TAIL(&definitionHeadMultipleStringSLTQ, definitionMultipleStringSLTQE, entries);
 
 //---------------------------------------------------------------------------------------------------
 
   // return STAILQ head, stores multiple (all) matching definitions, if STAILQ_EMPTY -> no matching definitions
-  return definitionHeadMultipleString;
+  return definitionHeadMultipleStringSLTQ;
 }
 
 

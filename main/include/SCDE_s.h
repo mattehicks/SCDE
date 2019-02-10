@@ -36,29 +36,24 @@ typedef struct Module_s Module_t;
  * typedefs for string storage and processing
  */
 
+// -------------------------------------------------------------------------------------------------
 
-
-// xString_t holds one string. Length information is included (because string is not zero terminated)
+// xString_t holds one string. Length information is included (because the string is not zero terminated)
 typedef struct xString_s xString_t;
-
-
 
 /*
  * xString_s (struct)
- * Holds one string (ptr to characters-array (not zero terminated) and length of this array)
+ * Holds one string (ptr to characters-array (not zero terminated) and the length of this array)
  */
 struct xString_s {
-
-  uint8_t *characters;		// ptr to allocated memory filled with an character-array
-  size_t length;		// length of the character-array
+  uint8_t *characters;		// typically ptr to allocated memory filled with an character-array
+  size_t length;		// length of the not zero terminated character-array
 };
 
-
+// -------------------------------------------------------------------------------------------------
 
 // OBSOLETE: use xString_t
 typedef struct strText_s strText_t;
-
-
 
 /* OBSOLETE: use xString_s
  * strText_s (struct)
@@ -67,49 +62,47 @@ typedef struct strText_s strText_t;
  * - *strText = NULL -> empty, else filled !
  */
 struct strText_s {
-
-  char *strText;		// ptr to allocated mem filled with text
-  size_t strTextLen;		// length of the text
+  char *strText;				// ptr to allocated mem filled with text
+  size_t strTextLen;				// length of the text
 };
 
+// -------------------------------------------------------------------------------------------------
 
-
-// xMultipleString_t holds multiple strings (in an linked queue). Length information is included (because string is not zero terminated)
-typedef struct xMultipleString_s xMultipleString_t;
-
-
+// xMultipleString_t to hold multiple xString_t strings (in an singly linked tail queue)
+typedef struct xMultipleStringSLTQE_s xMultipleStringSLTQE_t;
 
 /*
- * xMultipleString_s (struct)
- * Holds multiple linked strings (ptr to characters-array (not zero terminated) and length of this array)
+ * xMultipleStringSLTQE_s (struct) 
+ * is an singly linked tail queue element and stores one xString_t string
+ * it is used when storing multiple strings (in an singly tail linked queue)
  */
-struct xMultipleString_s {
-
-  STAILQ_ENTRY(xMultipleString_s) entries;	// Link to next xMultipleString
-
-  xString_t string;				// the xString of this entry
+struct xMultipleStringSLTQE_s {
+  STAILQ_ENTRY(xMultipleStringSLTQE_s) entries;	// link to next element of the singly linked tail queue
+  xString_t string;				// the string of this element
 };
 
+/*
+ * Constructor for the singly linked tail queue (head), which can hold multiple linked strings
+ * SLTQ can be used for an FIFO queue by adding entries at the tail and fetching entries from the head
+ * SLTQ is inefficient when removing arbitrary elements
+ */
+STAILQ_HEAD(xHeadMultipleStringSLTQ_s, xMultipleStringSLTQE_s);
+//STAILQ_HEAD(xMultipleStringSLTQH_s, xMultipleStringSLTQE_s);
 
+// -------------------------------------------------------------------------------------------------
 
 // OBSOLETE: use  xMultipleString_t
 typedef struct strTextMultiple_s strTextMultiple_t;
-
-
 
 /* OBSOLETE: use xMultipleString_s
  * strTextMultiple_s (struct)
  * - holds multiple text strings with length (not zero terminated) (linked queue)
  */
 struct strTextMultiple_s {
-
   STAILQ_ENTRY(strTextMultiple_s) entries;	// Link to next strTextMultiple
-
   char *strText; 				// ptr to allocated mem filled with text
   size_t strTextLen;				// length of the text
 };
-
-
 
 // -------------------------------------------------------------------------------------------------
 
@@ -117,8 +110,7 @@ struct strTextMultiple_s {
 
 
 //warum hier?
-// Constructor for the Stail-Queue xMultipleString
-STAILQ_HEAD(xHeadMultipleString_s, xMultipleString_s);
+
 // OBSOLETE: use xHeadMultipleString_s
 STAILQ_HEAD(headxMultipleString_s, xMultipleString_s);
 // OBSOLETE: use xHeadMultipleString_s
@@ -214,7 +206,7 @@ typedef int (* CallGetFnByDefNameFn_t) (const uint8_t *nameText, const size_t na
 typedef Module_t* (*CommandReloadModuleFn_t)(const uint8_t *typeName, const size_t typeNameLen);
 
 // typedef for Devspec2ArrayFn - returns all definitions that match the given devicespecification (devspec)
-typedef struct xHeadMultipleString_s (*Devspec2ArrayFn_t) (const xString_t devspecString);
+typedef struct xHeadMultipleStringSLTQ_s (*Devspec2ArrayFn_t) (const xString_t devspecString);
 
 // typedef for FmtDateTimeFn - returns formated text of Date-Time from tist
 typedef strText_t (*FmtDateTimeFn_t) (time_t time);
@@ -454,7 +446,13 @@ typedef strTextMultiple_t* (* SetFn_t)(Common_Definition_t *Common_Definition, u
 typedef strTextMultiple_t* (* ShutdownFn_t)(Common_Definition_t *Common_Definition);
 
 // typedef for StateFn - called to set an state for this definition e.g. called from setstate cmd for recovery from save
-typedef strTextMultiple_t* (* StateFn_t)(Common_Definition_t *Common_Definition, time_t readingTiSt, uint8_t *readingName, size_t readingNameLen, uint8_t *readingValue, size_t readingValueLen, uint8_t *readingMime, size_t readingMimeLen);
+//typedef strTextMultiple_t* (* StateFn_t)(Common_Definition_t *Common_Definition, time_t readingTiSt,
+// uint8_t *readingName, size_t readingNameLen, uint8_t *readingValue, size_t readingValueLen,
+// uint8_t *readingMime, size_t readingMimeLen);
+
+// typedef for StateFn - called to set an state for this definition.
+// Normally called from setstate cmd when recovering states from save from save
+typedef xMultipleStringSLTQE_t* (* StateFn_t) (Common_Definition_t *Common_Definition, const time_t stateTiSt, const xString_t stateNameString, const xString_t stateValueString, const xString_t stateMimeString);
 
 // typedef for SubFn - experimental - provided my module
 typedef strTextMultiple_t* (* SubFn_t)(Common_Definition_t *Common_Definition, uint8_t *kArgs, size_t kArgsLen);

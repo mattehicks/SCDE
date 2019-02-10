@@ -109,128 +109,186 @@ Setstate_InitializeCommandFn(SCDERoot_t* SCDERootptr)
 
 /* -------------------------------------------------------------------------------------------------
  *  FName: Setstate_CommandFn
- *  Desc: Tries to add an Setstate with optional value to an definition
- *        Calls modules SetstateibuteFn with cmd=add, if retMsg.strText != NULL -> module executes veto
- *  Info: 'defName' is an definition name, for that the Setstateibute should be assigned
+ *  Desc: Sets the state of an reading
+
+
+Die X_State-Funktion wird durch fhem.pl aufgerufen, sobald über den Befehl setstate versucht wird ein Wert für ein Reading oder den Status ($hash->{STATE}) einer Gerätedefinition zu setzen. Dieser Befehl wird primär beim Starten von FHEM aufgerufen sobald das State-File eingelesen wird
+
+
+An complete State with Date+Time+Name+Value+Mime '2017-08-08 22:42:25 myreading active TXT'
+
+Wenn via setstate ein Reading gesetzt wird, kann die X_State-Funktion das Setzen dieses Readings durch die Rückgabe einer aussagekräftigen Fehlermeldung unterbinden. Sofern undef zurückgegeben wird, wird das entsprechende Reading auf den übergebenen Status gesetzt.
+
+State without Name+Mime is assumed as the Definitions STATE '2017-08-08 22:42:25 active' (Date+Time+Value, has fixed Mime 'TXT')
+State without Date Time Name Mime 'active' (Value, sets current Date+Time and has fixed Mime 'TXT')
+
+Wenn via setstate der Definitionsstatus gesetzt wird, wird die X_State-Funktion erst nach dem Setzen des Status aufgerufen. Man kann dabei zwar eine Fehlermeldung zurückgeben, der Status wird aber dennoch übernommen. Die Fehlermeldung wird lediglich dem Nutzer angezeigt.
+
+
+
+
+ *  Info: 'devspecString' is an Devicespecification String, for that the Setstate should be executed
  *        'SetstateName' is the Setstateibute name
  *        'SetstateVal' is the OPTIONAL Setstateibute value
+
  *  Para: const uint8_t *args  -> prt to Setstate command args text "definition reading value"
  *                                                         or "definition timestamp reading value"
  *        const size_t argsLen -> Setstate command args text length
  *  Rets: struct headRetMsgMultiple_s -> STAILQ head of multiple retMsg, if NULL -> no retMsg-entry
+
+
+
+
+
+
+
+
+
+ *  Para: const xString_t argsString -> Setstate arguments string "devspec reading value"
+ *                                   -> or "devspec timestamp reading value"
+ *  Rets: struct xHeadMultipleStringSLTQ_s -> singly linked tail queue head to store multiple strings
+ *                                            loop string entrys till STAILQ_EMPTY
  * -------------------------------------------------------------------------------------------------
  */
-struct xHeadMultipleString_s //headRetMsgMultiple_s
+struct headRetMsgMultiple_s  //new xHeadMultipleStringSLTQ_s
 Setstate_CommandFn (const uint8_t *args
-		,const size_t argsLen)
+		,const size_t argsLen) //const xString_s argsString)
 {
+
+//-----------------------------------
+
 // temporary creation to make ready -> const xString_s argsString
-//  xString_s argsString;
-//  argsString.characters = args;
-//  argsString.length = argsLen;
+  xString_t argsString;
+  argsString.characters = args;
+  argsString.length = argsLen;
+
 //-----------------------------------
 
   // first seek-counter
   int i = 0;
 
-  // start seek with new * (seek starts at args *)
-  const uint8_t *definitionName = args;
+  // stores extracted Devicespecification-String
+  xString_t devspecString;
 
-  // seek * to start of Definition Name '\32' (after space)
-  while( (i < argsLen) && (*definitionName == ' ') ) {i++;definitionName++;}
-	
-  // continue seek with new * (seek starts at definitionName *)
-  const uint8_t *tiStReadingValue = definitionName;
+  // start seeking at Arguments-String *
+  devspecString.characters = 
+	argsString.characters;
+
+  // seek * to start of Devicespecification-String (after space  '\32')
+  while( (i < argsString.length) && (*devspecString.characters == ' ') )
+	{ i++ ; devspecString.characters++ ; }
+
+  // stores extracted Time-Stamp-Reading-Value-String
+  xString_t tiStReadingValueString;
+
+  // start seeking at beginning of Devicespecification-String *
+  tiStReadingValueString.characters = 
+	devspecString.characters;
 
   // second seek-counter
   int j = 0;
 
-  // seek * to end of Definition Name '\32' (after space)
-  while( (i < argsLen) && (*tiStReadingValue != ' ') ) {i++;j++;tiStReadingValue++;}
+  // seek * to the end of Devicespecification-String (before space '\32' !)
+  while( (i < argsString.length) && (*tiStReadingValueString.characters != ' ') )
+	{ i++ ; j++ ; tiStReadingValueString.characters++ ; }
 
-  // length of Definition-Name determined
-  size_t definitionNameLen = j;
+  // length of Devicespecification-String determined
+  devspecString.length = j;
 
-  // seek * to start of Timestamp-Reading-Value '\32' (after space)
-  while( (i < argsLen) && (*tiStReadingValue == ' ') ) {i++;tiStReadingValue++;}
+  // seek * to start of Timestamp-Reading-Value-String (after space  '\32')
+  while( (i < argsString.length) && (*tiStReadingValueString.characters == ' ') )
+	{ i++ ; tiStReadingValueString.characters++ ; }
 
-  // length of Timestamp-Reading-Value determined (assuming: rest of the args)
-  size_t tiStReadingValueLen = argsLen - i;
+  // length of Timestamp-Reading-Value-String determined (assuming: rest of the args)
+  tiStReadingValueString.length = argsString.length - i;
 
 // -------------------------------------------------------------------------------------------------
 
-  // prepare STAILQ head for multiple RetMsg storage
-  struct xHeadMultipleString_s retMsgHeadMultipleString;
+  // prepare singly linked tail queue head for multiple Return-Message storage
+  struct xHeadMultipleStringSLTQ_s retMsgHeadMultipleStringSLTQ;
 
-  // Initialize the queue
-  STAILQ_INIT(&retMsgHeadMultipleString);
+  // Initialize the SLTQ
+  STAILQ_INIT(&retMsgHeadMultipleStringSLTQ);
 
 // -------------------------------------------------------------------------------------------------
 
   // check usage by verifying lengths
-  if ( ( definitionNameLen == 0 ) || ( tiStReadingValueLen == 0 ) ) {
+  if ( ( devspecString.length == 0 ) || ( tiStReadingValueString.length == 0 ) ) {
 
 	// alloc mem for retMsg
-	xMultipleString_t *retMsgMultipleString =
-	malloc(sizeof(xMultipleString_t));
+	xMultipleStringSLTQE_t *retMsgMultipleStringSLTQE =
+	malloc(sizeof(xMultipleStringSLTQE_t));
 
 	// response with error text
-	retMsgMultipleString->string.length = 
-		asprintf(&retMsgMultipleString->string.characters
+	retMsgMultipleStringSLTQE->string.length = 
+		asprintf(&retMsgMultipleStringSLTQE->string.characters
 			,"Command Setstate could not interpret args '%.*s'!"
 			 " Usage: Setstate <devspec> <state-sub-args>"
-			,argsLen
-			,args);
+			,argsString.length
+			,argsString.characters);
 
 	// insert retMsg in stail-queue
-	STAILQ_INSERT_TAIL(&retMsgHeadMultipleString, retMsgMultipleString, entries);
+	STAILQ_INSERT_TAIL(&retMsgHeadMultipleStringSLTQ, retMsgMultipleStringSLTQE, entries);
 
-  	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-  	return retMsgHeadMultipleString;
+  	// return singly linked tail queue head, which holds multiple linked retMsg strings
+
+//-------
+struct headRetMsgMultiple_s x;
+STAILQ_INIT(&x);
+x.stqh_first = retMsgHeadMultipleStringSLTQ.stqh_first;
+x.stqh_last = retMsgHeadMultipleStringSLTQ.stqh_last;
+
+  	return x; // retMsgHeadMultipleStringSLTQ;   
+//-------
   }
-
-
-  // temporary creation till fixed
-  xString_t devspecString;
-  devspecString.characters = definitionName;//   devspecText;
-  devspecString.length = definitionNameLen; // devspecTextLen;
-
 
 // -------------------------------------------------------------------------------------------------
 
-// get list of definitions which meet devspec
-  struct xHeadMultipleString_s *definitionMultipleString =
+  // get all Definitions which meet devspec in an SLTQ
+  struct xHeadMultipleStringSLTQ_s definitionHeadMultipleStringSLTQ =
   	SCDEFn->Devspec2ArrayFn(devspecString);
 
-// Definitions for the given devspec NOT found
-  if ( definitionMultipleString == NULL ) {
+  // Queue empty? No Definitions for the given devspec NOT found
+  if (STAILQ_EMPTY(&definitionHeadMultipleStringSLTQ)) {
 
 	// alloc mem for retMsg
-	xMultipleString_t *retMsgMultipleString =
-	malloc(sizeof(xMultipleString_t));
+	xMultipleStringSLTQE_t *retMsgMultipleStringSLTQE =
+		malloc(sizeof(xMultipleStringSLTQE_t));
 
-	// response with error text
-	retMsgMultipleString->string.length = 
-		asprintf(&retMsgMultipleString->string.characters
+	// response with error retMsg
+	retMsgMultipleStringSLTQE->string.length = 
+		asprintf(&retMsgMultipleStringSLTQE->string.characters
 			,"Please define <%.*s> first!"
 			,devspecString.length
 			,devspecString.characters);
 
-	// insert retMsg in stail-queue
-	STAILQ_INSERT_TAIL(&retMsgHeadMultipleString, retMsgMultipleString, entries);
+	// insert retMsg in SLTQ
+	STAILQ_INSERT_TAIL(&retMsgHeadMultipleStringSLTQ, retMsgMultipleStringSLTQE, entries);
+
+//-------
+struct headRetMsgMultiple_s x;
+STAILQ_INIT(&x);
+x.stqh_first = retMsgHeadMultipleStringSLTQ.stqh_first;
+x.stqh_last = retMsgHeadMultipleStringSLTQ.stqh_last;
 
   	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-  	return retMsgHeadMultipleString;
+  	return x; // retMsgHeadMultipleString;   
+//-------
   }
 
-// now loop the found definitions here till the queue is empty
-  while ( definitionMultipleString != NULL ) {
+// -------------------------------------------------------------------------------------------------
 
-// definition in:
-// definitionMultipleString->string.characters
-// definitionMultipleString->string.length
+ // for processing the definition queue elements
+  xMultipleStringSLTQE_t *definitionMultipleStringSLTQE;
+
+  // now loop through the found Definitions - till the queue is empty
+  while ( !STAILQ_EMPTY ( &definitionHeadMultipleStringSLTQ ) ) {
 
 // -------------------------------------------------------------------------------------------------
+
+	// get first definition queue element
+	definitionMultipleStringSLTQE = 
+		STAILQ_FIRST(&definitionHeadMultipleStringSLTQ);
 
   	// search for the Common_Definition for the requested Definition-Name
   	Common_Definition_t *Common_Definition = 
@@ -238,12 +296,12 @@ Setstate_CommandFn (const uint8_t *args
 
  	 while ( Common_Definition != NULL ) {
 
-		if ( ( Common_Definition->nameLen == definitionMultipleString->string.length )
+		if ( ( Common_Definition->nameLen == definitionMultipleStringSLTQE->string.length )
 			&& ( !strncasecmp((const char*) Common_Definition->name
-				,(const char*) definitionMultipleString->string.characters
-				, definitionMultipleString->string.length) ) ) {
+				,(const char*) definitionMultipleStringSLTQE->string.characters
+				, definitionMultipleStringSLTQE->string.length) ) ) {
 
-			// found, break and keep current
+			// found matching Definition, break and keep current
 			break;
 		}
 
@@ -257,18 +315,18 @@ Setstate_CommandFn (const uint8_t *args
   	if ( Common_Definition == NULL ) {
 
 		// alloc mem for retMsg
-		xMultipleString_t *retMsgMultipleString =
-			malloc(sizeof(xMultipleString_t));
+		xMultipleStringSLTQE_t *retMsgMultipleStringSLTQE =
+			malloc(sizeof(xMultipleStringSLTQE_t));
 
-		// response with error text
-		retMsgMultipleString->string.length = 
-			asprintf(&retMsgMultipleString->string.characters
+		// response with error retMsg
+		retMsgMultipleStringSLTQE->string.length = 
+			asprintf(&retMsgMultipleStringSLTQE->string.characters
 				,"Please define <defName>: %.*s first!"
-				,definitionMultipleString->string.length
-				,definitionMultipleString->string.characters);
+				,definitionMultipleStringSLTQE->string.length
+				,definitionMultipleStringSLTQE->string.characters);
 
 		// insert retMsg in stail-queue
-		STAILQ_INSERT_TAIL(&retMsgHeadMultipleString, retMsgMultipleString, entries);
+		STAILQ_INSERT_TAIL(&retMsgHeadMultipleStringSLTQ, retMsgMultipleStringSLTQE, entries);
 
 		// -> continue processing the 'definitions that meet devspec' loop
   	}
@@ -278,36 +336,34 @@ Setstate_CommandFn (const uint8_t *args
  	// Definition for the given Definition-Name found
   	else {
 
-		// to store the time components
+		// to store the time, date components
 		struct tm timeComp;
 
-		// to store extracted readings
+		// to store extracted values by current method sscanf (reading, value and mime)
 		char reading[128];				// !!! 64??
 		char value[128];				// !!! 64??
 		char mime[16];					// !!! 64??
 
-		// create temorary string
-		char *tiStReadingValueString;
+// -------------------------------------------------------------------------------------------------
 
-		asprintf(&tiStReadingValueString
-				,"%.*s"
-				,tiStReadingValueLen
-				,tiStReadingValue);
+		// create temorary string because we need temp zero terminated string for sscanf
+		char *tiStReadingValueStringZT;
+		asprintf(&tiStReadingValueStringZT
+			,"%.*s"
+			,tiStReadingValueString.length
+			,tiStReadingValueString.characters);
 
-		// infos needed for calling the StateFn
+		// final data we needed for calling the StateFn
 		time_t readingTiSt;
-		uint8_t *readingName;
-		size_t readingNameLen;
-		uint8_t *readingValue;
-		size_t readingValueLen;
-		uint8_t *readingMime;
-		size_t readingMimeLen;
+		xString_t stateNameString;
+		xString_t stateValueString;
+		xString_t stateMimeString;
 
 // -------------------------------------------------------------------------------------------------
 
-		// check if detailed reading with timestamp and MIME can be rebuilt - via regex
-		// e.g. definitionname 2017-08-08 22:42:25 myreading active TXT
-		if ( 9 == sscanf(tiStReadingValueString
+		// check if a detailed Reading with Timestamp and MIME can be rebuilt - via regex
+		// e.g. '2017-08-08 22:42:25 myreading active TXT'
+		if ( 9 == sscanf(tiStReadingValueStringZT
 			,"%d-%d-%d %d:%d:%d %s %s %s"
 				,&timeComp.tm_year
 				,&timeComp.tm_mon
@@ -319,25 +375,28 @@ Setstate_CommandFn (const uint8_t *args
 				,value
 				,mime ) ) {
 
-				timeComp.tm_year -= 1900;
-				timeComp.tm_mon -= 1;
+			// correct the time
+			timeComp.tm_year -= 1900;
+			timeComp.tm_mon -= 1;
 
-				readingTiSt = mktime(&timeComp);
+			// use extracted time
+			readingTiSt = mktime(&timeComp);
 
-				if ( readingTiSt == -1 ) {
-					printf("Error: unable to make time using mktime\n");
+			// time ok?
+			if ( readingTiSt == -1 ) {
+				printf("Error: unable to make time using mktime\n");
 
-					// use current time
-					time(&readingTiSt);
-				}
+				// use current time
+				time(&readingTiSt);
+			}
 
-
-			readingName = &reading;
-			readingNameLen = strlen(reading);
-			readingValue = &value;
-			readingValueLen = strlen(value);
-			readingMime = &mime;
-			readingMimeLen = strlen(mime);
+			// the extracted data of an detailed reading
+			stateNameString.characters = &reading;
+			stateNameString.length = strlen(reading);
+			stateValueString.characters = &value;
+			stateValueString.length = strlen(value);
+			stateMimeString.characters = &mime;
+			stateMimeString.length = strlen(mime);
 
 /*
 // -------------------------------------------------------------------------------------------------
@@ -542,30 +601,78 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
       		  $d->{READINGS}{$sname}{TIME} = $tim; } 
 */
 
+// -------------------------------------------------------------------------------------------------
 
-// end of detailed rebuilt
+			// NULL = start with no veto for reading preperation
+			xMultipleStringSLTQE_t *retMsgMultipleStringSLTQE = NULL;
+
+			// if provided by Type -> call State Fn to set the state
+			if (Common_Definition->module->ProvidedByModule->StateFn) {
+
+				#if Setstate_Command_DBG >= 7
+				// prepare TiSt for LogFn
+				strText_t strText =
+  					SCDEFn->FmtDateTimeFn(readingTiSt);
+
+				SCDEFn->Log3Fn(Setstate_ProvidedByCommand.commandNameText
+		  			,Setstate_ProvidedByCommand.commandNameTextLen
+					,5
+					,"Calling StateFn of Module '%.*s' for Definition '%.*s'. "
+					 "Reading '%.*s' gets new Value '%.*s', Mime '%.*s', TimeStamp '%.*s'."
+					,Common_Definition->module->ProvidedByModule->typeNameLen
+					,Common_Definition->module->ProvidedByModule->typeName
+					,Common_Definition->nameLen
+					,Common_Definition->name
+					,stateNameString.length
+					,stateNameString.characters
+					,stateValueString.length
+					,stateValueString.characters
+					,stateMimeString.length
+					,stateMimeString.characters
+					,strText.strTextLen
+					,strText.strText);
+
+				// free TiSt from LogFn
+				free(strText.strText);
+				#endif
+
+				// call Modules StateFn. Interpret retMsgMultipleStringSLTQE != NULL as veto !
+				retMsgMultipleStringSLTQE =
+					Common_Definition->module->ProvidedByModule->StateFn(Common_Definition
+						,readingTiSt
+						,stateNameString
+						,stateValueString
+						,stateMimeString);
+				}
+
+			// got an singly linked tail queue element holding an return message? VETO + Insert it in queue.
+			if (retMsgMultipleStringSLTQE) 
+				STAILQ_INSERT_TAIL(&retMsgHeadMultipleStringSLTQ
+					,retMsgMultipleStringSLTQE, entries);
+
+			// else no return message - NO VETO. Prepare readings
+			else {
+// readings hier erstellen aber auch ohen stateFN
+			}
 		}
-
-
-
 
 // -------------------------------------------------------------------------------------------------
 
-		// an detailed reading could NOT be rebuilt
-		// assuming this is the general, required STATE reading
+		// seems that an detailed reading could NOT be rebuilt
+		// else assuming this is the general, required STATE reading with fixed Mime 'TXT'
 		else {
 
 			// we are dealing with STATE reading here
-			readingName = (uint8_t *) "STATE";
-			readingNameLen = sizeof("STATE")-1;
+			stateNameString.characters = (uint8_t *) "STATE";
+			stateNameString.length = sizeof("STATE")-1;
 
 			// we are dealing with STATE reading here, always MIME TXT
-			readingMime = (uint8_t *) "TXT";
-			readingMimeLen = sizeof("TXT")-1;
+			stateMimeString.characters = (uint8_t *) "TXT";
+			stateMimeString.length = sizeof("TXT")-1;
 
-			// STATE reading with date ?
-			// e.g. definitionname 2017-08-08 22:42:25 active
-			if ( 7 == sscanf(tiStReadingValueString
+			// check if a STATE Reading with Timestamp can be rebuilt ?
+			// e.g. '2017-08-08 22:42:25 active'
+			if ( 7 == sscanf(tiStReadingValueStringZT
 				,"%d-%d-%d %d:%d:%d %s"
 				,&timeComp.tm_year
 				,&timeComp.tm_mon
@@ -575,47 +682,104 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 				,&timeComp.tm_sec
 				,value ) ) {
 
+				// correct the time
 				timeComp.tm_year -= 1900;
 				timeComp.tm_mon -= 1;
 
+				// use extracted time
 				readingTiSt = mktime(&timeComp);
 
+				// time ok?
 				if ( readingTiSt == -1 ) {
 					printf("Error: unable to make time using mktime\n");
 
 					// use current time
 					time(&readingTiSt);
 				}
+
+				// the extracted data of the value
+				stateValueString.characters = &value;
+				stateValueString.length = strlen(value);
 			}
 
-			// STATE reading without date ?
-			// e.g. definitionname active
-			else if ( 1 == sscanf(tiStReadingValueString
-					,"%s"
-					,value ) ) {
+			// seems that an STATE Reading with Timestamp could NOT be rebuilt
+			// else check if a STATE Reading without Timestamp can be rebuilt ?
+			// e.g. 'active'
+			else if ( 1 == sscanf(tiStReadingValueStringZT
+				,"%s"
+				,value ) ) {
 
-					// use current time
-					time(&readingTiSt);
+				// use current time
+				time(&readingTiSt);
+
+				// the extracted data of the value
+				stateValueString.characters = &value;
+				stateValueString.length = strlen(value);
 			}
 
 			else {
 
-			// no value will be detected in length zero
-
+				// could NOT rebuilt -> results in value zero length
+				stateValueString.length = 0;
 			}
 
-			readingValue = &value;
-			readingValueLen = strlen(value);
+// -------------------------------------------------------------------------------------------------
 
-			// we have a value for 'STATE'
-			if (readingValueLen) {
+			// if provided by Type -> call State Fn to set the state
+			if (Common_Definition->module->ProvidedByModule->StateFn) {
 
-				// do not overwrite state like "opened" or "initialized"
+				#if Setstate_Command_DBG >= 7
+				// prepare TiSt for LogFn
+				strText_t strText =
+  					SCDEFn->FmtDateTimeFn(readingTiSt);
+
+				SCDEFn->Log3Fn(Setstate_ProvidedByCommand.commandNameText
+		  			,Setstate_ProvidedByCommand.commandNameTextLen
+					,7
+					,"Calling StateFn of Module '%.*s' for Definition '%.*s'. "
+					 "Reading '%.*s' gets new Value '%.*s', Mime '%.*s', TimeStamp '%.*s'."
+					,Common_Definition->module->ProvidedByModule->typeNameLen
+					,Common_Definition->module->ProvidedByModule->typeName
+					,Common_Definition->nameLen
+					,Common_Definition->name
+					,stateNameString.length
+					,stateNameString.characters
+					,stateValueString.length
+					,stateValueString.characters
+					,stateMimeString.length
+					,stateMimeString.characters
+					,strText.strTextLen
+					,strText.strText);
+
+				// free TiSt from LogFn
+				free(strText.strText);
+				#endif
+
+				// call Modules StateFn. Interpret retMsgMultipleStringSLTQE != NULL as veto !
+				xMultipleStringSLTQE_t *retMsgMultipleStringSLTQE =
+					Common_Definition->module->ProvidedByModule->StateFn(Common_Definition
+						,readingTiSt
+						,stateNameString
+						,stateValueString
+						,stateMimeString);
+
+				// got an singly linked tail queue element holding an return message? Insert it in queue.
+				if (retMsgMultipleStringSLTQE) 
+					STAILQ_INSERT_TAIL(&retMsgHeadMultipleStringSLTQ
+						,retMsgMultipleStringSLTQE, entries);
+
+				// no veto possible here - STATE will get state
+			}
+
+			// we have a value for 'STATE' ?
+			if (stateValueString.length) {
+
+				// do not overwrite some states like "opened" or "initialized"
 				if ( ( SCDERoot->globalCtrlRegA | F_INIT_DONE ) || 
 				     ( ( Common_Definition->stateLen == 3 ) && 
 				       ( strncmp((char*)Common_Definition->state, "???", 3 ) ) ) ) {
 
-					// free old value
+					// free old value, if any
 					if (Common_Definition->state)
 						free(Common_Definition->state);
 
@@ -623,10 +787,10 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 					Common_Definition->stateLen = 
 						asprintf((char**) &Common_Definition->state
 							,"%.*s"
-							,readingValueLen
-							,readingValue);
+							,stateValueString.length
+							,stateValueString.characters);
 
-					// store new tiST
+					// overwrite with new tiST
 					Common_Definition->stateTiSt = readingTiSt;
 				}
 			}
@@ -634,70 +798,32 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 
 // -------------------------------------------------------------------------------------------------
 
-		// call State Fn to execute the update - if provided by Type
-		if (Common_Definition->module->ProvidedByModule->StateFn) {
-
-			#if Setstate_Command_DBG >= 7
-			// prepare TiSt for LogFn
-			strText_t strText =
-  				SCDEFn->FmtDateTimeFn(readingTiSt);
-
-			SCDEFn->Log3Fn(Setstate_ProvidedByCommand.commandNameText
-		  		,Setstate_ProvidedByCommand.commandNameTextLen
-				,5
-				,"Calling StateFn of Module '%.*s' for Definition '%.*s'. "
-				 "Reading '%.*s' gets new Value '%.*s', Mime '%.*s', TimeStamp '%.*s'."
-				,Common_Definition->module->ProvidedByModule->typeNameLen
-				,Common_Definition->module->ProvidedByModule->typeName
-				,Common_Definition->nameLen
-				,Common_Definition->name
-				,readingNameLen
-				,readingName
-				,readingValueLen
-				,readingValue
-				,readingMimeLen
-				,readingMime
-				,strText.strTextLen
-				,strText.strText);
-
-			// free TiSt from LogFn
-			free(strText.strText);
-			#endif
-
-			// call modules StateFn, if retMsg != NULL -> interpret as veto
-			strTextMultiple_t *retMsg =
-				Common_Definition->module->ProvidedByModule->StateFn(Common_Definition
-					,readingTiSt
-					,readingName
-					,readingNameLen
-					,readingValue
-					,readingValueLen
-					,readingMime
-					,readingMimeLen);
-
-			// got an error msg? Insert retMsg in stail-queue
-			if (retMsg) STAILQ_INSERT_TAIL(&retMsgHeadMultipleString, retMsg, entries);
-
-		}
-
-
-		// free this temp string
-		free(tiStReadingValueString);
-
-// -------------------------------------------------------------------------------------------------
-
+		// free the temp string tiSt-Reading-Value-String
+		free(tiStReadingValueStringZT);
 	}
 
 // -------------------------------------------------------------------------------------------------
 
-  	// get next definitionMultipleString to process it
-  	definitionMultipleString = STAILQ_NEXT(definitionMultipleString, entries);
+  	// remove head in definition(s) STAIL Queue
+        STAILQ_REMOVE_HEAD(&definitionHeadMultipleStringSLTQ, entries);
+
+	// free charancters in xString_t
+	free(definitionMultipleStringSLTQE->string.characters);
+
+	// free STAIL Queue element xMultipleStringSLTQE_t
+	free(definitionMultipleStringSLTQE);
   }
 
 // -------------------------------------------------------------------------------------------------
 
-  // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-  return retMsgHeadMultipleString;
+//-------
+struct headRetMsgMultiple_s x;
+STAILQ_INIT(&x);
+x.stqh_first = retMsgHeadMultipleStringSLTQ.stqh_first;
+x.stqh_last = retMsgHeadMultipleStringSLTQ.stqh_last;
+
+  	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+  	return x; // retMsgHeadMultipleStringSLTQ;   
 }
 
 

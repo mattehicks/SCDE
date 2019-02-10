@@ -429,18 +429,32 @@ int HdrFldValueLen;	// current HdrFldValueBuff length
 
 
 
-// provided by module A-Z
+/*
+ *  Functions provided to SCDE by Module - for type operation (A-Z)
+ */
 strTextMultiple_t* WebIf_Add(Common_Definition_t* Common_Definition, uint8_t *kvArgs, size_t kvArgsLen);
-strTextMultiple_t* WebIf_Define(Common_Definition_t *Common_Definition);//, const char *Definition);
+
+strTextMultiple_t* WebIf_Define(Common_Definition_t *Common_Definition);
+
 int WebIf_DirectRead(Common_Definition_t* Def);
+
 int WebIf_DirectWrite(Common_Definition_t* Def);
+
 int WebIf_IdleCbX(Common_Definition_t *Common_Definition);
+
 int WebIf_Initialize(SCDERoot_t* SCDERoot);
+
 strTextMultiple_t* WebIf_Set(Common_Definition_t* Common_Definition, uint8_t *setArgs, size_t setArgsLen);
+
 strTextMultiple_t* WebIf_Sub(Common_Definition_t* Common_Definition , uint8_t *kArgs, size_t kArgsLen);
+
 strTextMultiple_t* WebIf_Undefine(Common_Definition_t* Common_Definition);
 
-// platform additional  A-Z
+
+
+/*
+ *  helpers provided to module for type operation
+ */
 void WebIf_disconnect(WebIf_Definition_t *WebIf_Definition);
 void espconn_regist_connectcb(WebIf_Definition_t *conn, espconn_connect_callback connectCb);
 void espconn_regist_disconcb(WebIf_Definition_t *conn, espconn_connect_callback DisconCb);

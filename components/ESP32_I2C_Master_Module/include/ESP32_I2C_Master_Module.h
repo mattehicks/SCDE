@@ -639,15 +639,22 @@ typedef struct ESP32_I2C_Master_StageXCHG_s {
 
 
 /*
- *  Functions provided to SCDE by module for type operation
+ *  Functions provided to SCDE by Module - for type operation (A-Z)
  */
 strTextMultiple_t* ESP32_I2C_Master_Attribute(Common_Definition_t* Common_Definition, const uint8_t *attrCmdText, const size_t attrCmdTextLen, const uint8_t *attrNameText, const size_t attrNameTextLen, uint8_t **attrValTextPtr, size_t *attrValTextLenPtr);
+
 strTextMultiple_t* ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition);
+
 //strTextMultiple_t* ESP32_I2C_Master_DirectWrite(Common_Definition_t *Common_Definition_Stage1, Common_Definition_t *Common_Definition_Stage2, Common_StageXCHG_t *Common_StageXCHG);
-int                ESP32_I2C_Master_IdleCb(Common_Definition_t *Common_Definition);
-int                ESP32_I2C_Master_Initialize(SCDERoot_t* SCDERoot);
+
+int ESP32_I2C_Master_IdleCb(Common_Definition_t *Common_Definition);
+
+int ESP32_I2C_Master_Initialize(SCDERoot_t* SCDERoot);
+
 strTextMultiple_t* ESP32_I2C_Master_Set(Common_Definition_t* Common_Definition, uint8_t *setArgs, size_t setArgsLen);
+
 strTextMultiple_t* ESP32_I2C_Master_Shutdown(Common_Definition_t* Common_Definition);
+
 strTextMultiple_t* ESP32_I2C_Master_Undefine(Common_Definition_t* Common_Definition);
 
 
