@@ -83,7 +83,7 @@ providedByCommand_t Delete_ProvidedByCommand =
  */
 int 
 Delete_InitializeCommandFn(SCDERoot_t* SCDERootptr)
-  {
+{
 
   // make data root locally available
   SCDERoot = SCDERootptr;
@@ -91,16 +91,19 @@ Delete_InitializeCommandFn(SCDERoot_t* SCDERootptr)
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
   SCDEFn = SCDERootptr->SCDEFn;
 
+// --------------------------------------------------------------------------------------------------
+
+  #if Delete_Command_DBG >= 3
   SCDEFn->Log3Fn(Delete_ProvidedByCommand.commandNameText
-		  ,Delete_ProvidedByCommand.commandNameTextLen
-		  ,3
-		  ,"InitializeFn called. Command '%.*s' now useable.\n"
-		  ,Delete_ProvidedByCommand.commandNameTextLen
-		  ,Delete_ProvidedByCommand.commandNameText);
+	,Delete_ProvidedByCommand.commandNameTextLen
+	,3
+	,"InitializeFn called. Now useable.");
+  #endif
+
+// --------------------------------------------------------------------------------------------------
 
   return 0;
-
-  }
+}
 
 
 

@@ -92,16 +92,19 @@ Deleteattr_InitializeCommandFn(SCDERoot_t* SCDERootptr)
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
   SCDEFn = SCDERootptr->SCDEFn;
 
+// --------------------------------------------------------------------------------------------------
+
+  #if Deleteattr_Command_DBG >= 3
   SCDEFn->Log3Fn(Deleteattr_ProvidedByCommand.commandNameText
-		  ,Deleteattr_ProvidedByCommand.commandNameTextLen
-		  ,3
-		  ,"InitializeFn called. Command '%.*s' now useable.\n"
-		  ,Deleteattr_ProvidedByCommand.commandNameTextLen
-		  ,Deleteattr_ProvidedByCommand.commandNameText);
+	,Deleteattr_ProvidedByCommand.commandNameTextLen
+	,3
+	,"InitializeFn called. Now useable.");
+  #endif
+
+// --------------------------------------------------------------------------------------------------
 
   return 0;
-
-  }
+}
 
 /*
 Device specification (devspec)
@@ -134,10 +137,20 @@ set room=kitchen:FILTER=STATE!=off off
  *  Rets: struct headRetMsgMultiple_s -> STAILQ head of multiple retMsg, if NULL -> no retMsg-entry
  * -------------------------------------------------------------------------------------------------
  */
-struct headRetMsgMultiple_s ICACHE_FLASH_ATTR
+struct headRetMsgMultiple_s
 Deleteattr_CommandFn (const uint8_t *argsText
 		,const size_t argsTextLen)
-  {
+{
+  #if Deleteattr_Command_DBG >= 7
+  SCDEFn->Log3Fn(Deleteattr_ProvidedByCommand.commandNameText
+	,Deleteattr_ProvidedByCommand.commandNameTextLen
+	,7
+	,"CommandFn called with args '%.*s'"
+	,argsTextLen
+	,argsText);
+  #endif
+
+// --------------------------------------------------------------------------------------------------
 
   // prepare STAILQ head for multiple RetMsg storage
   struct headRetMsgMultiple_s headRetMsgMultiple;

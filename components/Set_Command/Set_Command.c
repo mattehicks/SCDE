@@ -85,24 +85,26 @@ providedByCommand_t Set_ProvidedByCommand =
  */
 int 
 Set_InitializeCommandFn(SCDERoot_t* SCDERootptr)
-  {
-
+{
   // make data root locally available
   SCDERoot = SCDERootptr;
 
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
   SCDEFn = SCDERootptr->SCDEFn;
 
+// --------------------------------------------------------------------------------------------------
+
+  #if Set_Command_DBG >= 3
   SCDEFn->Log3Fn(Set_ProvidedByCommand.commandNameText
-		  ,Set_ProvidedByCommand.commandNameTextLen
-		  ,3
-		  ,"InitializeFn called. Command '%.*s' now useable.\n"
-		  ,Set_ProvidedByCommand.commandNameTextLen
-		  ,Set_ProvidedByCommand.commandNameText);
+	,Set_ProvidedByCommand.commandNameTextLen
+	,3
+	,"InitializeFn called. Now useable.");
+  #endif
+
+// --------------------------------------------------------------------------------------------------
 
   return 0;
-
-  }
+}
 
 
 
@@ -137,7 +139,17 @@ Set_InitializeCommandFn(SCDERoot_t* SCDERootptr)
 struct headRetMsgMultiple_s ICACHE_FLASH_ATTR
 Set_CommandFn (const uint8_t *args
 		,const size_t argsLen)
-  {
+{
+  #if Set_Command_DBG >= 7
+  SCDEFn->Log3Fn(Set_ProvidedByCommand.commandNameText
+	,Set_ProvidedByCommand.commandNameTextLen
+	,7
+	,"CommandFn called with args '%.*s'"
+	,argsLen
+	,args);
+  #endif
+
+// --------------------------------------------------------------------------------------------------
 
   // prepare STAILQ head for multiple RetMsg storage
   struct headRetMsgMultiple_s headRetMsgMultiple;

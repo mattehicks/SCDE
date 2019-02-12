@@ -170,24 +170,26 @@ providedByCommand_t Help_ProvidedByCommand =
  */
 int 
 Help_InitializeCommandFn(SCDERoot_t* SCDERootptr)
-  {
-
+{
   // make data root locally available
   SCDERoot = SCDERootptr;
 
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
   SCDEFn = SCDERootptr->SCDEFn;
 
+// --------------------------------------------------------------------------------------------------
+
+  #if Help_Command_DBG >= 3
   SCDEFn->Log3Fn(Help_ProvidedByCommand.commandNameText
 		  ,Help_ProvidedByCommand.commandNameTextLen
 		  ,3
-		  ,"InitializeFn called. Command '%.*s' now useable.\n"
-		  ,Help_ProvidedByCommand.commandNameTextLen
-		  ,Help_ProvidedByCommand.commandNameText);
+		  ,"InitializeFn called. Now useable.");
+  #endif
+
+// --------------------------------------------------------------------------------------------------
 
   return 0;
-
-  }
+}
 
 
 
@@ -208,7 +210,17 @@ Help_InitializeCommandFn(SCDERoot_t* SCDERootptr)
 struct headRetMsgMultiple_s
 Help_CommandFn (const uint8_t *args
 		,const size_t argsLen)
-  {
+{
+  #if Help_Command_DBG >= 7
+  SCDEFn->Log3Fn(Help_ProvidedByCommand.commandNameText
+	,Help_ProvidedByCommand.commandNameTextLen
+	,7
+	,"CommandFn called with args '%.*s'"
+	,argsLen
+	,args);
+  #endif
+
+// --------------------------------------------------------------------------------------------------
 
   // prepare STAILQ head for multiple RetMsg storage
   struct headRetMsgMultiple_s headRetMsgMultiple;

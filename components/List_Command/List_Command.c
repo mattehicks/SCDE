@@ -61,7 +61,7 @@ const uint8_t List_helpDetailText[] =
   "list definitions and state info";
 
 providedByCommand_t List_ProvidedByCommand =
-  {
+{
    "List"					// Command-Name of command -> libfilename.so !
   ,4						// length of cmd
   ,List_InitializeCommandFn			// Initialize Fn
@@ -70,7 +70,7 @@ providedByCommand_t List_ProvidedByCommand =
   ,sizeof(List_helpText)
   ,&List_helpDetailText
   ,sizeof(List_helpDetailText)
-  };
+};
 
 //(const uint8_t *) "Usage: define <name> <type> <options>, to define a device",57);	// CommandHelp, Len
 
@@ -85,24 +85,26 @@ providedByCommand_t List_ProvidedByCommand =
  */
 int 
 List_InitializeCommandFn(SCDERoot_t* SCDERootptr)
-  {
-
+{
   // make data root locally available
   SCDERoot = SCDERootptr;
 
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
   SCDEFn = SCDERootptr->SCDEFn;
 
+// --------------------------------------------------------------------------------------------------
+
+  #if List_Command_DBG >= 3
   SCDEFn->Log3Fn(List_ProvidedByCommand.commandNameText
-		  ,List_ProvidedByCommand.commandNameTextLen
-		  ,3
-		  ,"InitializeFn called. Command '%.*s' now useable.\n"
-		  ,List_ProvidedByCommand.commandNameTextLen
-		  ,List_ProvidedByCommand.commandNameText);
+	,List_ProvidedByCommand.commandNameTextLen
+	,3
+	,"InitializeFn called. Now useable.");
+  #endif
+
+// --------------------------------------------------------------------------------------------------
 
   return 0;
-
-  }
+}
 
 
 
@@ -133,12 +135,22 @@ List_InitializeCommandFn(SCDERoot_t* SCDERootptr)
  *  Rets: struct headRetMsgMultiple_s -> STAILQ head of multiple retMsg, if NULL -> no retMsg-entry
  * --------------------------------------------------------------------------------------------------
  */
-struct headRetMsgMultiple_s ICACHE_FLASH_ATTR
+struct headRetMsgMultiple_s
 List_CommandFn (const uint8_t *args
 		,const size_t argsLen)
 {
+  #if List_Command_DBG >= 7
+  SCDEFn->Log3Fn(List_ProvidedByCommand.commandNameText
+	,List_ProvidedByCommand.commandNameTextLen
+	,7
+	,"CommandFn called with args '%.*s'"
+	,argsLen
+	,args);
+  #endif
 
- // prepare STAILQ head for multiple RetMsg storage
+// --------------------------------------------------------------------------------------------------
+
+  // prepare STAILQ head for multiple RetMsg storage
   struct headRetMsgMultiple_s headRetMsgMultiple;
 
   // Initialize the queue

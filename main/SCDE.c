@@ -2136,37 +2136,39 @@ AnalyzeCommandChain(const uint8_t *args
 		return headRetMsgMultiple;
 	}
 
-  // get the Command by Name
+  // Command SLTQE
   command_t *command;
 
-  // search for the command
+  // loop the implemented commands
   STAILQ_FOREACH(command, &SCDERoot.headCommands, entries) {
 
-		if ( (command->providedByCommand->commandNameTextLen == commandLen)
-			&& (!strncasecmp((const char*) command->providedByCommand->commandNameText, (const char*) commandName, commandLen)) ) {
+	// matching Command Name ?
+	if ( (command->providedByCommand->commandNameTextLen == commandLen)
+		&& (!strncasecmp((const char*) command->providedByCommand->commandNameText
+			,(const char*) commandName
+			,commandLen)) ) {
 
-			// call the CommandFn, if retMsg != NULL -> error ret Msg
-			struct headRetMsgMultiple_s headRetMsgMultipleFromFn
-				= command->providedByCommand->commandFn(commandArgs, commandArgsLen);
+		// call the CommandFn, if retMsg != NULL -> error ret Msg
+		struct headRetMsgMultiple_s headRetMsgMultipleFromFn
+			= command->providedByCommand->commandFn(commandArgs, commandArgsLen);
 
-			// retMsgMultiple stailq from Fn filled ?
-			while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
+		// retMsgMultiple stailq from Fn filled ?
+		while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
 
-				// for the retMsg elements
-				strTextMultiple_t *retMsg =
-					STAILQ_FIRST(&headRetMsgMultipleFromFn);
+			// for the retMsg elements
+			strTextMultiple_t *retMsg =
+				STAILQ_FIRST(&headRetMsgMultipleFromFn);
 
-				// first remove this entry from Fn ret queue
-				STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
+			// first remove this entry from Fn ret queue
+			STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
 
-				// last insert entry in ret queue
-				STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-			}
-
-		// return STAILQ head, it stores multiple RetMsg, if NULL -> no RetMsg-entries
-		return headRetMsgMultiple;
+			// last insert entry in ret queue
+			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
 		}
+
+	// return STAILQ head, it stores multiple RetMsg, if NULL -> no RetMsg-entries
+	return headRetMsgMultiple;
+	}
   }
 
 // -------------------------------------------------------------------------------------------------

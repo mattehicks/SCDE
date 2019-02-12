@@ -84,24 +84,26 @@ providedByCommand_t Attr_ProvidedByCommand =
  */
 int 
 Attr_InitializeCommandFn(SCDERoot_t* SCDERootptr)
-  {
-
+{
   // make data root locally available
   SCDERoot = SCDERootptr;
 
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
   SCDEFn = SCDERootptr->SCDEFn;
 
+// --------------------------------------------------------------------------------------------------
+
+  #if Attr_Command_DBG >= 3
   SCDEFn->Log3Fn(Attr_ProvidedByCommand.commandNameText
-		  ,Attr_ProvidedByCommand.commandNameTextLen
-		  ,3
-		  ,"InitializeFn called. Command '%.*s' now useable."
-		  ,Attr_ProvidedByCommand.commandNameTextLen
-		  ,Attr_ProvidedByCommand.commandNameText);
+	,Attr_ProvidedByCommand.commandNameTextLen
+	,3
+	,"InitializeFn called. Now useable.");
+  #endif
+
+// --------------------------------------------------------------------------------------------------
 
   return 0;
-
-  }
+}
 
 /*
 Device specification (devspec)
@@ -139,6 +141,16 @@ struct headRetMsgMultiple_s ICACHE_FLASH_ATTR
 Attr_CommandFn (const uint8_t *argsText
 		,const size_t argsTextLen)
 {
+  #if Attr_Command_DBG >= 7
+  SCDEFn->Log3Fn(Attr_ProvidedByCommand.commandNameText
+	,Attr_ProvidedByCommand.commandNameTextLen
+	,7
+	,"CommandFn called with args '%.*s'"
+	,argsTextLen
+	,argsText);
+  #endif
+
+// --------------------------------------------------------------------------------------------------
 
   // prepare STAILQ head for multiple RetMsg storage
   struct headRetMsgMultiple_s headRetMsgMultiple;
