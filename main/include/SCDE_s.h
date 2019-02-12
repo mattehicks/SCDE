@@ -534,8 +534,6 @@ struct ProvidedByModule_s {
 // Module_t stores information of loaded modules, Fns required for module use and operation
 typedef struct Module_s Module_t;
 
-
-
 /*
  * Module_s (struct)
  * - stores information of loaded modules, Fns required for module use and operation
@@ -543,12 +541,9 @@ typedef struct Module_s Module_t;
  * - done in InitializeFn (after module load)
  */
 struct Module_s {
-
-  STAILQ_ENTRY (Module_s) entries;	// Link to next loaded Module
-
-  ProvidedByModule_t *ProvidedByModule;	// Ptr to Provided by Module Info
-
-  void *LibHandle;			// Handle to this loaded Module
+  STAILQ_ENTRY (Module_s) entries;		// Link to next loaded Module
+  ProvidedByModule_t *ProvidedByModule;		// Ptr to Provided by Module Info
+  void *LibHandle;				// Handle to this loaded Module
 };
 
 
@@ -557,46 +552,44 @@ struct Module_s {
 
 
 
-// bulkUpdateReadings_t stores bulk update information and the link to updated readings
+// xReadingsSLTQE_t - Singly Linked Tail Queue Element to hold multiple Readings
+typedef struct xReadingsSLTQE_s xReadingsSLTQE_t;
+
+/*
+ * xReadingsSLTQE_s (struct) 
+ * is an singly linked tail queue element and stores one Reading
+ * it is used when storing multiple Readings (in an singly tail linked queue)
+ */
+struct xReadingsSLTQE_s {
+  STAILQ_ENTRY(xReadingsSLTQE_s) entries;	// link to next xReadingsSLTQE_s element
+  time_t readingTist;				// timestamp of reading
+  xString_t nameString;				// text of reading-name, in allocated mem
+  xString_t valueString;			// text of reading-value, in allocated mem
+};
+
+/*
+ * Constructor for the singly linked tail queue head, which may hold multiple linked Readings
+ * SLTQ can be used for an FIFO queue by adding entries at the tail and fetching entries from the head
+ * SLTQ is inefficient when removing arbitrary elements
+ */
+STAILQ_HEAD(readingsSLTQH_s, xReadingsSLTQE_s);
+
+
+
+// -------------------------------------------------------------------------------------------------
+
+
+
+// bulkUpdateReadings_t - stores bulk update information and the readings SLTQH
 typedef struct bulkUpdateReadings_s bulkUpdateReadings_t;
-
-
 
 /* 
  * bulkUpdateReadings_s (struct)
- * - stores bulk update information and the link to updated readings
+ * - stores bulk update information and the readings singly linked tail queue head
  */
 struct bulkUpdateReadings_s {
-
-  STAILQ_HEAD (stailhead7, reading_s) headReadings;	// Link to assigned reading
-
-  time_t bulkUpdateTist;		// timestamp of bulk update
-};
-
-
-
-// -------------------------------------------------------------------------------------------------
-
-
-
-// reading_t stores one reading
-typedef struct reading_s reading_t;
-
-/* 
- * reading_s (struct)
- * - stores one reading
- */
-struct reading_s {
-
-  STAILQ_ENTRY(reading_s) entries;	// link to next reading
-
-  uint8_t *readingNameText;		// text of reading-name, in allocated mem
-  size_t readingNameTextLen;		// text-len of reading-name
-
-  uint8_t *readingValueText;		// text of reading-value, in allocated mem
-  size_t readingValueTextLen;		// text-len of reading-value
-
-  time_t readingTist;			// timestamp of reading
+  struct readingsSLTQH_s readingsSLTQH;		// head of multiple updated Readings
+  time_t bulkUpdateTist;			// timestamp of bulk update
 };
 
 

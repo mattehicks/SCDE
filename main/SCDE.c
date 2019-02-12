@@ -549,30 +549,30 @@ GetAllReadings(Common_Definition_t *Common_Definition)
 	// second the detailed list of readings
 
   // loop the readings stored for this definition for processing
-	reading_t *readingNow;
-	STAILQ_FOREACH(readingNow, &Common_Definition->headReadings, entries) {
+	xReadingsSLTQE_t *currentReadingsSLTQE;
+	STAILQ_FOREACH(currentReadingsSLTQE, &Common_Definition->headReadings, entries) {
 
 		// set current tist, if missing
-		if (!readingNow->readingTist) {
+		if (!currentReadingsSLTQE->readingTist) {
 
 			//Log 4, "WriteStatefile $d $c: Missing TIME, using current time";
 
-			time(&readingNow->readingTist);
+			time(&currentReadingsSLTQE->readingTist);
 
 		}
 
 /*		// set current value, if missing
-		if (!readingNow->readingTist) {
+		if (!currentReadingsSLTQE->readingTist) {
 
 			//Log 4, "WriteStatefile $d $c: Missing VAL, setting it to 0";
 
-			readingNow->readingTist = ;
+			currentReadingsSLTQE->readingTist = ;
 
 		}*/
 
 		// get reading tist
 		struct tm timeinfo;
-		localtime_r(&readingNow->readingTist, &timeinfo);
+		localtime_r(&currentReadingsSLTQE->readingTist, &timeinfo);
 
 		// alloc new retMsgMultiple queue element
 		strTextMultiple_t *retMsgMultiple =
@@ -589,10 +589,10 @@ GetAllReadings(Common_Definition_t *Common_Definition)
 			,timeinfo.tm_hour
 			,timeinfo.tm_min
 			,timeinfo.tm_sec
-			,readingNow->readingNameTextLen
-			,readingNow->readingNameText
-			,readingNow->readingValueTextLen
-			,readingNow->readingValueText);
+			,currentReadingsSLTQE->nameString.length
+			,currentReadingsSLTQE->nameString.characters
+			,currentReadingsSLTQE->valueString.length
+			,currentReadingsSLTQE->valueString.characters);
 
 /*
 		// display for debug
@@ -605,10 +605,10 @@ GetAllReadings(Common_Definition_t *Common_Definition)
 			,timeinfo.tm_hour
 			,timeinfo.tm_min
 			,timeinfo.tm_sec
-			,readingNow->readingNameTextLen
-			,readingNow->readingNameText
-			,readingNow->readingValueTextLen
-			,readingNow->readingValueText);
+			,currentReadingsSLTQE->readingNameTextLen
+			,currentReadingsSLTQE->readingNameText
+			,currentReadingsSLTQE->readingValueTextLen
+			,currentReadingsSLTQE->readingValueText);
 */
 
 		// insert retMsg in stail-queue
@@ -2751,7 +2751,6 @@ readingsBeginUpdate(Common_Definition_t *Common_Definition)
 		  ,Common_Definition->nameLen);
 
 	return 0;
-
   }
 
   // alloc mem for reading structure (bulkUpdateReadings_t)
@@ -2762,7 +2761,7 @@ readingsBeginUpdate(Common_Definition_t *Common_Definition)
   memset(Common_Definition->bulkUpdateReadings, 0, sizeof(bulkUpdateReadings_t));
 
   // clear bulk-update tail-queue
-  STAILQ_INIT(&Common_Definition->bulkUpdateReadings->headReadings);
+  STAILQ_INIT(&Common_Definition->bulkUpdateReadings->readingsSLTQH);
 
 
 
@@ -2847,8 +2846,7 @@ readingsBulkUpdate(Common_Definition_t *Common_Definition
 		,size_t readingNameTextLen
 		,uint8_t *readingValueText
 		,size_t readingValueTextLen)
-  {
-
+{
   // check if bulk update begin was called
   if (!Common_Definition->bulkUpdateReadings) {
 
@@ -2860,50 +2858,42 @@ readingsBulkUpdate(Common_Definition_t *Common_Definition
 		  ,Common_Definition->nameLen);
 
 	return 0;
-
   }
 
-
   // alloc mem for reading structure (reading_t)
-  reading_t *newReading
-	= malloc(sizeof(reading_t));
+  xReadingsSLTQE_t *newReadingsSLTQE
+	= malloc(sizeof(xReadingsSLTQE_t));
 
   // zero the struct
-  memset(newReading, 0, sizeof(reading_t));
+  memset(newReadingsSLTQE, 0, sizeof(xReadingsSLTQE_t));
 
   // copy reading data
-  newReading->readingNameText =
-	readingNameText;
-  newReading->readingNameTextLen =
-	readingNameTextLen;
-  newReading->readingValueText =
-	readingValueText;
-  newReading->readingValueTextLen =
-	readingValueTextLen;
+  newReadingsSLTQE->nameString.length = readingNameTextLen;
+  newReadingsSLTQE->nameString.characters = readingNameText;
+  newReadingsSLTQE->valueString.length = readingValueTextLen;
+  newReadingsSLTQE->valueString.characters = readingValueText;
 
   // store new reading to SCDE-Root
-  STAILQ_INSERT_HEAD(&Common_Definition->bulkUpdateReadings->headReadings, newReading, entries);
+  STAILQ_INSERT_HEAD(&Common_Definition->bulkUpdateReadings->readingsSLTQH, newReadingsSLTQE, entries);
 
   LOGD("readingsBulkUpdate called for reading:%.*s value:%.*s\n"
-  			,readingNameTextLen
-  			,readingNameText
-  			,readingValueTextLen
-  			,readingValueText);
-
+  	,readingNameTextLen
+  	,readingNameText
+  	,readingValueTextLen
+  	,readingValueText);
 
   // list currently added readings stored for processing
-  reading_t *reading;
-  STAILQ_FOREACH(reading, &Common_Definition->bulkUpdateReadings->headReadings, entries) {
+  xReadingsSLTQE_t *currentReadingsSLTQE;
+  STAILQ_FOREACH(currentReadingsSLTQE, &Common_Definition->bulkUpdateReadings->readingsSLTQH, entries) {
 	LOGD("L readingName:%.*s, readingValue:%.*s\n"
-		,reading->readingNameTextLen
-		,reading->readingNameText
-		,reading->readingValueTextLen
-		,reading->readingValueText);
+		,currentReadingsSLTQE->nameString.length
+		,currentReadingsSLTQE->nameString.characters
+		,currentReadingsSLTQE->valueString.length
+		,currentReadingsSLTQE->valueString.characters);
   }
 
   return 0;
-
-  }
+}
 
 
 
@@ -2922,8 +2912,7 @@ readingsBulkUpdate(Common_Definition_t *Common_Definition
  */
 int
 readingsEndUpdate(Common_Definition_t *Common_Definition)
-  {
-
+{
   // check if bulk update begin was called
   if (!Common_Definition->bulkUpdateReadings) {
 
@@ -2935,90 +2924,104 @@ readingsEndUpdate(Common_Definition_t *Common_Definition)
 		  ,Common_Definition->nameLen);
 
 	return 0;
-
   }
 
   printf("readingsEndUpdate called. Now processing:\n");
 
-
-
   // loop through the bulk-update-readings
-  reading_t *reading = STAILQ_FIRST(&Common_Definition->bulkUpdateReadings->headReadings);
-  reading_t *nextReading;
-  while (reading != NULL) {
+  xReadingsSLTQE_t *currentReadingsSLTQE = STAILQ_FIRST(&Common_Definition->bulkUpdateReadings->readingsSLTQH);
+  xReadingsSLTQE_t *nextReadingsSLTQE;
+  while (currentReadingsSLTQE != NULL) {
 
-	nextReading = STAILQ_NEXT(reading, entries);
+	nextReadingsSLTQE = STAILQ_NEXT(currentReadingsSLTQE, entries);
 
 	// set common tist
-	reading->readingTist =
+	currentReadingsSLTQE->readingTist =
 		Common_Definition->bulkUpdateReadings->bulkUpdateTist;
 
 	LOGD("Now proc. readingName:%.*s, readingValue:%.*s\n"
-		,reading->readingNameTextLen
-		,reading->readingNameText
-		,reading->readingValueTextLen
-		,reading->readingValueText);
+		,currentReadingsSLTQE->nameString.length
+		,currentReadingsSLTQE->nameString.characters
+		,currentReadingsSLTQE->valueString.length
+		,currentReadingsSLTQE->valueString.characters);
+
+	// SLTQ Element to loop trough the old readings
+	xReadingsSLTQE_t *oldReadingsSLTQE = 
+		STAILQ_FIRST(&Common_Definition->headReadings);
 
 	// loop through old readings and try to find an old reading and replace it. Or add the new reading.
-	reading_t *oldReading = STAILQ_FIRST(&Common_Definition->headReadings);
 	while (true) {
 
 		// no old reading found ?
-		if (oldReading == NULL) {
+		if (oldReadingsSLTQE == NULL) {
 
 			// add new reading at tail
-			STAILQ_INSERT_HEAD(&Common_Definition->headReadings, reading, entries);
+			STAILQ_INSERT_HEAD(&Common_Definition->headReadings, currentReadingsSLTQE, entries);
 
 			LOGD("Added new reading - readingName:%.*s, readingValue:%.*s\n"
-				,reading->readingNameTextLen
-				,reading->readingNameText
-				,reading->readingValueTextLen
-				,reading->readingValueText);
+				,currentReadingsSLTQE->nameString.length
+				,currentReadingsSLTQE->nameString.characters
+				,currentReadingsSLTQE->valueString.length
+				,currentReadingsSLTQE->valueString.characters);
 
 			// added new, break
 			break;
 		}
 
-		// is this an old value for this reading
-		if ( (oldReading->readingNameTextLen == reading->readingNameTextLen)
-			&& (!strncmp((const char*) oldReading->readingNameText, (const char*) reading->readingNameText, reading->readingNameTextLen)) ) {
+		// is this an old value for this reading ?
+		if ( (oldReadingsSLTQE->nameString.length == currentReadingsSLTQE->nameString.length)
+			&& (!strncmp((const char*) oldReadingsSLTQE->nameString.characters,
+				(const char*) currentReadingsSLTQE->nameString.characters,
+				currentReadingsSLTQE->nameString.length)) ) {
 
 			// replace old value for this reading
-			if (oldReading->readingNameText) free(oldReading->readingNameText);
-			if (oldReading->readingValueText) free(oldReading->readingValueText);
-			oldReading->readingNameTextLen = reading->readingNameTextLen;
-			oldReading->readingNameText = reading->readingNameText;
-			oldReading->readingValueTextLen = reading->readingValueTextLen;
-			oldReading->readingValueText = reading->readingValueText;
-			oldReading->readingTist =
+			if (oldReadingsSLTQE->nameString.characters) 
+				free(oldReadingsSLTQE->nameString.characters);
+
+			if (oldReadingsSLTQE->valueString.characters) 
+				free(oldReadingsSLTQE->valueString.characters);
+
+			oldReadingsSLTQE->nameString.length = 
+				currentReadingsSLTQE->nameString.length;
+
+			oldReadingsSLTQE->nameString.characters = 
+				currentReadingsSLTQE->nameString.characters;
+
+			oldReadingsSLTQE->valueString.length = 
+				currentReadingsSLTQE->valueString.length;
+
+			oldReadingsSLTQE->valueString.characters = 
+				currentReadingsSLTQE->valueString.characters;
+
+			oldReadingsSLTQE->readingTist =
 				Common_Definition->bulkUpdateReadings->bulkUpdateTist;
 
-			// we have taken the data - free reading
-			free(reading);
+			// we have taken the data - free current reading
+			free(currentReadingsSLTQE);
 
 			LOGD("Updated old reading - readingName:%.*s, readingValue:%.*s\n"
-				,oldReading->readingNameTextLen
-				,oldReading->readingNameText
-				,oldReading->readingValueTextLen
-				,oldReading->readingValueText);
+				,oldReadingsSLTQE->nameString.length
+				,oldReadingsSLTQE->nameString.characters
+				,oldReadingsSLTQE->valueString.length
+				,oldReadingsSLTQE->valueString.characters);
 
 			// found, break
 			break;
 		}
 
 		// get next reading for processing
-		oldReading = STAILQ_NEXT(oldReading, entries);
+		oldReadingsSLTQE = STAILQ_NEXT(oldReadingsSLTQE, entries);
 
 	}
 
 	// goto next reading for processing
-	reading = nextReading;
+	currentReadingsSLTQE = nextReadingsSLTQE;
   }
 
   printf("readingsEndUpdate finnished. Current readings for this definiton:\n");
 
   // clear bulk-update tail-queue
-//  STAILQ_INIT(&Common_Definition->bulkUpdateReadings->headReadings);
+//  STAILQ_INIT(&Common_Definition->bulkUpdateReadings->readingsSLTQH);
 
 
   // dealloc and clear bulk-update data
@@ -3042,7 +3045,7 @@ readingsEndUpdate(Common_Definition_t *Common_Definition)
 /*
   // list currently added readings stored for processing
   reading_t *reading;
-  STAILQ_FOREACH(reading, &Common_Definition->bulkUpdateReadings->headReadings, entries) {
+  STAILQ_FOREACH(reading, &Common_Definition->bulkUpdateReadings->readingsSLTQH, entries) {
 
 	printf("Processing readingName:%.*s, readingValue:%.*s\n"
 		,reading->readingNameTextLen
@@ -3051,34 +3054,34 @@ readingsEndUpdate(Common_Definition_t *Common_Definition)
 		,reading->readingValueText);
 
 	// loop and find old reading for this new reading ?
-	reading_t *oldReading;
-	STAILQ_FOREACH(oldReading, &Common_Definition->headReadings, entries) {
+	reading_t *oldReadingsSLTQE;
+	STAILQ_FOREACH(oldReadingsSLTQE, &Common_Definition->headReadings, entries) {
 
 		// is this an old value for this reading
-		if ( (oldReading->readingNameTextLen == reading->readingNameTextLen)
-			&& (!strncmp((const char*) oldReading->readingNameText, (const char*) reading->readingNameText, reading->readingNameTextLen)) ) {
+		if ( (oldReadingsSLTQE->readingNameTextLen == reading->readingNameTextLen)
+			&& (!strncmp((const char*) oldReadingsSLTQE->readingNameText, (const char*) reading->readingNameText, reading->readingNameTextLen)) ) {
 
 		// replace old value for this reading
-		if (oldReading->readingNameText) free(oldReading->readingNameText);
-		if (oldReading->readingValueText) free(oldReading->readingValueText);
-		oldReading->readingNameTextLen = reading->readingNameTextLen;
-		oldReading->readingNameText = reading->readingNameText;
-		oldReading->readingValueTextLen = reading->readingValueTextLen;
-		oldReading->readingValueText = reading->readingValueText;
+		if (oldReadingsSLTQE->readingNameText) free(oldReadingsSLTQE->readingNameText);
+		if (oldReadingsSLTQE->readingValueText) free(oldReadingsSLTQE->readingValueText);
+		oldReadingsSLTQE->readingNameTextLen = reading->readingNameTextLen;
+		oldReadingsSLTQE->readingNameText = reading->readingNameText;
+		oldReadingsSLTQE->readingValueTextLen = reading->readingValueTextLen;
+		oldReadingsSLTQE->readingValueText = reading->readingValueText;
 
 		printf("Updated old reading - readingName:%.*s, readingValue:%.*s\n"
-			,oldReading->readingNameTextLen
-			,oldReading->readingNameText
-			,oldReading->readingValueTextLen
-			,oldReading->readingValueText);
+			,oldReadingsSLTQE->readingNameTextLen
+			,oldReadingsSLTQE->readingNameText
+			,oldReadingsSLTQE->readingValueTextLen
+			,oldReadingsSLTQE->readingValueText);
 
 		}
 
 		// no old value for this reading found
-		else if (oldReading->entries == NULL) {
+		else if (oldReadingsSLTQE->entries == NULL) {
 
 			// store new reading to SCDE-Root
-			STAILQ_INSERT_AFTER(&Common_Definition->bulkUpdateReadings->headReadings, newReading, entries);
+			STAILQ_INSERT_AFTER(&Common_Definition->bulkUpdateReadings->readingsSLTQH, newReadingsSLTQE, entries);
 
 		}
 	
@@ -3091,20 +3094,18 @@ readingsEndUpdate(Common_Definition_t *Common_Definition)
 */
 
   // list readings stored for definition after processing
-  reading_t *readingNow;
-  STAILQ_FOREACH(readingNow, &Common_Definition->headReadings, entries) {
+//  xReadingsSLTQE_t *currentReadingsSLTQE;
+  STAILQ_FOREACH(currentReadingsSLTQE, &Common_Definition->headReadings, entries) {
+
 	LOGD("L readingName:%.*s, readingValue:%.*s\n"
-		,readingNow->readingNameTextLen
-		,readingNow->readingNameText
-		,readingNow->readingValueTextLen
-		,readingNow->readingValueText);
+		,currentReadingsSLTQE->nameString.length
+		,currentReadingsSLTQE->nameString.characters
+		,currentReadingsSLTQE->valueString.length
+		,currentReadingsSLTQE->valueString.characters);
   }
-
-
 
   return 0;
-
-  }
+}
 
 
 

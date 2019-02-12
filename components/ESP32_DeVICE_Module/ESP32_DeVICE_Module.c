@@ -1502,6 +1502,8 @@ ESP32_DeVICE_State(Common_Definition_t *Common_Definition
          "Should set State for '%.*s' with Value '%.*s' and Mime '%.*s'. TimeStamp '%.*s'."
 	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
 	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeName
+	,Common_Definition->nameLen
+	,Common_Definition->name
 	,stateNameString.length
 	,stateNameString.characters
 	,stateValueString.length

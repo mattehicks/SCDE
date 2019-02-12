@@ -396,22 +396,22 @@ List_CommandFn (const uint8_t *args
 				,"  Readings:\r\n");
 			
 			// list readings stored for definition after processing
-			reading_t *readingNow;
-			STAILQ_FOREACH(readingNow, &Common_Definition->headReadings, entries) {
+			xReadingsSLTQE_t *currentReadingsSLTQE;
+			STAILQ_FOREACH(currentReadingsSLTQE, &Common_Definition->headReadings, entries) {
 
 				// get tist text
 				strText_t strText =
-					SCDEFn->FmtDateTimeFn(readingNow->readingTist);
+					SCDEFn->FmtDateTimeFn(currentReadingsSLTQE->readingTist);
 
 					strBufferOffset += snprintf(wBufStart + strBufferOffset
 						,strBufferLen
 						,"  %.*s | %.*s = %.*s\r\n"
 						,strText.strTextLen
 						,strText.strText
-						,readingNow->readingNameTextLen
-						,readingNow->readingNameText
-						,readingNow->readingValueTextLen
-						,readingNow->readingValueText);
+						,currentReadingsSLTQE->nameString.length
+						,currentReadingsSLTQE->nameString.characters
+						,currentReadingsSLTQE->valueString.length
+						,currentReadingsSLTQE->valueString.characters);
 
 				free(strText.strText);
 

@@ -390,13 +390,23 @@ x.stqh_last = retMsgHeadMultipleStringSLTQ.stqh_last;
 				time(&readingTiSt);
 			}
 
-			// the extracted data of an detailed reading
-			stateNameString.characters = &reading;
-			stateNameString.length = strlen(reading);
-			stateValueString.characters = &value;
-			stateValueString.length = strlen(value);
-			stateMimeString.characters = &mime;
-			stateMimeString.length = strlen(mime);
+	
+
+			// build the data of an detailed reading
+			stateNameString.length = asprintf(&stateNameString.characters
+				,"%.*s"
+				,strlen(reading)
+				,(char*) &reading);
+
+			stateValueString.length = asprintf(&stateValueString.characters
+				,"%.*s"
+				,strlen(value)
+				,(char*) &value);
+
+			stateMimeString.length = asprintf(&stateMimeString.characters
+				,"%.*s"
+				,strlen(mime)
+				,(char*) &mime);
 
 /*
 // -------------------------------------------------------------------------------------------------
@@ -645,14 +655,147 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 						,stateMimeString);
 				}
 
-			// got an singly linked tail queue element holding an return message? VETO + Insert it in queue.
-			if (retMsgMultipleStringSLTQE) 
+			// return message? in singly linked tail queue element? VETO + Insert it in retMsg-queue.
+			if (retMsgMultipleStringSLTQE) {
+
 				STAILQ_INSERT_TAIL(&retMsgHeadMultipleStringSLTQ
 					,retMsgMultipleStringSLTQE, entries);
 
-			// else no return message - NO VETO. Prepare readings
+				// free memory
+				if (stateNameString.characters) 
+					free(stateNameString.characters);
+
+				if (stateValueString.characters) 
+					free(stateValueString.characters);
+
+				if (stateMimeString.characters) 
+					free(stateMimeString.characters);
+			}
+
+			// else no return message - NO VETO. Create / Update Reading
 			else {
-// readings hier erstellen aber auch ohen stateFN
+
+				// Loop through old readings and
+				// try to find an old reading and replace it.
+				// Or add the new reading.
+				xReadingsSLTQE_t *oldReadingsSLTQE = 
+					STAILQ_FIRST(&Common_Definition->headReadings);
+
+				while (true) {
+
+					// loop at end - no old Reading found. Create new one !
+					if (oldReadingsSLTQE == NULL) {
+
+						// alloc mem for new Reading 
+						xReadingsSLTQE_t *newReadingsSLTQE
+							= malloc(sizeof(xReadingsSLTQE_t));
+
+						// zero the struct
+						memset(newReadingsSLTQE, 0, sizeof(xReadingsSLTQE_t));
+
+						// fill Reading
+						newReadingsSLTQE->readingTist = readingTiSt;
+						newReadingsSLTQE->nameString = stateNameString;
+						newReadingsSLTQE->valueString = stateValueString;
+
+						// debug output
+						#if Setstate_Command_DBG >= 7
+						// prepare TiSt for LogFn
+						strText_t strText =
+  							SCDEFn->FmtDateTimeFn(readingTiSt);
+
+						SCDEFn->Log3Fn(Setstate_ProvidedByCommand.commandNameText
+		  					,Setstate_ProvidedByCommand.commandNameTextLen
+							,7
+							,"Created Reading '%.*s' with Value '%.*s',"
+							 " Mime '%.*s', TimeStamp '%.*s'."
+							,newReadingsSLTQE->nameString.length
+							,newReadingsSLTQE->nameString.characters
+							,newReadingsSLTQE->valueString.length
+							,newReadingsSLTQE->valueString.characters
+							,stateMimeString.length
+							,stateMimeString.characters
+							//,newReadingsSLTQE->mimeString.length
+							//,newReadingsSLTQE->mimeString.characters
+							,strText.strTextLen
+							,strText.strText);
+
+						// free TiSt from LogFn
+						free(strText.strText);
+						#endif
+
+
+if (stateMimeString.characters) 
+	free(stateMimeString.characters);
+
+						// add new Reading at tail
+						STAILQ_INSERT_TAIL(&Common_Definition->headReadings
+							,newReadingsSLTQE, entries);
+
+						// added new Reading, break
+						break;
+					}
+
+					// looped - check if this existing Reading matches. Overwrite the old value.
+					if ( (oldReadingsSLTQE->nameString.length == stateNameString.length)
+						&& (!strncmp((const char*) oldReadingsSLTQE->nameString.characters,
+						(const char*) stateNameString.characters,
+						stateNameString.length)) ) {
+
+						// replace / free old name & value for this reading
+						if (oldReadingsSLTQE->nameString.characters) 
+							free(oldReadingsSLTQE->nameString.characters);
+
+						if (oldReadingsSLTQE->valueString.characters) 
+							free(oldReadingsSLTQE->valueString.characters);
+
+						// fill Reading
+						oldReadingsSLTQE->readingTist = readingTiSt;
+						oldReadingsSLTQE->nameString = stateNameString;
+						oldReadingsSLTQE->valueString = stateValueString;
+
+						#if Setstate_Command_DBG >= 7
+						// prepare TiSt for LogFn
+						strText_t strText =
+  							SCDEFn->FmtDateTimeFn(readingTiSt);
+
+						// debug output
+						SCDEFn->Log3Fn(Setstate_ProvidedByCommand.commandNameText
+		  					,Setstate_ProvidedByCommand.commandNameTextLen
+							,7
+							,"Created Reading '%.*s' with Value '%.*s',"
+							 " Mime '%.*s', TimeStamp '%.*s'."
+							,oldReadingsSLTQE->nameString.length
+							,oldReadingsSLTQE->nameString.characters
+							,oldReadingsSLTQE->valueString.length
+							,oldReadingsSLTQE->valueString.characters
+							,stateMimeString.length
+							,stateMimeString.characters
+							//,newReadingsSLTQE->mimeString.length
+							//,newReadingsSLTQE->mimeString.characters
+							,strText.strTextLen
+							,strText.strText);
+
+						// free TiSt from LogFn
+						free(strText.strText);
+						#endif
+
+if (stateMimeString.characters) 
+	free(stateMimeString.characters);
+
+			/*LOGD("Updated old reading - readingName:%.*s, readingValue:%.*s\n"
+				,oldReading->readingNameTextLen
+				,oldReading->readingNameText
+				,oldReading->readingValueTextLen
+				,oldReading->readingValueText);*/
+
+						// found, break
+						break;
+					}
+
+					// get next reading for processing
+					oldReadingsSLTQE = STAILQ_NEXT(oldReadingsSLTQE, entries);
+				}
 			}
 		}
 
