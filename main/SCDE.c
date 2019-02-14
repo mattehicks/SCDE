@@ -170,8 +170,8 @@ SCDERoot_t SCDERoot;
  * Data: 
  */
 SCDEFn_t SCDEFn = {
-   AnalyzeCommandChain
-  ,AnalyzeCommand
+   AnalyzeCommand
+  ,AnalyzeCommandChain
   ,CallGetFnByDefName
   ,CommandReloadModule
   ,Devspec2Array
@@ -181,6 +181,8 @@ SCDEFn_t SCDEFn = {
   ,GetDefAndAttr
   ,GetDefinitionPtrByName
   ,GetLoadedModulePtrByName
+  ,GetTiSt
+  ,GetUniqueTiSt
   ,GoodDeviceName
   ,GoodReadingName
   ,HexDumpOut
@@ -275,89 +277,198 @@ Devspec2Array(const xString_t devspecString)
 
 
 
-/** Category: SCDE Core Fn
- * -------------------------------------------------------------------------------------------------
- *  FName: GoodDeviceName
- *  Desc: Checks the given Device Name if it is in compliance with the device name rules:
- *        - normal letters, without special signs (A-Z, a-z)
- *        - numbers (0-9), point (.) and underscore (_)
- *  Info: Device Name rules = definition name rules
- *  Para: const xString_s nameString -> the Device Name string that should be checked
- *  Rets: bool false -> not good ; bool true -> good device name
- * -------------------------------------------------------------------------------------------------
+/* helper
+ * --------------------------------------------------------------------------------------------------
+ *  FName: FmtDateTime 
+ *  Desc: Creates formated date-time-text (uint8_t style - in this case zero terminated) from given
+ *        time-stamp. Returned in msgText_t (text in allocated memory + length information)
+
+ *  Note: DO NOT FORGET TO FREE MEMORY !! 
+ *  Para: time_t tiSt -> the time-stamp that should be used
+ *  Rets: strText_t -> formated date-time-text data
+ * --------------------------------------------------------------------------------------------------
  */
-bool
-GoodDeviceName(const xString_t nameString)
+strText_t
+FmtDateTime(time_t tiSt)
 {
+  // our msg-text data packet
+  strText_t strText;
 
-// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
+  // get timeinfo for time-stamp
+  struct tm timeinfo;
+  localtime_r(&tiSt, &timeinfo);
 
-  return true;
+  // prepare formated-time-string in allocated memory
+  strText.strTextLen = asprintf((char**) &strText.strText
+	,"%04d-%02d-%02d %02d:%02d:%02d"
+	,timeinfo.tm_year+1900
+	,timeinfo.tm_mon+1
+	,timeinfo.tm_mday
+	,timeinfo.tm_hour
+	,timeinfo.tm_min
+	,timeinfo.tm_sec);
+
+  return strText;
+}
+	
+
+
+/* helper
+ * --------------------------------------------------------------------------------------------------
+ *  FName: FmtTime
+ *  Desc: Creates formated time-text (uint8_t style - in this case zero terminated) from given
+ *        time-stamp. Returned in msgText_t (text in allocated memory + length information)
+ *  Note: DO NOT FORGET TO FREE MEMORY !! 
+ *  Para: time_t tiSt -> the time-stamp that should be used
+ *  Rets: strText_t -> formated time-text data
+ * --------------------------------------------------------------------------------------------------
+ */
+strText_t
+FmtTime(time_t tiSt)
+{
+  // our msg-text data packet
+  strText_t strText;
+
+  // get timeinfo for time-stamp
+  struct tm timeinfo;
+  localtime_r(&tiSt, &timeinfo);
+
+  // prepare formated-time-string in allocated memory
+  strText.strTextLen = asprintf((char**) &strText.strText
+	,"%02d:%02d:%02d"
+	,timeinfo.tm_hour
+	,timeinfo.tm_min
+	,timeinfo.tm_sec);
+
+  return strText;
 }
 
 
 
-/** Category: SCDE Core Fn
- * -------------------------------------------------------------------------------------------------
- *  FName: MakeDeviceName
- *  Desc: Corrects the given Device Name.Then it is in compliance with the device name rules:
- *        - normal letters, without special signs (A-Z, a-z)
- *        - numbers (0-9), point (.) and underscore (_)
- *  Info: Characters that are not in comliance with the rules will be replaced by and underscore (_)
- *  Para: const xString_s nameString -> the Device Name string that should be corrected
- *  Rets: -/-
- * -------------------------------------------------------------------------------------------------
+/* --------------------------------------------------------------------------------------------------
+ *  FName: GetAllReadings
+ *  Desc: Creates a new Define with name "Name", and Module "TypeName" and calls Modules DefFn with
+ *        args "Args"
+ *  Info: 'Name' is custom definition name [azAZ09._] char[31]
+ *        'TypeName' is module name
+ *        'Definition+X' is passed to modules DefineFn, and stored in Definition->Definition
+ *  Para: Common_Definition_t *Common_Definition -> ptr to definition which readings are requested
+ *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple (all) readings
+ *        from requested Definition, NULL=NONE
+ * --------------------------------------------------------------------------------------------------
  */
-void
-MakeDeviceName(const xString_t nameString)
+struct headRetMsgMultiple_s
+GetAllReadings(Common_Definition_t *Common_Definition)
 {
+  // prepare STAILQ head for multiple RetMsg storage
+  struct headRetMsgMultiple_s headRetMsgMultiple;
 
-// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
+  // Initialize the queue head
+  STAILQ_INIT(&headRetMsgMultiple);
 
-  return;
-}
+//---------------------------------------------------------------------------------------------------
 
+  // first the STATE reading
+ 
+	if (Common_Definition->state) {
+//	if(defined($val) &&
+//     $val ne "unknown" &&
+//     $val ne "Initialized" &&
+//     $val ne "" &&
+//     $val ne "???") {
 
+		// alloc new retMsgMultiple queue element
+		strTextMultiple_t *retMsgMultiple =
+			malloc(sizeof(strTextMultiple_t));
 
-/** Category: SCDE Core Fn
- * -------------------------------------------------------------------------------------------------
- *  FName: GoodReadingName
- *  Desc: Checks the given Reading Name if it is in compliance with the reading name rules
- *        - normal letters, without special signs (A-Z, a-z)
- *        - numbers (0-9), point (.), hyphen (-), slash (/) and underscore (_)
- *  Para: const xString_s nameString -> the Reading Name string that should be checked
- *  Rets: bool false -> not good ; bool true -> good reading name
- * -------------------------------------------------------------------------------------------------
- */
-bool
-GoodReadingName(const xString_t nameString)
-{
+		// write line to allocated memory and store to queue
+		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
+			,"setstate %.*s %.*s\r\n"
+			,Common_Definition->nameLen
+			,Common_Definition->name
+			,Common_Definition->stateLen
+			,Common_Definition->state);
 
-// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
+		// insert retMsg in stail-queue
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsgMultiple, entries);
 
-  return true;
-}
+	}
 
+//---------------------------------------------------------------------------------------------------
 
+	// second the detailed list of readings
 
-/** Category: SCDE Core Fn
- * -------------------------------------------------------------------------------------------------
- *  FName: MakeReadingName
- *  Desc: Corrects the given Reading Name.Then it is in compliance with the reading name rules:
- *        - normal letters, without special signs (A-Z, a-z)
- *        - numbers (0-9), point (.), hyphen (-), slash (/) and underscore (_)
- *  Info: Characters that are not in comliance with the rules will be replaced by and underscore (_)
- *  Para: const xString_s nameString -> the Reading Name string that should be corrected
- *  Rets: -/-
- * -------------------------------------------------------------------------------------------------
- */
-void
-MakeReadingName(const xString_t nameString)
-{
+  // loop the readings stored for this definition for processing
+	xReadingsSLTQE_t *currentReadingsSLTQE;
+	STAILQ_FOREACH(currentReadingsSLTQE, &Common_Definition->headReadings, entries) {
 
-// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
+		// set current tist, if missing
+		if (!currentReadingsSLTQE->readingTist) {
 
-  return;
+			//Log 4, "WriteStatefile $d $c: Missing TIME, using current time";
+
+			time(&currentReadingsSLTQE->readingTist);
+
+		}
+
+/*		// set current value, if missing
+		if (!currentReadingsSLTQE->readingTist) {
+
+			//Log 4, "WriteStatefile $d $c: Missing VAL, setting it to 0";
+
+			currentReadingsSLTQE->readingTist = ;
+
+		}*/
+
+		// get reading tist
+		struct tm timeinfo;
+		localtime_r(&currentReadingsSLTQE->readingTist, &timeinfo);
+
+		// alloc new retMsgMultiple queue element
+		strTextMultiple_t *retMsgMultiple =
+			malloc(sizeof(strTextMultiple_t));
+
+		// write line to allocated memory and store to queue
+		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
+			,"setstate %.*s %d-%d-%d %d:%d:%d %.*s %.*s TXT\r\n"
+			,Common_Definition->nameLen
+			,Common_Definition->name
+			,timeinfo.tm_year+1900
+			,timeinfo.tm_mon+1
+			,timeinfo.tm_mday
+			,timeinfo.tm_hour
+			,timeinfo.tm_min
+			,timeinfo.tm_sec
+			,currentReadingsSLTQE->nameString.length
+			,currentReadingsSLTQE->nameString.characters
+			,currentReadingsSLTQE->valueString.length
+			,currentReadingsSLTQE->valueString.characters);
+
+/*
+		// display for debug
+		LOGD("setstate %.*s %d.%d.%d %d:%d:%d %.*s %.*s TXT\r\n"
+			,Common_Definition->nameLen
+			,Common_Definition->name
+			,timeinfo.tm_year+1900
+			,timeinfo.tm_mon+1
+			,timeinfo.tm_mday
+			,timeinfo.tm_hour
+
+			,timeinfo.tm_min
+			,timeinfo.tm_sec
+			,currentReadingsSLTQE->readingNameTextLen
+			,currentReadingsSLTQE->readingNameText
+			,currentReadingsSLTQE->readingValueTextLen
+			,currentReadingsSLTQE->readingValueText);
+*/
+
+		// insert retMsg in stail-queue
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsgMultiple, entries);
+
+	}
+
+  // return STAILQ head, stores multiple generated lines of text, if STAILQ_EMPTY -> none
+  return headRetMsgMultiple;
 }
 
 
@@ -366,17 +477,19 @@ MakeReadingName(const xString_t nameString)
  *  FName: GetDefAndAttr
  *  Desc: Creates a RetMsgMultiple with Definition CMD for this Definition and CMDs to create the
  *        assigned Attributes
+
  *  Info: 
  *  Para: Common_Definition_t *Common_Definition -> ptr to definition for which Def and Attr is requested
+
  *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple lines, 
  *                                       Definition CMD line and Attribute CMD lines NULL=NONE
  * --------------------------------------------------------------------------------------------------
+
  */
 struct headRetMsgMultiple_s
 GetDefAndAttr(Common_Definition_t *Common_Definition)
 {
-
-	// prepare STAILQ head for multiple RetMsg storage
+  // prepare STAILQ head for multiple RetMsg storage
   struct headRetMsgMultiple_s headRetMsgMultiple;
 
   // Initialize the queue head
@@ -484,142 +597,178 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 			// insert retMsg in stail-queue
 			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsgMultiple, entries);
 		}
-		}
 	}
+  }
 
-	// return STAILQ head, stores multiple generated lines of text, if STAILQ_EMPTY -> none
-	return headRetMsgMultiple;
+  // return STAILQ head, stores multiple generated lines of text, if STAILQ_EMPTY -> none
+  return headRetMsgMultiple;
 }
 
 
 
-
-/* --------------------------------------------------------------------------------------------------
- *  FName: GetAllReadings
- *  Desc: Creates a new Define with name "Name", and Module "TypeName" and calls Modules DefFn with
- *        args "Args"
- *  Info: 'Name' is custom definition name [azAZ09._] char[31]
- *        'TypeName' is module name
- *        'Definition+X' is passed to modules DefineFn, and stored in Definition->Definition
- *  Para: Common_Definition_t *Common_Definition -> ptr to definition which readings are requested
- *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple (all) readings
- *        from requested Definition, NULL=NONE
+/* Category: SCDE Core Fn
+ * --------------------------------------------------------------------------------------------------
+ *  FName: GetTiSt
+ *  Desc: Returns current SCDE Time Stamp.
+ *  Note: MAY DIFFER FROM SYSTEM TIME STAMP, BECAUSE REQUSTED UNIQUE TIME STAMPS MAY ADVANCE TIME
+ *        time(&time_t) returns system time, GetTiSt(void) returns current SCDE Time-Stamp !
+ *  Para: -/-
+ *  Rets: time_t tiST -> SCDE Time Stamp
  * --------------------------------------------------------------------------------------------------
  */
-struct headRetMsgMultiple_s
-GetAllReadings(Common_Definition_t *Common_Definition)
+  static time_t uniqueTiSt;
+time_t
+GetTiSt(void)
+{
+  // for time stamp storage
+  time_t nowTiSt;
+
+  // get time stamp
+  time(&nowTiSt);
+
+  // only return uniqueTiSt when it is ahead of nowTiSt
+  if (uniqueTiSt > nowTiSt)
+	nowTiSt = uniqueTiSt;
+
+  return nowTiSt;
+}
+
+
+
+/* Category: SCDE Core Fn
+ * --------------------------------------------------------------------------------------------------
+ *  FName: GetUniqueTiSt 
+ *  Desc: Returns an UNIQUE SCDE Time Stamp (in most cases the current Time Stamp).
+ *  Note: REQUESTING TOO MUCH UNIQUE TIME STAMPS MAY ADVANCE TIME
+ *        time(&time_t) returns system time, GetUniqueTiSt(void) returns an current+unique SCDE Time-Stamp !
+ *  Para: -/-
+ *  Rets: time_t uniqueTiSt -> SCDE Time Stamp (unique)
+ * --------------------------------------------------------------------------------------------------
+ */
+time_t
+GetUniqueTiSt(void)
+{
+  // for time stamp storage
+  time_t nowTiSt;
+
+  // get time stamp
+  time(&nowTiSt);
+
+  // if uniqueTiSt is smaller than nowTiSt -> nowTiSt is unique !
+  if (uniqueTiSt < nowTiSt)
+	 uniqueTiSt = nowTiSt;
+
+  // else lets make it unique by adding +1
+  else uniqueTiSt++;
+
+  return uniqueTiSt;
+}
+
+
+/** Category: SCDE Core Fn
+ * -------------------------------------------------------------------------------------------------
+ *  FName: GoodDeviceName
+ *  Desc: Checks the given Device Name if it is in compliance with the device name rules:
+ *        - normal letters, without special signs (A-Z, a-z)
+ *        - numbers (0-9), point (.) and underscore (_)
+ *  Info: Device Name rules = definition name rules
+ *  Para: const xString_s nameString -> the Device Name string that should be checked
+ *  Rets: bool false -> not good ; bool true -> good device name
+ * -------------------------------------------------------------------------------------------------
+ */
+bool
+GoodDeviceName(const xString_t nameString)
 {
 
-	// prepare STAILQ head for multiple RetMsg storage
-  struct headRetMsgMultiple_s headRetMsgMultiple;
+// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
 
-  // Initialize the queue head
-  STAILQ_INIT(&headRetMsgMultiple);
-
-//---------------------------------------------------------------------------------------------------
-
-  // first the STATE reading
- 
-	if (Common_Definition->state) {
-//	if(defined($val) &&
-//     $val ne "unknown" &&
-//     $val ne "Initialized" &&
-//     $val ne "" &&
-//     $val ne "???") {
-
-		// alloc new retMsgMultiple queue element
-		strTextMultiple_t *retMsgMultiple =
-			malloc(sizeof(strTextMultiple_t));
-
-		// write line to allocated memory and store to queue
-		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
-			,"setstate %.*s %.*s\r\n"
-			,Common_Definition->nameLen
-			,Common_Definition->name
-			,Common_Definition->stateLen
-			,Common_Definition->state);
-
-		// insert retMsg in stail-queue
-		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsgMultiple, entries);
-
-	}
-
-//---------------------------------------------------------------------------------------------------
-
-	// second the detailed list of readings
-
-  // loop the readings stored for this definition for processing
-	xReadingsSLTQE_t *currentReadingsSLTQE;
-	STAILQ_FOREACH(currentReadingsSLTQE, &Common_Definition->headReadings, entries) {
-
-		// set current tist, if missing
-		if (!currentReadingsSLTQE->readingTist) {
-
-			//Log 4, "WriteStatefile $d $c: Missing TIME, using current time";
-
-			time(&currentReadingsSLTQE->readingTist);
-
-		}
-
-/*		// set current value, if missing
-		if (!currentReadingsSLTQE->readingTist) {
-
-			//Log 4, "WriteStatefile $d $c: Missing VAL, setting it to 0";
-
-			currentReadingsSLTQE->readingTist = ;
-
-		}*/
-
-		// get reading tist
-		struct tm timeinfo;
-		localtime_r(&currentReadingsSLTQE->readingTist, &timeinfo);
-
-		// alloc new retMsgMultiple queue element
-		strTextMultiple_t *retMsgMultiple =
-			malloc(sizeof(strTextMultiple_t));
-
-		// write line to allocated memory and store to queue
-		retMsgMultiple->strTextLen = asprintf(&retMsgMultiple->strText
-			,"setstate %.*s %d-%d-%d %d:%d:%d %.*s %.*s TXT\r\n"
-			,Common_Definition->nameLen
-			,Common_Definition->name
-			,timeinfo.tm_year+1900
-			,timeinfo.tm_mon+1
-			,timeinfo.tm_mday
-			,timeinfo.tm_hour
-			,timeinfo.tm_min
-			,timeinfo.tm_sec
-			,currentReadingsSLTQE->nameString.length
-			,currentReadingsSLTQE->nameString.characters
-			,currentReadingsSLTQE->valueString.length
-			,currentReadingsSLTQE->valueString.characters);
-
-/*
-		// display for debug
-		LOGD("setstate %.*s %d.%d.%d %d:%d:%d %.*s %.*s TXT\r\n"
-			,Common_Definition->nameLen
-			,Common_Definition->name
-			,timeinfo.tm_year+1900
-			,timeinfo.tm_mon+1
-			,timeinfo.tm_mday
-			,timeinfo.tm_hour
-			,timeinfo.tm_min
-			,timeinfo.tm_sec
-			,currentReadingsSLTQE->readingNameTextLen
-			,currentReadingsSLTQE->readingNameText
-			,currentReadingsSLTQE->readingValueTextLen
-			,currentReadingsSLTQE->readingValueText);
-*/
-
-		// insert retMsg in stail-queue
-		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsgMultiple, entries);
-
-	}
-
-	// return STAILQ head, stores multiple generated lines of text, if STAILQ_EMPTY -> none
-	return headRetMsgMultiple;
-
+  return true;
 }
+
+
+
+/** Category: SCDE Core Fn
+ * -------------------------------------------------------------------------------------------------
+ *  FName: GoodReadingName
+ *  Desc: Checks the given Reading Name if it is in compliance with the reading name rules
+ *        - normal letters, without special signs (A-Z, a-z)
+ *        - numbers (0-9), point (.), hyphen (-), slash (/) and underscore (_)
+ *  Para: const xString_s nameString -> the Reading Name string that should be checked
+ *  Rets: bool false -> not good ; bool true -> good reading name
+ * -------------------------------------------------------------------------------------------------
+ */
+bool
+GoodReadingName(const xString_t nameString)
+{
+
+// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
+
+  return true;
+}
+
+
+
+/** Category: SCDE Core Fn
+ * -------------------------------------------------------------------------------------------------
+ *  FName: MakeDeviceName
+ *  Desc: Corrects the given Device Name.Then it is in compliance with the device name rules:
+ *        - normal letters, without special signs (A-Z, a-z)
+ *        - numbers (0-9), point (.) and underscore (_)
+ *  Info: Characters that are not in comliance with the rules will be replaced by and underscore (_)
+ *  Para: const xString_s nameString -> the Device Name string that should be corrected
+ *  Rets: -/-
+ * -------------------------------------------------------------------------------------------------
+ */
+void
+MakeDeviceName(const xString_t nameString)
+{
+
+// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
+
+  return;
+}
+
+
+
+/** Category: SCDE Core Fn
+ * -------------------------------------------------------------------------------------------------
+ *  FName: MakeReadingName
+ *  Desc: Corrects the given Reading Name.Then it is in compliance with the reading name rules:
+ *        - normal letters, without special signs (A-Z, a-z)
+ *        - numbers (0-9), point (.), hyphen (-), slash (/) and underscore (_)
+ *  Info: Characters that are not in comliance with the rules will be replaced by and underscore (_)
+ *  Para: const xString_s nameString -> the Reading Name string that should be corrected
+ *  Rets: -/-
+ * -------------------------------------------------------------------------------------------------
+ */
+void
+MakeReadingName(const xString_t nameString)
+{
+
+// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
+
+  return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2193,72 +2342,12 @@ AnalyzeCommandChain(const uint8_t *args
 }
 	
 		
-
-/* helper
- * --------------------------------------------------------------------------------------------------
- *  FName: FmtTime
- *  Desc: Creates formated time-text (uint8_t style - in this case zero terminated) from given
- *        time-stamp. Returned in msgText_t (text in allocated memory + length information)
- *  Note: DO NOT FORGET TO FREE MEMORY !! 
- *  Para: time_t tiSt -> the time-stamp that should be used
- *  Rets: strText_t -> formated time-text data
- * --------------------------------------------------------------------------------------------------
- */
-strText_t
-FmtTime(time_t tiSt)
-{
-  // our msg-text data packet
-  strText_t strText;
-
-  // get timeinfo for time-stamp
-  struct tm timeinfo;
-  localtime_r(&tiSt, &timeinfo);
-
-  // prepare formated-time-string in allocated memory
-  strText.strTextLen = asprintf((char**) &strText.strText
-	,"%02d:%02d:%02d"
-	,timeinfo.tm_hour
-	,timeinfo.tm_min
-	,timeinfo.tm_sec);
-
-  return strText;
-}
+	
 
 
 
-/* helper
- * --------------------------------------------------------------------------------------------------
- *  FName: FmtDateTime 
- *  Desc: Creates formated date-time-text (uint8_t style - in this case zero terminated) from given
- *        time-stamp. Returned in msgText_t (text in allocated memory + length information)
- *  Note: DO NOT FORGET TO FREE MEMORY !! 
- *  Para: time_t tiSt -> the time-stamp that should be used
- *  Rets: strText_t -> formated date-time-text data
- * --------------------------------------------------------------------------------------------------
- */
-strText_t
-FmtDateTime(time_t tiSt)
-{
-  // our msg-text data packet
-  strText_t strText;
 
-  // get timeinfo for time-stamp
-  struct tm timeinfo;
-  localtime_r(&tiSt, &timeinfo);
 
-  // prepare formated-time-string in allocated memory
-  strText.strTextLen = asprintf((char**) &strText.strText
-	,"%04d-%02d-%02d %02d:%02d:%02d"
-	,timeinfo.tm_year+1900
-	,timeinfo.tm_mon+1
-	,timeinfo.tm_mday
-	,timeinfo.tm_hour
-	,timeinfo.tm_min
-	,timeinfo.tm_sec);
-
-  return strText;
-}
-		
 
 		
 	/*  lan fürs loggen den loglevel vatiabel ermitteln?  Log GetLogLevel($name,4)
@@ -2401,9 +2490,9 @@ Log3 (const uint8_t *name
 /* helper
  * --------------------------------------------------------------------------------------------------
  *  FName: TimeNow
- *  Desc: Returns the current time stamp
+ *  Desc: Returns current system time. (IT IS NOT THE SCDE TIME STAMP)
  *  Para: -/-
- *  Rets: time_t -> current time-stamp
+ *  Rets: time_t timeNow -> current system time
  * --------------------------------------------------------------------------------------------------
  */
 time_t

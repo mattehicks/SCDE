@@ -5,8 +5,8 @@
 
 PROJECT_NAME := SCDE
 
-EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/components/Command
-EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/components/Module
+EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/components/Commands
+EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/components/Modules
 
 include $(IDF_PATH)/make/project.mk
 

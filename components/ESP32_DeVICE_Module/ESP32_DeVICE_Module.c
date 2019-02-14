@@ -618,50 +618,29 @@ const WebIf_ActiveResourcesDataB_t ESP32_DeVICE_ActiveResourcesDataB_forWebIf[] 
 ProvidedByModule_t
 ESP32_DeVICE_ProvidedByModule = { 
 // A-Z order
-
   "ESP32_DeVICE"			// Type-Name of module -> should be same name as libfilename.so !
   ,12					// size of Type-Name
 
   ,NULL					// Add
-
   ,ESP32_DeVICE_Attribute		// Attribute
-
   ,ESP32_DeVICE_Define			// Define
-
   ,NULL					// Delete
-
   ,NULL					// Except
-
   ,NULL					// Get
-
   ,NULL					// IdleCb
-
   ,ESP32_DeVICE_Initialize		// Initialize
-
   ,NULL					// Notify
-
   ,NULL					// Parse
-
   ,NULL					// Read
-
   ,NULL					// Ready
-
   ,ESP32_DeVICE_Rename			// Rename
-
   ,ESP32_DeVICE_Set			// Set
-
   ,ESP32_DeVICE_Shutdown		// Shutdown
-
   ,ESP32_DeVICE_State			// State
-
   ,NULL					// Sub
-
   ,ESP32_DeVICE_Undefine		// Undefine
-
   ,NULL					// DirectRead
-
   ,NULL					// DirectWrite
-
 //  ,NULL		 		// FnProvided
 
   ,sizeof(ESP32_DeVICE_Definition_t)	// Size of modul specific definition structure (Common_Definition_t + X)

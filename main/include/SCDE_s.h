@@ -193,11 +193,11 @@ typedef parsedKVInputArgs_t* (* ParseKVInputArgsFn_t) (int numImplementedKeys, c
  * typedefs of Function Callbacks
  * This are provided & made accessible for modules and commands - for operation and helpers
  */
-// typedef for AnalyzeCommandChainFn - analyzes + processes an configuration file
-typedef struct headRetMsgMultiple_s (*AnalyzeCommandChainFn_t) (const uint8_t *args, const size_t argsLen);
-
 // typedef for AnalyzeCommandFn - analyzes + processes one command row
 typedef struct headRetMsgMultiple_s (*AnalyzeCommandFn_t) (const uint8_t *args, const size_t argsLen);
+
+// typedef for AnalyzeCommandChainFn - analyzes + processes an configuration file
+typedef struct headRetMsgMultiple_s (*AnalyzeCommandChainFn_t) (const uint8_t *args, const size_t argsLen);
 
 // typedef for Call GetFn by Def-Name - for 2 stage desings, requests data
 typedef int (* CallGetFnByDefNameFn_t) (const uint8_t *nameText, const size_t nameTextLen, Common_Definition_t *sourceCommon_Definition, void *X);
@@ -225,6 +225,12 @@ typedef Common_Definition_t* (*GetDefinitionPtrByNameFn_t) (const size_t definit
 
 //
 typedef Module_t* (*GetLoadedModulePtrByNameFn_t)(const uint8_t *typeName, const size_t typeNameLen);
+
+// returns current SCDE Time Stamp
+typedef time_t (*GetTiStFn_t)(void);
+
+// returns an UNIQUE SCDE Time Stamp (in most cases the current Time Stamp)
+typedef time_t (*GetUniqueTiStFn_t)(void);
 
 // typedef for GoodDeviceNameFn - checks the given Device Name for device name rules
 typedef bool (*GoodDeviceNameFn_t) (const xString_t nameString);
@@ -278,61 +284,36 @@ typedef strText_t* (*Get_attrVal_by_defName_and_attrNameFn_t) (const strText_t *
  * Stores Function callbacks provided & made accessible for modules and commands - for operation and helpers
  */
 typedef struct SCDEFn_s {
-
-  AnalyzeCommandChainFn_t AnalyzeCommandChainFn;           // analyzes + processes an configuration file
-
   AnalyzeCommandFn_t AnalyzeCommandFn;                     // analyzes + processes one command row
-
+  AnalyzeCommandChainFn_t AnalyzeCommandChainFn;           // analyzes + processes an configuration file
   CallGetFnByDefNameFn_t CallGetFnByDefNameFn;             // original CallFn
-
   CommandReloadModuleFn_t CommandReloadModuleFn;           //
-
   Devspec2ArrayFn_t Devspec2ArrayFn;			   // returns all definitions that match devspec
-
   FmtDateTimeFn_t FmtDateTimeFn;                           // returns formated text of Date-Time from tist
-
   FmtTimeFn_t FmtTimeFn;                                   // returns formated text of Time from tist
-
   GetAllReadingsFn_t GetAllReadingsFn;                     // returns all readings of an definition
-
   GetDefAndAttrFn_t GetDefAndAttrFn;                       //
-
   GetDefinitionPtrByNameFn_t GetDefinitionPtrByNameFn;     //
-
   GetLoadedModulePtrByNameFn_t GetLoadedModulePtrByNameFn; //
-
+  GetTiStFn_t GetTiStFn;                                   // returns current SCDE Time Stamp
+  GetUniqueTiStFn_t GetUniqueTiStFn;			   // returns an UNIQUE SCDE Time Stamp
   GoodDeviceNameFn_t GoodDeviceNameFn;			   // checks the given Device Name for device name rules
-
   GoodReadingNameFn_t GoodReadingNameFn;		   // checks the given Reading Name for device name rules
-
   HexDumpOutFn_t HexDumpOutFn;                             // prints data as Hex-Dump to debug terminal
-
   LogFn_t LogFn;                                           // Log -> This is the main logging function
-
   Log3Fn_t Log3Fn;                                         // Log -> This is the main logging function
-
   Log4Fn_t Log4Fn;                                         // Log -> This is the main logging function
-
   MakeDeviceNameFn_t MakeDeviceNameFn;			   // corrects the given Device Name
-
   MakeReadingNameFn_t MakeReadingNameFn;		   // corrects the given Reading Name   
-
   readingsBeginUpdateFn_t readingsBeginUpdateFn;           // call this before updating readings
-
   readingsBulkUpdateFn_t readingsBulkUpdateFn;	           // call this for every reading (bulk-update)
-
   readingsEndUpdateFn_t readingsEndUpdateFn;               // call this to after bulk-update to process readings
-
-  TimeNowFn_t TimeNowFn;                                   // returns current time stamp
-
+  TimeNowFn_t TimeNowFn;                                   // returns current system time (no TiSt)
   WriteStatefileFn_t WriteStatefileFn;                     // 
-
-  // added Fn (Perl -> C)
+// added Fn (Perl -> C)
   Get_attrVal_by_defName_and_attrNameFn_t Get_attrVal_by_defName_and_attrNameFn;
-
-  // not final
+// not final
   CommandUndefineFn_t CommandUndefineFn;                   //
-
   ParseKVInputArgsFn_t ParseKVInputArgsFn;                 // parses Key=Value(@) input arguments into array
 } SCDEFn_t;
 

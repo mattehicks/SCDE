@@ -27,11 +27,11 @@ void InitA();
  * AND made accessible for calling by modules and commands (for SCDE operation and helpers )
  */
 
-// analyzes + processes an configuration file
-struct headRetMsgMultiple_s AnalyzeCommandChain(const uint8_t *args, const size_t argsLen);
-
 // analyzes + processes one command row
 struct headRetMsgMultiple_s AnalyzeCommand(const uint8_t *args, const size_t argsLen);
+
+// analyzes + processes an configuration file
+struct headRetMsgMultiple_s AnalyzeCommandChain(const uint8_t *args, const size_t argsLen);
 
 //
 int CallGetFnByDefName(const uint8_t *nameText, const size_t nameTextLen, Common_Definition_t *sourceCommon_Definition, void *X);
@@ -59,6 +59,12 @@ Common_Definition_t* GetDefinitionPtrByName(const size_t definitionNameLen, cons
 
 //
 Module_t* GetLoadedModulePtrByName(const uint8_t *typeName, const size_t typeNameLen);
+
+// returns current SCDE Time Stamp
+time_t GetTiSt(void);
+
+// returns an UNIQUE SCDE Time Stamp (in most cases the current Time Stamp)
+time_t GetUniqueTiSt(void);
 
 // checks the given Device Name for device name rules
 bool GoodDeviceName(const xString_t nameString);
@@ -93,7 +99,7 @@ int readingsBulkUpdate(Common_Definition_t *Common_Definition, uint8_t *readingN
 // call this to after bulk-update to process readings
 int readingsEndUpdate(Common_Definition_t *Common_Definition);
 
-// returns current time stamp
+// returns current system time. (IT IS NOT AN TIME STAMP)
 time_t TimeNow();
 
 //
