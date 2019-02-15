@@ -175,7 +175,7 @@ SelectAData ESP32_DeVICE_WIFI_BANDWIDTH[] = {  //ID, Text MAX CGI LEN BEACHTEN!!
 
 
 
-
+//define xyz ESP32_DeVICE Name=maik&WSAP_Password=pw&WSAP_RF_Channel=1&WSAP_Maximal_Connections=3&WSAP_Authentication_Method=WPA2_PSK
 
 
 /**
@@ -187,7 +187,7 @@ SelectAData ESP32_DeVICE_WIFI_BANDWIDTH[] = {  //ID, Text MAX CGI LEN BEACHTEN!!
 enum ESP32_DeVICE_Set_IK {				// Bit #XX for debugging
 
    // Block 1 - func
-    ESP32_DeVICE_Set_IK_NAME		= 0		// Bit #00 'NAME'			-> 
+    ESP32_DeVICE_Set_IK_Name		= 0		// Bit #00 'Name'			-> 
   , ESP32_DeVICE_Set_IK_WSAP_Password			// Bit #01 'WSAP_Password'		-> 
   , ESP32_DeVICE_Set_IK_WSAP_RF_Channel		        // Bit #02 'WSAP_RF_Channel' 		-> 
   , ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections	// Bit #03 'WSAP_Maximal_Connections'  	-> 
@@ -196,7 +196,7 @@ enum ESP32_DeVICE_Set_IK {				// Bit #XX for debugging
   , ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval		// Bit #06 'WSAP_Beacon_Interval'  	-> 
 
    // Block 2 - func
-  , ESP32_DeVICE_Set_IK_WSAP_IP_Adress			// Bit #07 'WSAP_DHCPS'  		-> 
+  , ESP32_DeVICE_Set_IK_WSAP_IP_Adress			// Bit #07 'WSAP_IP_Adress'  		-> 
   , ESP32_DeVICE_Set_IK_WSAP_Netmask			// Bit #08 'WSAP_Netmask'  		-> 
   , ESP32_DeVICE_Set_IK_WSAP_Gateway_Adress		// Bit #09 'WSAP_Gateway_Adress'  	-> 
 
@@ -295,41 +295,41 @@ enum ESP32_DeVICE_Set_IK {				// Bit #XX for debugging
  */
 enum ESP32_DeVICE_Readings {				 // Bit #XX for debugging
   // Internals - TiSt-Sharing - Block 1 - func
-   ESP32_DeVICE_R_NAME				= (1<<0) // Bit #01 'NAME'			-> 
-  ,ESP32_DeVICE_R_WSAP_Password			= (1<<0) // Bit #01 'WSAP_Password'		-> 
-  ,ESP32_DeVICE_R_WSAP_RF_Channel		= (1<<0) // Bit #01 'WSAP_RF_Channel'		-> 
-  ,ESP32_DeVICE_R_WSAP_Maximal_Connections	= (1<<0) // Bit #01 'WSAP_Maximal_Connections'	-> 
-  ,ESP32_DeVICE_R_WSAP_Authentication_Method	= (1<<0) // Bit #01 'WSAP_Authentication_Method'-> 
-  ,ESP32_DeVICE_R_WSAP_SSID			= (1<<0) // Bit #01 'WSAP_SSID'			->
-  ,ESP32_DeVICE_R_WSAP_Beacon_Interval		= (1<<0) // Bit #01 'WSAP_Beacon_Interval'	-> 
+   ESP32_DeVICE_R_Name				= (1<<0) // Bit #01 'Name'			-> 
+  ,ESP32_DeVICE_R_WSAP_Password			= (1<<1) // Bit #01 'WSAP_Password'		-> 
+  ,ESP32_DeVICE_R_WSAP_RF_Channel		= (1<<2) // Bit #01 'WSAP_RF_Channel'		-> 
+  ,ESP32_DeVICE_R_WSAP_Maximal_Connections	= (1<<3) // Bit #01 'WSAP_Maximal_Connections'	-> 
+  ,ESP32_DeVICE_R_WSAP_Authentication_Method	= (1<<4) // Bit #01 'WSAP_Authentication_Method'-> 
+  ,ESP32_DeVICE_R_WSAP_SSID			= (1<<5) // Bit #01 'WSAP_SSID'			->
+  ,ESP32_DeVICE_R_WSAP_Beacon_Interval		= (1<<6) // Bit #01 'WSAP_Beacon_Interval'	-> 
 
   // Internals - TiSt-Sharing - Block 2 - func
-  ,ESP32_DeVICE_R_WSAP_IP_Adress		= (1<<1) // Bit #02 'WSAP_IP_Adress'		-> 
-  ,ESP32_DeVICE_R_WSAP_Netmask			= (1<<1) // Bit #02 'WSAP_Netmask'		-> 
-  ,ESP32_DeVICE_R_WSAP_Gateway_Adress		= (1<<1) // Bit #02 'WSAP_Gateway_Adress'	-> 
+  ,ESP32_DeVICE_R_WSAP_IP_Adress		= (1<<7) // Bit #02 'WSAP_IP_Adress'		-> 
+  ,ESP32_DeVICE_R_WSAP_Netmask			= (1<<8) // Bit #02 'WSAP_Netmask'		-> 
+  ,ESP32_DeVICE_R_WSAP_Gateway_Adress		= (1<<9) // Bit #02 'WSAP_Gateway_Adress'	-> 
 
   // Internals - TiSt-Sharing - Block 3 - func
-  ,ESP32_DeVICE_R_WSAP_MAC_Adress		= (1<<2) // Bit #04 'WSAP_MAC_Adress'		-> 
+  ,ESP32_DeVICE_R_WSAP_MAC_Adress		= (1<<10) // Bit #04 'WSAP_MAC_Adress'		-> 
 
   // Internals - TiSt-Sharing - Block 4 - func
-  ,ESP32_DeVICE_R_WSAP_WiFi_Bandwidth		= (1<<3) // Bit #07 'WSAP_WiFi_Bandwidth'	-> 
+  ,ESP32_DeVICE_R_WSAP_WiFi_Bandwidth		= (1<<11) // Bit #07 'WSAP_WiFi_Bandwidth'	-> 
 
   // Internals - TiSt-Sharing - Block 5 - func
-  ,ESP32_DeVICE_R_WiFi_Country			= (1<<4) // Bit #07 'WiFi_Country'		-> 
+  ,ESP32_DeVICE_R_WiFi_Country			= (1<<12) // Bit #07 'WiFi_Country'		-> 
 
   // Internals - TiSt-Sharing - Block 6 - func
-  ,ESP32_DeVICE_R_Station_IP_Adress		= (1<<5) // Bit #06 'Station_IP_Adress'	-> 
-  ,ESP32_DeVICE_R_Station_Netmask		= (1<<5) // Bit #06 'Station_Netmask'		-> 
-  ,ESP32_DeVICE_R_Station_Gateway_Adress	= (1<<5) // Bit #06 'Station_Gateway_Adress'	-> 
+  ,ESP32_DeVICE_R_Station_IP_Adress		= (1<<13) // Bit #06 'Station_IP_Adress'	-> 
+  ,ESP32_DeVICE_R_Station_Netmask		= (1<<14) // Bit #06 'Station_Netmask'		-> 
+  ,ESP32_DeVICE_R_Station_Gateway_Adress	= (1<<15) // Bit #06 'Station_Gateway_Adress'	-> 
 
   // Internals - TiSt-Sharing - Block 7 - func
-  ,ESP32_DeVICE_R_Station_MAC_Adress		= (1<<6) // Bit #11 'Station_MAC_Adress'	-> 
+  ,ESP32_DeVICE_R_Station_MAC_Adress		= (1<<16) // Bit #11 'Station_MAC_Adress'	-> 
 
   // Internals - TiSt-Sharing - Block 8 - func
-  ,ESP32_DeVICE_R_Station_Auto_Connect		= (1<<7) // Bit #09 'Station_Auto_Connect'	-> 
+  ,ESP32_DeVICE_R_Station_Auto_Connect		= (1<<16) // Bit #09 'Station_Auto_Connect'	-> 
 
   // Internals - TiSt-Sharing - Block 9 - func
-  ,ESP32_DeVICE_R_Station_WiFi_Bandwidth	= (1<<8) // Bit #07 'Station_WiFi_Bandwidth'	-> 
+  ,ESP32_DeVICE_R_Station_WiFi_Bandwidth	= (1<<16) // Bit #07 'Station_WiFi_Bandwidth'	-> 
 
 
 
@@ -368,7 +368,7 @@ enum ESP32_DeVICE_Readings {				 // Bit #XX for debugging
   ,ESP32_DeVICE_R_Station_RSSI			= (1<<12) // Bit #13 'Station_RSSI'		-> 
   ,ESP32_DeVICE_R_TiSt_Time			= (1<<12) // Bit #13 'TiSt_Time'		-> 
 
-  ,ESP32_DeVICE_R_name				= (1<<13) // Bit #02 'name' + caps + ufid -> 
+  ,ESP32_DeVICE_R_Namex				= (1<<13) // Bit #02 'name' + caps + ufid -> 
 };
 
 
@@ -401,7 +401,7 @@ enum ESP32_DeVICE_Readings {				 // Bit #XX for debugging
 kvParseImplementedKeys_t ESP32_DeVICE_Set_ImplementedKeys[] =
   {//affected_reading | affected_reading			|  CMD
   // Block 1 - func
-   { ESP32_DeVICE_R_NAME					, "name" }			// #00
+   { ESP32_DeVICE_R_Name					, "Name" }			// #00
   ,{ ESP32_DeVICE_R_WSAP_Password				, "WSAP_Password" }		// #01
   ,{ ESP32_DeVICE_R_WSAP_RF_Channel				, "WSAP_RF_Channel" }		// #02
   ,{ ESP32_DeVICE_R_WSAP_Maximal_Connections			, "WSAP_Maximal_Connections" }	// #03
@@ -775,7 +775,7 @@ ESP32_DeVICE_Attribute(Common_Definition_t* Common_Definition
  *  Rets: strTextMultiple_t* -> response text NULL=no text
  * -------------------------------------------------------------------------------------------------
  */
-strTextMultiple_t* ICACHE_FLASH_ATTR 
+strTextMultiple_t*
 ESP32_DeVICE_Define(Common_Definition_t *Common_Definition)
 {
 
@@ -962,11 +962,11 @@ ESP32_DeVICE_Initialize(SCDERoot_t* SCDERootptr)
 
   #if ESP32_DeVICE_Module_DBG >= 3
   SCDEFn->Log3Fn(ESP32_DeVICE_ProvidedByModule.typeName
-		  ,ESP32_DeVICE_ProvidedByModule.typeNameLen
-		  ,3
-		  ,"Executing InitializeFn of Module '%.*s' to make it useable."
-		  ,ESP32_DeVICE_ProvidedByModule.typeNameLen
-		  ,ESP32_DeVICE_ProvidedByModule.typeName);
+	,ESP32_DeVICE_ProvidedByModule.typeNameLen
+	,3
+	,"Executing InitializeFn of Module '%.*s' to make it useable."
+	,ESP32_DeVICE_ProvidedByModule.typeNameLen
+	,ESP32_DeVICE_ProvidedByModule.typeName);
   #endif
 
 // -------------------------------------------------------------------------------------------------
@@ -1010,7 +1010,8 @@ ESP32_DeVICE_Rename(Common_Definition_t *Common_Definition
   SCDEFn->Log3Fn(Common_Definition->name
 		,Common_Definition->nameLen
 		,5
-		,"Executing RenameFn of Module '%.*s'. An definition is renamed from old name '%.*s' to new name '%.*s'."
+		,"Executing RenameFn of Module '%.*s'. "
+		 "An definition is renamed from old name '%.*s' to new name '%.*s'."
 		,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
 		,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeName
 		,oldName
@@ -1049,47 +1050,6 @@ ESP32_DeVICE_Rename(Common_Definition_t *Common_Definition
 
 
 
-
-
-/**
- *   Data structure for implemented query keys and affected readings
- *   used as input for Key=Value parsing, proc SCDEH_ParseStrToparsedKVInput
- */
-typedef struct ESP32_DeVICE_kvParseImplementedKeys_s {
-
-  const uint32_t affectedReadings;
-
-  const char *implementedKey;
-
-  } ESP32_DeVICE_kvParseImplementedKeys_t;
-
-
-
-/*
- *   Result structure for http_parser_parse_url().
- *   Callers should index into field_data[] with UF_* values if field_set
- *   has the relevant (1 << UF_*) bit set. As a courtesy to clients (and
- *   because we probably have padding left over), we convert any port to
- *   a uint32_t.
- */
-typedef struct ESP32_DeVICE_parsedKVInput_s {
-
-  uint64_t keysFoundBF;		// Bit-Field of found keys (1 << XX_IK_*)
-
-  struct ESP32_DeVICE_keyData_s {
-
-	uint16_t off;		// Offset into buffer in which value-text starts
-
-	uint16_t len;		// Length of value-text in buffer
-
-	uint32_t affectedReadings;
-
-	} ESP32_DeVICE_keyData_t[];		// XX_IK_MAX
-
-  } ESP32_DeVICE_parsedKVInput_t;
-
-
-
 /*
  * Find the first occurrence of find in s, where the search is limited to the
  * first slen characters of s.
@@ -1120,128 +1080,15 @@ ESP32_DeVICE_strnstr(s, find, slen)
 
 
 
-/**   // query keys dürfen keine encoded zeichen enthalten!
- *--------------------------------------------------------------------------------------------------
- *FName: ESP32_DeVICE_ParseKVInputArgs Parse Key=Value@ input Arguments
- * Desc: Hepler routine that searches and extracts an SPECIAL string value matching the given key. 
- *       Source data is an key=value pair string, seperated by an "&" from an query string
- *       WARNING: FOR FIRST and LAST CHAR ONLY ALPHA OR NUMMERICALAL IS ALLOWED !	  
- * Para: int num -> number of implemented KEYs for this query-type
- *       const implementedKeys *XX_IK -> list of implemented KEYs for this query-type
- *       const char *QueryStr -> ptr to zero-teriminated KEY=VALUE string from query, seperated by '&'
- * Rets: struct SCDE_XX_parsedKVInput *parsedKVInput -> allocad struct, filled with data
- *       DONT FORGET TO FREE MEMORY !
- *--------------------------------------------------------------------------------------------------
- */
-ESP32_DeVICE_parsedKVInput_t* ICACHE_FLASH_ATTR
-ESP32_DeVICE_ParseKVInputArgs(int numImplementedKeys
-			,const ESP32_DeVICE_kvParseImplementedKeys_t *XX_IK
-			,const uint8_t *kvArgs
-			,const size_t kvArgsLen)
-  {
 
-  // alloc memory for ESP32_DeVICE_parsedKVInput_t -> length is variable !
-  int memlen =  8 + (numImplementedKeys * (2+2+4));
 
-  #if SCDEH_DBG >= 5
-  printf("|PKVInput-malloc:%d, input:\"%.*s\">"
-	,memlen
-	,kvArgsLen
-	,kvArgs);
-  #endif
 
-  ESP32_DeVICE_parsedKVInput_t *parsedKVInput =
-	(struct ESP32_DeVICE_parsedKVInput_s *) malloc(memlen);
 
-  // clear keys-found bitfield
-  parsedKVInput->keysFoundBF = 0;
 
-  // implemented keys loop
-  int i;
-  for ( i = 0 ; i < numImplementedKeys ; i++ ) {
 
-	// get ptr to current key
-	const char *key = XX_IK[i].implementedKey;
 
-	#if SCDEH_DBG >= 5
-	printf("|chk for KEY:%d-\"%s\", "
-		,i
-		,key);
-	#endif
 
-	const uint8_t *p = kvArgs;		// kv-args start ptr
-	const uint8_t *ep = kvArgs + kvArgsLen;	// kv-args end ptr
-	const uint8_t *e;			// end ptr 
-	int keylen = strlen(key);		// lenght of implemented key
 
-//	while ( (p != NULL) && (*p != '\n') && (*p != '\r') && (*p != 0) )
-
-	while ( (p != NULL) && (p < ep) ) {
-
-		# if SCDEH_DBG >= 5
-		printf("cmp:\"%.*s\""
-			,keylen
-			,p);
-		# endif
-
-		// matches value? and is "=" after value?
-		if ( (strncasecmp((char*) p, key, keylen) == 0 ) && (p[keylen] == '=') ) {
-
-			// move p to start of the VALUE (from this KEY)
-			p += keylen + 1;
-
-			// move e to end of the VALUE (from this KEY)
-			e = (uint8_t *) ESP32_DeVICE_strnstr((char*) p, "&", ep - p);
-
-			// or is it last Key-Value pair?
-			if (e == NULL) e = ep;
-
- 			# if SCDEH_DBG >= 5
-			printf(", next cmp:\"%.*s\""
-				,(e-p)
-				,p);
-			# endif
-
-			// store positive result -> do not forget to url-encode !
-			parsedKVInput->keysFoundBF |= (uint64_t) 1<<i;
-			parsedKVInput->ESP32_DeVICE_keyData_t[i].off = (p-kvArgs); // or better store ptr?
-			parsedKVInput->ESP32_DeVICE_keyData_t[i].len = (e-p);
-			parsedKVInput->ESP32_DeVICE_keyData_t[i].affectedReadings = 
-				XX_IK[i].affectedReadings;
-
-			// KEY found
-			# if SCDEH_DBG >= 5
-			printf(", found!>");
-			# endif
-
-			break;
-
-			}
-
-		// jump after next "&"
-		p = (uint8_t*) ESP32_DeVICE_strnstr((char*) p, "&", ep - p);
-
-		if (p != NULL) p += 1;
-
-		}
-
-	// KEY not found
-	# if SCDEH_DBG >= 5
-	printf(">");
-	# endif
-
-	}
-
-  // Query parsed complete
-  # if SCDEH_DBG >= 5
-  SCDEFn->HexDumpOutFn ("|parsedKVInput-HEX",
-	parsedKVInput,
-	memlen);
-  # endif
-
-  return parsedKVInput;
-
-  }
 
 
 /*"WSAP_Password ";
@@ -1623,6 +1470,28 @@ ESP32_DeVICE_Undefine(Common_Definition_t* Common_Definition)
  */
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // eine für Set und eine für define ????
 
 /**
@@ -1644,80 +1513,35 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 	,size_t argsTextLen)
 {
 
-// 1. Step: Prepare structures with current values from TYPE & SYSTEM 
-//          (to allow an abort if values not complete or in case of processing errors)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-  // beginning with '?' ?
-  if ( (setArgsLen > 0) && (*setArgs == '?') ) {
-
-	// set start of possible Type-Name
-	const uint8_t *tempTxt = setArgs + 1;
-
-	// a seek-counter
-	int i = 1;
-
-	// skip spaces after '?' (search for more ...)
-	while( (i < setArgsLen) && (*tempTxt == ' ') ) {i++;tempTxt++;}
-
-	// only spaces after '?' -> answer with Set-Capabilities
-	if (i == setArgsLen) {
-
-		// response with error text
-		// alloc mem for retMsg
-		retMsg = malloc(sizeof(strTextMultiple_t));
-
-		// response with error text
-		retMsg->strTextLen = asprintf(&retMsg->strText
-			,"requested ? '%.*s' !"
-			,setArgsLen
-			,setArgs);
-
-		return retMsg;
-
-		}
-	// '? + X' here !!! -> normal parse
-	}
-
-  // Parse set-args (key=value@) protocol) and get parsedKVInput in allocated mem
-  ESP32_DeVICE_parsedKVInput_t *parsedKVInput = 
-	ESP32_DeVICE_ParseKVInputArgs(ESP32_DeVICE_Set_IK_Number_of_keys	// Num Implementated KEYs MAX for Set Fn
-	,ESP32_DeVICE_Set_ImplementedKeys	// Implementated Keys for Set Fn
-	,setArgs				// our args text
-	,setArgsLen);				// our args text len
-
-*/
-
-
-
 // -------------------------------------------------------------------------------------------------
-// Prepare structures with current values from SDK
+// 1. Step: Create backup structures, if required mirror current values from SDK
 // -------------------------------------------------------------------------------------------------
 
-  // block #1 get current Service-AP settings
+  // block #01 mirror 'wifi_config_t' (WSAP-Configuration)
   wifi_config_t ap_wifi_config;
-  esp_wifi_get_config (WIFI_IF_AP, &ap_wifi_config);
+  if (parsedKVInput->keysFoundBF & ( (1 << ESP32_DeVICE_Set_IK_Name)
+				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Password)
+				   | (1 << ESP32_DeVICE_Set_IK_WSAP_RF_Channel)
+				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections)
+				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Authentication_Method)
+				   | (1 << ESP32_DeVICE_Set_IK_WSAP_SSID)
+				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval) ) ) {
 
-  // block #2  get current Service AP IP-Settings
+	esp_wifi_get_config (WIFI_IF_AP, &ap_wifi_config);
+  }
+
+// -------------------------------------------------------------------------------------------------
+
+  // Processed block #02 mirror 'tcpip_adapter_ip_info_t' (WSAP-IP-Settings)
   tcpip_adapter_ip_info_t ap_ip_info;
-  tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_AP, &ap_ip_info);
+  if (parsedKVInput->keysFoundBF &  ( ESP32_DeVICE_R_WSAP_IP_Adress
+				    | ESP32_DeVICE_R_WSAP_Netmask
+				    | ESP32_DeVICE_R_WSAP_Gateway_Adress) ) {
+
+	tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_AP, &ap_ip_info);
+  }
+
+// -------------------------------------------------------------------------------------------------
 
   // block #3 get current Service AP MAC Adress
   uint8_t ap_mac_addr[8];
@@ -1794,32 +1618,49 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 */
 
 
+/*
+   // Block 1 - func
+    ESP32_DeVICE_Set_IK_Name		= 0		// Bit #00 'Name'			-> 
+  , ESP32_DeVICE_Set_IK_WSAP_Password			// Bit #01 'WSAP_Password'		-> 
+  , ESP32_DeVICE_Set_IK_WSAP_RF_Channel		        // Bit #02 'WSAP_RF_Channel' 		-> 
+  , ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections	// Bit #03 'WSAP_Maximal_Connections'  	-> 
+  , ESP32_DeVICE_Set_IK_WSAP_Authentication_Method	// Bit #04 'WSAP_Authentication_Method' -> 
+  , ESP32_DeVICE_Set_IK_WSAP_SSID			// Bit #05 'WSAP_SSID'  		-> 
+  , ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval		// Bit #06 'WSAP_Beacon_Interval'  	-> 
+*/
+
+
+
+
+
+
+
+
+// -------------------------------------------------------------------------------------------------
+// 2. Step: Check for found KEYs and if the given values match the requirements
+// -------------------------------------------------------------------------------------------------
+
   // remember the readings affected by the parsing process
   uint32_t affectedReadings = 0;
 
 // -------------------------------------------------------------------------------------------------
 
-  // name=[a-f-A-F0-9] -> Setze Farbe für RGB Kanal (uint24) (0-x)
-  // name=[a-f-A-F0-9] -> Set color for RGB channel (uint24) (0-x)
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_NAME) {
+  // Name=[a-f-A-F0-9] -> Setze Device-Name = WSAP-Name (char) (0-sizeof (ap_wifi_config.ap.ssid))
+  // Name=[a-f-A-F0-9] -> Set Device-Name = WSAP-Name (char) (0-sizeof (ap_wifi_config.ap.ssid))
+  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_Name) {
 
-	// valid input happened ?
-	if (SCDEH_GetSpecialStrVal(argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_NAME].off
-		,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_NAME].len
+	// valid input ?
+	if (SCDEH_GetSpecialStrVal(argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].off
+		,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].len
 		,(char*) &ap_wifi_config.ap.ssid
 		,sizeof (ap_wifi_config.ap.ssid)
 		,2) ) {	
 
 		// mark affected readings for TX
-		affectedReadings |= parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_NAME].affectedReadings;
-
-//		// New Timestamp
-//		SysCfgRamNoMirror->MySCDE_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
-//			GetUniqueTIST();
+		affectedReadings |= parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].affectedReadings;
 
 //		// Push processed CMD to to Response ...
 //		RespArgsWPos += sprintf( RespArgsWPos,"cmd=name");
-
 	}
 
 	// invalid input detected ?
@@ -1829,8 +1670,8 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 // -------------------------------------------------------------------------------------------------
 
 
-  // rval=[0-9] -> Setze Wert für den roten Anteil vom RGB Kanal (uint8) (0-x)
-  // rval=[0-9] -> Set value for the red component of the RGB channel (uint8) (0-x)
+  // WSAP_Password=[a-f-A-F0-9] -> Setze das Wireless Service Access Point Passwort (char) (0-sizeof (ap_wifi_config.ap.password))
+  // WSAP_Password=[a-f-A-F0-9] -> Set the Wireless Service Access Point Passwort (char) (0-sizeof (ap_wifi_config.ap.password))
 
   if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Password) {
 
@@ -1844,13 +1685,8 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 		// mark affected readings for TX
 		affectedReadings |= parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].affectedReadings;
 
-		// New Timestamp
-//		SysCfgRamNoMirror->MySCDE_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
-//			GetUniqueTIST();
-
 //		// Push processed CMD to to Response ...
 //		RespArgsWPos += sprintf( RespArgsWPos,"cmd=WSAP_Password");
-
 	}
 
 	// invalid input detected ?
@@ -1859,8 +1695,8 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 // -------------------------------------------------------------------------------------------------
 
-  // WSAP_RF_Channel=[1-13] -> Setze Wireless Service Access Point Kanal (Station Kanal hat Priorität)
-  // WSAP_RF_Channel=[1-13] -> Set Wireless Service Access Point channel (Station Channel has priority)
+  // WSAP_RF_Channel=[1-13] -> Setze den Wireless Service Access Point Kanal (!Station Kanal hat Priorität)
+  // WSAP_RF_Channel=[1-13] -> Set the Wireless Service Access Point channel (!Station Channel has priority)
 
   if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_RF_Channel) {
 
@@ -1872,20 +1708,12 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 		if ( (NewChan >= 1) && (NewChan <= 13) ) {
 
-			// save new channel
-			ap_wifi_config.ap.channel = NewChan;
-
 			// mark affected readings for TX
 			affectedReadings |= 
 				parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].affectedReadings;
 
-//			// New Timestamp
-//			SysCfgRamNoMirror->MySCDE_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
-//				GetUniqueTIST();
-
-			// Push processed CMD to to Response ...
+//			// Push processed CMD to to Response ...
 //			RespArgsWPos += sprintf( RespArgsWPos,"cmd=WSAP_RF_Channel");
-
 		}
 	}
 
@@ -1895,8 +1723,8 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 // -------------------------------------------------------------------------------------------------
 
-  // rmax=[ ] -> Setze vom RGB Kanal den roten Anteil maximal (0-x)
-  // rmax=[ ] -> Set red component of the RGB channel to maximum (0-x)
+  // WSAP_Maximal_Connections=[ ] -> Setze die maximale Anzahl der Verbindungen zum WSAP (0-4)
+  // WSAP_Maximal_Connections=[ ] -> Set maximum number of connections to the WSAP (0-4)
 
   if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections) {
 
@@ -1908,17 +1736,13 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 		if ( (NewMaxConn >= 0) && (NewMaxConn <= 4) ) {
 
-			// save new max conn
-			ap_wifi_config.ap.max_connection = MaxConn;
+//			// save new max conn
+//			ap_wifi_config.ap.max_connection = MaxConn;
 
 			// mark affected readings for TX
 			affectedReadings |= parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections].affectedReadings;
 
-			// New Timestamp
-//			SysCfgRamNoMirror->MyLiGHT_FeatCfgRamNoMirror_M1[ADID].RB01_X_TiSt =
-//				GetUniqueTIST();
-
-			// Push processed CMD to to Response ...
+//			// Push processed CMD to to Response ...
 //			RespArgsWPos += os_sprintf( RespArgsWPos,"cmd=WSAP_RF_Channel");
 		}
 	}
@@ -1929,8 +1753,8 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 // --------------------------------------------------------------------------------------------------
 
-  // rmin=[ ] -> Setze vom RGB Kanal den roten Anteil minimal (0-x)
-  // rmin=[ ] -> Set red component of the RGB channel to minimum (0-x)
+  // WSAP_Authentication_Method=[OPEN|WEP|WPA_PSK|WPA2_PSK|WPA_WPA2_PSK|WPA2_ENTERPRISE|MAX] -> Setze die Authentifizierungsmethode
+  // WSAP_Authentication_Method=[OPEN|WEP|WPA_PSK|WPA2_PSK|WPA_WPA2_PSK|WPA2_ENTERPRISE|MAX] -> Set the authentication method
 
   if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Authentication_Method) {
 
@@ -1940,19 +1764,14 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 	if (SCDEH_GetQueryKeyID(argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Authentication_Method].off
 		,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Authentication_Method].len, &NewAuthMode, Auth_M)) {
 
-		// save auth mode
-		ap_wifi_config.ap.authmode = NewAuthMode;
+//		// save auth mode
+//		ap_wifi_config.ap.authmode = NewAuthMode;
 
 		// mark affected readings for TX
 		affectedReadings |= parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Authentication_Method].affectedReadings;
 
-		// New Timestamp
-//		SysCfgRamNoMirror->MySCDE_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
-//			GetUniqueTIST();
-
-		// Push processed CMD to to Response ...
+//		// Push processed CMD to to Response ...
 //		RespArgsWPos += sprintf( RespArgsWPos,"cmd=WSAP_Authentication_Method");
-
 	}
 
 	// invalid input detected ?
@@ -1961,8 +1780,8 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 // --------------------------------------------------------------------------------------------------
 
-  // gval=[0-9] -> Setze Wert für den gruenen Anteil vom RGB Kanal (uint8) (0-x)
-  // gval=[0-9] -> Set value for the gree component of the RGB channel (uint8) (0-x)
+  // WSAP_SSID=[0-9] -> Setze Wert für den gruenen Anteil vom RGB Kanal (uint8) (0-x)
+  // WSAP_SSID=[0-9] -> Set value for the gree component of the RGB channel (uint8) (0-x)
 
   if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_SSID) {
 
@@ -2541,7 +2360,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // name=[a-zA-Z0-9_.] -> Setze einen neuen Feature Namen (char[31]) (0-x)
   // name=[a-zA-Z0-9_.] -> Set a new Feature Name (char[31]) (0-x)
 /*
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_name) {
+  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_Name) {
 
   }
 */
@@ -2565,6 +2384,22 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
   }
 */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ------------------------------------------------------------------------------------------------
 
@@ -2590,12 +2425,13 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 	return true;
   }
 
-// ------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+// 4. Step: Passed. Store the new values to SDK
+// -------------------------------------------------------------------------------------------------
+/*
 
-// 4. Step: Passed. Store the new values
-
- // block #01 readings, store ap_wifi_config (WSAP-Wifi-Configuration), then save & set
-  if (parsedKVInput->keysFoundBF & ( (1 << ESP32_DeVICE_Set_IK_NAME)
+  // block #01 readings, store ap_wifi_config (WSAP-Wifi-Configuration), then save & set
+  if (parsedKVInput->keysFoundBF & ( (1 << ESP32_DeVICE_Set_IK_Name)
 				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Password)
 				   | (1 << ESP32_DeVICE_Set_IK_WSAP_RF_Channel)
 				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections)
@@ -2614,25 +2450,13 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 		strlen((char*)&ap_wifi_config.ap.ssid);
 
 	// Set new WSAP Cfg
-	esp_wifi_set_config (WIFI_IF_AP, &ap_wifi_config);
+	esp_wifi_set_config(WIFI_IF_AP, &ap_wifi_config);
 
 	// Set new Hostname
 	tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_AP, (const char *) &ap_wifi_config.ap.ssid);
   }
-
+*/
 // -------------------------------------------------------------------------------------------------
-
-
-
-
-// ------------------------------------------------------------------------------------------------
-
-// 5. Step: Passed. Return OK
-
-  return false;
-
-}
-
 
 
 
@@ -2661,12 +2485,16 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 
 /*
+// =================================================================================================
+// =================================================================================================
+// =================================================================================================
+
 // -------------------------------------------------------------------------------------------------
 // Save changes to SDK
 // -------------------------------------------------------------------------------------------------
 
   // Processed block #01 readings, that affects ap_wifi_config (WSAP-Wifi-Configuration) ? then save & set
-  if (affectedReadings & ( ESP32_DeVICE_R_NAME
+  if (affectedReadings & ( ESP32_DeVICE_R_Name
 			| ESP32_DeVICE_R_WSAP_Password
 			| ESP32_DeVICE_R_WSAP_RF_Channel
 			| ESP32_DeVICE_R_WSAP_Maximal_Connections
@@ -2816,7 +2644,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // Processed block #03 readings, that affects AP_dhcps_lease (Service-Access-Point-Configuration) ? then save & set
   if (affectedReadings & ( SCDE_R_WSAP_DHCPS_Lease_Start_IP
 			| SCDE_R_WSAP_DHCPS_Lease_End_IP
-			| SCDE_R_WSAP_DHCPS) ) {
+			| SCDE_R_WSAP_IP_Adress) ) {
 
 	# if SCDE_WIFI_DBG >= 5
 	HexDumpOut ("WSAP dhcps_lease ch!",
@@ -2914,587 +2742,285 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 
 
-/*
+// -------------------------------------------------------------------------------------------------
+// 5. Step: update the Readings according to 'affectedReadings' - if any ...
+// -------------------------------------------------------------------------------------------------
+
   // debugview all readings
-  affectedReadings = 0xffffffff;
+ // affectedReadings = 0xffffffff;
 
-// =================================================================================================
-
-  // prepare the readings update according to 'affectedReadings'
-
-  // do we have updates?
+  // update the Readings according to 'affectedReadings' - if any ...
   if (affectedReadings) {
 
-  SCDEFn->readingsBeginUpdateFn(Common_Definition);
-
-  }
-
-  // temp for reading creation
-  uint8_t *readingNameText;
-  size_t readingNameTextLen;
-  uint8_t *readingValueText;
-  size_t readingValueTextLen;
+	SCDEFn->readingsBeginUpdateFn((Common_Definition_t*) ESP32_DeVICE_Definition);
 
 // ------------------------------------------------------------------------------------------------- 
 
-  // add Reading 'Name'
-  if (affectedReadings & ESP32_DeVICE_R_NAME) {
+	// Reading 'Name'
+	if (affectedReadings & ESP32_DeVICE_R_Name) {
 
-	#if SCDEH_DBG >= 5
-	printf("&NAME=%s"
-		,(char*) &ap_wifi_config.ap.ssid);
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"Name");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%.*s"
-		,strlen((char *) &ap_wifi_config.ap.ssid)
-		,(char *) &ap_wifi_config.ap.ssid);		// max length check??
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Name].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Name].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].off);
+	}
 
 // -------------------------------------------------------------------------------------------------
 
-  // add Reading 'WSAP_Password'
-  if (affectedReadings & ESP32_DeVICE_R_WSAP_Password) {
+	// Reading 'WSAP_Password'
+	if (affectedReadings & ESP32_DeVICE_R_WSAP_Password) {
 
-	#if SCDEH_DBG >= 5
-	printf("&WSAP_Password=%s"
-		,(char*) &ap_wifi_config.ap.password);
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"WSAP_Password");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%.*s"
-		,strlen((char *) &ap_wifi_config.ap.password)
-		,(char *) &ap_wifi_config.ap.password);		// max length check??
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Password].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Password].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].off);
+	}
 
 // ------------------------------------------------------------------------------------------------- 
 
-  // add Reading 'WSAP_RF_Channel'
-  if (affectedReadings & ESP32_DeVICE_R_WSAP_RF_Channel) {
+	// Reading 'WSAP_RF_Channel'
+	if (affectedReadings & ESP32_DeVICE_R_WSAP_RF_Channel) {
 
-	#if SCDEH_DBG >= 5
-	printf("&WSAP_RF_Channel=%u"
-		,ap_wifi_config.ap.channel);
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"WSAP_RF_Channel");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%u"
-		,ap_wifi_config.ap.channel);
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_RF_Channel].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_RF_Channel].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_RF_Channel].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_RF_Channel].off);
+	}
 
 // ------------------------------------------------------------------------------------------------- 
 
-  // add Reading 'WSAP_Maximal_Connections'
-  if (affectedReadings & ESP32_DeVICE_R_WSAP_Maximal_Connections) {
+	// Reading 'WSAP_Maximal_Connections'
+	if (affectedReadings & ESP32_DeVICE_R_WSAP_Maximal_Connections) {
 
-	#if SCDEH_DBG >= 5
-	printf("&WSAP_Maximal_Connections=%u"
-		,ap_wifi_config.ap.max_connection);
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"WSAP_Maximal_Connections");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%u"
-		,ap_wifi_config.ap.max_connection);
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_Maximal_Connections].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_Maximal_Connections].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_Maximal_Connections].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_Maximal_Connections].off);
+	}
 
 // ------------------------------------------------------------------------------------------------- 
 
-  // add Reading 'WSAP_Authentication_Method'
-  if (affectedReadings & ESP32_DeVICE_R_WSAP_Authentication_Method) {
+	// Reading 'WSAP_Authentication_Method'
+	if (affectedReadings & ESP32_DeVICE_R_WSAP_Authentication_Method) {
 
-	#if SCDEH_DBG >= 5
-	printf("&WSAP_Authentication_Method=%s"
-		,SCDE_GetDesc(Auth_M,ap_wifi_config.ap.authmode));
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"WSAP_Authentication_Method");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%s"
-		,SCDE_GetDesc(Auth_M,ap_wifi_config.ap.authmode));
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+ 		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_Authentication_Method].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_Authentication_Method].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_Authentication_Method].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_Authentication_Method].off);
+	}
 
 // ------------------------------------------------------------------------------------------------- 
 
-  // add Reading 'WSAP_SSID'
-  if (affectedReadings & ESP32_DeVICE_R_WSAP_SSID) {
+	// Reading 'WSAP_SSID'
+	if (affectedReadings & ESP32_DeVICE_R_WSAP_SSID) {
 
-	#if SCDEH_DBG >= 5
-	printf("&WSAP_SSID=%s"
-		,SCDE_GetDesc(SSID_H,ap_wifi_config.ap.ssid_hidden));
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"WSAP_SSID");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%s"
-		,SCDE_GetDesc(SSID_H,ap_wifi_config.ap.ssid_hidden));
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_SSID].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_SSID].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_SSID].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_SSID].off);
+	}
 
 // ------------------------------------------------------------------------------------------------- 
 
-  // add Reading 'WSAP_Beacon_Interval'
-  if (affectedReadings & ESP32_DeVICE_R_WSAP_Beacon_Interval) {
+	// Reading 'WSAP_Beacon_Interval'
+	if (affectedReadings & ESP32_DeVICE_R_WSAP_Beacon_Interval) {
 
-	#if SCDEH_DBG >= 5
-	printf("&WSAP_Beacon_Interval=%u"
-		,ap_wifi_config.ap.beacon_interval);
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"WSAP_RF_Channel");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%u"
-		,ap_wifi_config.ap.beacon_interval);
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval].off);
+	}
 
 // -------------------------------------------------------------------------------------------------
 
-  // add Reading 'WSAP_IP_Adress'
-  if (affectedReadings & ESP32_DeVICE_R_WSAP_IP_Adress) {
+	// Reading 'WSAP_IP_Adress'
+	if (affectedReadings & ESP32_DeVICE_R_WSAP_IP_Adress) {
 
-	#if SCDEH_DBG >= 5
-	printf("&WSAP_IP_Adress=%03d.%03d.%03d.%03d"
-		,ap_ip_info.ip.addr & 0xff
-		,(ap_ip_info.ip.addr >> 8) & 0xff
-		,(ap_ip_info.ip.addr >> 16) & 0xff
-		,ap_ip_info.ip.addr >> 24);
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"WSAP_IP_Adress");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%03d.%03d.%03d.%03d"
-		,ap_ip_info.ip.addr & 0xff
-		,(ap_ip_info.ip.addr >> 8) & 0xff
-		,(ap_ip_info.ip.addr >> 16) & 0xff
-		,ap_ip_info.ip.addr >> 24);
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_IP_Adress].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_IP_Adress].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_IP_Adress].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_IP_Adress].off);
+	}
 
 // -------------------------------------------------------------------------------------------------
 
-  // add Reading 'WSAP_Netmask'
-  if (affectedReadings & ESP32_DeVICE_R_WSAP_Netmask) {
+	// Reading 'WSAP_Netmask'
+	if (affectedReadings & ESP32_DeVICE_R_WSAP_Netmask) {
 
-	#if SCDEH_DBG >= 5
-	printf("&WSAP_Netmask=%03d.%03d.%03d.%03d"
-		,ap_ip_info.netmask.addr & 0xff
-		,(ap_ip_info.netmask.addr >> 8) & 0xff
-		,(ap_ip_info.netmask.addr >> 16) & 0xff
-		,ap_ip_info.netmask.addr >> 24);
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"WSAP_Netmask");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%03d.%03d.%03d.%03d"
-		,ap_ip_info.netmask.addr & 0xff
-		,(ap_ip_info.netmask.addr >> 8) & 0xff
-		,(ap_ip_info.netmask.addr >> 16) & 0xff
-		,ap_ip_info.netmask.addr >> 24);
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Netmask].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Netmask].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Netmask].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Netmask].off);
+	}
 
 // -------------------------------------------------------------------------------------------------
 
-  // add Reading 'WSAP_Gateway_Adress'
-  if (affectedReadings & ESP32_DeVICE_R_WSAP_Gateway_Adress) {
+	// Reading 'WSAP_Gateway_Adress'
+	if (affectedReadings & ESP32_DeVICE_R_WSAP_Gateway_Adress) {
 
-	#if SCDEH_DBG >= 5
-	printf("&WSAP_Gateway_Adress=%03d.%03d.%03d.%03d"
-		,ap_ip_info.gw.addr & 0xff
-		,(ap_ip_info.gw.addr >> 8) & 0xff
-		,(ap_ip_info.gw.addr >> 16) & 0xff
-		,ap_ip_info.gw.addr >> 24);
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"WSAP_Gateway_Adress");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%03d.%03d.%03d.%03d"
-		,ap_ip_info.gw.addr & 0xff
-		,(ap_ip_info.gw.addr >> 8) & 0xff
-		,(ap_ip_info.gw.addr >> 16) & 0xff
-		,ap_ip_info.gw.addr >> 24);
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Gateway_Adress].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Gateway_Adress].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Gateway_Adress].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Gateway_Adress].off);
+	}
 
 // -------------------------------------------------------------------------------------------------
 
-  // add Reading 'WSAP_MAC_Adress'
-  if (affectedReadings & ESP32_DeVICE_R_WSAP_MAC_Adress) {
+	// Reading 'WSAP_MAC_Adress'
+	if (affectedReadings & ESP32_DeVICE_R_WSAP_MAC_Adress) {
 
-	#if SCDEH_DBG >= 5
-	printf("&WSAP_MAC_Adress=%02X.%02X.%02X.%02X.%02X.%02X.%02X.%02X"
-		,ap_mac_addr[0]
-		,ap_mac_addr[1]
-		,ap_mac_addr[2]
-		,ap_mac_addr[3]
-		,ap_mac_addr[4]
-		,ap_mac_addr[5]
-		,ap_mac_addr[6]
-		,ap_mac_addr[7]);
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"WSAP_MAC_Adress");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%02X.%02X.%02X.%02X.%02X.%02X.%02X.%02X"
-		,ap_mac_addr[0]
-		,ap_mac_addr[1]
-		,ap_mac_addr[2]
-		,ap_mac_addr[3]
-		,ap_mac_addr[4]
-		,ap_mac_addr[5]
-		,ap_mac_addr[6]
-		,ap_mac_addr[7]);
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_MAC_Adress].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_MAC_Adress].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_MAC_Adress].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_MAC_Adress].off);
+	}
 
 // -------------------------------------------------------------------------------------------------
 
-  // add Reading 'WSAP_WiFi_Bandwidth'
-  if (affectedReadings & ESP32_DeVICE_R_WSAP_WiFi_Bandwidth) {
+	// Reading 'WSAP_WiFi_Bandwidth'
+	if (affectedReadings & ESP32_DeVICE_R_WSAP_WiFi_Bandwidth) {
 
-	#if SCDEH_DBG >= 5
-	printf("&WSAP_WiFi_Bandwidth=%s"
-		,SCDE_GetDesc(wifiBandwidth, ap_wifi_bandwidth));	
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"WSAP_WiFi_Bandwidth");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%s"
-		,SCDE_GetDesc(wifiBandwidth, ap_wifi_bandwidth));
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_WiFi_Bandwidth].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_WiFi_Bandwidth].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_WiFi_Bandwidth].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_WiFi_Bandwidth].off);
+	}
 
 // -------------------------------------------------------------------------------------------------
 
-  // add Reading 'WiFi_Country'
-  if (affectedReadings & ESP32_DeVICE_R_WiFi_Country) {
+	// Reading 'WiFi_Country'
+	if (affectedReadings & ESP32_DeVICE_R_WiFi_Country) {
 
-	#if SCDEH_DBG >= 5
-	printf("&WiFi_Country=%s"
-		,SCDE_GetDesc(wifiCountry, &country));
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"WiFi_Country");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%s"
-		,SCDE_GetDesc(wifiCountry, &country));
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WiFi_Country].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WiFi_Country].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WiFi_Country].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WiFi_Country].off);
+	}
 
 // -------------------------------------------------------------------------------------------------
 
-  // add Reading 'Station_IP_Adress'
-  if (affectedReadings & ESP32_DeVICE_R_Station_IP_Adress) {
+	// Reading 'Station_IP_Adress'
+	if (affectedReadings & ESP32_DeVICE_R_Station_IP_Adress) {
 
-	#if SCDEH_DBG >= 5
-	printf("&Station_IP_Adress=%03d.%03d.%03d.%03d"
-		,sta_ip_info.ip.addr & 0xff
-		,(sta_ip_info.ip.addr >> 8) & 0xff
-		,(sta_ip_info.ip.addr >> 16) & 0xff
-		,sta_ip_info.ip.addr >> 24);
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"Station_IP_Adress");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%03d.%03d.%03d.%03d"
-		,sta_ip_info.ip.addr & 0xff
-		,(sta_ip_info.ip.addr >> 8) & 0xff
-		,(sta_ip_info.ip.addr >> 16) & 0xff
-		,sta_ip_info.ip.addr >> 24);
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_IP_Adress].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_IP_Adress].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_IP_Adress].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_IP_Adress].off);
+	}
 
 // -------------------------------------------------------------------------------------------------
 
-  // add Reading 'Station_Netmask'
-  if (affectedReadings & ESP32_DeVICE_R_Station_Netmask) {
+	// add Reading 'Station_Netmask'
+	if (affectedReadings & ESP32_DeVICE_R_Station_Netmask) {
 
-	#if SCDEH_DBG >= 5
-	printf("&Station_Netmask=%03d.%03d.%03d.%03d"
-		,sta_ip_info.netmask.addr & 0xff
-		,(sta_ip_info.netmask.addr >> 8) & 0xff
-		,(sta_ip_info.netmask.addr >> 16) & 0xff
-		,sta_ip_info.netmask.addr >> 24);
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"Station_Netmask");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%03d.%03d.%03d.%03d"
-		,sta_ip_info.netmask.addr & 0xff
-		,(sta_ip_info.netmask.addr >> 8) & 0xff
-		,(sta_ip_info.netmask.addr >> 16) & 0xff
-		,sta_ip_info.netmask.addr >> 24);
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_Netmask].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_Netmask].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Netmask].len
+			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Netmask].off);
+	}
 
 // -------------------------------------------------------------------------------------------------
 
-  // add Reading 'Station_Gateway_Adress'
-  if (affectedReadings & ESP32_DeVICE_R_Station_Gateway_Adress) {
+	// add Reading 'Station_Gateway_Adress'
+	if (affectedReadings & ESP32_DeVICE_R_Station_Gateway_Adress) {
 
-	#if SCDEH_DBG >= 5
-	printf("&Station_Gateway_Adress=%03d.%03d.%03d.%03d"
-		,sta_ip_info.gw.addr & 0xff
-		,(sta_ip_info.gw.addr >> 8) & 0xff
-		,(sta_ip_info.gw.addr >> 16) & 0xff
-		,sta_ip_info.gw.addr >> 24);
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"Station_Gateway_Adress");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%03d.%03d.%03d.%03d"
-		,sta_ip_info.gw.addr & 0xff
-		,(sta_ip_info.gw.addr >> 8) & 0xff
-		,(sta_ip_info.gw.addr >> 16) & 0xff
-		,sta_ip_info.gw.addr >> 24);
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_Gateway_Adress].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_Gateway_Adress].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Gateway_Adress].len
+			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Gateway_Adress].off);
+	}
 
 // -------------------------------------------------------------------------------------------------
 
-  // add Reading 'Station_MAC_Adress'
-  if (affectedReadings & ESP32_DeVICE_R_Station_MAC_Adress) {
+	// Reading 'Station_MAC_Adress'
+	if (affectedReadings & ESP32_DeVICE_R_Station_MAC_Adress) {
 
-	#if SCDEH_DBG >= 5
-	printf("&Station_MAC_Adress=%02X.%02X.%02X.%02X.%02X.%02X.%02X.%02X"
-		,sta_mac_addr[0]
-		,sta_mac_addr[1]
-		,sta_mac_addr[2]
-		,sta_mac_addr[3]
-		,sta_mac_addr[4]
-		,sta_mac_addr[5]
-		,sta_mac_addr[6]
-		,sta_mac_addr[7]);
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"Station_MAC_Adress");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%02X.%02X.%02X.%02X.%02X.%02X.%02X.%02X"
-		,sta_mac_addr[0]
-		,sta_mac_addr[1]
-		,sta_mac_addr[2]
-		,sta_mac_addr[3]
-		,sta_mac_addr[4]
-		,sta_mac_addr[5]
-		,sta_mac_addr[6]
-		,sta_mac_addr[7]);
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_MAC_Adress].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_MAC_Adress].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_MAC_Adress].len
+			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_MAC_Adress].off);
+	}
 
 // -------------------------------------------------------------------------------------------------
 
-  // add Reading 'Station_Auto_Connect'
-  if (affectedReadings & ESP32_DeVICE_R_Station_Auto_Connect) {
+	// Reading 'Station_Auto_Connect'
+	if (affectedReadings & ESP32_DeVICE_R_Station_Auto_Connect) {
 
-	#if SCDEH_DBG >= 5
-	printf("&Station_Auto_Connect=%s"
-		,SCDE_GetDesc(DisEn, sta_autoconnect_status));
-	#endif
-
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"Station_Auto_Connect");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%s"
-		,SCDE_GetDesc(DisEn, sta_autoconnect_status));
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
-  }
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_Auto_Connect].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_Auto_Connect].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Auto_Connect].len
+			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Auto_Connect].off);
+	}
 
 // -------------------------------------------------------------------------------------------------
 
-  // add Reading 'Station_WiFi_Bandwidth'
-  if (affectedReadings & ESP32_DeVICE_R_Station_WiFi_Bandwidth) {
+	// add Reading 'Station_WiFi_Bandwidth'
+	if (affectedReadings & ESP32_DeVICE_R_Station_WiFi_Bandwidth) {
 
-	#if SCDEH_DBG >= 5
-	printf("&Station_WiFi_Bandwidth=%s"
-		,SCDE_GetDesc(wifiBandwidth, sta_wifi_bandwidth));
-	#endif
+		// create / update reading
+		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_WiFi_Bandwidth].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_WiFi_Bandwidth].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_WiFi_Bandwidth].len
+			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_WiFi_Bandwidth].off);
+	}
+//uint8_t *argsText
+// -------------------------------------------------------------------------------------------------
 
-
-	readingNameTextLen = asprintf((char **) &readingNameText
-		,"Station_WiFi_Bandwidth");
-
-	readingValueTextLen = asprintf((char **) &readingValueText
-		,"%s"
-		,SCDE_GetDesc(wifiBandwidth, sta_wifi_bandwidth));
-
-	SCDEFn->readingsBulkUpdateFn(Common_Definition
-		,readingNameText
-		,readingNameTextLen
-		,readingValueText
-		,readingValueTextLen);
-
+  SCDEFn->readingsEndUpdateFn((Common_Definition_t*) ESP32_DeVICE_Definition);
   }
-*/
 
+// =================================================================================================
+// =================================================================================================
+// =================================================================================================
+
+
+
+
+
+// ------------------------------------------------------------------------------------------------
+
+// 5. Step: Passed. Return OK
+
+  return false;
+
+}
 
 
 
@@ -3520,12 +3046,12 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
   if (affectedReadings & (SCDE_R_WSAP_DHCPS_Lease_Start_IP
 		| SCDE_R_WSAP_DHCPS_Lease_End_IP
-		| SCDE_R_WSAP_DHCPS ) ) {
+		| SCDE_R_WSAP_IP_Adress ) ) {
 
 	RespArgsWPos += os_sprintf( RespArgsWPos
 		,"&WSAP_DHCPS_Lease_Start_IP=%03d.%03d.%03d.%03d"
 		 "&WSAP_DHCPS_Lease_End_IP=%03d.%03d.%03d.%03d"
-		 "&WSAP_DHCPS=%s"
+		 "&WSAP_IP_Adress=%s"
 		, dhcps_lease.start_ip.addr & 0xff
 		,(dhcps_lease.start_ip.addr >> 8) & 0xff
 		,(dhcps_lease.start_ip.addr >> 16) & 0xff
@@ -3660,16 +3186,6 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 
 
-  // were there any updates?
-  if (affectedReadings) {
-
-  SCDEFn->readingsEndUpdateFn(Common_Definition);
-
-  }
-
-
-
-
 
 
 
@@ -3694,7 +3210,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
   // make common ptr to modul specific ptr
   ESP32_DeVICE_Definition_t* ESP32_DeVICE_Definition =
-	(ESP32_DeVICE_Definition_t*) Common_Definition;
+	(ESP32_DeVICE_Definition_t*) ESP32_DeVICE_Definition;
 
   #if SCDEH_DBG >= 5
   printf("\n|ESP32_DeVICE_Set, Name:%.*s, got args:%.*s>"

@@ -93,8 +93,11 @@ void MakeReadingName(const xString_t nameString);
 // call this before updating readings
 int readingsBeginUpdate(Common_Definition_t *Common_Definition);
 
-// call this for every reading (bulk-update)
+// call this to add an Reading to the running update of Readings
 int readingsBulkUpdate(Common_Definition_t *Common_Definition, uint8_t *readingNameText, size_t readingNameTextLen, uint8_t *readingValueText, size_t readingValueTextLen);
+
+// call this to add an Reading to the running update of Readings
+int readingsBulkUpdate2(Common_Definition_t *Common_Definition, const size_t readingNameStringLength, const uint8_t *readingNameStringCharacters, const size_t readingValueStringLength, const uint8_t *readingValueStringCharacters);
 
 // call this to after bulk-update to process readings
 int readingsEndUpdate(Common_Definition_t *Common_Definition);

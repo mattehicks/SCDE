@@ -1,0 +1,32 @@
+TAILQ_HEAD(tailhead, entry) head;
+struct tailhead *headp;         /* Tail queue head. */
+struct entry {
+        ...
+        TAILQ_ENTRY(entry) entries;     /* Tail queue. */
+        ...
+} *n1, *n2, *np;
+
+TAILQ_INIT(&head);                      /* Initialize the queue. */
+
+n1 = malloc(sizeof(struct entry));      /* Insert at the head. */
+TAILQ_INSERT_HEAD(&head, n1, entries);
+
+n1 = malloc(sizeof(struct entry));      /* Insert at the tail. */
+TAILQ_INSERT_TAIL(&head, n1, entries);
+
+n2 = malloc(sizeof(struct entry));      /* Insert after. */
+TAILQ_INSERT_AFTER(&head, n1, n2, entries);
+
+n2 = malloc(sizeof(struct entry));      /* Insert before. */
+TAILQ_INSERT_BEFORE(n1, n2, entries);
+                                        /* Forward traversal. */
+TAILQ_FOREACH(np, &head, entries)
+        np-> ...
+                                        /* Reverse traversal. */
+TAILQ_FOREACH_REVERSE(np, &head, tailhead, entries)
+        np-> ...
+                                        /* Delete. */
+while (TAILQ_FIRST(&head) != NULL)
+        TAILQ_REMOVE(&head, TAILQ_FIRST(&head), entries);
+if (TAILQ_EMPTY(&head))                 /* Test for emptiness. */
+        printf("nothing to do\n");

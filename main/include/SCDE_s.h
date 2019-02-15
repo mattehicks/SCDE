@@ -262,6 +262,9 @@ typedef int (*readingsBeginUpdateFn_t) (Common_Definition_t *Common_Definition);
 // typedef for readingsBulkUpdateFn - call this for every reading (bulk-update)
 typedef int (*readingsBulkUpdateFn_t) (Common_Definition_t *Common_Definition, uint8_t *readingNameText, size_t readingNameTextLen, uint8_t *readingValueText, size_t readingValueTextLen);
 
+// call this to add an Reading to the running update of Readings
+typedef int (*readingsBulkUpdate2Fn_t) (Common_Definition_t *Common_Definition, const size_t readingNameStringLength, const uint8_t *readingNameStringCharacters, const size_t readingValueStringLengthconst, uint8_t *readingValueStringCharacters);
+
 // typedef for readingsEndUpdateFn - call this to after bulk-update to process readings
 typedef int (*readingsEndUpdateFn_t) (Common_Definition_t *Common_Definition);
 
@@ -307,6 +310,7 @@ typedef struct SCDEFn_s {
   MakeReadingNameFn_t MakeReadingNameFn;		   // corrects the given Reading Name   
   readingsBeginUpdateFn_t readingsBeginUpdateFn;           // call this before updating readings
   readingsBulkUpdateFn_t readingsBulkUpdateFn;	           // call this for every reading (bulk-update)
+  readingsBulkUpdate2Fn_t readingsBulkUpdate2Fn;	   // call this to add an Reading to the running update
   readingsEndUpdateFn_t readingsEndUpdateFn;               // call this to after bulk-update to process readings
   TimeNowFn_t TimeNowFn;                                   // returns current system time (no TiSt)
   WriteStatefileFn_t WriteStatefileFn;                     // 
@@ -457,52 +461,30 @@ typedef int (* DirectWriteFn_t)(Common_Definition_t *Common_Definition);
  * - done by InitializeFn after module the loaded
  */
 struct ProvidedByModule_s {
-
   uint8_t typeName[32];		// Type-Name of module
   size_t typeNameLen;
 
   AddFn_t AddFn;		// called when Key=Value Attributes owned by this Module are assigned
-
   AttributeFn_t AttributeFn;	// called in case of attribute changes, to check them
-
   DefineFn_t DefineFn;		// called to create a new definition of this type
-
   DeleteFn_t DeleteFn;		// clean up (delete logfile), called by delete after UndefFn
-
   ExceptFn_t ExceptFn;		// called if the global select reports an except field
-
   GetFn_t GetFn;		// get some data from this device
-
   IdleCbFn_t IdleCbFn;		// give module an Idle-Callback to process something
-
   InitializeFn_t InitializeFn;	// returns module information (module_s) required for operation
-
   NotifyFn_t NotifyFn;		// call this if some device changed its properties
-
   ParseFn_t ParseFn;		// Interpret a new message
-
   ReadFn_t ReadFn;		// Reading / receiving from a Device
-
   ReadyFn_t ReadyFn;		// check for available data, if no FD
-
   RenameFn_t RenameFn;		// called to inform the definition about its renameing
-
   SetFn_t SetFn;		// set/activate this device
-
   ShutdownFn_t ShutdownFn;	// called before shutdown
-
   StateFn_t StateFn;		// set local info for this device, do not activate anything
-
   SubFn_t SubFn;		// called when Attribute-Keys owned by this Module are deleted
-
   UndefineFn_t UndefineFn;	// clean up (delete timer, close fd), called by delete and rereadcfg
-
   DirectReadFn_t DirectReadFn;	// ? called by select loop
-
   DirectWriteFn_t DirectWriteFn;// ? called by select loop
-
 // uint32_t *FnProvided;	// Fn Provided for other Modules
-
   int SizeOfDefinition;		// Size of modul specific definition structure (Common_Definition_t + X)
 };
 
@@ -534,15 +516,15 @@ struct Module_s {
 
 
 // xReadingsSLTQE_t - Singly Linked Tail Queue Element to hold multiple Readings
-typedef struct xReadingsSLTQE_s xReadingsSLTQE_t;
+typedef struct xReadingSLTQE_s xReadingSLTQE_t;
 
 /*
  * xReadingsSLTQE_s (struct) 
  * is an singly linked tail queue element and stores one Reading
  * it is used when storing multiple Readings (in an singly tail linked queue)
  */
-struct xReadingsSLTQE_s {
-  STAILQ_ENTRY(xReadingsSLTQE_s) entries;	// link to next xReadingsSLTQE_s element
+struct xReadingSLTQE_s {
+  STAILQ_ENTRY(xReadingSLTQE_s) entries;	// link to next xReadingsSLTQE_s element
   time_t readingTist;				// timestamp of reading
   xString_t nameString;				// text of reading-name, in allocated mem
   xString_t valueString;			// text of reading-value, in allocated mem

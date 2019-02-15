@@ -671,7 +671,7 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 				// Loop through old readings and
 				// try to find an old reading and replace it.
 				// Or add the new reading.
-				xReadingsSLTQE_t *oldReadingsSLTQE = 
+				xReadingSLTQE_t *oldReadingsSLTQE = 
 					STAILQ_FIRST(&Common_Definition->headReadings);
 
 				while (true) {
@@ -680,11 +680,11 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 					if (oldReadingsSLTQE == NULL) {
 
 						// alloc mem for new Reading 
-						xReadingsSLTQE_t *newReadingsSLTQE
-							= malloc(sizeof(xReadingsSLTQE_t));
+						xReadingSLTQE_t *newReadingsSLTQE
+							= malloc(sizeof(xReadingSLTQE_t));
 
 						// zero the struct
-						memset(newReadingsSLTQE, 0, sizeof(xReadingsSLTQE_t));
+						memset(newReadingsSLTQE, 0, sizeof(xReadingSLTQE_t));
 
 						// fill Reading
 						newReadingsSLTQE->readingTist = readingTiSt;

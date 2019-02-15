@@ -193,6 +193,7 @@ SCDEFn_t SCDEFn = {
   ,MakeReadingName
   ,readingsBeginUpdate
   ,readingsBulkUpdate
+  ,readingsBulkUpdate2
   ,readingsEndUpdate
   ,TimeNow
   ,WriteStatefile
@@ -399,7 +400,7 @@ GetAllReadings(Common_Definition_t *Common_Definition)
 	// second the detailed list of readings
 
   // loop the readings stored for this definition for processing
-	xReadingsSLTQE_t *currentReadingsSLTQE;
+	xReadingSLTQE_t *currentReadingsSLTQE;
 	STAILQ_FOREACH(currentReadingsSLTQE, &Common_Definition->headReadings, entries) {
 
 		// set current tist, if missing
@@ -2813,87 +2814,8 @@ doGlobalDef(const uint8_t *cfgFileName
 }	
 		
 
-		
-/*
- * --------------------------------------------------------------------------------------------------
- *  FName: readingsBeginUpdateFn
- *  Desc: Call readingsBeginUpdate before you start updating readings. The updated readings will all
- *       get the same timestamp, which is the time when you called this subroutine.
- *  Para: const uint8_t *commandTxt ->  ptr to the Command-Text
- *       const size_t commandTxtLen -> Command-Text length
- *       commandFn_t commandFn -> the command Fn
- *       const uint8_t *commandHelp -> ptr the Command-Help text
- *       const size_t commandHelpLen -> Command-Help text length
- *  Rets: -/-
- * --------------------------------------------------------------------------------------------------
- */
-int
-readingsBeginUpdate(Common_Definition_t *Common_Definition)
-  {
 
-  // check if bulk update is not already called
-  if (Common_Definition->bulkUpdateReadings) {
-
-	Log3(Common_Definition->module->ProvidedByModule->typeName
-		  ,Common_Definition->module->ProvidedByModule->typeNameLen
-		  ,1
-		  ,"Error! readingsEndUpdateFn not called in Def-Name: '%.*s'. Can not begin new update."
-		  ,Common_Definition->name
-		  ,Common_Definition->nameLen);
-
-	return 0;
-  }
-
-  // alloc mem for reading structure (bulkUpdateReadings_t)
-  Common_Definition->bulkUpdateReadings =
-	(bulkUpdateReadings_t *) malloc(sizeof(bulkUpdateReadings_t));
-
-  // zero the struct
-  memset(Common_Definition->bulkUpdateReadings, 0, sizeof(bulkUpdateReadings_t));
-
-  // clear bulk-update tail-queue
-  STAILQ_INIT(&Common_Definition->bulkUpdateReadings->readingsSLTQH);
-
-
-
-
-
-
-  // assign bulk update time stamp
-  Common_Definition->bulkUpdateReadings->bulkUpdateTist = TimeNow();
-
-  strText_t  strText =
-	FmtDateTime(Common_Definition->bulkUpdateReadings->bulkUpdateTist);
-
-  LOGD("HelloTest tist:%.*s"
-	,strText.strTextLen
-	,strText.strText);
-
-  free(strText.strText);
-
-
-
-
-
-
-  // assign bulk update time stamp
-  time(&Common_Definition->bulkUpdateReadings->bulkUpdateTist);
-
-  // display for debug
-  struct tm timeinfo;
-  localtime_r(&Common_Definition->bulkUpdateReadings->bulkUpdateTist, &timeinfo);
-
-  printf("readingsBeginUpdate tist: %d.%d.%d, %d:%d:%d\n"
-	,timeinfo.tm_mday
-	,timeinfo.tm_mon+1
-	,timeinfo.tm_year+1900
-	,timeinfo.tm_hour
-	,timeinfo.tm_min
-	,timeinfo.tm_sec);
-
-
- 
-/*
+/* valid time check ?
     time_t now = 0;
     struct tm timeinfo = { 0 };
     int retry = 0;
@@ -2906,15 +2828,69 @@ readingsBeginUpdate(Common_Definition_t *Common_Definition)
 */
 
 
+		
+/*
+ * --------------------------------------------------------------------------------------------------
+ *  FName: readingsBeginUpdateFn
+ *  Desc: Call readingsBeginUpdate before you start updating Readings. The updated Readings will all
+ *       get the same timestamp, which is the time when you called this subroutine.
+ *  Para: Common_Definition_t *Common_Definition -> the definition which wants to update readings
+ *  Rets: ?
+ * --------------------------------------------------------------------------------------------------
+ */
+int
+readingsBeginUpdate(Common_Definition_t *Common_Definition)
+  {
 
-  LOGD("readingsBeginUpdate called, Type-Name:%.*s, Def-Name:%.*s\n"
+  // check if bulk update is already called
+  if (Common_Definition->bulkUpdateReadings) {
+
+	#if CORE_SCDE_DBG >= 1
+	Log3(Common_Definition->module->ProvidedByModule->typeName
+		,Common_Definition->module->ProvidedByModule->typeNameLen
+		,1
+		,"Error! readingsBeginUpdate was already called for Definition '%.*s'. Can not begin new update!"
+		,Common_Definition->name
+		,Common_Definition->nameLen);
+	#endif
+
+	return 0;
+  }
+
+  // alloc mem for bulk update structure (bulkUpdateReadings_t)
+  Common_Definition->bulkUpdateReadings =
+	(bulkUpdateReadings_t *) malloc(sizeof(bulkUpdateReadings_t));
+
+  // zero the bulk update structure (bulkUpdateReadings_t)
+  memset(Common_Definition->bulkUpdateReadings, 0, sizeof(bulkUpdateReadings_t));
+
+  // bulk-update single-linked-tail queue - init head
+  STAILQ_INIT(&Common_Definition->bulkUpdateReadings->readingsSLTQH);
+
+  // assign bulk update time stamp
+  Common_Definition->bulkUpdateReadings->bulkUpdateTist = GetUniqueTiSt();
+
+  #if CORE_SCDE_DBG >= 7
+  // prepare time for debug
+  struct tm timeinfo;
+  localtime_r(&Common_Definition->bulkUpdateReadings->bulkUpdateTist, &timeinfo);
+
+  Log3(Common_Definition->module->ProvidedByModule->typeName
 	,Common_Definition->module->ProvidedByModule->typeNameLen
-	,Common_Definition->module->ProvidedByModule->typeName
+	,7
+	,"readingsBeginUpdate called for Definition '%.*s'. Got TiSt '%d.%d.%d, %d:%d:%d'."
 	,Common_Definition->nameLen
-	,Common_Definition->name);
+	,Common_Definition->name
+	,timeinfo.tm_mday
+	,timeinfo.tm_mon+1
+	,timeinfo.tm_year+1900
+	,timeinfo.tm_hour
+	,timeinfo.tm_min
+	,timeinfo.tm_sec);
+  #endif
 
   return 0;
-  }
+}
 
 
 
@@ -2952,11 +2928,11 @@ readingsBulkUpdate(Common_Definition_t *Common_Definition
   }
 
   // alloc mem for reading structure (reading_t)
-  xReadingsSLTQE_t *newReadingsSLTQE
-	= malloc(sizeof(xReadingsSLTQE_t));
+  xReadingSLTQE_t *newReadingsSLTQE
+	= malloc(sizeof(xReadingSLTQE_t));
 
   // zero the struct
-  memset(newReadingsSLTQE, 0, sizeof(xReadingsSLTQE_t));
+  memset(newReadingsSLTQE, 0, sizeof(xReadingSLTQE_t));
 
   // copy reading data
   newReadingsSLTQE->nameString.length = readingNameTextLen;
@@ -2974,14 +2950,90 @@ readingsBulkUpdate(Common_Definition_t *Common_Definition
   	,readingValueText);
 
   // list currently added readings stored for processing
-  xReadingsSLTQE_t *currentReadingsSLTQE;
+  xReadingSLTQE_t *currentReadingsSLTQE;
   STAILQ_FOREACH(currentReadingsSLTQE, &Common_Definition->bulkUpdateReadings->readingsSLTQH, entries) {
+
 	LOGD("L readingName:%.*s, readingValue:%.*s\n"
 		,currentReadingsSLTQE->nameString.length
 		,currentReadingsSLTQE->nameString.characters
 		,currentReadingsSLTQE->valueString.length
 		,currentReadingsSLTQE->valueString.characters);
   }
+
+  return 0;
+}
+
+
+
+/*
+ * --------------------------------------------------------------------------------------------------
+ *  FName: readingsBulkUpdate2Fn
+ *  Desc: Call readingsBulkUpdate to add an Reading to the running update of Readings
+ *  NOTE: Call readingsBeginUpdateFn first!
+ *  Para: Common_Definition_t *Common_Definition -> the definition which wants updated readings
+ *        const size_t readingNameStringLength -> length of the name string
+ *        const uint8_t *readingNameStringCharacters -> ptr to the name string
+ *        const size_t readingValueStringLength -> length of the value string
+ *        const uint8_t *readingValueStringCharacters) -> ptr to the value string
+ *  Rets: ?
+ * --------------------------------------------------------------------------------------------------
+ */
+int
+readingsBulkUpdate2(Common_Definition_t *Common_Definition
+		,const size_t readingNameStringLength
+		,const uint8_t *readingNameStringCharacters
+		,const size_t readingValueStringLength
+		,const uint8_t *readingValueStringCharacters)
+{
+  // check if bulk update begin was called
+  if (!Common_Definition->bulkUpdateReadings) {
+
+	#if CORE_SCDE_DBG >= 1
+	Log3(Common_Definition->module->ProvidedByModule->typeName
+		,Common_Definition->module->ProvidedByModule->typeNameLen
+		,1
+		,"Error! readingsBulkUpdateFn called for Definition '%.*s' without calling readingsBeginUpdateFn first!"
+		,Common_Definition->name
+		,Common_Definition->nameLen);
+	#endif
+
+	return 0;
+  }
+
+  // alloc mem for reading
+  xReadingSLTQE_t *newReadingSLTQE
+	= malloc(sizeof(xReadingSLTQE_t));
+
+  // zero the struct ??? notwendig ???
+  memset(newReadingSLTQE, 0, sizeof(xReadingSLTQE_t));
+
+  // fill Reading with Name
+  newReadingSLTQE->nameString.length =
+	asprintf((char **) &newReadingSLTQE->nameString.characters
+	,"%.*s"
+	,readingNameStringLength
+	,readingNameStringCharacters);
+
+  // fill Reading with Value
+  newReadingSLTQE->valueString.length =
+	asprintf((char **) &newReadingSLTQE->valueString.characters
+	,"%.*s"
+	,readingValueStringLength
+	,readingValueStringCharacters);
+
+  // add new Reading to definitions bulk-Update-Readings queue
+  STAILQ_INSERT_TAIL(&Common_Definition->bulkUpdateReadings->readingsSLTQH, newReadingSLTQE, entries);
+
+  #if CORE_SCDE_DBG >= 7
+  Log3(Common_Definition->module->ProvidedByModule->typeName
+      ,Common_Definition->module->ProvidedByModule->typeNameLen
+      ,7
+      ,"readingsBulkUpdateFn adds Reading for update. Name: '%.*s' Value: '%.*s'"
+      ,readingNameStringLength
+      ,readingNameStringCharacters
+      ,readingValueStringLength
+      ,readingValueStringCharacters);
+  #endif
 
   return 0;
 }
@@ -3007,12 +3059,14 @@ readingsEndUpdate(Common_Definition_t *Common_Definition)
   // check if bulk update begin was called
   if (!Common_Definition->bulkUpdateReadings) {
 
+	#if CORE_SCDE_DBG >= 1
 	Log3(Common_Definition->module->ProvidedByModule->typeName
-		  ,Common_Definition->module->ProvidedByModule->typeNameLen
-		  ,1
-		  ,"Error! readingsEndUpdateFn called without calling readingsBeginUpdateFn first in Def-Name: '%.*s'."
-		  ,Common_Definition->name
-		  ,Common_Definition->nameLen);
+		,Common_Definition->module->ProvidedByModule->typeNameLen
+		,1
+		,"Error! readingsEndUpdateFn called for Definition '%.*s' without calling readingsBeginUpdateFn first!"
+		,Common_Definition->name
+		,Common_Definition->nameLen);
+	#endif
 
 	return 0;
   }
@@ -3020,11 +3074,13 @@ readingsEndUpdate(Common_Definition_t *Common_Definition)
   printf("readingsEndUpdate called. Now processing:\n");
 
   // loop through the bulk-update-readings
-  xReadingsSLTQE_t *currentReadingsSLTQE = STAILQ_FIRST(&Common_Definition->bulkUpdateReadings->readingsSLTQH);
-  xReadingsSLTQE_t *nextReadingsSLTQE;
+  xReadingSLTQE_t *currentReadingsSLTQE = 
+	STAILQ_FIRST(&Common_Definition->bulkUpdateReadings->readingsSLTQH);
+
+//  xReadingSLTQE_t *nextReadingsSLTQE;
   while (currentReadingsSLTQE != NULL) {
 
-	nextReadingsSLTQE = STAILQ_NEXT(currentReadingsSLTQE, entries);
+//	nextReadingsSLTQE = STAILQ_NEXT(currentReadingsSLTQE, entries);
 
 	// set common tist
 	currentReadingsSLTQE->readingTist =
@@ -3037,7 +3093,7 @@ readingsEndUpdate(Common_Definition_t *Common_Definition)
 		,currentReadingsSLTQE->valueString.characters);
 
 	// SLTQ Element to loop trough the old readings
-	xReadingsSLTQE_t *oldReadingsSLTQE = 
+	xReadingSLTQE_t *oldReadingsSLTQE = 
 		STAILQ_FIRST(&Common_Definition->headReadings);
 
 	// loop through old readings and try to find an old reading and replace it. Or add the new reading.
@@ -3046,8 +3102,11 @@ readingsEndUpdate(Common_Definition_t *Common_Definition)
 		// no old reading found ?
 		if (oldReadingsSLTQE == NULL) {
 
+			// remove from 
+			STAILQ_REMOVE(&Common_Definition->bulkUpdateReadings->readingsSLTQH, currentReadingsSLTQE, entries);
+
 			// add new reading at tail
-			STAILQ_INSERT_HEAD(&Common_Definition->headReadings, currentReadingsSLTQE, entries);
+			STAILQ_INSERT_TAIL(&Common_Definition->headReadings, currentReadingsSLTQE, entries);
 
 			LOGD("Added new reading - readingName:%.*s, readingValue:%.*s\n"
 				,currentReadingsSLTQE->nameString.length
@@ -3087,6 +3146,9 @@ readingsEndUpdate(Common_Definition_t *Common_Definition)
 			oldReadingsSLTQE->readingTist =
 				Common_Definition->bulkUpdateReadings->bulkUpdateTist;
 
+			// remove from 
+			STAILQ_REMOVE(&Common_Definition->bulkUpdateReadings->readingsSLTQH, currentReadingsSLTQE, xReadingSLTQE_t, entries);
+
 			// we have taken the data - free current reading
 			free(currentReadingsSLTQE);
 
@@ -3106,7 +3168,9 @@ readingsEndUpdate(Common_Definition_t *Common_Definition)
 	}
 
 	// goto next reading for processing
-	currentReadingsSLTQE = nextReadingsSLTQE;
+//	currentReadingsSLTQE = nextReadingsSLTQE;
+
+currentReadingsSLTQE = STAILQ_NEXT(currentReadingsSLTQE, entries);
   }
 
   printf("readingsEndUpdate finnished. Current readings for this definiton:\n");
@@ -3185,7 +3249,7 @@ readingsEndUpdate(Common_Definition_t *Common_Definition)
 */
 
   // list readings stored for definition after processing
-//  xReadingsSLTQE_t *currentReadingsSLTQE;
+//  xReadingSLTQE_t *currentReadingsSLTQE;
   STAILQ_FOREACH(currentReadingsSLTQE, &Common_Definition->headReadings, entries) {
 
 	LOGD("L readingName:%.*s, readingValue:%.*s\n"

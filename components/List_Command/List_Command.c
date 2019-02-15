@@ -408,7 +408,7 @@ List_CommandFn (const uint8_t *args
 				,"  Readings:\r\n");
 			
 			// list readings stored for definition after processing
-			xReadingsSLTQE_t *currentReadingsSLTQE;
+			xReadingSLTQE_t *currentReadingsSLTQE;
 			STAILQ_FOREACH(currentReadingsSLTQE, &Common_Definition->headReadings, entries) {
 
 				// get tist text
