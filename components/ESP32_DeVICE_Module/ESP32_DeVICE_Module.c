@@ -19,6 +19,12 @@
  * #################################################################################################
  */
 
+/*
+define xyz ESP32_DeVICE Name=maik&WSAP_Password=pw&WSAP_RF_Channel=1&WSAP_Maximal_Connections=3&WSAP_Authentication_Method=WPA2_PSK
+define xyz 
+
+*/
+
 // Daten:
 // 1. define (commmon/specific)
 // 2. Attribute (Name/Content)

@@ -7,3 +7,6 @@
 [submodule "components/ESP32_S0_Module"]
 	path = components/ESP32_S0_Module
 	url = https://github.com/EcSUHA/ESP32_S0_Module.git
+[submodule "components/TeLNET_Module"]
+	path = components/TeLNET_Module
+	url = https://github.com/EcSUHA/TeLNET_Module
