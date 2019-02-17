@@ -1136,8 +1136,7 @@ strTextMultiple_t* ICACHE_FLASH_ATTR
 ESP32_DeVICE_Set(Common_Definition_t* Common_Definition
 	,uint8_t *setArgsText
 	,size_t setArgsTextLen)
-  {
-
+{
   // for Fn response msg
   strTextMultiple_t *retMsg = NULL;
 
@@ -1513,19 +1512,26 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 	,size_t argsTextLen)
 {
 
+
+
+printf ("The Args: '%.*s'.",argsTextLen,argsText);
+
+
+
 // -------------------------------------------------------------------------------------------------
 // 1. Step: Create backup structures, if required mirror current values from SDK
 // -------------------------------------------------------------------------------------------------
 
   // block #01 mirror 'wifi_config_t' (WSAP-Configuration)
   wifi_config_t ap_wifi_config;
-  if (parsedKVInput->keysFoundBF & ( (1 << ESP32_DeVICE_Set_IK_Name)
-				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Password)
-				   | (1 << ESP32_DeVICE_Set_IK_WSAP_RF_Channel)
-				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections)
-				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Authentication_Method)
-				   | (1 << ESP32_DeVICE_Set_IK_WSAP_SSID)
-				   | (1 << ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval) ) ) {
+  if (parsedKVInput->keysFoundBF & 
+				( (1 << ESP32_DeVICE_Set_IK_Name)
+				| (1 << ESP32_DeVICE_Set_IK_WSAP_Password)
+				| (1 << ESP32_DeVICE_Set_IK_WSAP_RF_Channel)
+				| (1 << ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections)
+				| (1 << ESP32_DeVICE_Set_IK_WSAP_Authentication_Method)
+				| (1 << ESP32_DeVICE_Set_IK_WSAP_SSID)
+				| (1 << ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval) ) ) {
 
 	esp_wifi_get_config (WIFI_IF_AP, &ap_wifi_config);
   }
@@ -1634,7 +1640,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 
 
-
+printf ("parsedKVInput->keysFoundBF:%lld", parsedKVInput->keysFoundBF);
 
 // -------------------------------------------------------------------------------------------------
 // 2. Step: Check for found KEYs and if the given values match the requirements
@@ -1647,17 +1653,18 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
   // Name=[a-f-A-F0-9] -> Setze Device-Name = WSAP-Name (char) (0-sizeof (ap_wifi_config.ap.ssid))
   // Name=[a-f-A-F0-9] -> Set Device-Name = WSAP-Name (char) (0-sizeof (ap_wifi_config.ap.ssid))
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_Name) {
-
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_Name) {
+printf ("ZA");
 	// valid input ?
-	if (SCDEH_GetSpecialStrVal(argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].off
+	if (SCDEH_GetSpecialStrVal(argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].off
 		,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].len
 		,(char*) &ap_wifi_config.ap.ssid
 		,sizeof (ap_wifi_config.ap.ssid)
 		,2) ) {	
-
+printf ("XA");
 		// mark affected readings for TX
-		affectedReadings |= parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].affectedReadings;
+		affectedReadings |= 
+			parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].affectedReadings;
 
 //		// Push processed CMD to to Response ...
 //		RespArgsWPos += sprintf( RespArgsWPos,"cmd=name");
@@ -1673,17 +1680,18 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // WSAP_Password=[a-f-A-F0-9] -> Setze das Wireless Service Access Point Passwort (char) (0-sizeof (ap_wifi_config.ap.password))
   // WSAP_Password=[a-f-A-F0-9] -> Set the Wireless Service Access Point Passwort (char) (0-sizeof (ap_wifi_config.ap.password))
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Password) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Password) {
 
 	// valid input happened ?
-	if (SCDEH_GetSpecialStrVal(argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].off
+	if (SCDEH_GetSpecialStrVal(argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].off
 		,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].len
 		,(char*) &ap_wifi_config.ap.password
 		,sizeof (ap_wifi_config.ap.password)
 		,2) ) {	
-
+printf ("XB");
 		// mark affected readings for TX
-		affectedReadings |= parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].affectedReadings;
+		affectedReadings |= 
+			parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].affectedReadings;
 
 //		// Push processed CMD to to Response ...
 //		RespArgsWPos += sprintf( RespArgsWPos,"cmd=WSAP_Password");
@@ -1698,16 +1706,17 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // WSAP_RF_Channel=[1-13] -> Setze den Wireless Service Access Point Kanal (!Station Kanal hat Priorität)
   // WSAP_RF_Channel=[1-13] -> Set the Wireless Service Access Point channel (!Station Channel has priority)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_RF_Channel) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_RF_Channel) {
 
 	uint8_t NewChan;
 
 	// valid input happened ?
-	if (SCDEH_GetDecUInt8Val(argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].off
-		,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].len, &NewChan)) {
+	if (SCDEH_GetDecUInt8Val(argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].off
+		,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].len
+		,&NewChan)) {
 
 		if ( (NewChan >= 1) && (NewChan <= 13) ) {
-
+printf ("XC");
 			// mark affected readings for TX
 			affectedReadings |= 
 				parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].affectedReadings;
@@ -1726,7 +1735,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // WSAP_Maximal_Connections=[ ] -> Setze die maximale Anzahl der Verbindungen zum WSAP (0-4)
   // WSAP_Maximal_Connections=[ ] -> Set maximum number of connections to the WSAP (0-4)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections) {
 
 	uint8_t NewMaxConn;
 
@@ -1738,9 +1747,10 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 //			// save new max conn
 //			ap_wifi_config.ap.max_connection = MaxConn;
-
+printf ("XD");
 			// mark affected readings for TX
-			affectedReadings |= parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections].affectedReadings;
+			affectedReadings |= 
+				parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections].affectedReadings;
 
 //			// Push processed CMD to to Response ...
 //			RespArgsWPos += os_sprintf( RespArgsWPos,"cmd=WSAP_RF_Channel");
@@ -1756,7 +1766,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // WSAP_Authentication_Method=[OPEN|WEP|WPA_PSK|WPA2_PSK|WPA_WPA2_PSK|WPA2_ENTERPRISE|MAX] -> Setze die Authentifizierungsmethode
   // WSAP_Authentication_Method=[OPEN|WEP|WPA_PSK|WPA2_PSK|WPA_WPA2_PSK|WPA2_ENTERPRISE|MAX] -> Set the authentication method
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Authentication_Method) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Authentication_Method) {
 
 	uint8_t NewAuthMode;
 
@@ -1766,9 +1776,10 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 //		// save auth mode
 //		ap_wifi_config.ap.authmode = NewAuthMode;
-
+printf ("XE");
 		// mark affected readings for TX
-		affectedReadings |= parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Authentication_Method].affectedReadings;
+		affectedReadings |= 
+			parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Authentication_Method].affectedReadings;
 
 //		// Push processed CMD to to Response ...
 //		RespArgsWPos += sprintf( RespArgsWPos,"cmd=WSAP_Authentication_Method");
@@ -1783,7 +1794,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // WSAP_SSID=[0-9] -> Setze Wert für den gruenen Anteil vom RGB Kanal (uint8) (0-x)
   // WSAP_SSID=[0-9] -> Set value for the gree component of the RGB channel (uint8) (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_SSID) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_SSID) {
 
 	uint8_t NewSSIDSetting;
 
@@ -1792,10 +1803,11 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 		,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_SSID].len, &NewSSIDSetting, SSID_H)) {
 
 		// save auth mode
-		ap_wifi_config.ap.ssid_hidden = NewSSIDSetting;
-
+//		ap_wifi_config.ap.ssid_hidden = NewSSIDSetting;
+printf ("XF");
 		// mark affected readings for TX
-		affectedReadings |= parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_SSID].affectedReadings;
+		affectedReadings |= 
+			parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_SSID].affectedReadings;
 
 		// New Timestamp
 //		SysCfgRamNoMirror->MySCDE_FeatCfgRamNoMirror[ADID].IB01_X_TiSt =
@@ -1815,7 +1827,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // WSAP-Beacon-Interval=[100-60000] -> Setze den Beacon-Sendeinterval des Wireless Service Access Points
   // WSAP-Beacon-Interval=[100-60000] -> Set the beacon interval of the Wireless Service Access Point
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval) {
 
 	uint16_t NewBI;
 
@@ -1826,8 +1838,8 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 		if ( (NewBI >= 100) && (NewBI <= 60000) ) {
 
 			// save beacon interval
-			ap_wifi_config.ap.beacon_interval = (uint16_t) NewBI;
-
+//			ap_wifi_config.ap.beacon_interval = (uint16_t) NewBI;
+printf ("XG");
 			// mark affected readings for TX
 			affectedReadings |= 
 				parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval].affectedReadings;
@@ -1851,7 +1863,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // gmax=[ ] -> Setze vom RGB Kanal den gruenen Anteil maximal (0-x)
   // gmax=[ ] -> Set green component of the RGB channel to maximum (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_IP_Adress) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_IP_Adress) {
 
   }
 
@@ -1860,7 +1872,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // gmin=[ ] -> Setze vom RGB Kanal den gruenen Anteil minimal (0-x)
   // gmin=[ ] -> Set green component of the RGB channel to minimum (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Netmask) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Netmask) {
 
   }
 
@@ -1869,7 +1881,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // bval=[0-9] -> Setze Wert für den blauen Anteil vom RGB Kanal (uint8) (0-x)
   // bval=[0-9] -> Set value for the blue component of the RGB channel (uint8) (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Gateway_Adress) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Gateway_Adress) {
 
   }
 
@@ -1879,7 +1891,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // red=[ ] -> Setze RGB Kanal auf Leuchtfarbe rot (0-x)
   // red=[ ] -> Set RGB Channel SCDEing red (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_MAC_Adress) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_MAC_Adress) {
 
   }
 
@@ -1888,7 +1900,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // yell=[ ] -> Setze RGB Kanal auf Leuchtfarbe gelb (0-x)
   // yell=[ ] -> Set RGB Channel SCDEing yellow (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WiFi_Country) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WiFi_Country) {
 
   }
 
@@ -1897,7 +1909,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // yell=[ ] -> Setze RGB Kanal auf Leuchtfarbe gelb (0-x)
   // yell=[ ] -> Set RGB Channel SCDEing yellow (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_WiFi_Bandwidth) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_WiFi_Bandwidth) {
 
   }
 
@@ -1906,7 +1918,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // blue=[ ] -> Setze RGB Kanal auf Leuchtfarbe blau (0-x)
   // blue=[ ] -> Set RGB Channel SCDEing blue (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_IP_Adress) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_IP_Adress) {
 
   }
 
@@ -1915,7 +1927,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // oran=[ ] -> Setze RGB Kanal auf Leuchtfarbe orange (0-x)
   // oran=[ ] -> Set RGB Channel SCDEing orange (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_Netmask) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_Netmask) {
 
   }
 
@@ -1924,7 +1936,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // yell=[ ] -> Setze RGB Kanal auf Leuchtfarbe gelb (0-x)
   // yell=[ ] -> Set RGB Channel SCDEing yellow (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_Gateway_Adress) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_Gateway_Adress) {
 
   }
 
@@ -1933,7 +1945,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // yell=[ ] -> Setze RGB Kanal auf Leuchtfarbe gelb (0-x)
   // yell=[ ] -> Set RGB Channel SCDEing yellow (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_MAC_Adress) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_MAC_Adress) {
 
   }
 
@@ -1942,7 +1954,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // wval=[0-9] -> Setze Wert für warm-weissen Kanal (uint8) (0-x)
   // wval=[0-9] -> Set value for warm white channel (uint8) (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_Auto_Connect) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_Auto_Connect) {
 
   }
 
@@ -1951,7 +1963,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // yell=[ ] -> Setze RGB Kanal auf Leuchtfarbe gelb (0-x)
   // yell=[ ] -> Set RGB Channel SCDEing yellow (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_WiFi_Bandwidth) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_WiFi_Bandwidth) {
 
   }
 
@@ -1979,7 +1991,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // bmax=[ ] -> Setze vom RGB Kanal den blauen Anteil maximal (0-x)
   // bmax=[ ] -> Set blue component of the RGB channel to maximum (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_DHCPS_Lease_Start_IP) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_DHCPS_Lease_Start_IP) {
 
   }
 
@@ -1988,7 +2000,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // bmin=[ ] -> Setze vom RGB Kanal den blauen Anteil minimal (0-x)
   // bmin=[ ] -> Set blue component of the RGB channel to minimum (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_DHCPS_Lease_End_IP) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_DHCPS_Lease_End_IP) {
 
   }
 
@@ -1997,7 +2009,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // bdim=[0-9] -> Setze dimmer für den blauen Anteil vom RGB Kanal (uint8) (0-x)
   // bdim=[0-9] -> Set dimming for the blue component of the RGB channel (uint8) (0-x)
 /*
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_DHCPS) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_DHCPS) {
 
 	uint8_t NewDHCPSStatus;
 
@@ -2026,7 +2038,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // gree=[ ] -> Setze RGB Kanal auf Leuchtfarbe grün (0-x)
   // gree=[ ] -> Set RGB Channel SCDEing green (0-x)
 /*
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP) {
 
 	uint8_t NewApOpMode;
 
@@ -2059,7 +2071,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // blck=[ ] -> Setze RGB Kanal auf Leuchtfarbe schwarz (0-x)
   // blck=[ ] -> Set RGB Channel SCDEing black (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station) {
 
   }
 
@@ -2068,7 +2080,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // whte=[ ] -> Setze RGB Kanal auf Leuchtfarbe weiss (0-x)
   // whte=[ ] -> Set RGB Channel SCDEing white (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_DHCP) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_DHCP) {
 
   }
 
@@ -2077,7 +2089,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // wdim=[0-9] -> Setze dimmer für warm-weissen Kanal (uint8) (0-x)
   // wdim=[0-9] -> Set dimming for warm white channel (uint8) (0-x)
 /*
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_Physical_Mode) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_Physical_Mode) {
 
 	uint8_t NewPhyMode;
 
@@ -2106,7 +2118,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // wmax=[ ] -> Setze warm-weissen Kanal maximal (0-x)
   // wmax=[ ] -> Set warm white channel maximum (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_Get_RSSI) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_Station_Get_RSSI) {
 
   }
 
@@ -2154,7 +2166,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // TiSt_NTP_Server_Backup_1=[azAZ09._] -> Setze NTP-Server Adresse, Backup 1 (0-x)
   // TiSt_NTP_Server_Backup_1=[azAZ09._] -> Set NTP-Server adress, Backup 1 (0-x)
 /*
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_TiSt_NTP_Server_Backup_1) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_TiSt_NTP_Server_Backup_1) {
 
 	// valid input happened ?
 	if (SCDEH_GetSpecialStrVal(argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_TiSt_NTP_Server_Backup_1].off
@@ -2193,7 +2205,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // TiSt_NTP_Server_Backup_2=[azAZ09._] char[?] -> Setze NTP-Server Adresse, Backup 2 (0-x)
   // TiSt_NTP_Server_Backup_2=[azAZ09._] char[?] -> Set NTP-Server adress, Backup 2 (0-x)
 /*
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_TiSt_NTP_Server_Backup_2) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_TiSt_NTP_Server_Backup_2) {
 
 	// valid input happened ?
 	if (SCDEH_GetSpecialStrVal(argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_TiSt_NTP_Server_Backup_2].off
@@ -2232,7 +2244,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // wmax=[ ] -> Setze warm-weissen Kanal maximal (0-x) 
   // wmax=[ ] -> Set warm white channel maximum (0-x)
 /*
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_TiSt_Time_Zone) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_TiSt_Time_Zone) {
 
 	int8 NewTZ;
 
@@ -2278,7 +2290,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // wmax=[ ] -> Setze warm-weissen Kanal maximal (0-x)
   // wmax=[ ] -> Set warm white channel maximum (0-x)
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_TiSt_Get_Time) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_TiSt_Get_Time) {
 
   }
 
@@ -2288,7 +2300,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // wmax=[ ] -> Setzt das Geräte warm-weissen Kanal maximal (0-x)
   // wmax=[ ] -> Set the Device into state 'restart'
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_SoCHW_Restart) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_SoCHW_Restart) {
 
 	system_restart();
 
@@ -2299,7 +2311,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // SoCHW_Factory_Reset_SCDE=[ ] -> Setzt die Smart-Connected-Device-Engine auf Werkseinstellung zurück 'factory reset'
   // SoCHW_Factory_Reset_SCDE=[ ] -> Set Smart-Connected-Device-Engine to state 'factory reset'
 /*
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_SoCHW_Factory_Reset_SCDE) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_SoCHW_Factory_Reset_SCDE) {
 
 //	SCDE_ReconstructSysCfgRomNoMirror();		// todo
 //	SCDE_ReconstructSysCfgRamNoMirror();		// reconstruct Sys-Cfg stored in ram (done by reboot)
@@ -2319,10 +2331,10 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // SoCHW_Factory_Reset_CAPI=[ ] -> Setzt die SoC-Hardware-Chip-API auf Werkseinstellung zurück 'factory reset'
   // SoCHW_Factory_Reset_CAPI=[ ] -> Set SoC-Hardware-Chip-API to state 'factory reset'
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_SoCHW_Factory_Reset_CAPI) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_SoCHW_Factory_Reset_CAPI) {
 
 	// restore SDK parameters (SDK-factory reset)
-	system_restore();
+//	system_restore();
 
 //	SCDE_ReconstructSysCfgRomNoMirror();		// todo
 //	SCDE_ReconstructSysCfgRamNoMirror();		// reconstruct Sys-Cfg stored in ram (done by reboot)
@@ -2333,7 +2345,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 //	SCDE_SDKInitialParameterSetup();
 
 	// fresh start
-	system_restart();
+//	system_restart();
 
   }
 
@@ -2342,16 +2354,16 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // SoCHW_Factory_Reset_CAPI=[ ] -> Setzt die SoC-Hardware-Chip-API auf Werkseinstellung zurück 'factory reset'
   // SoCHW_Factory_Reset_CAPI=[ ] -> Set SoC-Hardware-Chip-API to state 'factory reset'
 
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_SoCHW_Factory_Reset) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_SoCHW_Factory_Reset) {
 
 	// restore SDK parameters (SDK-factory reset)
-	system_restore();
+//	system_restore();
 
 	// initial setup / correction of the SDK parameters
 //	SCDE_SDKInitialParameterSetup();
 
 	// fresh start
-	system_restart();
+//	system_restart();
 
   }
 
@@ -2360,7 +2372,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // name=[a-zA-Z0-9_.] -> Setze einen neuen Feature Namen (char[31]) (0-x)
   // name=[a-zA-Z0-9_.] -> Set a new Feature Name (char[31]) (0-x)
 /*
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_Name) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_Name) {
 
   }
 */
@@ -2369,7 +2381,7 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // caps=[ ] -> Fragt nach den Fähigkeiten-Bits (0-x)
   // caps=[ ] -> Request for Capabilities-Bits (0-x)
 /*
-  if (parsedKVInput->keysFoundBF == (uint64_t) 1 << ESP32_DeVICE_Set_IK_caps) {
+  if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_caps) {
 
 	// mark affected readings for TX
 	affectedReadings |= parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_caps].affectedReadings;
@@ -2749,6 +2761,8 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
   // debugview all readings
  // affectedReadings = 0xffffffff;
 
+ printf ("AffectedReadings:%d", affectedReadings);
+
   // update the Readings according to 'affectedReadings' - if any ...
   if (affectedReadings) {
 
@@ -2787,10 +2801,10 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 		// create / update reading
 		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
-			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_RF_Channel].implementedKey)
-			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_RF_Channel].implementedKey
-			,parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_RF_Channel].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_RF_Channel].off);
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].off);
 	}
 
 // ------------------------------------------------------------------------------------------------- 
@@ -2800,10 +2814,10 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 		// create / update reading
 		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
-			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_Maximal_Connections].implementedKey)
-			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_Maximal_Connections].implementedKey
-			,parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_Maximal_Connections].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_Maximal_Connections].off);
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections].off);
 	}
 
 // ------------------------------------------------------------------------------------------------- 
@@ -2813,10 +2827,10 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
  		// create / update reading
 		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
-			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_Authentication_Method].implementedKey)
-			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_Authentication_Method].implementedKey
-			,parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_Authentication_Method].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_Authentication_Method].off);
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Authentication_Method].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Authentication_Method].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Authentication_Method].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Authentication_Method].off);
 	}
 
 // ------------------------------------------------------------------------------------------------- 
@@ -2852,10 +2866,10 @@ ESP32_DeVICE_ProcessKVInputArgs(ESP32_DeVICE_Definition_t *ESP32_DeVICE_Definiti
 
 		// create / update reading
 		SCDEFn->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition
-			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_IP_Adress].implementedKey)
-			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_R_WSAP_IP_Adress].implementedKey
-			,parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_IP_Adress].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_R_WSAP_IP_Adress].off);
+			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_IP_Adress].implementedKey)
+			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_IP_Adress].implementedKey
+			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_IP_Adress].len
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_IP_Adress].off);
 	}
 
 // -------------------------------------------------------------------------------------------------

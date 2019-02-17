@@ -174,57 +174,33 @@ static SCDEFn_t* SCDEFn;
  *  Data: 
  * --------------------------------------------------------------------------------------------------
  */
-ProvidedByModule_t Telnet_ProvidedByModule =
-  { // A-Z order
-
+ProvidedByModule_t Telnet_ProvidedByModule =   { // A-Z order
   "Telnet"				// Type-Name of module -> should be same name as libfilename.so !
   ,6					// size of Type-Name
 
   ,NULL					// Add
-
   ,NULL					// Attribute
-
   ,Telnet_Define			// Define
-
   ,NULL					// Delete
-
   ,NULL					// Except
-
   ,NULL					// Get
-
   ,NULL					// IdleCb
-
   ,Telnet_Initialize			// Initialize
-
   ,NULL					// Notify
-
   ,NULL					// Parse
-
   ,NULL					// Read
-
   ,NULL					// Ready
-
   ,NULL					// Rename
-
   ,Telnet_Set				// Set
-
   ,NULL					// Shutdown
-
   ,NULL					// State
-
   ,NULL					// Sub
-
   ,Telnet_Undefine			// Undefine
-
   ,Telnet_DirectRead			// DirectRead
-
   ,Telnet_DirectWrite			// DirectWrite
-
  // ,NULL				// FnProvided
-
   ,sizeof(Telnet_Definition_t)		// Size of modul specific definition structure (Common_Definition_t + X)
-
-  };
+};
 
 
 
@@ -238,7 +214,7 @@ ProvidedByModule_t Telnet_ProvidedByModule =
  */
 int 
 Telnet_Initialize(SCDERoot_t* SCDERootptr)
-  {
+{
 
   // make data root locally available
   SCDERoot = SCDERootptr;
@@ -254,8 +230,7 @@ Telnet_Initialize(SCDERoot_t* SCDERootptr)
 		  ,Telnet_ProvidedByModule.typeName);
 
   return 0;
-
-  }
+}
 
 
 
@@ -269,9 +244,7 @@ Telnet_Initialize(SCDERoot_t* SCDERootptr)
  */
 static char*
 eventToString(telnet_event_type_t type)
-
-  {
-
+{
   switch (type)
 
 	{
@@ -324,8 +297,7 @@ eventToString(telnet_event_type_t type)
 	}
 
   return "Unknown type";
-
-  }
+}
 
 
 
@@ -343,13 +315,13 @@ static void
 Telnet_LibtelnetEventHandler(telnet_t *thisTelnet,
 		telnet_event_t *event,
 		void *userData)
-  {
+{
 
   int rc;
 
-	# if SCDED_DBG >= 3
-	printf("|telnet event: %s>", eventToString(event->type));
-	#endif
+  # if SCDED_DBG >= 3
+  printf("|telnet event: %s>", eventToString(event->type));
+  #endif
 
 
   LOGD("telnet event: %s", eventToString(event->type));
@@ -361,6 +333,7 @@ Telnet_LibtelnetEventHandler(telnet_t *thisTelnet,
 	{
 
 // -----------------------------------------------------------------------
+
 /* TELNET_EV_SEND:
    This event is sent whenever libtelnet has generated data that must
    be sent over the wire to the remove end.  Generally that means
@@ -390,14 +363,15 @@ Telnet_LibtelnetEventHandler(telnet_t *thisTelnet,
 			,event->data.size);
 
 		// report error
-		if (rc < 0)
-			{
+		if (rc < 0) {
+
 			printf("free / err: %d", rc);
-			}
+		}
 
 		break;
 
 // -----------------------------------------------------------------------
+
 /* TELNET_EV_DATA:
    The DATA event is triggered whenever regular data (not part of any
    special TELNET command) is received.  For a client, this will be
@@ -412,8 +386,12 @@ Telnet_LibtelnetEventHandler(telnet_t *thisTelnet,
    will be received in whole lines.  If you wish to process data
    a line at a time, you are responsible for buffering the data and
    checking for line terminators yourself!*/
+
 	case TELNET_EV_DATA:
 {
+
+// to do: Line Buffering
+
 		# if SCDED_DBG >= 5
  		 SCDEFn->HexDumpOutFn ("\nTelnet received:"
 			,(char *) event->data.buffer
@@ -436,23 +414,22 @@ Telnet_LibtelnetEventHandler(telnet_t *thisTelnet,
 			strTextMultiple_t *retMsg =
 				STAILQ_FIRST(&headRetMsgMultipleFromFn);
 
-//			printf("SendingRetMsg: %.*s\n"
-//				,retMsg->strTextLen
-//				,retMsg->strText);
+			// contains a msg?
+			if (retMsg->strTextLen) {
 
-			// and send it via telnet
-			telnet_send(conn->tnHandle
-				,(char *) retMsg->strText
-				,retMsg->strTextLen);
+				// and send it via telnet
+				telnet_send(conn->tnHandle
+					,(char *) retMsg->strText
+					,retMsg->strTextLen);
 
-//			// add \r\n
-//			telnet_send(conn->tnHandle
-//				,"\r\n"
-//				,2);
+				// add \r\n (CR+LF)
+				telnet_send(conn->tnHandle
+					,"\r\n"
+					,2);
+			}
 
 			// done, remove this entry
-			STAILQ_REMOVE_HEAD(&headRetMsgMultipleFromFn, entries);
-//			STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
+			STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
 
 			// free the msg-string
 			free(retMsg->strText);
@@ -460,17 +437,13 @@ Telnet_LibtelnetEventHandler(telnet_t *thisTelnet,
 			// and the strTextMultiple_t
 			free(retMsg);
 		}
-
-		// add \r\n
-		telnet_send(conn->tnHandle
-			,"\r\n"
-			,2);
 }
 		break;
 
 
-/*
-TELNET_EV_IAC:
+
+// -----------------------------------------------------------------------
+/* TELNET_EV_IAC:
    The IAC event is triggered whenever a simple IAC command is
    received, such as the IAC EOR (end of record, also called go ahead
    or GA) command.
@@ -478,15 +451,17 @@ TELNET_EV_IAC:
    The command received is in the event->iac.cmd value.
 
    The necessary processing depends on the specific commands; see
-   the TELNET RFC for more information.
-*/ 
+   the TELNET RFC for more information.*/ 
+
 	case TELNET_EV_IAC:
 
 	break;
 
-/*
- TELNET_EV_WILL:
- TELNET_EV_DO:
+
+
+// -----------------------------------------------------------------------
+/* TELNET_EV_WILL:
+   TELNET_EV_DO:
    The WILL and DO events are sent when a TELNET negotiation command
    of the same name is received.
 
@@ -507,8 +482,8 @@ TELNET_EV_IAC:
     http://www.faqs.org/rfcs/rfc1143.html
 
    Note that in PROXY mode libtelnet will do no processing of its
-   own for you.
-*/
+   own for you.*/
+
 	case TELNET_EV_WILL:
 
 	break;
@@ -517,9 +492,11 @@ TELNET_EV_IAC:
 
 	break;
 
-/*
- TELNET_EV_WONT:
- TELNET_EV_DONT:
+
+
+// -----------------------------------------------------------------------
+/* TELNET_EV_WONT:
+   TELNET_EV_DONT:
    The WONT and DONT events are sent when the remote end of the
    connection wishes to disable an option, when they are refusing to
    a support an option that you have asked for, or in confirmation of
@@ -541,9 +518,8 @@ TELNET_EV_IAC:
    event->neg.telopt field.
 
    Note that in PROXY mode libtelnet will do no processing of its
-   own for you.
+   own for you.*/
 
-*/
 	case TELNET_EV_WONT:
 
 	break;
@@ -552,9 +528,10 @@ TELNET_EV_IAC:
 
 	break;
 
-/*
 
- TELNET_EV_SUBNEGOTIATION:
+
+// -----------------------------------------------------------------------
+/* TELNET_EV_SUBNEGOTIATION:
    Triggered whenever a TELNET sub-negotiation has been received.
    Sub-negotiations include the NAWS option for communicating
    terminal size to a server, the NEW-ENVIRON and TTYPE options for
@@ -572,22 +549,23 @@ TELNET_EV_IAC:
    defined in various TELNET RFCs and other informal specifications.
    A subnegotiation should never be sent unless the specific option
    has been enabled through the use of the telnet negotiation
-   feature.
+   feature.*/
 
-*/
 	case TELNET_EV_SUBNEGOTIATION:
 
 	break;
 
-/*
 
-   TTYPE/ENVIRON/NEW-ENVIRON/MSSP/ZMP SUPPORT:
+
+// -----------------------------------------------------------------------
+/* TTYPE/ENVIRON/NEW-ENVIRON/MSSP/ZMP SUPPORT:
    libtelnet parses these subnegotiation commands.  A special
    event will be sent for each, after the SUBNEGOTIATION event is
    sent.  Except in special circumstances, the SUBNEGOTIATION event
    should be ignored for these options and the special events should
    be handled explicitly.
 
+// -----------------------------------------------------------------------
  TELNET_EV_COMPRESS:
    The COMPRESS event notifies the app that COMPRESS2/MCCP2
    compression has begun or ended.  Only servers can send compressed
@@ -596,18 +574,21 @@ TELNET_EV_IAC:
    The event->command value will be 1 if compression has started and
    will be 0 if compression has ended.
 
+// -----------------------------------------------------------------------
  TELNET_EV_ZMP:
    The event->zmp.argc field is the number of ZMP parameters, including
    the command name, that have been received.  The event->zmp.argv
    field is an array of strings, one for each ZMP parameter.  The
    command name will be in event->zmp.argv[0].
 
+// -----------------------------------------------------------------------
  TELNET_EV_TTYPE:
    The event->ttype.cmd field will be either TELNET_TTYPE_SEND,
    TELNET_TTYPE_IS, TELNET_TTYPE_INFO.
 
    The actual terminal type will be in event->ttype.name.
 
+// -----------------------------------------------------------------------
  TELNET_EV_ENVIRON:
    The event->environ.cmd field will be either TELNET_ENVIRON_IS,
    TELNET_ENVIRON_SEND, or TELNET_ENVIRON_INFO.
@@ -629,6 +610,7 @@ TELNET_EV_IAC:
    NEW-ENVIRON.  Data using escaped bytes will not be parsed
    correctly.
 
+// -----------------------------------------------------------------------
  TELNET_EV_MSSP:
    The event->mssp.values field is an array of telnet_environ_t
    structures.  The cmd field in each entry will have an
@@ -640,6 +622,7 @@ TELNET_EV_IAC:
    The number of entries in the event->mssp.values array is
    stored in event->mssp.count.
  
+// -----------------------------------------------------------------------
  TELNET_EV_WARNING:
    The WARNING event is sent whenever something has gone wrong inside
    of libtelnet (possibly due to malformed data sent by the other
@@ -650,8 +633,9 @@ TELNET_EV_IAC:
    The event->error.msg field will contain a NUL terminated string
    explaining the error.*/
 
-// -----------------------------------------------------------------------
 
+
+// -----------------------------------------------------------------------
 /* TELNET_EV_ERROR:
    Similar to the WARNING event, the ERROR event is sent whenever
    something has gone wrong.  ERROR events are non-recoverable,
@@ -662,6 +646,7 @@ TELNET_EV_IAC:
 
    The event->error.msg field will contain a NUL terminated string
    explaining the error.*/
+
 	case TELNET_EV_ERROR:
 
 		sprintf("TELNET error: %s"
@@ -676,8 +661,7 @@ TELNET_EV_IAC:
 		break;
 
 	}
-
-  }
+}
 
 
 

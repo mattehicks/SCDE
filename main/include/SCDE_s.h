@@ -149,7 +149,8 @@ struct kvParseImplementedKeys_s {
   const char *implementedKey;
 };
 
-typedef struct parsedKVInputArgs_s parsedKVInputArgs_t; // holds the parsed result in allocated mem
+ // holds the parsed result in allocated mem
+typedef struct parsedKVInputArgs_s parsedKVInputArgs_t;
 
 // Result structure for http_parser_parse_url().
 // Callers should index into field_data[] with UF_* values if field_set
@@ -157,24 +158,16 @@ typedef struct parsedKVInputArgs_s parsedKVInputArgs_t; // holds the parsed resu
 // because we probably have padding left over), we convert any port to
 // a uint32_t.
 struct parsedKVInputArgs_s {
-
   uint64_t keysFoundBF;		// Bit-Field of found keys (1 << XX_IK_*)
-
   uint64_t requiredKVBF;	// Bit-Field of keys that are required for a successful parse
-
   uint64_t forbiddenKVBF;	// Bit-Field of keys that are forbidden for a successful parse
-
   uint32_t affectedReadingsBF;	// Bit-Field of affected readings
 
   struct keyData_s {
-
 	uint16_t off;		// Offset into buffer in which value-text starts
-
 	uint16_t len;		// Length of value-text in buffer
-
 	uint32_t affectedReadings;
-
-	} keyData_t[];		// XX_IK_MAX
+  } keyData_t[];		// XX_IK_MAX
 };
 
 // Hepler routine that parses Key=Value(@) input arguments into an allocated array
@@ -535,7 +528,7 @@ struct xReadingSLTQE_s {
  * SLTQ can be used for an FIFO queue by adding entries at the tail and fetching entries from the head
  * SLTQ is inefficient when removing arbitrary elements
  */
-STAILQ_HEAD(readingsSLTQH_s, xReadingsSLTQE_s);
+STAILQ_HEAD(readingsSLTQH_s, xReadingSLTQE_s);
 
 
 
