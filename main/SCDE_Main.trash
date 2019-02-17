@@ -875,9 +875,283 @@ SelectQueryTask(void *pvParameters)
 
 
 
+#include "apps/sntp/sntp.h"
+
+static void 
+Initialize_SNTP(void)
+{
+  ESP_LOGI(TAG, "Initializing SNTP");
+  sntp_setoperatingmode(SNTP_OPMODE_POLL);
+  sntp_setservername(0, "pool.ntp.org");
+  sntp_init();
+}
 
 
 
+
+
+static void
+Obtain_Time(void)
+{
+  Initialize_SNTP();
+
+  // wait for time to be set
+  time_t now = 0;
+
+  struct tm timeinfo = { 0 };
+
+  int retry = 0;
+
+  const int retry_count = 10;
+
+  while (timeinfo.tm_year < (2016 - 1900) && ++retry < retry_count) {
+
+ 		ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
+
+		vTaskDelay(2000 / portTICK_PERIOD_MS);
+
+ 		time(&now);
+
+		localtime_r(&now, &timeinfo);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+ * --------------------------------------------------------------------------------------------------
+ *  FName: ESP32_WiFiEventHandler
+ *  Desc: Wifi event handler
+ *  Para: System_Event_t *event -> struct with incoming event information for wifi
+ *  Rets: -/-
+ * --------------------------------------------------------------------------------------------------
+ */
+static esp_err_t
+ESP32_WiFiEventHandler(void *ctx, system_event_t *event)
+  {
+
+   switch (event->event_id)
+
+	{
+
+//--------------------------------------------------------------------------------------------------
+
+	// ESP32 WiFi ready
+	case SYSTEM_EVENT_WIFI_READY:
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	//ESP32 finish scanning AP
+	case SYSTEM_EVENT_SCAN_DONE:
+
+	// struct contains:
+  	// uint32_t status;          /**< status of scanning APs */
+  	// uint8_t  number;
+  	// uint8_t  scan_id;
+	// system_event_sta_scan_done_t;
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	//ESP32 station start
+	case SYSTEM_EVENT_STA_START:
+
+	// station started - connect to station
+	esp_wifi_connect();
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	//ESP32 station stop
+	case SYSTEM_EVENT_STA_STOP:
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	//ESP32 station connected to AP
+	case SYSTEM_EVENT_STA_CONNECTED:
+
+	// struct contains:
+   	// uint8_t ssid[32];         /**< SSID of connected AP */
+   	// uint8_t ssid_len;         /**< SSID length of connected AP */
+   	// uint8_t bssid[6];         /**< BSSID of connected AP*/
+   	// uint8_t channel;          /**< channel of connected AP*/
+   	// wifi_auth_mode_t authmode;
+	// system_event_sta_connected_t;
+
+	Log3( (const uint8_t*)"xxx"
+		, sizeof("xxx")
+		,1
+		,"Devices station connected to an access-point. SSID:%s, channel:%d"
+		,event->event_info.connected.ssid
+		,event->event_info.connected.channel);
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	//ESP32 station disconnected from AP
+	case SYSTEM_EVENT_STA_DISCONNECTED:
+
+	// struct contains:
+   	// uint8_t ssid[32];         /**< SSID of disconnected AP */
+   	// uint8_t ssid_len;         /**< SSID length of disconnected AP */
+   	// uint8_t bssid[6];         /**< BSSID of disconnected AP */
+   	// uint8_t reason;           /**< reason of disconnection */
+	// system_event_sta_disconnected_t;
+
+	// This is a workaround as ESP32 WiFi libs don't currently auto-reassociate
+	esp_wifi_connect();
+	xEventGroupClearBits(wifi_event_group, CONNECTED_BIT);
+
+	Log3( (const uint8_t*)"xxx"
+		, sizeof("xxx")
+		,1
+		,"Devices station disconnected from an access-point. SSID:%s, reason:%d"
+		,event->event_info.disconnected.ssid
+		,event->event_info.disconnected.reason);
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	//the auth mode of AP connected by ESP32 station changed
+	case SYSTEM_EVENT_STA_AUTHMODE_CHANGE:
+
+	// struct contains:
+   	// wifi_auth_mode_t old_mode;         /**< the old auth mode of AP */
+    	// wifi_auth_mode_t new_mode;         /**< the new auth mode of AP */
+	// system_event_sta_authmode_change_t;
+
+	Log3( (const uint8_t*)"xxx"
+		, sizeof("xxx")
+		,1
+		,"Devices station - Authmode changed from %d to %d",
+		event->event_info.auth_change.old_mode,
+		event->event_info.auth_change.new_mode);
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	//ESP32 station got IP from connected AP
+	case SYSTEM_EVENT_STA_GOT_IP:
+
+	// struct contains:
+    	// tcpip_adapter_ip_info_t ip_info;
+	// system_event_sta_got_ip_t;
+
+	// ??
+	xEventGroupSetBits(wifi_event_group, CONNECTED_BIT);
+
+	Log3( (const uint8_t*)"xxx"
+		, sizeof("xxx")
+		,1
+		,"Devices station got IP from access point:"IPSTR ", mask:"IPSTR", gw:"IPSTR,
+		IP2STR(&event->event_info.got_ip.ip_info.ip),
+		IP2STR(&event->event_info.got_ip.ip_info.netmask),
+		IP2STR(&event->event_info.got_ip.ip_info.gw));
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	//ESP32 soft-AP start
+	case SYSTEM_EVENT_AP_START:
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	//ESP32 soft-AP stop
+	case SYSTEM_EVENT_AP_STOP:
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	//a station connected to ESP32 soft-AP
+	case SYSTEM_EVENT_AP_STACONNECTED:
+
+	// struct contains:
+ 	// uint8_t mac[6];           /**< MAC address of the station connected to ESP32 soft-AP */
+ 	// uint8_t aid;              /**< the aid that ESP32 soft-AP gives to the station connected to  */
+	// system_event_ap_staconnected_t;
+	
+	Log3( (const uint8_t*)"xxx"
+		, sizeof("xxx")
+		,1
+		,"I:WSAP Device conn.: "MACSTR ", AID = %d",
+		MAC2STR(event->event_info.sta_connected.mac),
+		event->event_info.sta_connected.aid);
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	// a station disconnected from ESP32 soft-AP
+	case SYSTEM_EVENT_AP_STADISCONNECTED:
+
+	// struct contains:
+   	// uint8_t mac[6];           /**< MAC address of the station disconnects to ESP32 soft-AP */
+   	// uint8_t aid;              /**< the aid that ESP32 soft-AP gave to the station disconnects to  */
+	// system_event_ap_stadisconnected_t;
+
+	Log3( (const uint8_t*)"xxx"
+		, sizeof("xxx")
+		,1
+		,"WSAP - Device disconnected: "MACSTR ", AID = %d",
+		MAC2STR(event->event_info.sta_disconnected.mac),
+		event->event_info.sta_disconnected.aid);
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	// Receive probe request packet in soft-AP interface
+	case SYSTEM_EVENT_AP_PROBEREQRECVED:
+
+	// struct contains:
+ 	// int rssi;                 /**< Received probe request signal strength */
+ 	// uint8_t mac[6];           /**< MAC address of the station which send probe request */
+	// system_event_ap_probe_req_rx_t;
+
+	Log3( (const uint8_t*)"xxx"
+		, sizeof("xxx")
+		,1
+		,"WSAP - ProbeReq.Rcved:%d"
+		,event->event_info.ap_probereqrecved.rssi);
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	default:
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	}
+
+  return ESP_OK;
+
+  }
 
 
 
@@ -906,6 +1180,58 @@ SelectQueryTask(void *pvParameters)
 
 
 /*
+ * --------------------------------------------------------------------------------------------------
+ *  FName: ESP32_WiFiInit
+ *  Desc: Init wifi
+ *  Para: -/-
+ *  Rets: -/-
+ * --------------------------------------------------------------------------------------------------
+ */
+static void 
+ESP32_WiFiInit(void) {
+
+  tcpip_adapter_init();
+
+  wifi_event_group = xEventGroupCreate();
+
+  // install wifi event handler
+  ESP_ERROR_CHECK(esp_event_loop_init(ESP32_WiFiEventHandler, NULL) );
+
+  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+
+  ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
+
+  ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM) );
+
+  ESP_ERROR_CHECK( esp_wifi_set_mode(WIFI_MODE_STA) );
+
+  wifi_config_t sta_config = {
+        .sta = {
+            .ssid = "SF4 AP",
+            .password = "pcmcia91",
+            .bssid_set = false
+        }
+  };
+
+  ESP_ERROR_CHECK( esp_wifi_set_config(WIFI_IF_STA, &sta_config) );
+
+  ESP_ERROR_CHECK( esp_wifi_start() );
+
+  ESP_ERROR_CHECK( esp_wifi_connect() );
+
+}
+
+
+
+
+
+//esp_err_t event_handler(void *ctx, system_event_t *event)
+//{
+//    return ESP_OK;
+//}
+
+
+/*
  *  Main entry point for ESP32 into the application.
  */
 int
@@ -915,27 +1241,37 @@ app_main(void)
 
  // LOGD("Free IRAM: %d",  xPortGetFreeHeapSizeTagged(MALLOC_CAP_32BIT));
 
-//--------------------------------------------------------------------------------------------------
-
   //Initialize NVS
   esp_err_t ret = nvs_flash_init();
-
-  // Error ? -> init nvs
   if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-
 	ESP_ERROR_CHECK(nvs_flash_erase());
-
 	ret = nvs_flash_init();
   }
 
   ESP_ERROR_CHECK(ret);
+
+
+//nvs_flash_init();
+//system_init();
+
+//x  LOGD("WiFi init");
+//x  ESP32_WiFiInit();
+
+
+
+//  ESP_LOGI(TAG, "... hello\r\n");
+
+
+  // mount the SPIFFS, make VFS useable ...
+//  ESP32_Platform_MountSPIFFS();
+
+//  ESP_LOGI(TAG, "... VFS accessible\r\n");
 
 //--------------------------------------------------------------------------------------------------
 
   // init the SCDE-Engine (ROOT data)
   InitSCDERoot();
 
-  // Now we can use the LogFn, say hello
   Log3( (const uint8_t*)"test!!!"
   		,4 //chck
 		,1
@@ -943,7 +1279,20 @@ app_main(void)
 		,3
 		,TAG);
 
+
   // --------------------------------------------------------------------------------------------------
+/*x
+  // wait till wifi is connected
+  xEventGroupWaitBits(wifi_event_group
+		  , CONNECTED_BIT
+		  ,false
+		  ,true
+		  ,portMAX_DELAY);
+
+
+  // sync time via SNTP
+  Obtain_Time();
+*/
 
 
 
@@ -962,6 +1311,26 @@ app_main(void)
 
 
 
+
+/*
+
+  time_t now;
+      struct tm timeinfo;
+      time(&now);
+      localtime_r(&now, &timeinfo);
+
+      char strftime_buf[64];
+
+      // Set timezone to Eastern Standard Time and print local time
+         setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
+         tzset();
+         localtime_r(&now, &timeinfo);
+         strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+         LOGD("New York is: %s"
+        	,strftime_buf);
+*/
+
+ 
 
 
 
@@ -982,59 +1351,118 @@ app_main(void)
 
 
 
-
-
-
-// -------------------------------------------------------------------------------------------------
-// initialize SPIFFS
-
   // initialize SPIFFS at path ??? 
-  ESP_LOGI(TAG, "Initializing SPIFFS");
+   ESP_LOGI(TAG, "Initializing SPIFFS");
     
   esp_vfs_spiffs_conf_t conf = {
- 	.base_path = "/spiffs",
-	.partition_label = NULL,
-	.max_files = 5,
-	.format_if_mount_failed = true
+    .base_path = "/spiffs",
+    .partition_label = NULL,
+    .max_files = 5,
+    .format_if_mount_failed = true
   };
 
   // register SPIFFS
   //esp_err_t ret = esp_vfs_spiffs_register(&conf);
   ret = esp_vfs_spiffs_register(&conf);
   if (ret != ESP_OK) {
-	if (ret == ESP_FAIL) {
-
-		ESP_LOGE(TAG, "Failed to mount or format filesystem");
-
-	} else if (ret == ESP_ERR_NOT_FOUND) {
-
-		ESP_LOGE(TAG, "Failed to find SPIFFS partition");
-
-	} else {
-
-		ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
-
-	}
-
-	return;
+    if (ret == ESP_FAIL) {
+      ESP_LOGE(TAG, "Failed to mount or format filesystem");
+    } else if (ret == ESP_ERR_NOT_FOUND) {
+      ESP_LOGE(TAG, "Failed to find SPIFFS partition");
+    } else {
+      ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
+    }
+    return;
   }
 
   // get SPIFFS infos
   size_t total = 0, used = 0;
-
   ret = esp_spiffs_info(NULL, &total, &used);
-
   if (ret != ESP_OK) {
-
-	ESP_LOGE(TAG, "Failed to get SPIFFS partition information (%s)", esp_err_to_name(ret));
+    ESP_LOGE(TAG, "Failed to get SPIFFS partition information (%s)", esp_err_to_name(ret));
   } else {
-
-  ESP_LOGI(TAG, "Partition size: total: %d, used: %d", total, used);
-
+    ESP_LOGI(TAG, "Partition size: total: %d, used: %d", total, used);
   }
 
+
+
+
+
+
+
+
+/*
+
+   // Use POSIX and C standard library functions to work with files.
+    // First create a file.
+    ESP_LOGI(TAG, "Opening file");
+    FILE* f = fopen("/spiffs/hello.txt", "w");
+    if (f == NULL) {
+        ESP_LOGE(TAG, "Failed to open file for writing");
+        return;
+    }
+    fprintf(f, "Hello World!\n");
+    fclose(f);
+    ESP_LOGI(TAG, "File written");
+
+    // Check if destination file exists before renaming
+    struct stat st;
+    if (stat("/spiffs/foo.txt", &st) == 0) {
+        // Delete it if it exists
+        unlink("/spiffs/foo.txt");
+    }
+
+    // Rename original file
+    ESP_LOGI(TAG, "Renaming file");
+    if (rename("/spiffs/hello.txt", "/spiffs/foo.txt") != 0) {
+        ESP_LOGE(TAG, "Rename failed");
+        return;
+    }
+
+    // Open renamed file for reading
+    ESP_LOGI(TAG, "Reading file");
+    f = fopen("/spiffs/foo.txt", "r");
+    if (f == NULL) {
+        ESP_LOGE(TAG, "Failed to open file for reading");
+        return;
+    }
+    char line[64];
+    fgets(line, sizeof(line), f);
+    fclose(f);
+    // strip newline
+    char* pos = strchr(line, '\n');
+    if (pos) {
+        *pos = '\0';
+    }
+    ESP_LOGI(TAG, "Read from file: '%s'", line);
+
+
+
+
+
+   // Open renamed file for reading
+    ESP_LOGI(TAG, "Reading Makerfile");
+    f = fopen("/spiffs/makerfile.cfg", "r");
+    if (f == NULL) {
+        ESP_LOGE(TAG, "Failed to open file for reading");
+        return;
+    }
+    char line2[64];
+    fgets(line2, sizeof(line2), f);
+    fclose(f);
+    // strip newline
+    char* pos2 = strchr(line2, '\n');
+    if (pos2) {
+        *pos2 = '\0';
+    }
+    ESP_LOGI(TAG, "Read from Makerfile: '%s'", line2);
+
+*/
+
+
 // -------------------------------------------------------------------------------------------------
-// embedd commands A-Z
+
+  // embedd commands A-Z
 
   // Activate Add as SCDE built-in Command
   extern providedByCommand_t Add_ProvidedByCommand;
@@ -1097,15 +1525,16 @@ app_main(void)
   CommandActivateCommand(&Sub_ProvidedByCommand);
 
 // -------------------------------------------------------------------------------------------------
-// embedd modules A-Z (we have no file system to load)
 
-  // --- the required module
+  // embedd modules A-Z (we have no file system to load)
+
+// --- the required module
 
   // Activate Global as SCDE built-in Module
   extern ProvidedByModule_t Global_ProvidedByModule;
   CommandActivateModule(&Global_ProvidedByModule);
 
-  // --- now the optional modules
+// --- now the optional modules
 
   // Activate ESP32_BH1750 as SCDE built-in Module
   extern ProvidedByModule_t ESP32_BH1750_ProvidedByModule;
@@ -1176,6 +1605,208 @@ app_main(void)
 		free(retMsg);
 	}
   }
+
+
+
+
+
+
+
+//--------------------------------------------------------------------------------------------------
+/*
+  Log3( (const uint8_t*)"xxx"
+  		, sizeof("xxx")
+		,1
+		,"Commands loaded. Continue with Defines\n");
+*/
+
+
+/*  // for Fn response msg
+  strTextMultiple_t retMsg;
+  retMsg.strText = NULL;*/
+
+/*
+  // start the internal WebIF (built in module)
+  // define Name:MyTelnet Module:Telnet -> Args: Port:23
+#define CMD_4_TELNET "define MyTelnet Telnet 23"
+ ret = SCDEFn.CommandDefineCommandFn((const uint8_t*) CMD_4_TELNET, 18);//sizeof(CMD_4_TELNET));
+ if (ret)
+ 	 {
+	 Log3( (const uint8_t*)"xxx"
+			 ,sizeof("xxx")
+			 ,1
+			 ,"result is:%s\n"
+			 ,ret);
+	 free(ret);
+ 	 }
+*/
+
+
+
+//--------------------------------------------------------------------------------------------------
+/*
+  // start the internal Telnet (built in module)
+  // define Name:MyTelnet Module:Telnet -> Args: Port:23
+#define CMD_4_TELNET "define MyTelnet Telnet 23"
+  headRetMsgMultiple = AnalyzeCommand((const uint8_t*) CMD_4_TELNET, 25);//sizeof(CMD_4_TELNET));
+
+  // retMsgMultiple stailq filled ?
+  if (!STAILQ_EMPTY(&headRetMsgMultiple)) {
+
+	// for the retMsg elements
+	strTextMultiple_t *retMsg;
+
+	// get the entries till empty
+	while (!STAILQ_EMPTY(&headRetMsgMultiple)) {
+
+		retMsg = STAILQ_FIRST(&headRetMsgMultiple);
+
+		Log3( (const uint8_t*)"xxx"
+			 ,sizeof("xxx")
+			 ,1
+			 ,"result is:%.*s\n"
+			 ,retMsg->strTextLen
+			,retMsg->strText);
+
+		// done, remove this entry
+		STAILQ_REMOVE(&headRetMsgMultiple, retMsg, strTextMultiple_s, entries);
+
+		// free the msg-string
+		free(retMsg->strText);
+
+		// and the strTextMultiple_t
+		free(retMsg);
+	}
+  }
+
+ vTaskDelay(1000 / portTICK_PERIOD_MS);
+*/
+//--------------------------------------------------------------------------------------------------
+
+
+
+
+//--------------------------------------------------------------------------------------------------
+
+  // start the internal WebIF (built in module)
+  // define Name:WebIF Module:WebIF -> Args: Port:80
+
+
+//  char *WebIfDef = "MyWebIF WebIF 80";
+//  char* Args = malloc (strlen(WebIfDef)+1);
+//  strcpy(Args,WebIfDef);
+//  SCDE_memcpy_plus
+//  printf("Dcheck1:%p\n"
+//   		,Args);
+
+//spz  CommandDefine("MyWebIF WebIF 80"); // goes to external flash
+   // start the internal Telnet (built in module)
+  // define Name:MyTelnet Module:Telnet -> Args: Port:23
+/*
+#define CMD_4_WEBIF "define MyWebIF WebIf 80"
+ headRetMsgMultiple = AnalyzeCommand((const uint8_t*) CMD_4_WEBIF, 23);//sizeof(CMD_4_TELNET));
+
+  // retMsgMultiple stailq filled ?
+  if (!STAILQ_EMPTY(&headRetMsgMultiple)) {
+
+	// for the retMsg elements
+	strTextMultiple_t *retMsg;
+
+	// get the entries till empty
+	while (!STAILQ_EMPTY(&headRetMsgMultiple)) {
+
+		retMsg = STAILQ_FIRST(&headRetMsgMultiple);
+
+		Log3( (const uint8_t*)"xxx"
+			 ,sizeof("xxx")
+			 ,1
+			 ,"result is:%.*s\n"
+			 ,retMsg->strTextLen
+			,retMsg->strText);
+
+		// done, remove this entry
+		STAILQ_REMOVE(&headRetMsgMultiple, retMsg, strTextMultiple_s, entries);
+
+		// free the msg-string
+		free(retMsg->strText);
+
+		// and the strTextMultiple_t
+		free(retMsg);
+	}
+  }
+
+ vTaskDelay(1000 / portTICK_PERIOD_MS);
+*/
+//--------------------------------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------------------------------
+/*
+#define CMD_4_ESP32CONTROL "define ESP32Ctrl esp32control"
+  headRetMsgMultiple = AnalyzeCommand((const uint8_t*) CMD_4_ESP32CONTROL, 29);//sizeof(CMD_4_TELNET));
+
+  // retMsgMultiple stailq filled ?
+  if (!STAILQ_EMPTY(&headRetMsgMultiple)) {
+
+	// for the retMsg elements
+	strTextMultiple_t *retMsg;
+
+	// get the entries till empty
+	while (!STAILQ_EMPTY(&headRetMsgMultiple)) {
+
+		retMsg = STAILQ_FIRST(&headRetMsgMultiple);
+
+		Log3( (const uint8_t*)"xxx"
+			 ,sizeof("xxx")
+			 ,1
+			 ,"result is:%.*s\n"
+			 ,retMsg->strTextLen
+			,retMsg->strText);
+
+		// done, remove this entry
+		STAILQ_REMOVE(&headRetMsgMultiple, retMsg, strTextMultiple_s, entries);
+
+		// free the msg-string
+		free(retMsg->strText);
+
+		// and the strTextMultiple_t
+		free(retMsg);
+	}
+  }
+
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
+*/
+//--------------------------------------------------------------------------------------------------
+
+
+
+ /*   char *WebIfDef = "MyWebIF";
+    char* Args = malloc (25);
+  //  strcpy(Args,WebIfDef);
+    SCDE_memcpy_plus(Args,WebIfDef,25);
+  //  printf("Dcheck1:%p\n"
+  //   		,Args);
+    CommandUndefine(Args); // goes to external flash*/
+
+
+/*spz
+  Log3("main?", 1, "calling a set fn for test!\n");
+  CommandSet("MyWebIF hellotest"); // goes to external flash
+
+  Log3("main?", 1, "calling a undefine fn for test!\n");
+  CommandUndefine("MyWebIF"); // goes to external flash
+
+  Log3("main?", 1, "wtests finnished\n");
+*/
+/*  char* ccc;
+  int xyz = asprintf(&ccc, "xxx%d",5);*/
+
+//  static const char *TAG = "example";
+//  ESP_LOGI(TAG, "... allocated socket\r\n");
+
+
+
+
 
 //--------------------------------------------------------------------------------------------------
 

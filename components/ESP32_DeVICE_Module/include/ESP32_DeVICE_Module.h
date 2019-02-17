@@ -47,6 +47,11 @@ xMultipleStringSLTQE_t* ESP32_DeVICE_State(Common_Definition_t *Common_Definitio
 
 strTextMultiple_t* ESP32_DeVICE_Undefine(Common_Definition_t* Common_Definition);
 
+static esp_err_t ESP32_DeVICE_WiFiEventHandler(void *ctx, system_event_t *event);
+
+static void Initialize_SNTP(void);
+
+static void Obtain_Time(void);
 
 
 

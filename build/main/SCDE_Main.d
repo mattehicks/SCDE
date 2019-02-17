@@ -167,8 +167,6 @@ SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
  /home/maikschulze/esp/SCDE/main/include/scde_task.h \
  /home/maikschulze/esp/esp-idf/components/heap/include/esp_heap_alloc_caps.h \
  /home/maikschulze/esp/SCDE/main/include/logging.h \
- /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/apps/sntp/sntp.h \
- /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/apps/sntp/sntp_opts.h \
  /home/maikschulze/esp/esp-idf/components/spiffs/include/esp_spiffs.h
 
 /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h:
@@ -506,10 +504,6 @@ SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
 /home/maikschulze/esp/esp-idf/components/heap/include/esp_heap_alloc_caps.h:
 
 /home/maikschulze/esp/SCDE/main/include/logging.h:
-
-/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/apps/sntp/sntp.h:
-
-/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/apps/sntp/sntp_opts.h:
 
 /home/maikschulze/esp/esp-idf/components/spiffs/include/esp_spiffs.h:
 /home/maikschulze/esp/SCDE/main/./SCDE_Main.c:

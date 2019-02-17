@@ -47,6 +47,8 @@ define xyz
 
 #include "SCDE_Main.h"
 
+#include "freertos/event_groups.h"
+
 
 
 // -------------------------------------------------------------------------------------------------
@@ -64,6 +66,14 @@ static SCDERoot_t* SCDERoot;
 
 // make locally available from data-root: the SCDEFn (Functions / callbacks) for operation
 static SCDEFn_t* SCDEFn;
+
+// FreeRTOS event group to signal when we are connected & ready to make a request
+static EventGroupHandle_t wifi_event_group;
+
+/* The event group allows multiple bits for each event,
+ but we only care about one event - are we connected
+ to the AP with an IP? */
+static const int CONNECTED_BIT = BIT0;
 
 // -------------------------------------------------------------------------------------------------
 
@@ -774,7 +784,8 @@ ESP32_DeVICE_Attribute(Common_Definition_t* Common_Definition
 /**
  * -------------------------------------------------------------------------------------------------
  *  FName: ESP32_DeVICE_Define
- *  Desc: Finalizes the defines a new "device" of 'ESP32Control' type. Contains devicespecific init code.
+ *  Desc: Finalizes the definition of a new "device" of 'ESP32Control' type.
+ *        Contains devicespecific init code.
  *  Info: 
  *  Para: Common_Definition_t *Common_Definition -> prefilled ESP32Control Definition
  *        char *Definition -> the last part of the CommandDefine arg* 
@@ -798,7 +809,8 @@ ESP32_DeVICE_Define(Common_Definition_t *Common_Definition)
   SCDEFn->Log3Fn(Common_Definition->name
 	,Common_Definition->nameLen
 	,5
-	,"Executing DefineFn of Module '%.*s' to continue creation of Definition '%.*s' with args '%.*s'."
+	,"Executing DefineFn of Module '%.*s' to continue creation of Definition '%.*s' "
+	 "with args '%.*s'."
 	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
 	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeName
 	,ESP32_DeVICE_Definition->common.nameLen
@@ -825,6 +837,72 @@ ESP32_DeVICE_Define(Common_Definition_t *Common_Definition)
 
 	return retMsg;
   }
+
+// -------------------------------------------------------------------------------------------
+
+
+  // s1.1: The main task calls tcpip_adapter_init() to create an LwIP core task and 
+  //       initialize LwIP-related work.
+  tcpip_adapter_init();
+
+
+  // s1.2: The main task calls esp_event_loop_init() to create a system Event task and 
+  //       initialize an application event’s callback function. In the scenario above,
+  //       the application event’s callback function does nothing but relaying the event
+  //       to the application task.
+  wifi_event_group = xEventGroupCreate();
+
+  // install wifi event handler
+  ESP_ERROR_CHECK(esp_event_loop_init(ESP32_DeVICE_WiFiEventHandler, NULL) );
+
+
+  // s1.3: The main task calls esp_wifi_init() to create the Wi-Fi driver task
+  // and initialize the Wi-Fi driver.
+   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+
+   ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
+
+
+
+
+
+
+  ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM) );
+
+  ESP_ERROR_CHECK( esp_wifi_set_mode(WIFI_MODE_STA) );
+
+  wifi_config_t sta_config = {
+        .sta = {
+            .ssid = "SF4 AP",
+            .password = "pcmcia91",
+            .bssid_set = false
+        }
+  };
+
+  ESP_ERROR_CHECK( esp_wifi_set_config(WIFI_IF_STA, &sta_config) );
+
+  ESP_ERROR_CHECK( esp_wifi_start() );
+
+  ESP_ERROR_CHECK( esp_wifi_connect() );
+
+
+
+
+
+
+ // wait till wifi is connected
+  xEventGroupWaitBits(wifi_event_group
+		  , CONNECTED_BIT
+		  ,false
+		  ,true
+		  ,portMAX_DELAY);
+
+
+  // sync time via SNTP
+  Obtain_Time();
+
+
+
 
 // -------------------------------------------------------------------------------------------
 
@@ -857,7 +935,8 @@ ESP32_DeVICE_Define(Common_Definition_t *Common_Definition)
 	SCDEFn->Log3Fn(Common_Definition->name
 		,Common_Definition->nameLen
 		,1
-		,"Could not enable WebIf support for '%.*s'. Type '%.*s' detects Type 'WebIf' is NOT loaded!"
+		,"Could not enable WebIf support for '%.*s'. "
+		 "Type '%.*s' detects Type 'WebIf' is NOT loaded!"
 		,ESP32_DeVICE_Definition->common.nameLen
 		,ESP32_DeVICE_Definition->common.name
 		,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
@@ -1274,16 +1353,27 @@ ESP32_DeVICE_Shutdown(Common_Definition_t* Common_Definition)
 
   #if ESP32_DeVICE_Module_DBG >= 5
   SCDEFn->Log3Fn(Common_Definition->name
-		,Common_Definition->nameLen
-		,5
-		,"Executing ShutdownFn of Module '%.*s' for Definition '%.*s'."
-		,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
-		,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeName
+	,Common_Definition->nameLen
+	,5
+	,"Executing ShutdownFn of Module '%.*s' for Definition '%.*s'."
+	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
+	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeName
 		,ESP32_DeVICE_Definition->common.nameLen
-		,ESP32_DeVICE_Definition->common.name);
+	,ESP32_DeVICE_Definition->common.name);
   #endif
 
 // -------------------------------------------------------------------------------------------------
+
+  // 8. Wi-Fi Deinit Phase
+
+  // s8.1: Call esp_wifi_disconnect() to disconnect the Wi-Fi connectivity.
+  esp_wifi_disconnect();
+
+  // s8.2: Call esp_wifi_stop() to stop the Wi-Fi driver.
+  esp_wifi_stop();
+
+  // s8.3: Call esp_wifi_deinit() to unload the Wi-Fi driver.
+  esp_wifi_deinit();
 
   return retMsg;
 }
@@ -1471,29 +1561,335 @@ ESP32_DeVICE_Undefine(Common_Definition_t* Common_Definition)
 
 
 /*
+ * --------------------------------------------------------------------------------------------------
+ *  FName: ESP32_DeVICE_WiFiEventHandler
+ *  Desc: Wifi event handler
+ *  Para: System_Event_t *event -> struct with incoming event information for wifi
+ *  Rets: -/-
+ * --------------------------------------------------------------------------------------------------
+ */
+static esp_err_t
+ESP32_DeVICE_WiFiEventHandler(void *ctx, system_event_t *event)
+{
+  switch (event->event_id)
+
+	{
+
+//--------------------------------------------------------------------------------------------------
+
+	// ESP32 WiFi ready
+	case SYSTEM_EVENT_WIFI_READY:
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	// ESP32 finish scanning AP
+	case SYSTEM_EVENT_SCAN_DONE:
+
+	// struct contains:
+  	// uint32_t status;          /**< status of scanning APs */
+  	// uint8_t  number;
+  	// uint8_t  scan_id;
+	// system_event_sta_scan_done_t;
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	// ESP32 station start
+	case SYSTEM_EVENT_STA_START:
+
+	// station started - connect to station
+	esp_wifi_connect();
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	// ESP32 station stop
+	case SYSTEM_EVENT_STA_STOP:
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	// ESP32 station connected to AP
+	case SYSTEM_EVENT_STA_CONNECTED:
+
+	// struct contains:
+   	// uint8_t ssid[32];         /**< SSID of connected AP */
+   	// uint8_t ssid_len;         /**< SSID length of connected AP */
+   	// uint8_t bssid[6];         /**< BSSID of connected AP*/
+   	// uint8_t channel;          /**< channel of connected AP*/
+   	// wifi_auth_mode_t authmode;
+	// system_event_sta_connected_t;
+
+	SCDEFn->Log3Fn( (const uint8_t*)"xxx"
+		, sizeof("xxx")
+		,1
+		,"Devices station connected to an access-point. SSID:%s, channel:%d"
+		,event->event_info.connected.ssid
+		,event->event_info.connected.channel);
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	// ESP32 station disconnected from AP
+	case SYSTEM_EVENT_STA_DISCONNECTED:
+
+	// struct contains:
+   	// uint8_t ssid[32];         /**< SSID of disconnected AP */
+   	// uint8_t ssid_len;         /**< SSID length of disconnected AP */
+   	// uint8_t bssid[6];         /**< BSSID of disconnected AP */
+   	// uint8_t reason;           /**< reason of disconnection */
+	// system_event_sta_disconnected_t;
+
+	// This is a workaround as ESP32 WiFi libs don't currently auto-reassociate
+	esp_wifi_connect();
+	xEventGroupClearBits(wifi_event_group, CONNECTED_BIT);
+
+	SCDEFn->Log3Fn( (const uint8_t*)"xxx"
+		, sizeof("xxx")
+		,1
+		,"Devices station disconnected from an access-point. SSID:%s, reason:%d"
+		,event->event_info.disconnected.ssid
+		,event->event_info.disconnected.reason);
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	// the auth mode of AP connected by ESP32 station changed
+	case SYSTEM_EVENT_STA_AUTHMODE_CHANGE:
+
+	// struct contains:
+   	// wifi_auth_mode_t old_mode;         /**< the old auth mode of AP */
+    	// wifi_auth_mode_t new_mode;         /**< the new auth mode of AP */
+	// system_event_sta_authmode_change_t;
+
+	SCDEFn->Log3Fn( (const uint8_t*)"xxx"
+		, sizeof("xxx")
+		,1
+		,"Devices station - Authmode changed from %d to %d",
+		event->event_info.auth_change.old_mode,
+		event->event_info.auth_change.new_mode);
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	// ESP32 station got IP from connected AP
+	case SYSTEM_EVENT_STA_GOT_IP:
+
+	// struct contains:
+    	// tcpip_adapter_ip_info_t ip_info;
+	// system_event_sta_got_ip_t;
+
+	// ??
+	xEventGroupSetBits(wifi_event_group, CONNECTED_BIT);
+
+	SCDEFn->Log3Fn( (const uint8_t*)"xxx"
+		, sizeof("xxx")
+		,1
+		,"Devices station got IP from access point:"IPSTR ", mask:"IPSTR", gw:"IPSTR,
+		IP2STR(&event->event_info.got_ip.ip_info.ip),
+		IP2STR(&event->event_info.got_ip.ip_info.netmask),
+		IP2STR(&event->event_info.got_ip.ip_info.gw));
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	// ESP32 soft-AP start
+	case SYSTEM_EVENT_AP_START:
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	// ESP32 soft-AP stop
+	case SYSTEM_EVENT_AP_STOP:
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	// a station connected to ESP32 soft-AP
+	case SYSTEM_EVENT_AP_STACONNECTED:
+
+	// struct contains:
+ 	// uint8_t mac[6];           /**< MAC address of the station connected to ESP32 soft-AP */
+ 	// uint8_t aid;              /**< the aid that ESP32 soft-AP gives to the station connected to  */
+	// system_event_ap_staconnected_t;
+	
+	SCDEFn->Log3Fn( (const uint8_t*)"xxx"
+		, sizeof("xxx")
+		,1
+		,"I:WSAP Device conn.: "MACSTR ", AID = %d",
+		MAC2STR(event->event_info.sta_connected.mac),
+		event->event_info.sta_connected.aid);
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	// a station disconnected from ESP32 soft-AP
+	case SYSTEM_EVENT_AP_STADISCONNECTED:
+
+	// struct contains:
+   	// uint8_t mac[6];           /**< MAC address of the station disconnects to ESP32 soft-AP */
+   	// uint8_t aid;              /**< the aid that ESP32 soft-AP gave to the station disconnects to  */
+	// system_event_ap_stadisconnected_t;
+
+	SCDEFn->Log3Fn( (const uint8_t*)"xxx"
+		, sizeof("xxx")
+		,1
+		,"WSAP - Device disconnected: "MACSTR ", AID = %d",
+		MAC2STR(event->event_info.sta_disconnected.mac),
+		event->event_info.sta_disconnected.aid);
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	// Receive probe request packet in soft-AP interface
+	case SYSTEM_EVENT_AP_PROBEREQRECVED:
+
+	// struct contains:
+ 	// int rssi;                 /**< Received probe request signal strength */
+ 	// uint8_t mac[6];           /**< MAC address of the station which send probe request */
+	// system_event_ap_probe_req_rx_t;
+
+	SCDEFn->Log3Fn( (const uint8_t*)"xxx"
+		, sizeof("xxx")
+		,1
+		,"WSAP - ProbeReq.Rcved:%d"
+		,event->event_info.ap_probereqrecved.rssi);
+
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	default:
+	break;
+
+//--------------------------------------------------------------------------------------------------
+
+	}
+
+  return ESP_OK;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include "apps/sntp/sntp.h"
+
+static void 
+Initialize_SNTP(void)
+{
+  printf ("Initializing SNTP");
+
+  sntp_setoperatingmode(SNTP_OPMODE_POLL);
+
+  sntp_setservername(0, "pool.ntp.org");
+
+  sntp_init();
+}
+
+
+
+
+
+static void
+Obtain_Time(void)
+{
+  Initialize_SNTP();
+
+  // wait for time to be set
+  time_t now = 0;
+
+  struct tm timeinfo = { 0 };
+
+  int retry = 0;
+
+  const int retry_count = 10;
+
+  while (timeinfo.tm_year < (2016 - 1900) && ++retry < retry_count) {
+
+	printf ("Waiting for system time to be set... (%d/%d)",
+		retry,
+		retry_count);
+
+	vTaskDelay(2000 / portTICK_PERIOD_MS);
+
+	time(&now);
+
+	localtime_r(&now, &timeinfo);
+  }
+}
+
+
+
+/*
+
+  time_t now;
+      struct tm timeinfo;
+      time(&now);
+      localtime_r(&now, &timeinfo);
+
+      char strftime_buf[64];
+
+      // Set timezone to Eastern Standard Time and print local time
+         setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
+         tzset();
+         localtime_r(&now, &timeinfo);
+         strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+         LOGD("New York is: %s"
+        	,strftime_buf);
+*/
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
  * ------------------  helpers provided for module operation starting here ------------------------
  */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1656,18 +2052,17 @@ printf ("parsedKVInput->keysFoundBF:%lld", parsedKVInput->keysFoundBF);
   uint32_t affectedReadings = 0;
 
 // -------------------------------------------------------------------------------------------------
-
-  // Name=[a-f-A-F0-9] -> Setze Device-Name = WSAP-Name (char) (0-sizeof (ap_wifi_config.ap.ssid))
-  // Name=[a-f-A-F0-9] -> Set Device-Name = WSAP-Name (char) (0-sizeof (ap_wifi_config.ap.ssid))
+// Name=[a-zA-Z0-9_.] -> Setze Device-Name = WSAP-Name (char) (0-sizeof (ap_wifi_config.ap.ssid)-1)
+// Name=[a-zA-Z0-9_.] -> Set Device-Name = WSAP-Name (char) (0-sizeof (ap_wifi_config.ap.ssid)-1)
   if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_Name) {
-printf ("ZA");
+
 	// valid input ?
 	if (SCDEH_GetSpecialStrVal(argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].off
 		,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].len
 		,(char*) &ap_wifi_config.ap.ssid
-		,sizeof (ap_wifi_config.ap.ssid)
+		,sizeof (ap_wifi_config.ap.ssid)-1
 		,2) ) {	
-printf ("XA");
+
 		// mark affected readings for TX
 		affectedReadings |= 
 			parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].affectedReadings;
@@ -1681,10 +2076,8 @@ printf ("XA");
   }
 
 // -------------------------------------------------------------------------------------------------
-
-
-  // WSAP_Password=[a-f-A-F0-9] -> Setze das Wireless Service Access Point Passwort (char) (0-sizeof (ap_wifi_config.ap.password))
-  // WSAP_Password=[a-f-A-F0-9] -> Set the Wireless Service Access Point Passwort (char) (0-sizeof (ap_wifi_config.ap.password))
+// WSAP_Password=[a-zA-Z0-9_.] -> Setze das Wireless Service Access Point Passwort (char) (0-sizeof (ap_wifi_config.ap.password)-1)
+// WSAP_Password=[a-zA-Z0-9_.] -> Set the Wireless Service Access Point Passwort (char) (0-sizeof (ap_wifi_config.ap.password)-1)
 
   if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Password) {
 
@@ -1692,9 +2085,9 @@ printf ("XA");
 	if (SCDEH_GetSpecialStrVal(argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].off
 		,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].len
 		,(char*) &ap_wifi_config.ap.password
-		,sizeof (ap_wifi_config.ap.password)
+		,sizeof (ap_wifi_config.ap.password)-1
 		,2) ) {	
-printf ("XB");
+
 		// mark affected readings for TX
 		affectedReadings |= 
 			parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].affectedReadings;
@@ -1708,9 +2101,8 @@ printf ("XB");
   }
 
 // -------------------------------------------------------------------------------------------------
-
-  // WSAP_RF_Channel=[1-13] -> Setze den Wireless Service Access Point Kanal (!Station Kanal hat Priorität)
-  // WSAP_RF_Channel=[1-13] -> Set the Wireless Service Access Point channel (!Station Channel has priority)
+// WSAP_RF_Channel=[0-9] -> Setze den Wireless Service Access Point Kanal (1-13 aber Station Kanal hat Priorität!)
+// WSAP_RF_Channel=[0-9] -> Set the Wireless Service Access Point channel (1-13 but Station Channel has priority)
 
   if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_RF_Channel) {
 
@@ -1722,7 +2114,7 @@ printf ("XB");
 		,&NewChan)) {
 
 		if ( (NewChan >= 1) && (NewChan <= 13) ) {
-printf ("XC");
+
 			// mark affected readings for TX
 			affectedReadings |= 
 				parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].affectedReadings;
@@ -1737,9 +2129,8 @@ printf ("XC");
   }
 
 // -------------------------------------------------------------------------------------------------
-
-  // WSAP_Maximal_Connections=[ ] -> Setze die maximale Anzahl der Verbindungen zum WSAP (0-4)
-  // WSAP_Maximal_Connections=[ ] -> Set maximum number of connections to the WSAP (0-4)
+// WSAP_Maximal_Connections=[0-9] -> Setze die maximale Anzahl der Verbindungen zum WSAP (0-4)
+// WSAP_Maximal_Connections=[0-9] -> Set maximum number of connections to the WSAP (0-4)
 
   if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections) {
 
@@ -1753,7 +2144,7 @@ printf ("XC");
 
 //			// save new max conn
 //			ap_wifi_config.ap.max_connection = MaxConn;
-printf ("XD");
+
 			// mark affected readings for TX
 			affectedReadings |= 
 				parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections].affectedReadings;
@@ -1768,9 +2159,8 @@ printf ("XD");
   }
 
 // --------------------------------------------------------------------------------------------------
-
-  // WSAP_Authentication_Method=[OPEN|WEP|WPA_PSK|WPA2_PSK|WPA_WPA2_PSK|WPA2_ENTERPRISE|MAX] -> Setze die Authentifizierungsmethode
-  // WSAP_Authentication_Method=[OPEN|WEP|WPA_PSK|WPA2_PSK|WPA_WPA2_PSK|WPA2_ENTERPRISE|MAX] -> Set the authentication method
+// WSAP_Authentication_Method=[OPEN|WEP|WPA_PSK|WPA2_PSK|WPA_WPA2_PSK|WPA2_ENTERPRISE|MAX] -> Setze die Authentifizierungsmethode für den Wireless Service Access Point
+// WSAP_Authentication_Method=[OPEN|WEP|WPA_PSK|WPA2_PSK|WPA_WPA2_PSK|WPA2_ENTERPRISE|MAX] -> Set the authentication method for the Wireless Service Access Point
 
   if (parsedKVInput->keysFoundBF & (uint64_t) 1 << ESP32_DeVICE_Set_IK_WSAP_Authentication_Method) {
 
