@@ -1943,6 +1943,11 @@ printf ("The Args: '%.*s'.",argsTextLen,argsText);
 
 // -------------------------------------------------------------------------------------------------
 
+
+
+
+
+
   // Processed block #02 mirror 'tcpip_adapter_ip_info_t' (WSAP-IP-Settings)
   tcpip_adapter_ip_info_t ap_ip_info;
   if (parsedKVInput->keysFoundBF &  ( ESP32_DeVICE_R_WSAP_IP_Adress
@@ -1978,10 +1983,12 @@ printf ("The Args: '%.*s'.",argsTextLen,argsText);
   bool sta_autoconnect_status;
   esp_wifi_get_auto_connect(&sta_autoconnect_status);
 
-  // block #9 get the bandwith of Station
-  wifi_bandwidth_t sta_wifi_bandwidth;
-  esp_wifi_get_bandwidth(WIFI_IF_STA, &sta_wifi_bandwidth);
+ // block #9 mirror 'wifi_bandwidth_t' (WIFI STA Configuration)
+  wifi_bandwidth_t wifiBandwidthSTA;
+  if (parsedKVInput->keysFoundBF & (1 << ESP32_DeVICE_R_WSAP_WiFi_Bandwidth) ) {
 
+	esp_wifi_get_bandwidth(WIFI_IF_STA, &wifiBandwidthSTA);
+  }
 
 
 
@@ -2009,9 +2016,50 @@ printf ("The Args: '%.*s'.",argsTextLen,argsText);
 //esp_err_t tcpip_adapter_dhcpc_start(tcpip_adapter_if_t tcpip_if);
 //esp_err_t tcpip_adapter_dhcpc_stop(tcpip_adapter_if_t tcpip_if);
 
-  // block #13 get current Wifi operating mode (Station + Service AP)
+
+
+/*
+
+  // block #13 mirror 'wifi_mode_t' (WIFI WSAP+STA Configuration)
   wifi_mode_t wifi_mode;
-  esp_wifi_get_mode(&wifi_mode);
+  if (parsedKVInput->keysFoundBF & (1 << ESP32_DeVICE_Set_IK_?) ) {
+
+	esp_wifi_get_mode(&wifi_mode);
+  }
+
+  // block #xx mirror 'wifi_ps_type_t' (WIFI WSAP+STA Configuration)
+  wifi_ps_type_t wifi_ps_type;
+  if (parsedKVInput->keysFoundBF & (1 << ESP32_DeVICE_Set_IK_?) ) {
+
+	esp_wifi_set_ps(&wifi_ps_type);
+  }
+
+  // block #xx mirror 'protocol_bitmap' (WIFI WSAP Configuration)
+  uint8_t protocolBitmapAP;
+  if (parsedKVInput->keysFoundBF & (1 << ESP32_DeVICE_Set_IK_?) ) {
+
+	esp_wifi_get_protocol(TCPIP_ADAPTER_IF_AP, &protocolBitmapAP);
+  }
+
+  // block #xx mirror 'protocol_bitmap' (WIFI STA Configuration)
+  uint8_t protocolBitmapSTA;
+  if (parsedKVInput->keysFoundBF & (1 << ESP32_DeVICE_Set_IK_?) ) {
+
+	esp_wifi_get_protocol(TCPIP_ADAPTER_IF_STA, &protocolBitmapSTA);
+  }
+
+ // block #xx mirror 'wifi_bandwidth_t' (WIFI WSAP Configuration)
+  wifi_bandwidth_t wifiBandwidthSTA;
+  if (parsedKVInput->keysFoundBF & (1 << ESP32_DeVICE_R_STA_WiFi_Bandwidth) ) {
+
+	esp_wifi_get_bandwidth(WIFI_IF_STA, &wifiBandwidthSTA);
+  }
+*/
+
+
+
+
+
 
   // block #14 get current Wifi operating mode (Station + Service AP)
   wifi_ps_type_t wifi_ps_type;
@@ -3177,7 +3225,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Name].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Name].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].off);
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Name].off
+			,true);
 	}
 
 // -------------------------------------------------------------------------------------------------
@@ -3190,7 +3239,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Password].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Password].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].off);
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].off
+			,true);
 	}
 
 // ------------------------------------------------------------------------------------------------- 
@@ -3203,7 +3253,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].off);
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_RF_Channel].off
+			,true);
 	}
 
 // ------------------------------------------------------------------------------------------------- 
@@ -3216,7 +3267,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections].off);
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Maximal_Connections].off
+			,true);
 	}
 
 // ------------------------------------------------------------------------------------------------- 
@@ -3229,7 +3281,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Authentication_Method].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Authentication_Method].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Authentication_Method].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Authentication_Method].off);
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Authentication_Method].off
+			,true);
 	}
 
 // ------------------------------------------------------------------------------------------------- 
@@ -3242,7 +3295,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_SSID].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_SSID].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_SSID].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_SSID].off);
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_SSID].off
+			,true);
 	}
 
 // ------------------------------------------------------------------------------------------------- 
@@ -3255,7 +3309,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval].off);
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Beacon_Interval].off
+			,true);
 	}
 
 // -------------------------------------------------------------------------------------------------
@@ -3268,7 +3323,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_IP_Adress].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_IP_Adress].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_IP_Adress].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_IP_Adress].off);
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_IP_Adress].off
+			,true);
 	}
 
 // -------------------------------------------------------------------------------------------------
@@ -3281,7 +3337,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Netmask].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Netmask].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Netmask].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Netmask].off);
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Netmask].off
+			,true);
 	}
 
 // -------------------------------------------------------------------------------------------------
@@ -3294,7 +3351,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Gateway_Adress].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Gateway_Adress].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Gateway_Adress].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Gateway_Adress].off);
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Gateway_Adress].off
+			,true);
 	}
 
 // -------------------------------------------------------------------------------------------------
@@ -3307,7 +3365,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_MAC_Adress].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_MAC_Adress].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_MAC_Adress].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_MAC_Adress].off);
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_MAC_Adress].off
+			,true);
 	}
 
 // -------------------------------------------------------------------------------------------------
@@ -3320,7 +3379,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_WiFi_Bandwidth].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_WiFi_Bandwidth].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_WiFi_Bandwidth].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_WiFi_Bandwidth].off);
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_WiFi_Bandwidth].off
+			,true);
 	}
 
 // -------------------------------------------------------------------------------------------------
@@ -3333,7 +3393,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WiFi_Country].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WiFi_Country].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WiFi_Country].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WiFi_Country].off);
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WiFi_Country].off
+			,true);
 	}
 
 // -------------------------------------------------------------------------------------------------
@@ -3346,7 +3407,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_IP_Adress].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_IP_Adress].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_IP_Adress].len
-			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_IP_Adress].off);
+			,argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_IP_Adress].off
+			,true);
 	}
 
 // -------------------------------------------------------------------------------------------------
@@ -3359,7 +3421,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_Netmask].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_Netmask].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Netmask].len
-			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Netmask].off);
+			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Netmask].off
+			,true);
 	}
 
 // -------------------------------------------------------------------------------------------------
@@ -3372,7 +3435,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_Gateway_Adress].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_Gateway_Adress].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Gateway_Adress].len
-			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Gateway_Adress].off);
+			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Gateway_Adress].off
+			,true);
 	}
 
 // -------------------------------------------------------------------------------------------------
@@ -3385,7 +3449,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_MAC_Adress].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_MAC_Adress].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_MAC_Adress].len
-			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_MAC_Adress].off);
+			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_MAC_Adress].off
+			,true);
 	}
 
 // -------------------------------------------------------------------------------------------------
@@ -3398,7 +3463,8 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_Auto_Connect].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_Auto_Connect].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Auto_Connect].len
-			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Auto_Connect].off);
+			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_Auto_Connect].off
+			,true);
 	}
 
 // -------------------------------------------------------------------------------------------------
@@ -3411,12 +3477,13 @@ printf ("XG");
 			,strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_WiFi_Bandwidth].implementedKey)
 			,(const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_Station_WiFi_Bandwidth].implementedKey
 			,parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_WiFi_Bandwidth].len
-			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_WiFi_Bandwidth].off);
+			,argsText + parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_Station_WiFi_Bandwidth].off
+			,true);
 	}
 //uint8_t *argsText
 // -------------------------------------------------------------------------------------------------
 
-  SCDEFn->readingsEndUpdateFn((Common_Definition_t*) ESP32_DeVICE_Definition);
+  SCDEFn->readingsEndUpdateFn((Common_Definition_t*) ESP32_DeVICE_Definition, true);
   }
 
 // =================================================================================================

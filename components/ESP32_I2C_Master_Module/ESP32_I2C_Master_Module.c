@@ -366,53 +366,31 @@ const WebIf_ActiveResourcesDataB_t ESP32_I2C_Master_ActiveResourcesDataB_forWebI
  */
 ProvidedByModule_t ESP32_I2C_Master_ProvidedByModule = {
    // A-Z order
-
   "ESP32_I2C_Master"			// Type-Name of module -> should be same name as libfilename.so !
   ,16					// size of Type-Name
 
   ,NULL					// Add
-
   ,ESP32_I2C_Master_Attribute		// Attribute
-
   ,ESP32_I2C_Master_Define		// Define
-
   ,NULL					// Delete
-
   ,NULL					// Except
-
   ,NULL					// Get
-
   ,ESP32_I2C_Master_IdleCb		// IdleCb
-
   ,ESP32_I2C_Master_Initialize		// Initialize
-
   ,NULL					// Notify
-
   ,NULL					// Parse
-
   ,NULL					// Read
-
   ,NULL					// Ready
-
   ,NULL					// Rename
-
   ,ESP32_I2C_Master_Set			// Set
-
   ,ESP32_I2C_Master_Shutdown		// Shutdown
-
   ,NULL					// State
-
   ,NULL					// Sub
-
   ,ESP32_I2C_Master_Undefine		// Undefine
-
   ,NULL					// DirectRead
-
   ,NULL					// DirectWrite
-
 //  ,NULL		 		// FnProvided
-
-  ,sizeof(ESP32_I2C_Master_Definition_t)	// Size of modul specific definition structure (Common_Definition_t + X)
+  ,sizeof(ESP32_I2C_Master_Definition_t) // Size of modul specific definition structure (Common_Definition_t + X)
 
 };
 
@@ -744,13 +722,13 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
   parsedKVInput->forbiddenKVBF = 	( (1 << ESP32_I2C_Master_SET_SLAVE_10BIT_ENA)
 					| (1 << ESP32_I2C_Master_SET_SLAVE_ADRESS)
  					);
-
+/*
   // process the set-args (key=value@) protocol
   retMsg = ESP32_I2C_Master_ProcessKVInputArgs(ESP32_I2C_Master_Definition
 		,parsedKVInput		// KVInput parsed
 		,defArgsText		// our args text
 		,defArgsTextLen);	// our args text len
-
+*/
   // processing reports an problem. Args not taken. Return with MSG
   if (retMsg != SCDE_OK) {
 
@@ -782,14 +760,12 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
   printf("|ESP32_I2C_Master_Define, installing i2c driver>");
   #endif
 
-//#define I2C_MASTER_NUM I2C_NUM_1   /*!< I2C port number for master dev */
-//#define I2C_MASTER_SDA_IO    18    /*!< gpio number for I2C master data  */
-//#define I2C_MASTER_SCL_IO    19    /*!< gpio number for I2C master clock */
-#define I2C_MASTER_TX_BUF_DISABLE   0   /*!< I2C master do not need buffer */
-#define I2C_MASTER_RX_BUF_DISABLE   0   /*!< I2C master do not need buffer */
-//#define I2C_MASTER_FREQ_HZ    100000     /*!< I2C master clock frequency */
+#define I2C_MASTER_NUM I2C_NUM_1   /*!< I2C port number for master dev */
+#define I2C_MASTER_SDA_IO    18    /*!< gpio number for I2C master data  */
+#define I2C_MASTER_SCL_IO    19    /*!< gpio number for I2C master clock */
+#define I2C_MASTER_FREQ_HZ    100000     /*!< I2C master clock frequency */
 
-/*
+
 //Temp fill of struct
 
     ESP32_I2C_Master_Definition->i2c_num =
@@ -819,7 +795,7 @@ ESP32_I2C_Master_Define(Common_Definition_t *Common_Definition)
 
 	return retMsg;
   }
-*/
+
 // ------------------------------------------------------------------------------------------------
 
 /*
@@ -894,6 +870,8 @@ esp_err_t i2c_driver_install(i2c_port_t i2c_num, i2c_mode_t mode, size_t slv_rx_
   // slv_rx_buf_len > 100	-> 0-100
   // slv_tx_buf_len > 100	-> 0-100
 
+#define I2C_MASTER_TX_BUF_DISABLE   0   /*!< I2C master do not need buffer */
+#define I2C_MASTER_RX_BUF_DISABLE   0   /*!< I2C master do not need buffer */
 
 
 i2c_port_t i2c_num = I2C_NUM_1;//0;
@@ -1168,7 +1146,7 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
     uint8_t* data_wr = (uint8_t*) malloc(DATA_LENGTH);
     uint8_t* data_rd = (uint8_t*) malloc(DATA_LENGTH);
     uint8_t sensor_data_h = 0;
-	uint8_t sensor_data_l = 0;
+    uint8_t sensor_data_l = 0;
 
  //   while (1) {
 //        ret = i2c_master_sensor_test( I2C_MASTER_NUM, &sensor_data_h, &sensor_data_l);
@@ -1192,6 +1170,7 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
 
     if (ret == ESP_FAIL) {
        // return ret;
+ printf("*****ERROR1***\n");
     }
 
     else {
@@ -1207,6 +1186,7 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
     i2c_cmd_link_delete(cmd);
     if (ret == ESP_FAIL) {
      //   return ESP_FAIL;
+  printf("*****ERROR2***\n");
     }
     else {
     ret = ESP_OK;
@@ -3455,7 +3435,8 @@ ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition_t* ESP32_I2C_Ma
 
 
 
-static void i2c_isr_handler_default(void* arg)
+static void 
+i2c_isr_handler_default(void* arg)
 {
 /*  // we got ptr to ESP32_I2C_Master_Definition_t
   ESP32_I2C_Master_Definition_t* ESP32_I2C_Master_Definition =
@@ -3495,7 +3476,6 @@ static void i2c_isr_handler_default(void* arg)
 
         //get error ack value from slave device, stop the commands
         i2c_master_cmd_begin_static(p_i2c);
-
       }
 
     } else if (status & I2C_TRANS_START_INT_ST_M) {
@@ -3517,7 +3497,6 @@ static void i2c_isr_handler_default(void* arg)
         for (idx = 0; idx < rx_fifo_cnt; idx++) {
 
           p_i2c->data_buf[idx] = I2C[i2c_num]->fifo_data.data;
-
         }
 
         xRingbufferSendFromISR(p_i2c->rx_ring_buf
@@ -3528,7 +3507,6 @@ static void i2c_isr_handler_default(void* arg)
         if (HPTaskAwoken == pdTRUE) {
 
           portYIELD_FROM_ISR();
-
         }
 
         I2C[i2c_num]->int_clr.rx_fifo_full = 1;
@@ -3538,7 +3516,6 @@ static void i2c_isr_handler_default(void* arg)
         if (p_i2c->status != I2C_STATUS_ACK_ERROR) {
 
           i2c_master_cmd_begin_static(p_i2c);
-
         }
       }
 
@@ -3582,7 +3559,6 @@ static void i2c_isr_handler_default(void* arg)
         for (idx = 0; idx < size; idx++) {
 
           WRITE_PERI_REG(I2C_DATA_APB_REG(i2c_num), data[idx]);
-
         }
 
         vRingbufferReturnItemFromISR(p_i2c->tx_ring_buf, data, &HPTaskAwoken);
@@ -3600,7 +3576,6 @@ static void i2c_isr_handler_default(void* arg)
       I2C[i2c_num]->int_ena.tx_fifo_empty = 0;
 
       I2C[i2c_num]->int_clr.tx_fifo_empty = 1;
-
     }
 
   } else if (status & I2C_RXFIFO_FULL_INT_ST_M) {
@@ -3610,7 +3585,6 @@ static void i2c_isr_handler_default(void* arg)
     for (idx = 0; idx < rx_fifo_cnt; idx++) {
 
       p_i2c->data_buf[idx] = I2C[i2c_num]->fifo_data.data;
-
     }
 
     xRingbufferSendFromISR(p_i2c->rx_ring_buf, p_i2c->data_buf, rx_fifo_cnt, &HPTaskAwoken);
@@ -3618,7 +3592,6 @@ static void i2c_isr_handler_default(void* arg)
     if (HPTaskAwoken == pdTRUE) {
 
       portYIELD_FROM_ISR();
-
     }
 
     I2C[i2c_num]->int_clr.rx_fifo_full = 1;
@@ -3626,7 +3599,6 @@ static void i2c_isr_handler_default(void* arg)
     } else {
 
       I2C[i2c_num]->int_clr.val = status;
-
     }
   }
 }
@@ -3640,7 +3612,12 @@ static void i2c_isr_handler_default(void* arg)
  *  Data: 
  * -------------------------------------------------------------------------------------------------
  */
-esp_err_t i2c_isr_register(i2c_port_t i2c_num, void (*fn)(void*), void * arg, int intr_alloc_flags, intr_handle_t *handle)
+esp_err_t 
+i2c_isr_register(i2c_port_t i2c_num
+	,void (*fn)(void*)
+	,void * arg
+	,int intr_alloc_flags
+	,intr_handle_t *handle)
 {
 
   I2C_CHECK(i2c_num < I2C_NUM_MAX, I2C_NUM_ERROR_STR, ESP_ERR_INVALID_ARG);
@@ -3662,11 +3639,9 @@ esp_err_t i2c_isr_register(i2c_port_t i2c_num, void (*fn)(void*), void * arg, in
       ret = esp_intr_alloc(ETS_I2C_EXT0_INTR_SOURCE, intr_alloc_flags, fn, arg, handle);
 
     break;
-
   }
 
   return ret;
-
 }
 
 
@@ -3696,7 +3671,7 @@ esp_err_t i2c_isr_free(intr_handle_t handle)
  */
 strTextMultiple_t*
 i2c_param_config(i2c_port_t i2c_num
-				,const i2c_config_t *i2c_conf)
+	,const i2c_config_t *i2c_conf)
 {
 
   // start without error
@@ -3791,7 +3766,6 @@ i2c_param_config(i2c_port_t i2c_num
   I2C_EXIT_CRITICAL(&i2c_spinlock[i2c_num]);
 
   return retMsg;
-
 }
 
 
@@ -3818,7 +3792,6 @@ i2c_set_pin(i2c_port_t i2c_num
 			,gpio_pullup_t scl_pullup_en
 			,i2c_mode_t mode)
 {
-
   // start without error
   strTextMultiple_t* retMsg = SCDE_OK;
 
@@ -3864,7 +3837,6 @@ i2c_set_pin(i2c_port_t i2c_num
 	if (sda_pullup_en == GPIO_PULLUP_ENABLE) {
 
 		gpio_set_pull_mode(sda_io_num, GPIO_PULLUP_ONLY);
-
         } 
 
 	else {
@@ -3875,7 +3847,6 @@ i2c_set_pin(i2c_port_t i2c_num
 	gpio_matrix_out(sda_io_num, sda_out_sig, 0, 0);
 
 	gpio_matrix_in(sda_io_num, sda_in_sig, 0);
-
   }
 
   if (scl_io_num >= 0) {
@@ -3889,32 +3860,27 @@ i2c_set_pin(i2c_port_t i2c_num
 		gpio_set_direction(scl_io_num, GPIO_MODE_INPUT_OUTPUT_OD);
 
 		gpio_matrix_out(scl_io_num, scl_out_sig, 0, 0);
-
 	}
 
 	else {
 
 		gpio_set_direction(scl_io_num, GPIO_MODE_INPUT);
-
 	}
 
 	if (scl_pullup_en == GPIO_PULLUP_ENABLE) {
 
 		gpio_set_pull_mode(scl_io_num, GPIO_PULLUP_ONLY);
-
 	}
 
 	else {
 
 		gpio_set_pull_mode(scl_io_num, GPIO_FLOATING);
-
 	}
 
 	gpio_matrix_in(scl_io_num, scl_in_sig, 0);
   }
 
   return retMsg;
-
 }
 
 
@@ -3926,9 +3892,9 @@ i2c_set_pin(i2c_port_t i2c_num
  *  Data: 
  * -------------------------------------------------------------------------------------------------
  */
-esp_err_t i2c_reset_tx_fifo(i2c_port_t i2c_num)
+esp_err_t 
+i2c_reset_tx_fifo(i2c_port_t i2c_num)
 {
-
   I2C_CHECK(i2c_num < I2C_NUM_MAX, I2C_NUM_ERROR_STR, ESP_ERR_INVALID_ARG);
 
   I2C_ENTER_CRITICAL(&i2c_spinlock[i2c_num]);
@@ -3940,7 +3906,6 @@ esp_err_t i2c_reset_tx_fifo(i2c_port_t i2c_num)
   I2C_EXIT_CRITICAL(&i2c_spinlock[i2c_num]);
 
   return ESP_OK;
-
 }
 
 
@@ -3952,9 +3917,9 @@ esp_err_t i2c_reset_tx_fifo(i2c_port_t i2c_num)
  *  Data: 
  * -------------------------------------------------------------------------------------------------
  */
-esp_err_t i2c_reset_rx_fifo(i2c_port_t i2c_num)
+esp_err_t 
+i2c_reset_rx_fifo(i2c_port_t i2c_num)
 {
-
   I2C_CHECK(i2c_num < I2C_NUM_MAX, I2C_NUM_ERROR_STR, ESP_ERR_INVALID_ARG);
 
   I2C_ENTER_CRITICAL(&i2c_spinlock[i2c_num]);
@@ -3966,7 +3931,6 @@ esp_err_t i2c_reset_rx_fifo(i2c_port_t i2c_num)
   I2C_EXIT_CRITICAL(&i2c_spinlock[i2c_num]);
 
   return ESP_OK;
-
 }
 
 
@@ -3983,7 +3947,6 @@ esp_err_t i2c_reset_rx_fifo(i2c_port_t i2c_num)
 static void IRAM_ATTR 
 i2c_master_cmd_begin_static(i2c_obj_t* p_i2c)
 {
-
   // get the assigned i2c num.
   int i2c_num = p_i2c->i2c_num;
 
@@ -4013,7 +3976,6 @@ i2c_master_cmd_begin_static(i2c_obj_t* p_i2c)
 	}
 
 	return;
-
   }
 
   else if (p_i2c->status == I2C_STATUS_READ) {
@@ -4023,7 +3985,6 @@ i2c_master_cmd_begin_static(i2c_obj_t* p_i2c)
 	while (p_i2c->rx_cnt-- > 0) {
 
 		*cmd->data++ = READ_PERI_REG(I2C_DATA_APB_REG(i2c_num));
-
 	}
 
 	if (cmd->byte_num > 0) {
@@ -4108,7 +4069,6 @@ i2c_master_cmd_begin_static(i2c_obj_t* p_i2c)
 		p_i2c->status = I2C_STATUS_WRITE;
 
 		break;
-
 	}
 
 	else if (cmd->op_code == I2C_CMD_READ) {
@@ -4126,7 +4086,6 @@ i2c_master_cmd_begin_static(i2c_obj_t* p_i2c)
 		p_i2c->status = I2C_STATUS_READ;
 
 		break;
-
 	}
 
 	else {
@@ -4143,7 +4102,6 @@ i2c_master_cmd_begin_static(i2c_obj_t* p_i2c)
 		p_i2c->status = I2C_STATUS_IDLE;
 
 		break;
-
 	}
   }
 
@@ -4155,7 +4113,6 @@ i2c_master_cmd_begin_static(i2c_obj_t* p_i2c)
   I2C[i2c_num]->ctr.trans_start = 1;
 
   return;
-
 }
 
 
@@ -4171,11 +4128,11 @@ i2c_master_cmd_begin_static(i2c_obj_t* p_i2c)
  *  Rets: esp_err_t ->
  * -------------------------------------------------------------------------------------------------
  */
-esp_err_t i2c_master_cmd_begin(i2c_obj_t *p_i2c
-				,i2c_cmd_handle_t cmd_handle
-				,portBASE_TYPE ticks_to_wait)
+esp_err_t
+i2c_master_cmd_begin(i2c_obj_t *p_i2c
+	,i2c_cmd_handle_t cmd_handle
+	,portBASE_TYPE ticks_to_wait)
 {
-
   // get the assigned i2c num.
   int i2c_num = p_i2c->i2c_num;
 
@@ -4242,7 +4199,6 @@ esp_err_t i2c_master_cmd_begin(i2c_obj_t *p_i2c
   xSemaphoreGive(p_i2c->cmd_mux);
 
   return ret;
-
 }
 
 
@@ -4258,14 +4214,13 @@ esp_err_t i2c_master_cmd_begin(i2c_obj_t *p_i2c
  *  Rets: i2c_cmd_desc_t* as void* i2c_cmd_handle_t
  * -------------------------------------------------------------------------------------------------
  */
-i2c_cmd_handle_t i2c_cmd_link_create()
+i2c_cmd_handle_t
+i2c_cmd_link_create()
 {
-
   // allocate zero filled linked list head
   i2c_cmd_desc_t* cmd_desc = (i2c_cmd_desc_t*) calloc(1, sizeof(i2c_cmd_desc_t));
 
   return (i2c_cmd_handle_t) cmd_desc;
-
 }
 
 
@@ -4279,9 +4234,9 @@ i2c_cmd_handle_t i2c_cmd_link_create()
  *  Rets: -/-
  * -------------------------------------------------------------------------------------------------
  */
-void i2c_cmd_link_delete(i2c_cmd_handle_t cmd_handle)
+void
+i2c_cmd_link_delete(i2c_cmd_handle_t cmd_handle)
 {
-
   // is it a valid handle ?
   if (cmd_handle == NULL) {
 
@@ -4310,7 +4265,6 @@ void i2c_cmd_link_delete(i2c_cmd_handle_t cmd_handle)
   free(cmd_handle);
 
   return;
-
 }
 
 
@@ -4325,10 +4279,10 @@ void i2c_cmd_link_delete(i2c_cmd_handle_t cmd_handle)
  *  Rets: esp_err_t ->
  * -------------------------------------------------------------------------------------------------
  */
-static esp_err_t i2c_cmd_link_append(i2c_cmd_handle_t cmd_handle
-					,i2c_cmd_t* cmd)
+static esp_err_t
+i2c_cmd_link_append(i2c_cmd_handle_t cmd_handle
+	,i2c_cmd_t* cmd)
 {
-
   // get ptr to linked list head 
   i2c_cmd_desc_t* cmd_desc = (i2c_cmd_desc_t*) cmd_handle;
 
@@ -4377,7 +4331,6 @@ static esp_err_t i2c_cmd_link_append(i2c_cmd_handle_t cmd_handle
   err:
 
   return ESP_FAIL;
-
 }
 
 
@@ -4391,9 +4344,9 @@ static esp_err_t i2c_cmd_link_append(i2c_cmd_handle_t cmd_handle
  *  Rets: esp_err_t ->
  * -------------------------------------------------------------------------------------------------
  */
-esp_err_t i2c_master_start(i2c_cmd_handle_t cmd_handle)
+esp_err_t 
+i2c_master_start(i2c_cmd_handle_t cmd_handle)
 {
-
   I2C_CHECK(cmd_handle != NULL, I2C_CMD_LINK_INIT_ERR_STR, ESP_ERR_INVALID_ARG);
 
   i2c_cmd_t cmd;
@@ -4406,7 +4359,6 @@ esp_err_t i2c_master_start(i2c_cmd_handle_t cmd_handle)
   cmd.op_code = I2C_CMD_RESTART;
 
   return i2c_cmd_link_append(cmd_handle, &cmd);
-
 }
 
 
@@ -4420,9 +4372,9 @@ esp_err_t i2c_master_start(i2c_cmd_handle_t cmd_handle)
  *  Rets: esp_err_t ->
  * -------------------------------------------------------------------------------------------------
  */
-esp_err_t i2c_master_stop(i2c_cmd_handle_t cmd_handle)
+esp_err_t
+i2c_master_stop(i2c_cmd_handle_t cmd_handle)
 {
-
   I2C_CHECK(cmd_handle != NULL, I2C_CMD_LINK_INIT_ERR_STR, ESP_ERR_INVALID_ARG);
 
   i2c_cmd_t cmd;
@@ -4435,7 +4387,6 @@ esp_err_t i2c_master_stop(i2c_cmd_handle_t cmd_handle)
   cmd.op_code = I2C_CMD_STOP;
 
   return i2c_cmd_link_append(cmd_handle, &cmd);
-
 }
 
 
@@ -4453,12 +4404,12 @@ esp_err_t i2c_master_stop(i2c_cmd_handle_t cmd_handle)
  *  Rets: esp_err_t ->
  * -------------------------------------------------------------------------------------------------
  */
-esp_err_t i2c_master_write(i2c_cmd_handle_t cmd_handle
-				,uint8_t* data
-				,size_t data_len
-				,bool ack_en)
+esp_err_t 
+i2c_master_write(i2c_cmd_handle_t cmd_handle
+	,uint8_t* data
+	,size_t data_len
+	,bool ack_en)
 {
-
   I2C_CHECK((data != NULL), I2C_ADDR_ERROR_STR, ESP_ERR_INVALID_ARG);
   I2C_CHECK(cmd_handle != NULL, I2C_CMD_LINK_INIT_ERR_STR, ESP_ERR_INVALID_ARG);
 
@@ -4492,7 +4443,6 @@ esp_err_t i2c_master_write(i2c_cmd_handle_t cmd_handle
   }
 
   return ESP_OK;
-
 }
 
 
@@ -4508,11 +4458,11 @@ esp_err_t i2c_master_write(i2c_cmd_handle_t cmd_handle
  *  Rets: esp_err_t ->
  * -------------------------------------------------------------------------------------------------
  */
-esp_err_t i2c_master_write_byte(i2c_cmd_handle_t cmd_handle
-				,uint8_t data
-				,bool ack_en)
+esp_err_t 
+i2c_master_write_byte(i2c_cmd_handle_t cmd_handle
+	,uint8_t data
+	,bool ack_en)
 {
-
   I2C_CHECK(cmd_handle != NULL, I2C_CMD_LINK_INIT_ERR_STR, ESP_ERR_INVALID_ARG);
 
   i2c_cmd_t cmd;
@@ -4526,7 +4476,6 @@ esp_err_t i2c_master_write_byte(i2c_cmd_handle_t cmd_handle
   cmd.byte_cmd = data;
 
   return i2c_cmd_link_append(cmd_handle, &cmd);
-
 }
 
 
@@ -4544,12 +4493,12 @@ esp_err_t i2c_master_write_byte(i2c_cmd_handle_t cmd_handle
  *  Rets: esp_err_t ->
  * -------------------------------------------------------------------------------------------------
  */
-esp_err_t i2c_master_read(i2c_cmd_handle_t cmd_handle
-				,uint8_t* data
-				,size_t data_len
-				,int ack)
+esp_err_t 
+i2c_master_read(i2c_cmd_handle_t cmd_handle
+	,uint8_t* data
+	,size_t data_len
+	,int ack)
 {
-
   I2C_CHECK((data != NULL), I2C_ADDR_ERROR_STR, ESP_ERR_INVALID_ARG);
   I2C_CHECK(cmd_handle != NULL, I2C_CMD_LINK_INIT_ERR_STR, ESP_ERR_INVALID_ARG);
 
@@ -4582,7 +4531,6 @@ esp_err_t i2c_master_read(i2c_cmd_handle_t cmd_handle
   }
 
   return ESP_OK;
-
 }
 
 
@@ -4603,9 +4551,9 @@ esp_err_t i2c_master_read(i2c_cmd_handle_t cmd_handle
  */
 esp_err_t
 i2c_master_read_byte(i2c_cmd_handle_t cmd_handle
-			, uint8_t* data, int ack)
+	,uint8_t* data
+	,int ack)
 {
-
   I2C_CHECK((data != NULL), I2C_ADDR_ERROR_STR, ESP_ERR_INVALID_ARG);
   I2C_CHECK(cmd_handle != NULL, I2C_CMD_LINK_INIT_ERR_STR, ESP_ERR_INVALID_ARG);
 
@@ -4619,5 +4567,4 @@ i2c_master_read_byte(i2c_cmd_handle_t cmd_handle
   cmd.data = data;
 
   return i2c_cmd_link_append(cmd_handle, &cmd);
-
 }

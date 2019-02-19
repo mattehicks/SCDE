@@ -256,10 +256,10 @@ typedef int (*readingsBeginUpdateFn_t) (Common_Definition_t *Common_Definition);
 typedef int (*readingsBulkUpdateFn_t) (Common_Definition_t *Common_Definition, uint8_t *readingNameText, size_t readingNameTextLen, uint8_t *readingValueText, size_t readingValueTextLen);
 
 // call this to add an Reading to the running update of Readings
-typedef int (*readingsBulkUpdate2Fn_t) (Common_Definition_t *Common_Definition, const size_t readingNameStringLength, const uint8_t *readingNameStringCharacters, const size_t readingValueStringLengthconst, uint8_t *readingValueStringCharacters);
+typedef int (*readingsBulkUpdate2Fn_t) (Common_Definition_t *Common_Definition, const size_t readingNameStringLength, const uint8_t *readingNameStringCharacters, const size_t readingValueStringLengthconst, const uint8_t *readingValueStringCharacters, const bool changed);
 
 // typedef for readingsEndUpdateFn - call this to after bulk-update to process readings
-typedef int (*readingsEndUpdateFn_t) (Common_Definition_t *Common_Definition);
+typedef int (*readingsEndUpdateFn_t) (Common_Definition_t *Common_Definition, bool doTrigger);
 
 // typedef for TimeNowFn - returns current time stamp
 typedef time_t (*TimeNowFn_t) ();

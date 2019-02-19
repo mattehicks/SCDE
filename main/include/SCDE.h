@@ -97,10 +97,10 @@ int readingsBeginUpdate(Common_Definition_t *Common_Definition);
 int readingsBulkUpdate(Common_Definition_t *Common_Definition, uint8_t *readingNameText, size_t readingNameTextLen, uint8_t *readingValueText, size_t readingValueTextLen);
 
 // call this to add an Reading to the running update of Readings
-int readingsBulkUpdate2(Common_Definition_t *Common_Definition, const size_t readingNameStringLength, const uint8_t *readingNameStringCharacters, const size_t readingValueStringLength, const uint8_t *readingValueStringCharacters);
+int readingsBulkUpdate2(Common_Definition_t *Common_Definition, const size_t readingNameStringLength, const uint8_t *readingNameStringCharacters, const size_t readingValueStringLength, const uint8_t *readingValueStringCharacters,const bool changed);
 
 // call this to after bulk-update to process readings
-int readingsEndUpdate(Common_Definition_t *Common_Definition);
+int readingsEndUpdate(Common_Definition_t *Common_Definition, bool doTrigger);
 
 // returns current system time. (IT IS NOT AN TIME STAMP)
 time_t TimeNow();

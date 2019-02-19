@@ -2847,6 +2847,8 @@ doGlobalDef(const uint8_t *cfgFileName
  *  Rets: ?
  * --------------------------------------------------------------------------------------------------
  */
+/*
+Die Funktion readingsBeginUpdate() bereitet die Definition mit dem Hash $hash auf ein Update von Readings vor. Dies betrifft insbesondere das Setzen von Umgebungsvariablen sowie dem aktuellen Zeitstempel als Änderungszeitpunkt. Der Aufruf dieser Funktion ist notwendig um eigentliche Updates mit der Funktion readingsBulkUpdate() auf der gewünschten Definition durchführen zu können.*/
 int
 readingsBeginUpdate(Common_Definition_t *Common_Definition)
   {
@@ -2905,7 +2907,7 @@ readingsBeginUpdate(Common_Definition_t *Common_Definition)
 
 
 
-/*
+/*OBSOLETE USE readingsBulkUpdateFn2!
  * --------------------------------------------------------------------------------------------------
  *  FName: readingsBulkUpdateFn
  *  Desc: Call readingsBulkUpdate to update the reading.
@@ -2981,7 +2983,7 @@ readingsBulkUpdate(Common_Definition_t *Common_Definition
  *  FName: readingsBulkUpdate2Fn
  *  Desc: Call readingsBulkUpdate to add an Reading to the running update of Readings
  *  NOTE: Call readingsBeginUpdateFn first!
- *  Para: Common_Definition_t *Common_Definition -> the definition which wants updated readings
+ *  Para: Common_Definition_t *Common_Definition -> the Definition that requests updated readings
  *        const size_t readingNameStringLength -> length of the name string
  *        const uint8_t *readingNameStringCharacters -> ptr to the name string
  *        const size_t readingValueStringLength -> length of the value string
@@ -2989,12 +2991,21 @@ readingsBulkUpdate(Common_Definition_t *Common_Definition
  *  Rets: ?
  * --------------------------------------------------------------------------------------------------
  */
-int
+/*Die Funktion readingsBulkUpdate() führt ein Update eines einzelnen Readings für die Definition $hash durch. Dabei wird das Readings $reading auf den Wert $value gesetzt. Bevor diese Funktion benutzt werden kann, muss readingsBeginUpdate() zuvor aufgerufen werden, ansonsten werden keine Updates durchgeführt.
+
+changed optional
+Flag, ob ein Event für dieses Update erzeugt werden soll (Wert: 1). Oder ob definitiv kein Event erzeugt werden soll (Wert: 0). Wenn nicht gesetzt, wird aufgrund entsprechender Attribute in der Definition von $hash entschieden, ob ein Event zu erzeugen ist, oder nicht (Attribute: event-on-change-reading, event-on-update-reading, event-min-interval, ...)
+
+Rückgabewert $rv
+Zeichenkette bestehend aus Reading und Wert getrennt durch einen Doppelpunkt, welcher anzeigt, auf welchen Wert das Reading tatsächlich gesetzt wurde.*/
+
+int // will be renamed to readingsBulkUpdate
 readingsBulkUpdate2(Common_Definition_t *Common_Definition
 		,const size_t readingNameStringLength
 		,const uint8_t *readingNameStringCharacters
 		,const size_t readingValueStringLength
-		,const uint8_t *readingValueStringCharacters)
+		,const uint8_t *readingValueStringCharacters
+		,const bool changed)
 {
   // check if bulk update begin was called
   if (!Common_Definition->bulkUpdateReadings) {
@@ -3059,16 +3070,15 @@ readingsBulkUpdate2(Common_Definition_t *Common_Definition
  *  FName: readingsEndUpdate
  *  Desc: Call readingsEndUpdate when you are done updating readings. This optionally calls DoTrigger
  *        to propagate the changes.
- *  Para: const uint8_t *commandTxt ->  ptr to the Command-Text
- *       const size_t commandTxtLen -> Command-Text length
- *       commandFn_t commandFn -> the command Fn
- *       const uint8_t *commandHelp -> ptr the Command-Help text
- *       const size_t commandHelpLen -> Command-Help text length
+ *  Para: Common_Definition_t *Common_Definition -> the Definition that requests updated readings
+ *        bool doTrigger -> triggering readings ? false / true
  *  Rets: -/-
  * --------------------------------------------------------------------------------------------------
  */
+/*Die Funktion readingsEndUpdate() beendet den Bulk-Update Prozess durch die Funktionen readingsBeginUpdate() & readingsBulkUpdate() und triggert optional die entsprechenden Events sämtlicher erzeugter Readings für die Definition $hash. Desweiteren werden nachgelagerte Tasks wie bspw. die Erzeugung von User-Readings (Attribut: userReadings), sowie die Erzeugung des STATE aufgrund des Attributs stateFormat durchgeführt. Sofern $do_trigger gesetzt ist, werden alle anstehenden Events nach Abschluss getriggert.*/
 int
-readingsEndUpdate(Common_Definition_t *Common_Definition)
+readingsEndUpdate(Common_Definition_t *Common_Definition,
+	bool doTrigger)
 {
   // check if bulk update begin was called
   if (!Common_Definition->bulkUpdateReadings) {

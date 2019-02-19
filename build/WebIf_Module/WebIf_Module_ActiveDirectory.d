@@ -147,7 +147,7 @@ WebIf_Module_ActiveDirectory.o: \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
  /home/maikschulze/esp/SCDE/main/include/SCDE_s.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h \
- /home/maikschulze/esp/SCDE/components/ESP32_Control_Module/include/HTools_cgi.h \
+ /home/maikschulze/esp/SCDE/components/ESP32_DeVICE_Module/include/HTools_cgi.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h \
@@ -449,7 +449,7 @@ WebIf_Module_ActiveDirectory.o: \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h:
 
-/home/maikschulze/esp/SCDE/components/ESP32_Control_Module/include/HTools_cgi.h:
+/home/maikschulze/esp/SCDE/components/ESP32_DeVICE_Module/include/HTools_cgi.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h:
 

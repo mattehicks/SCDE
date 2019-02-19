@@ -152,7 +152,7 @@ ESP32_SwITCH_Module.o: \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSAdvFileTX.h \
- /home/maikschulze/esp/SCDE/components/ESP32_Control_Module/include/HTools_cgi.h \
+ /home/maikschulze/esp/SCDE/components/ESP32_DeVICE_Module/include/HTools_cgi.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Content/include/ServAPCfg_tpl.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/CGI_Redirect.h \
@@ -468,7 +468,7 @@ ESP32_SwITCH_Module.o: \
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSAdvFileTX.h:
 
-/home/maikschulze/esp/SCDE/components/ESP32_Control_Module/include/HTools_cgi.h:
+/home/maikschulze/esp/SCDE/components/ESP32_DeVICE_Module/include/HTools_cgi.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Content/include/ServAPCfg_tpl.h:
 
