@@ -602,17 +602,11 @@ typedef struct {
  * loaded module. Values are initialized by HCTRLD an the loaded module itself.
  */
 typedef struct ESP32_I2C_Master_Definition_s {
-
   Common_Definition_t common;		// ... the common part of the definition
-
   WebIf_Provided_t WebIf_Provided;	// provided data for WebIf
-
   uint8_t i2c_num;			// the I2C hardware that should be used
-
   i2c_config_t i2c_config;		// i2c configuration
-
   i2c_obj_t i2c_obj;			// the current i2c job
-
 } ESP32_I2C_Master_Definition_t;
 
 
