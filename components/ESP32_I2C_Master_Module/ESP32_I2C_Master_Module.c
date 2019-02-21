@@ -29,6 +29,7 @@
 
 #include <SCDE_s.h>
 
+#include "ESP32_I2C_Master_Module_s.h"
 #include "ESP32_I2C_Master_Module.h"
 
 #include "SCDE_Main.h"
