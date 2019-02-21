@@ -12,6 +12,10 @@
 
 
 
+// -------------------------------------------------------------------------------------------------
+
+
+
 /* 
  * ESP32 I2C Controller Hardware Configuration Registers (R / W)
  * ESP32 has 2 I2C Controller units. Base adress is (I2C0) 0x3FF53000 (I2C1) 0x3FF67000
@@ -429,6 +433,8 @@ typedef volatile struct ESP32_I2C_CONTROLLER_CONF_REG_t_s {
 
 
 
+// -------------------------------------------------------------------------------------------------
+
 
 
 /*
@@ -486,6 +492,10 @@ typedef enum {
 
 
 
+// -------------------------------------------------------------------------------------------------
+
+
+
 /**
  * @brief I2C initialization parameters
  */
@@ -540,7 +550,9 @@ typedef void* i2c_cmd_handle_t;    /*!< I2C command handle  */
 
 
 
-//XXXXXXXXXXXXXXXXXXXXXXXXXXXXX NEEDED BY CLIENTS THAT PREPARE A LINKED LIST XXXXXXXXXXXXXXXXXXXXXXX
+// -------------------------------------------------------------------------------------------------
+
+
 
 // i2c commands linked list - detailed data for one command
 typedef struct {
@@ -615,17 +627,74 @@ typedef struct {
 // -------------------------------------------------------------------------------------------------
 
 
+/*
+ * typedefs of ESP32_I2C_Master Function Callbacks
+ * This Fn are provided & made accessible for client modules - for operation
+ */
+// typedef for i2c_cmd_link_createFn - 
+typedef i2c_cmd_handle_t (*i2c_cmd_link_createFn_t) ();
+
+// typedef for i2c_cmd_link_deleteFn - 
+typedef void (*i2c_cmd_link_deleteFn_t) (i2c_cmd_handle_t cmd_handle);
+
+// typedef for i2c_cmd_link_appendFn - 
+typedef esp_err_t (*i2c_cmd_link_appendFn_t) (i2c_cmd_handle_t cmd_handle, i2c_cmd_t *cmd);
+
+// typedef for i2c_master_startFn - 
+typedef esp_err_t (*i2c_master_startFn_t) (i2c_cmd_handle_t cmd_handle);
+
+// typedef for i2c_master_stopFn - 
+typedef esp_err_t (*i2c_master_stopFn_t) (i2c_cmd_handle_t cmd_handle);
+
+// typedef for i2c_master_writeFn - 
+typedef esp_err_t (*i2c_master_writeFn_t) (i2c_cmd_handle_t cmd_handle, uint8_t *data, size_t data_len, bool ack_en);
+
+// typedef for i2c_master_write_byteFn - 
+typedef esp_err_t (*i2c_master_write_byteFn_t) (i2c_cmd_handle_t cmd_handle, uint8_t data, bool ack_en);
+
+// typedef for i2c_master_read_byteFn - 
+typedef esp_err_t (*i2c_master_read_byteFn_t) (i2c_cmd_handle_t cmd_handle, uint8_t *data, i2c_ack_type_t ack);
+
+// typedef for i2c_master_readFn - 
+typedef esp_err_t (*i2c_master_readFn_t) (i2c_cmd_handle_t cmd_handle, uint8_t *data, size_t data_len, i2c_ack_type_t ack);
+
+// typedef for i2c_master_cmd_beginFn - 
+typedef esp_err_t (*i2c_master_cmd_beginFn_t) (i2c_obj_t *p_i2c, i2c_cmd_handle_t cmd_handle, TickType_t ticks_to_wait);
+
+/*
+ * ESP32_I2C_Master Fn (I2C Functions) typedef
+ * Stores function callbacks provided & made accessible for client modules using this module
+ */
+typedef struct ESP32_I2C_Master_Fn_s {
+  i2c_cmd_link_createFn_t i2c_cmd_link_createFn;           // ?
+  i2c_cmd_link_deleteFn_t i2c_cmd_link_deleteFn;           // ?
+  i2c_cmd_link_appendFn_t i2c_cmd_link_appendFn;           // ?
+  i2c_master_startFn_t i2c_master_startFn;                 // ?
+  i2c_master_stopFn_t i2c_master_stopFn;                   // ?
+  i2c_master_writeFn_t i2c_master_writeFn;                 // ?
+  i2c_master_write_byteFn_t i2c_master_write_byteFn;       // ?
+  i2c_master_read_byteFn_t i2c_master_read_byteFn;         // ?
+  i2c_master_readFn_t i2c_master_readFn;                   // ?
+  i2c_master_cmd_beginFn_t i2c_master_cmd_beginFn;         // ?
+} ESP32_I2C_Master_Fn_t;
+
+
+
+// -------------------------------------------------------------------------------------------------
+
+
 
 /** 
  * ESP32_I2C_Master_Definition stores values for operation valid only for the defined instance of an
  * loaded module. Values are initialized by HCTRLD an the loaded module itself.
  */
 typedef struct ESP32_I2C_Master_Definition_s {
-  Common_Definition_t common;		/*!< ... the common part of the definition */
-  WebIf_Provided_t WebIf_Provided;	/*!< provided data for WebIf */
-  uint8_t i2c_num;			/*!< the I2C hardware that should be used */
-  i2c_config_t i2c_config;		/*!< i2c configuration */
-  i2c_obj_t *i2c_obj;			/*!< the current i2c job */
+  Common_Definition_t common;			/*!< ... the common part of the definition */
+  WebIf_Provided_t WebIf_Provided;		/*!< provided data for WebIf */
+  uint8_t i2c_num;				/*!< the I2C hardware that should be used */
+  i2c_config_t i2c_config;			/*!< i2c configuration */
+  i2c_obj_t *i2c_obj;				/*!< the current i2c job */
+  ESP32_I2C_Master_Fn_t* ESP32_I2C_Master_Fn;	/*!< ESP32_I2C_MasterFn (Functions / callbacks) accessible for client modules */
 } ESP32_I2C_Master_Definition_t;
 
 
@@ -690,6 +759,7 @@ bool ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition_t* ESP32_I
  * @brief I2C driver install
  *
  * @param i2c_num I2C port number
+ * @param i2c_obj_t** p_i2c_obj -> Pointer to the location where the pointer to the i2c object is stored (**) (will be allocated)
  * @param mode I2C mode( master or slave )
  * @param slv_rx_buf_len receiving buffer size for slave mode
  *        @note
@@ -711,7 +781,8 @@ bool ESP32_I2C_Master_SetAffectedReadings(ESP32_I2C_Master_Definition_t* ESP32_I
  */
 esp_err_t 
 i2c_driver_install(i2c_port_t i2c_num,
-	i2c_obj_t *p_i2c, i2c_mode_t mode,
+	i2c_obj_t** p_i2c_obj,
+	i2c_mode_t mode,
 	size_t slv_rx_buf_len,
 	size_t slv_tx_buf_len,
 	int intr_alloc_flags);
@@ -719,13 +790,13 @@ i2c_driver_install(i2c_port_t i2c_num,
 /**
  * @brief I2C driver delete
  *
- * @param i2c_num I2C port number
+ * @param i2c_obj_t** p_i2c_obj -> Pointer to the location where the pointer to the i2c object is stored (**) (will be cleared)
  *
  * @return
  *     - ESP_OK Success
  *     - ESP_ERR_INVALID_ARG Parameter error
  */
-esp_err_t i2c_driver_delete(i2c_obj_t *p_i2c);
+esp_err_t i2c_driver_delete(i2c_obj_t** p_i2c_obj);
 
 
 /**
@@ -832,6 +903,18 @@ i2c_cmd_handle_t i2c_cmd_link_create();
  * @param cmd_handle I2C command handle
  */
 void i2c_cmd_link_delete(i2c_cmd_handle_t cmd_handle);
+
+/** to stage 2 module!
+ * -------------------------------------------------------------------------------------------------
+ *  FName: i2c_cmd_link_append
+ *  Desc: Append to linked list: Adds a command i2c_cmd_t at the given ptr to the linked i2c cmd list
+ *  Info: 
+ *  Para: i2c_cmd_handle_t cmd_handle -> head of linked list - i2c commands
+ *        i2c_cmd_t* cmd -> ptr to the cmd data (data will be copied to allocated memory)
+ *  Rets: esp_err_t ->
+ * -------------------------------------------------------------------------------------------------
+ */
+static esp_err_t i2c_cmd_link_append(i2c_cmd_handle_t cmd_handle, i2c_cmd_t *cmd);
 
 /**
  * @brief Queue command for I2C master to generate a start signal
@@ -1165,4 +1248,5 @@ esp_err_t i2c_get_data_mode(i2c_port_t i2c_num, i2c_trans_mode_t *tx_trans_mode,
 
 
 #endif /*ESP32_I2C_MASTER_MODULE_H*/
+
 

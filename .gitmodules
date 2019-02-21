@@ -10,3 +10,6 @@
 [submodule "components/TeLNET_Module"]
 	path = components/TeLNET_Module
 	url = https://github.com/EcSUHA/TeLNET_Module
+[submodule "components/SSD1306_Module"]
+	path = components/SSD1306_Module
+	url = https://github.com/EcSUHA/SSD1306_Module
