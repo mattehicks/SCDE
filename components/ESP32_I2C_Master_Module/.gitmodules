@@ -1,0 +1,3 @@
+[submodule "ESP32_I2C_Master_Module"]
+	path = ESP32_I2C_Master_Module
+	url = https://github.com/EcSUHA/ESP32_I2C_Master_Module

@@ -16,3 +16,6 @@
 [submodule "components/BH1750_Module"]
 	path = components/BH1750_Module
 	url = https://github.com/EcSUHA/BH1750_Module
+[submodule "components/ESP32_I2C_Master_Module"]
+	path = components/ESP32_I2C_Master_Module
+	url = https://github.com/EcSUHA/ESP32_I2C_Master_Module
