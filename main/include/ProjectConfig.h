@@ -43,14 +43,15 @@
 #define Setstate_Command_DBG                          7
 #define Shutdown_Command_DBG                          7
 #define Sub_Command_DBG                               7
+#define IOWrite_Command_DBG                           7
 
 // Module logging verbose - override    0 1 2 3 4 5 6 7 8 9
-#define ESP32_BH1770_Module_DBG                       7
-#define ESP32_CoNTROL_Module_DBG                      7
+#define BH1750_Module_DBG                             7
 #define ESP32_DeVICE_Module_DBG                       7
 #define ESP32_I2C_Master_Module_DBG                   7
 #define ESP32_S0_Module_DBG                           7
 #define ESP32_SwITCH_Module_DBG                       7
+#define SSD1306_Module_DBG                            7
 #define Telnet_Module_DBG                             7
 #define Webif_Module_DBG                              7
 

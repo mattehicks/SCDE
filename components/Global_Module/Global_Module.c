@@ -58,57 +58,33 @@ static SCDEFn_t* SCDEFn;
  *  Data: 
  * -------------------------------------------------------------------------------------------------
  */
-ProvidedByModule_t Global_ProvidedByModule =
-  { // A-Z order
-
-  "Global"				// Type-Name of module -> should be same name as libfilename.so !
+ProvidedByModule_t Global_ProvidedByModule = { // A-Z order
+  "Global"				// Type-Name of module -> on Linux libfilename.so !
   ,6					// size of Type-Name
 
   ,NULL					// Add
-
   ,NULL					// Attribute
-
   ,Global_Define			// Define
-
   ,NULL					// Delete
-
-  ,NULL					// Except
-
-  ,NULL					// Get
-
-  ,NULL					// IdleCb
-
-  ,Global_Initialize			// Initialize
-
-  ,NULL					// Notify
-
-  ,NULL					// Parse
-
-  ,NULL					// Read
-
-  ,NULL					// Ready
-
-  ,NULL					// Rename
-
-  ,NULL					// Set
-
-  ,NULL					// Shutdown
-
-  ,NULL					// State
-
-  ,NULL					// Sub
-
-  ,NULL					// Undefine
-
   ,NULL					// DirectRead
-
   ,NULL					// DirectWrite
-
-//  ,NULL		 		// FnProvided
-
-  ,sizeof(Global_Definition_t)		// Size of modul specific definition structure (Common_Definition_t + X)
-
-  };
+  ,NULL					// Except
+  ,NULL					// Get
+  ,NULL					// IdleCb
+  ,Global_Initialize			// Initialize
+  ,NULL					// Notify
+  ,NULL					// Parse
+  ,NULL					// Read
+  ,NULL					// Ready
+  ,NULL					// Rename
+  ,NULL					// Set
+  ,NULL					// Shutdown
+  ,NULL					// State
+  ,NULL					// Sub
+  ,NULL					// Undefine
+  ,NULL					// Write
+  ,sizeof(Global_Definition_t)		// Modul specific Size (Common_Definition_t + X)
+};
 
 
 

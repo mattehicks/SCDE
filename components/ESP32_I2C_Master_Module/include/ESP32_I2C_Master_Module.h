@@ -33,7 +33,7 @@ strTextMultiple_t* ESP32_I2C_Master_Shutdown(Common_Definition_t* Common_Definit
 
 strTextMultiple_t* ESP32_I2C_Master_Undefine(Common_Definition_t* Common_Definition);
 
-
+xMultipleStringSLTQE_t* ESP32_I2C_Master_Write(Common_Definition_t *Common_Definition, xString_t data);
 
 // -------------------------------------------------------------------------------------------------
 

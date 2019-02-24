@@ -353,15 +353,16 @@ ESP32_I2C_Master_Fn_t ESP32_I2C_Master_Fn = {
  *  Data: 
  * -------------------------------------------------------------------------------------------------
  */
-ProvidedByModule_t ESP32_I2C_Master_ProvidedByModule = {
-   // A-Z order
-  "ESP32_I2C_Master"			// Type-Name of module -> should be same name as libfilename.so !
+ProvidedByModule_t ESP32_I2C_Master_ProvidedByModule = {   // A-Z order
+  "ESP32_I2C_Master"			// Type-Name of module -> on Linux libfilename.so !
   ,16					// size of Type-Name
 
   ,NULL					// Add
   ,ESP32_I2C_Master_Attribute		// Attribute
   ,ESP32_I2C_Master_Define		// Define
   ,NULL					// Delete
+  ,NULL					// DirectRead
+  ,NULL					// DirectWrite
   ,NULL					// Except
   ,NULL					// Get
   ,ESP32_I2C_Master_IdleCb		// IdleCb
@@ -376,10 +377,8 @@ ProvidedByModule_t ESP32_I2C_Master_ProvidedByModule = {
   ,NULL					// State
   ,NULL					// Sub
   ,ESP32_I2C_Master_Undefine		// Undefine
-  ,NULL					// DirectRead
-  ,NULL					// DirectWrite
-//  ,NULL		 		// FnProvided
-  ,sizeof(ESP32_I2C_Master_Definition_t) // Size of modul specific definition structure (Common_Definition_t + X)
+  ,ESP32_I2C_Master_Write		// Write
+  ,sizeof(ESP32_I2C_Master_Definition_t) // Modul specific Size (Common_Definition_t + X)
 };
 
 
@@ -1166,7 +1165,7 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
 
 
 
-
+/*
     int i = 0;
     int ret;
  //   uint32_t task_idx = (uint32_t) arg;
@@ -1234,7 +1233,7 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
             printf("No ack, sensor not connected...skip...\n");
         }
 
-
+*/
 
 //https://github.com/BoschSensortec/BMP180_driver
 
@@ -1247,7 +1246,7 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
 
 
 
-
+/*
 // Following definitions are bollowed from 
 // http://robotcantalk.blogspot.com/2015/03/interfacing-arduino-with-ssd1306-driven.html
 
@@ -1356,7 +1355,7 @@ esp_err_t i2c_driver_delete(i2c_port_t i2c_num)
 
 	
 }
-
+*/
 
 
 
@@ -1922,6 +1921,111 @@ ESP32_I2C_Master_Undefine(Common_Definition_t *Common_Definition)
   return retMsg;
 
 }
+
+
+
+/**
+ * -------------------------------------------------------------------------------------------------
+ *  FName: ESP32_I2C_Master_Write
+ *  Desc: Is called to write data to an 'Definition' of 'ESP32_I2C_Master' Module.
+ *  Info: 
+ *  Para: Common_Definition_t* Common_Definition -> the 'Definition' that should write the data 
+ *                                                  (cast to ESP32_I2C_Master_Definition_t*)
+ *        xString_t data          -> data that should be written (characters in allocated mem + len) 
+ *  Rets: xMultipleStringSLTQE_t* -> response: ptr to an singly linked tail queue element with return
+ *                                   message in allocated memory, or NULL = OK / No message
+ * -------------------------------------------------------------------------------------------------
+ */
+xMultipleStringSLTQE_t*
+ESP32_I2C_Master_Write(Common_Definition_t *Common_Definition,
+		       xString_t data)
+{
+
+  // make common ptr to modul specific ptr
+  ESP32_I2C_Master_Definition_t* ESP32_I2C_Master_Definition =
+		  (ESP32_I2C_Master_Definition_t*) Common_Definition;
+
+  // for Fn response msg
+  xMultipleStringSLTQE_t *retMsgMultipleStringSLTQE = SCDE_OK;
+
+// -------------------------------------------------------------------------------------------------
+
+  #if ESP32_I2C_Master_Module_DBG >= 7
+  SCDEFn->Log3Fn(Common_Definition->name
+	,Common_Definition->nameLen
+	,7
+	,"WriteFn of Module '%.*s' is called for Definition '%.*s'. Got %d bytes raw data."
+	,ESP32_I2C_Master_Definition->common.module->ProvidedByModule->typeNameLen
+	,ESP32_I2C_Master_Definition->common.module->ProvidedByModule->typeName
+	,ESP32_I2C_Master_Definition->common.nameLen
+	,ESP32_I2C_Master_Definition->common.name
+	,data.length);
+  #endif
+
+// -------------------------------------------------------------------------------------------------
+
+  esp_err_t espRc;
+
+  // the characters pointer goes to our i2c cmds = data to write
+  i2c_cmd_handle_t cmd = (i2c_cmd_handle_t) data.characters;
+
+  espRc = i2c_master_cmd_begin(ESP32_I2C_Master_Definition->i2c_obj,
+		cmd,
+		10 / portTICK_PERIOD_MS);
+
+  // free the allocated memory
+  i2c_cmd_link_delete(cmd);
+
+  // prepare error msg in case of error
+  if (espRc == ESP_OK) {
+
+	printf("I2C Master CMD executed ok!");
+  } else {
+
+	#if ESP32_I2C_Master_Module_DBG >= 5
+	SCDEFn->Log3Fn(Common_Definition->name
+		,Common_Definition->nameLen
+		,5
+		,"While executing Module '%.*s' WriteFn : "
+		 "i2c_master_cmd_beginFn returns an error! code: 0x%.2X."
+		,ESP32_I2C_Master_Definition->common.module->ProvidedByModule->typeNameLen
+		,ESP32_I2C_Master_Definition->common.module->ProvidedByModule->typeName
+		,espRc);
+	#endif
+
+	// alloc mem for retMsg
+	retMsgMultipleStringSLTQE = 
+		malloc(sizeof(xMultipleStringSLTQE_t));
+
+	  // response with error text
+	retMsgMultipleStringSLTQE->string.length = 
+		asprintf(&retMsgMultipleStringSLTQE->string.characters
+		,"An error (code: 0x%.2X) occured while executing the WriteFn of "
+                 "Module '%.*s' for Definition '%.*s'!"
+		,espRc
+		,ESP32_I2C_Master_Definition->common.module->ProvidedByModule->typeNameLen
+		,ESP32_I2C_Master_Definition->common.module->ProvidedByModule->typeName
+		,ESP32_I2C_Master_Definition->common.nameLen
+		,ESP32_I2C_Master_Definition->common.name);
+  }
+
+  return retMsgMultipleStringSLTQE;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

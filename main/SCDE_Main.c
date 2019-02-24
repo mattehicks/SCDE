@@ -1064,6 +1064,10 @@ app_main(void)
   extern providedByCommand_t Include_ProvidedByCommand;
   CommandActivateCommand(&Include_ProvidedByCommand);
 
+  // Activate IOWrite as SCDE built-in Command
+  extern providedByCommand_t IOWrite_ProvidedByCommand;
+  CommandActivateCommand(&IOWrite_ProvidedByCommand);
+
   // Activate List as SCDE built-in Command
   extern providedByCommand_t List_ProvidedByCommand;
   CommandActivateCommand(&List_ProvidedByCommand);
@@ -1107,9 +1111,9 @@ app_main(void)
 
   // --- now the optional modules
 
-  // Activate ESP32_BH1750 as SCDE built-in Module
-  extern ProvidedByModule_t ESP32_BH1750_ProvidedByModule;
-  CommandActivateModule(&ESP32_BH1750_ProvidedByModule);
+  // Activate BH1750 as SCDE built-in Module
+  extern ProvidedByModule_t BH1750_ProvidedByModule;
+  CommandActivateModule(&BH1750_ProvidedByModule);
 
   // Activate ESP32_Control as SCDE built-in Module
 //  extern ProvidedByModule_t ESP32_Control_ProvidedByModule;
@@ -1130,6 +1134,10 @@ app_main(void)
   // Activate ESP32_SwITCH as SCDE built-in Module
   extern ProvidedByModule_t ESP32_SwITCH_ProvidedByModule;
   CommandActivateModule(&ESP32_SwITCH_ProvidedByModule);
+
+  // Activate SSD1306 as SCDE built-in Module
+  extern ProvidedByModule_t SSD1306_ProvidedByModule;
+  CommandActivateModule(&SSD1306_ProvidedByModule);
 
   // Activate Telnet as SCDE built-in Module
   extern ProvidedByModule_t Telnet_ProvidedByModule;

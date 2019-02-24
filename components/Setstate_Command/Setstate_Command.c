@@ -603,7 +603,7 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 
 				SCDEFn->Log3Fn(Setstate_ProvidedByCommand.commandNameText
 		  			,Setstate_ProvidedByCommand.commandNameTextLen
-					,5
+					,7
 					,"Calling StateFn of Module '%.*s' for Definition '%.*s'. "
 					 "Reading '%.*s' gets new Value '%.*s', Mime '%.*s', TimeStamp '%.*s'."
 					,Common_Definition->module->ProvidedByModule->typeNameLen

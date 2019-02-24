@@ -10147,57 +10147,33 @@ WebIf_Provided_t WebIf_Provided = {
  *  Data:
  * ---------------------------------------------------------------------------------------------------
  */
-const ProvidedByModule_t WebIf_ProvidedByModule =
-  { // A-Z order
-
-   "WebIf"			  	// Type-Name of module -> should be same name as libfilename.so !
+const ProvidedByModule_t WebIf_ProvidedByModule = { // A-Z order
+   "WebIf"			  	// Type-Name of module -> on Linux libfilename.so !
   ,5					// size of Type-Name
 
   ,WebIf_Add				// Add
-
   ,NULL					// Attribute
-
   ,WebIf_Define				// Define
-
   ,NULL					// Delete
-
-  ,NULL					// Except
-
-  ,NULL					// Get
-
-  ,WebIf_IdleCbX			// IdleCb
-
-  ,WebIf_Initialize			// Initialize
-
-  ,NULL					// Notify
-
-  ,NULL					// Parse
-
-  ,NULL					// Read
-
-  ,NULL					// Ready
-
-  ,NULL					// Rename
-
-  ,NULL	//WebIf_Set			// Set
-
-  ,NULL					// Shutdown
-
-  ,NULL					// State
-
-  ,WebIf_Sub				// Sub
-
-  ,WebIf_Undefine			// Undefine
-
   ,WebIf_DirectRead			// DirectRead
-
   ,WebIf_DirectWrite			// DirectWrite
-
-//  ,WebIf_Provided 			// FnProvided
-
-  ,sizeof(WebIf_Definition_t)		// Size of modul specific definition structure (Common_Definition_t + X)
-
-  };
+  ,NULL					// Except
+  ,NULL					// Get
+  ,WebIf_IdleCbX			// IdleCb
+  ,WebIf_Initialize			// Initialize
+  ,NULL					// Notify
+  ,NULL					// Parse
+  ,NULL					// Read
+  ,NULL					// Ready
+  ,NULL					// Rename
+  ,NULL	//WebIf_Set			// Set
+  ,NULL					// Shutdown
+  ,NULL					// State
+  ,WebIf_Sub				// Sub
+  ,WebIf_Undefine			// Undefine
+  ,NULL					// Write
+  ,sizeof(WebIf_Definition_t)		// Modul specific Size (Common_Definition_t + X)
+};
 
 
 

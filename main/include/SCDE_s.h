@@ -386,6 +386,14 @@ typedef strTextMultiple_t* (* DefineFn_t)(Common_Definition_t *Common_Definition
 //
 typedef int (* DeleteFn_t)(Common_Definition_t *Common_Definition);		
 
+
+//
+typedef int (* DirectReadFn_t)(Common_Definition_t *Common_Definition);
+
+// typedef for DirectWriteFn - for 2 stage designs - called to give write job to 1st stage - provided my module
+/*typedef strTextMultiple_t* (* DirectWriteFn_t)(Common_Definition_t *Common_Definition_Stage1, Common_Definition_t *Common_Definition_Stage2, Common_StageXCHG_t *Common_StageXCHG);*/
+typedef int (* DirectWriteFn_t)(Common_Definition_t *Common_Definition);
+
 //
 typedef int (* ExceptFn_t)(Common_Definition_t *Common_Definition);
 
@@ -438,12 +446,11 @@ typedef strTextMultiple_t* (* SubFn_t)(Common_Definition_t *Common_Definition, u
 // typedef for UndefineFn - called when an definition is deleted, chance to cleanup - provided my module
 typedef strTextMultiple_t* (* UndefineFn_t)(Common_Definition_t *Common_Definition);		
 
-//
-typedef int (* DirectReadFn_t)(Common_Definition_t *Common_Definition);
+// typedef for WriteFn - called to write data to the definition
+typedef xMultipleStringSLTQE_t* (* WriteFn_t) (Common_Definition_t *Common_Definition, xString_t data);
 
-// typedef for DirectWriteFn - for 2 stage designs - called to give write job to 1st stage - provided my module
-/*typedef strTextMultiple_t* (* DirectWriteFn_t)(Common_Definition_t *Common_Definition_Stage1, Common_Definition_t *Common_Definition_Stage2, Common_StageXCHG_t *Common_StageXCHG);*/
-typedef int (* DirectWriteFn_t)(Common_Definition_t *Common_Definition);
+
+
 
 
 
@@ -461,6 +468,8 @@ struct ProvidedByModule_s {
   AttributeFn_t AttributeFn;	// called in case of attribute changes, to check them
   DefineFn_t DefineFn;		// called to create a new definition of this type
   DeleteFn_t DeleteFn;		// clean up (delete logfile), called by delete after UndefFn
+  DirectReadFn_t DirectReadFn;	// ? called by select loop
+  DirectWriteFn_t DirectWriteFn;// ? called by select loop
   ExceptFn_t ExceptFn;		// called if the global select reports an except field
   GetFn_t GetFn;		// get some data from this device
   IdleCbFn_t IdleCbFn;		// give module an Idle-Callback to process something
@@ -475,9 +484,8 @@ struct ProvidedByModule_s {
   StateFn_t StateFn;		// set local info for this device, do not activate anything
   SubFn_t SubFn;		// called when Attribute-Keys owned by this Module are deleted
   UndefineFn_t UndefineFn;	// clean up (delete timer, close fd), called by delete and rereadcfg
-  DirectReadFn_t DirectReadFn;	// ? called by select loop
-  DirectWriteFn_t DirectWriteFn;// ? called by select loop
-// uint32_t *FnProvided;	// Fn Provided for other Modules
+  WriteFn_t WriteFn;		//
+// uint32_t *FnProvided;	// Link to Fn Provided for other Modules here?
   int SizeOfDefinition;		// Size of modul specific definition structure (Common_Definition_t + X)
 };
 
@@ -500,6 +508,8 @@ struct Module_s {
   STAILQ_ENTRY (Module_s) entries;		// Link to next loaded Module
   ProvidedByModule_t *ProvidedByModule;		// Ptr to Provided by Module Info
   void *LibHandle;				// Handle to this loaded Module
+
+ // place  ProvidedByModule  FNS here direct ?
 };
 
 

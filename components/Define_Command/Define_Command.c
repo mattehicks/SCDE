@@ -121,8 +121,8 @@ Define_InitializeCommandFn(SCDERoot_t* SCDERootptr)
  * --------------------------------------------------------------------------------------------------
  */
 struct headRetMsgMultiple_s ICACHE_FLASH_ATTR
-Define_CommandFn (const uint8_t *args
-		, const size_t argsLen)
+Define_CommandFn (const uint8_t *args,
+		  const size_t argsLen)
 {
   #if Define_Command_DBG >= 7
   SCDEFn->Log3Fn(Define_ProvidedByCommand.commandNameText
@@ -138,7 +138,7 @@ Define_CommandFn (const uint8_t *args
   // prepare STAILQ head for multiple RetMsg storage
   struct headRetMsgMultiple_s headRetMsgMultiple;
 
-  // Initialize the queue
+  // initialize the queue
   STAILQ_INIT(&headRetMsgMultiple);
 
   // set start of possible Name
@@ -195,7 +195,6 @@ Define_CommandFn (const uint8_t *args
 
     // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
     return headRetMsgMultiple;
-
   }
 
  /*
@@ -210,16 +209,16 @@ Define_CommandFn (const uint8_t *args
 
 
    // get the module ptr by name
-   Module_t* Module = SCDEFn->GetLoadedModulePtrByNameFn(typeName
-    ,typeNameLen);
+   Module_t* Module = SCDEFn->GetLoadedModulePtrByNameFn(typeName,
+ 	typeNameLen);
 
   // do we need to reload Module?
   if (!Module) // NOT FUNCTIONAL!
-    Module = SCDEFn->CommandReloadModuleFn(typeName, typeNameLen);
+	Module = SCDEFn->CommandReloadModuleFn(typeName, typeNameLen);
 
   // alloc mem for modul specific definition structure (Common_Definition_t + X)
-  Common_Definition_t *NewCommon_Definition
-    = malloc(Module->ProvidedByModule->SizeOfDefinition);
+  Common_Definition_t* NewCommon_Definition
+	= malloc(Module->ProvidedByModule->SizeOfDefinition);
 
   // zero the struct
   memset(NewCommon_Definition, 0, Module->ProvidedByModule->SizeOfDefinition);
@@ -266,28 +265,34 @@ Define_CommandFn (const uint8_t *args
   // DefineFn assigned by module ?
   if (Module->ProvidedByModule->DefineFn) {
 
-    printf("Calling DefineFN for Name:%.*s TypeName:%.*s Definition:%.*s cnt:%d state:%.*s\n"
-      ,NewCommon_Definition->nameLen
-      ,NewCommon_Definition->name
-      ,NewCommon_Definition->module->ProvidedByModule->typeNameLen
-      ,NewCommon_Definition->module->ProvidedByModule->typeName
-      ,NewCommon_Definition->definitionLen
-      ,NewCommon_Definition->definition
-      ,NewCommon_Definition->nr
-      ,NewCommon_Definition->stateLen
-      ,NewCommon_Definition->state);
+	#if Define_Command_DBG >= 7
+	SCDEFn->Log3Fn(Define_ProvidedByCommand.commandNameText,
+		Define_ProvidedByCommand.commandNameTextLen,
+		7,
+		"Calling DefineFn of Module '%.*s' for construction of new Definition '%.*s' "
+		"using arguments '%.*s'. (Nr.:%d, Initial State:%.*s)",
+		NewCommon_Definition->module->ProvidedByModule->typeNameLen,
+		NewCommon_Definition->module->ProvidedByModule->typeName,
+		NewCommon_Definition->nameLen,
+		NewCommon_Definition->name,
+		NewCommon_Definition->definitionLen,
+      		NewCommon_Definition->definition,
+    		NewCommon_Definition->nr,
+		NewCommon_Definition->stateLen,
+     		NewCommon_Definition->state);
+		#endif
 
-    // execute DefineFn and maybe get an error msg
-    strTextMultiple_t *retMsg = 
-      Module->ProvidedByModule->DefineFn(NewCommon_Definition);
 
-    // got an error msg?
-    if (retMsg) {
+	// call Modules DefineFn. Interpret retMsgMultipleStringSLTQE != NULL as veto !
+	strTextMultiple_t *retMsg = 
+		Module->ProvidedByModule->DefineFn(NewCommon_Definition);
 
-      // insert retMsg in stail-queue
-      STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-    }
-	  
+	// got an error msg?
+	if (retMsg) {
+
+		// insert retMsg in stail-queue
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+	}
   }
 	
 /*
@@ -320,7 +325,7 @@ Define_CommandFn (const uint8_t *args
 //	printf("Got error from DefineFN %s \n"
 //			  ,retMsg.strText);
 
-    printf("Got error from DefineFN!\n");
+    printf("Got error from DefineFN! deinit here!\n");
 
 	//Log 1, "Define $def: $ret";
 //	DefineDefinition(Name);	//Define $defs{$name};                            # Veto
@@ -328,9 +333,9 @@ Define_CommandFn (const uint8_t *args
 
   }
 
+
   // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
   return headRetMsgMultiple;
-
 }
 
 
