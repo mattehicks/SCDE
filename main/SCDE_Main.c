@@ -1115,9 +1115,9 @@ app_main(void)
   extern ProvidedByModule_t BH1750_ProvidedByModule;
   CommandActivateModule(&BH1750_ProvidedByModule);
 
-  // Activate ESP32_Control as SCDE built-in Module
-//  extern ProvidedByModule_t ESP32_Control_ProvidedByModule;
-//  CommandActivateModule(&ESP32_Control_ProvidedByModule);
+  // Activate BMP180 as SCDE built-in Module
+  extern ProvidedByModule_t BMP180_ProvidedByModule;
+  CommandActivateModule(&BMP180_ProvidedByModule);
 
   // Activate ESP32_DeVICE as SCDE built-in Module
   extern ProvidedByModule_t ESP32_DeVICE_ProvidedByModule;

@@ -22,3 +22,6 @@
 [submodule "components/ESP32_I2C_Master_Module"]
 	path = components/ESP32_I2C_Master_Module
 	url = https://github.com/EcSUHA/ESP32_I2C_Master_Module
+[submodule "components/BMP180_Module"]
+	path = components/BMP180_Module
+	url = https://github.com/EcSUHA/BMP180_Module
