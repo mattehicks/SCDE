@@ -1,5 +1,5 @@
-WebIf_Module.o: \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/WebIf_Module.c \
+WebIf_ActiveDirTokens.o: \
+ /home/maikschulze/esp/SCDE/components/WebIf_Module/WebIf_ActiveDirTokens.c \
  /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h \
  /home/maikschulze/esp/SCDE/main/include/esp8266.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h \
@@ -142,28 +142,11 @@ WebIf_Module.o: \
  /home/maikschulze/esp/esp-idf/components/log/include/esp_log_internal.h \
  /home/maikschulze/esp/SCDE/main/include/Platform.h \
  /home/maikschulze/esp/SCDE/main/include/espmissingincludes.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
+ /home/maikschulze/esp/SCDE/main/include/Platform.h \
  /home/maikschulze/esp/SCDE/main/include/SCDE_s.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module_Global.h \
- /home/maikschulze/esp/SCDE/main/include/Platform.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/SCDED_Platform.h \
- /home/maikschulze/esp/SCDE/main/include/SCDE_Main.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
- /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/sockets.h \
- /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/inet.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_ActiveDirTokens.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module_Mimes.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module_Schemes.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module_ActiveDirectory.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Base64.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/sha1.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/CGI_NoAuthErr.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/CGI_NotFoundErr.h
+ /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_ActiveDirTokens.h
 
 /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h:
 
@@ -449,47 +432,13 @@ WebIf_Module.o: \
 
 /home/maikschulze/esp/SCDE/main/include/espmissingincludes.h:
 
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
+/home/maikschulze/esp/SCDE/main/include/Platform.h:
 
 /home/maikschulze/esp/SCDE/main/include/SCDE_s.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h:
 
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module_Global.h:
-
-/home/maikschulze/esp/SCDE/main/include/Platform.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/SCDED_Platform.h:
-
-/home/maikschulze/esp/SCDE/main/include/SCDE_Main.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h:
-
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
 
-/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/sockets.h:
-
-/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/inet.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h:
-
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_ActiveDirTokens.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module_Mimes.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module_Schemes.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module_ActiveDirectory.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/Base64.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/sha1.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/CGI_NoAuthErr.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/CGI_NotFoundErr.h:
-/home/maikschulze/esp/SCDE/components/WebIf_Module/./WebIf_Module.c:
+/home/maikschulze/esp/SCDE/components/WebIf_Module/./WebIf_ActiveDirTokens.c:

@@ -399,7 +399,8 @@ int HdrFldValueLen;	// current HdrFldValueBuff length
   unsigned int parser_scheme : 4;	// FROM REQUEST ONLY - scheme extracted by uri-parsing (AvailSchemes[] from ps.h)
   unsigned int parser_mime : 4;		// FROM REQUEST ONLY - mime extracted by uri-parsing (AvailContentTypes[] from ps.h)
   unsigned int freereserved1 : 8;	// 
-  int16_t ActiveDirID;			// FROM REQUEST ONLY - Active Directory ID (ADID) extracted by uri-parsing (0-32767 valid,-1,-2,-3 indicate special cases)
+  int16_t AxctiveDirID;			// FROM REQUEST ONLY - Active Directory ID (ADID) extracted by uri-parsing (0-32767 valid,-1,-2,-3
+  void* ActiveDirID;			// FROM REQUEST ONLY - Active Directory ID (ADID) extracted by uri-parsing (0-32767 valid,-1,-2,-3 indicate special cases)
 
 //-
 
@@ -621,11 +622,10 @@ typedef struct
 
 
 // Helper for active URL processing
-typedef struct
-  {
+typedef struct {
   const char *UrlSeekPtr;
   char *SrcPtr;
-  } UrlProcHelper;
+} UrlProcHelper_t;
 
 
 

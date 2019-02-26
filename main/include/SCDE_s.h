@@ -6,6 +6,8 @@
 #include <sys/queue.h>
 
 
+
+
 // nach unten verschieben ? doppelt ?
 typedef struct Common_Definition_s Common_Definition_t;
 
@@ -611,6 +613,12 @@ struct Common_Definition_s {
 
   bulkUpdateReadings_t *bulkUpdateReadings;
   STAILQ_HEAD (stailhead6, reading_s) headReadings;	// Link to assigned Attributes
+
+
+  // Pointer to ActiveResourcesDataA, set at init time.
+  void* ActiveResourcesDataA;
+  // Pointer to ActiveResourcesDataB, set at init time.
+  void* ActiveResourcesDataB;
 
   /* todo
 #Special values in %defs:
