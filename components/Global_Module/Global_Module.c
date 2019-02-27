@@ -18,11 +18,20 @@
 #include <esp8266.h>
 #include <Platform.h>
 
+
+
+// the Smart-Connected-Device-Engine structures & types ..
 #include <SCDE_s.h>
 
+// provides WebIf, need the structures & types ...
+#include "WebIf_Module.h"
+
+// this Modules structures & types ...
 #include "Global_Module.h"
 
-#include "SCDE_Main.h"
+
+
+
 
 
 

@@ -145,8 +145,8 @@ Global_Module.o: \
  /home/maikschulze/esp/SCDE/main/include/Platform.h \
  /home/maikschulze/esp/SCDE/main/include/SCDE_s.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h \
- /home/maikschulze/esp/SCDE/components/Global_Module/include/Global_Module.h \
- /home/maikschulze/esp/SCDE/main/include/SCDE_Main.h
+ /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
+ /home/maikschulze/esp/SCDE/components/Global_Module/include/Global_Module.h
 
 /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h:
 
@@ -438,7 +438,7 @@ Global_Module.o: \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h:
 
-/home/maikschulze/esp/SCDE/components/Global_Module/include/Global_Module.h:
+/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
 
-/home/maikschulze/esp/SCDE/main/include/SCDE_Main.h:
+/home/maikschulze/esp/SCDE/components/Global_Module/include/Global_Module.h:
 /home/maikschulze/esp/SCDE/components/Global_Module/./Global_Module.c:

@@ -1,4 +1,4 @@
-﻿/*
+/*
  *##################################################################################################
  *  Function: HTTP Daemon
  *  ESP 8266EX SOC Activities ...
@@ -4504,572 +4504,23 @@ HTTPD_RespondToOpenConnection
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-// Query Resource processing steps (enum)
-enum step			 //#XX for debugging
-  { s_strt_cmp_with_avail_bi_res= 0// #00 Next Step: Start compare with available resource
-  , s_chk_method_avail_for_res	// #01 check if the requested method is availabe for this this Resource-Row
-  , s_chk_scheme_avail_for_res	// #02 check if the requested scheme is availabe for this this Resource-Row
-  , s_chk_mime_avail_for_res	// #03 check if the requested mime type is availabe for this Resource-Row
-  , s_chk_if_res_is_enabled	// #04 check if this Resource-Row is enabled
-  , s_get_cgi_data_row_no	// #05 Get the Cgi-Data-Row number for this Resource-Row
-  , s_prep_callback_and_exe	// #06 Next Step: Prepare callback and execute
-  , s_return_callback_prep	// #07 before identifying if msg is request or response
-  , s_res_not_found_show_err	// #08 resource not found, answer with error ...
-};
-
-#define CURRENT_STEP() NextStep
-#define UPDATE_STEP(V) NextStep = (enum step) (V);
-#define STEP_UPDATED() goto stepupdated;   
-*/
-
-/*
- *--------------------------------------------------------------------------------------------------
- *FName: HTTPD_ParseUrl
- * Desc: Analyzes the path extracted by HTTP-Parser and tries to find + load a matching build in
- *       Resource + procedure-call data. Installs and tries filesystem if not found. Or throws not
- *       found error 
- * Para: WebIf_HTTPDConnSlotData_t *conn -> ptr to connection slot
- * Rets: -/-
- *--------------------------------------------------------------------------------------------------
- */
-/*
-void ICACHE_FLASH_ATTR
-HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t *conn)
-  {
-
- #if SCDED_DBG >= 4
-  printf("\n|ADir-Res.avail.chk! Path:\"%s\">",
-	conn->url);
-  #endif	
-
-  UrlProcHelper MyUrlProcHelper;	// processing helper
-
-  // current Active-Resources Path & processing Row
-  WebIf_ActiveResourcesDataA_t *PathActiveRes= NULL;
-  int BiResRow = 0;
-
-  // current Active-Resources RPC & identified Row
-  WebIf_ActiveResourcesDataB_t *RPCActiveRes = NULL;	
-  int RPCDRow = 0;
-
-  int DocMime = 0;
-
-  enum step NextStep = s_strt_cmp_with_avail_bi_res;
-
-// -------------------------------------------------------------------------------------------------
-
-  // loop through Common_Definitions to get WebIf provided data
-  Common_Definition_t *Common_Definition;
-
-  STAILQ_FOREACH(Common_Definition, &SCDERoot->HeadCommon_Definitions, entries)
-
-	{
-
-	while (Common_Definition.link)
-
-		{
-
-		// find WebIf provided data
-		if ( (Common_Definition.PROVIDEDfn) && (Common_Definition.PROVIDEDfn == WebIfPROVIDEDfn)
-
-			{
-
-			}
-
-		else Common_Definition = Common_Definition.nextlink;
-
-
-
-	}
-
-
-
-// -------------------------------------------------------------------------------------------------
-
-  // Main url processing loop, stops at stage 6, "URL not found"	
-  while (1) //bei welchem fall -> (NextStep != s_res_not_found_show_err)
-
-	{
-
-// -------------------------------------------------------------------------------------------------
-
-	// if - path is empty?
-	// -> Next Step: Immedietly go to Stage 6, "URL not found"
-	if (conn->url == NULL)
-
-		{
-
-		UPDATE_STEP(s_res_not_found_show_err);
-
-		}
-
-// -------------------------------------------------------------------------------------------------
-
-	// else if - not at the end of "built in urls" list?
-	// -> Next Step: Start compare with available resources
-	else if (PathActiveRes[BiResRow].Url[0] != '*')
-
-		{
-
-		UPDATE_STEP(s_strt_cmp_with_avail_bi_res);
-
-		}
-
-// -------------------------------------------------------------------------------------------------
-
-	// else - assuming that we are at the end of the built in resources list ... 
-	// -> Next Step: Load file system callback and execute to try to get file from file system
-	else
-
-		{
-
-		#if SCDED_DBG >= 4
-		printf("\n|*, loading FS Cb\n");
-		#endif	
-
-		conn->cgi = WebIF_EspFSStdFileTX;	// Callback Function for file system
-		conn->PCArg = NULL;			// Data for Callback Function
-
- // Clear cgi Data
-conn->PCData = NULL; //SCDED_DBG!!!!!!!!!!!!!!!!!!!!!!!!
-
-		UPDATE_STEP(s_return_callback_prep);	// -> file from file system
-
-		}
-
-// -------------------------------------------------------------------------------------------------
-
-	// restart here, if the processing step is updated ...
-	stepupdated:
-
- 	# if SCDED_DBG >= 4
-	printf("|S%d>",
-		NextStep);
-  	# endif
-
-  	switch (NextStep) 
-
-		{
-
-
-
-
-
-// -------------------------------------------------------------------------------------------------
-
-		// check if the path of the requested url (excl.mime) matches this active Resource-Row
-//		case s_strt_cmp_with_avail_bi_res:
-
-//		break;
-
-// -------------------------------------------------------------------------------------------------
-
-		// check if the path of the requested url (excl.mime) matches this active Resource-Row
-		case s_strt_cmp_with_avail_bi_res:
-
-		// ActiveID init for processing,
-		// -3 error not found,
-		// -2 empty and no error,
-		// -1 found without value,
-		// 0-x value found 
-		// in case =>-1 we need alternative Filename !!!
-		conn->ActiveDirID = -2; 		
-		MyUrlProcHelper.SrcPtr = conn->url;
-		MyUrlProcHelper.UrlSeekPtr = PathActiveRes[BiResRow].Url;
-
-		#if SCDED_DBG >= 4
-		printf("\n|R-Row %d CMP:",
-			BiResRow);
-		#endif
-
-		// outter compare loop. breakes if template str is ZERO (string-end=100% compared) or DIFFERENT
-		while (*MyUrlProcHelper.UrlSeekPtr != '\0')
-
-			{
-
-			// inner compare loop. breakes if source str is zero or different 
-			while ( (*MyUrlProcHelper.SrcPtr == *MyUrlProcHelper.UrlSeekPtr) &&
-				(*MyUrlProcHelper.SrcPtr != '\0') )
-
-				{
-
-				#if SCDED_DBG >= 4
-				printf("%c",
-					*MyUrlProcHelper.UrlSeekPtr);
-				#endif
-
-				MyUrlProcHelper.SrcPtr++;
-				MyUrlProcHelper.UrlSeekPtr++;
-
-				}
-
-			// if different -> is next char at UrlSeekPtr a COMMANDO CHAR indicating active content?
-//spz			if (HTTPD_ChkActiveDirContent(conn, &MyUrlProcHelper)) break; // search was not successful, break loop
-break;
-			}
-
-		// check if UrlSeekPtr is at string-end (zero) and ADID doesnt indicate an error (-3)   
-		// if ok -> continue at state: s_chk_mime_avail_for_res
-		if ( (*MyUrlProcHelper.UrlSeekPtr == '\0') &&		// Res-Row compared till UrlSeekPtr-end?
-			(conn->ActiveDirID != -3) )			// no extraction error? (-3)
-
-			{
-
-			# if SCDED_DBG >= 4
-			printf("|ADID:%d>",
-				conn->ActiveDirID);
-			# endif
-
-			UPDATE_STEP(s_chk_mime_avail_for_res);
-			STEP_UPDATED()
-
-			}
-
-		break;
-
-// -------------------------------------------------------------------------------------------------
-
-		// check if the requested url ends with an availabe mime for this Resource-Row
-		case s_chk_mime_avail_for_res:
-
-		DocMime = 0;
-
-		// is there a mime? If not keep 0 -> no mime
-		if (*MyUrlProcHelper.SrcPtr == '.') {
-
-			// skip the '.'
-			MyUrlProcHelper.SrcPtr++;
-
-			// seek table - till found, or NULL (at least at pos 16)
-			while ( (AvailMimes[DocMime].ext != NULL) &&
-				(strcmp(MyUrlProcHelper.SrcPtr, AvailMimes[DocMime].ext) !=0) )
-				DocMime++;
-
-			// no valid doc mime found ?, break
-			if (AvailMimes[DocMime].ext == NULL) {
-
-				break;
-
-				}
-
-			MyUrlProcHelper.SrcPtr += strlen(AvailMimes[DocMime].ext);
-
-			}
-
-		# if SCDED_DBG >= 4
-		printf("|DocMimeBit:%d>",
-			DocMime);
-		# endif
-
-		// check if a VALID (<16) mime is available for this resource
-		// and check if SrcPtr is 100% compared
-		// -> continue at state: s_chk_scheme_avail_for_cont
-		if ( (DocMime < 16) &&
-			(PathActiveRes[BiResRow].AllowedDocMimesBF & 1<<DocMime)
-			&& (*MyUrlProcHelper.SrcPtr == '\0') ) {	
-
-			UPDATE_STEP(s_chk_method_avail_for_res);
-			STEP_UPDATED()	
-
-			}
-	
-		break;
-
-// -------------------------------------------------------------------------------------------------
-
-		// check if the requested method is availabe for this this Resource-Row
-		case s_chk_method_avail_for_res:
-
-		// check if method is available -> continue at state: s_chk_scheme_avail_for_res
-		if ( (PathActiveRes[BiResRow].AllowedMethodsBF
-			& (1 << conn->parser_method) ) 
-			&& (conn->parser_method <= 31) )
-
-			{
-
-			UPDATE_STEP(s_chk_scheme_avail_for_res);
-			STEP_UPDATED()	
-
-			}
-
-		break;
-
-// -------------------------------------------------------------------------------------------------
-
-		// check if the requested scheme type is availabe for this Resource-Row
-		case s_chk_scheme_avail_for_res:
-
-		// check if scheme is available -> continue at state: s_chk_if_res_is_enabled
-		if ( (PathActiveRes[BiResRow].AllowedSchemesBF & 1<<conn->parser_scheme) &&
-			(conn->parser_scheme <= 15) )
-
-			{	
-
-			UPDATE_STEP(s_chk_if_res_is_enabled);
-			STEP_UPDATED()	
-
-			}
-
-		break;
-
-// -------------------------------------------------------------------------------------------------
-
-		// check if this Resource-Row is enabled
-		case s_chk_if_res_is_enabled:
-
-		// check if Row is enabled -> continue at state: s_get_cgi_data_row_no
-		if ( (!PathActiveRes[BiResRow].EnaByBit)
-			|| (conn->conn->HTTPD_InstCfg->DirConEnaCtrlFB &
-			(1 << (PathActiveRes[BiResRow].EnaByBit-1))) )
-
-			{
-
-			UPDATE_STEP(s_get_cgi_data_row_no);
-			STEP_UPDATED()
-
-			}
-
-		break;
-
-// -------------------------------------------------------------------------------------------------
-
-		// Get the Cgi-Data-Row number for this Resource-Row
-		case s_get_cgi_data_row_no:
-
-		// check if Active Page Data is found -> continue at state: s_prep_callback_and_exe
-		; //need this
-		uint32_t RPCFucIDMask = 0xffff0000 | (1 << DocMime); // any docmime allowed is ok
-		int RPCFucID = ( (PathActiveRes[BiResRow].RPCNo << 16) | (1 << DocMime) );
-		while ( (RPCActiveRes[RPCDRow].RPCFucID & RPCFucIDMask)
-			 != RPCFucID) RPCDRow++;	// find and assign cgi function data
-
-		# if SCDED_DBG >= 4
-		printf("|PC-Row:%d>", RPCDRow);
-		# endif
-
-		UPDATE_STEP(s_prep_callback_and_exe);
-		STEP_UPDATED()
-
-		break;
-
-// -------------------------------------------------------------------------------------------------
-
-		// Prepare callback data
-		case s_prep_callback_and_exe: //s_prep_callback:
-		
-		// If prepared - continue at state:  s_callback_prep_and_done
-		//if (Stage == 4)
-		//	{
-		// Clear cgi Data
-		conn->PCData = NULL; //debug!!!!!!!!!!!!!!!!!!!!!!!!
-		// Correct DestUrl pointer to real Filesystem url to get the right template "Switch.htm" ??????????? //conn->url;
-		conn->DestUrl = (char* volatile) PathActiveRes[BiResRow].Url;	// DESTURL BENÖTIGT????????????????????????
-
-		// If ActiveDirID >= -1 we need alt. filename in case we want to load content from filesystem
-		// the alternative Filename is stored after the path "/\xfe/S0\x00 S0X.htm"
-		if (conn->ActiveDirID >= -1)
-			{
-
-			MyUrlProcHelper.UrlSeekPtr++; // warum doppelt?????? einsparen das byte?
-			MyUrlProcHelper.UrlSeekPtr++;
-			conn->AltFSFile = (char* volatile) MyUrlProcHelper.UrlSeekPtr; // e.g. "SwITCH.htm";
-
-			#if SCDED_DBG >= 4
-			printf("FileName override: %s\n", conn->AltFSFile);
-			#endif
-
-			}
-
-		else conn->AltFSFile = conn->url;	// use requested filename for content load...
-
-		// Store cgi CB Function
-		conn->cgi = RPCActiveRes[RPCDRow].PCb;
-
-		// Store cgi CB data
-		conn->PCArg = RPCActiveRes[RPCDRow].PCArg;
-
-		//const int k = RPCActiveRes[RPCDRow].RPCData;		// optional Data  benötigt???????????????????? raus
-		//if (k != -1) conn->RPCData = k;			// +option not to take data
-
- // Clear cgi Data
- conn->PCData = NULL; //Error nach update?
-
-		UPDATE_STEP(s_return_callback_prep);
-		STEP_UPDATED()
-
-		break;
-
-// -------------------------------------------------------------------------------------------------
-
-		// Processing finished, case callback for resource found and prepared, return
-		case s_return_callback_prep:
-
-		return;
-
-		break;
-
-// -------------------------------------------------------------------------------------------------
-
-		// Processing finished, case resource not found callback loaded, return
-		case s_res_not_found_show_err:
-
-		#if SCDED_DBG >= 1
-		printf("|404 Cb!>");
-		#endif
-
-		// set callback for "Not Found Error"
-		conn->cgi = NotFoundErr_cgi;
-
-		return;
-
-		break;
-
-// -------------------------------------------------------------------------------------------------
-
-		}
-
-	BiResRow++;	// end of Resource-Row matching loop, try next, till "*" endmark
-
-	}
-
-  return;
-
-  }
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-  int16_t ActiveDirID;	// FROM REQUEST ONLY - Active Directory ID (ADID) extracted by uri-parsing (0-32767 valid,-1,-2,-3 indicate special cases)
-
-  Common_Definition_t* ActiveDirID;			// FROM REQUEST ONLY - Active Directory ID (ADID) extracted by uri-parsing (0-32767 valid,-1,-2,-3 indicate special cases)
-Common_Definition extracted assigned from active directory
-Common_Definition
-
-
-
-
-
-		// ActiveID init for processing,
-		// -3 error not found,
-		// -2 empty and no error,
-		// -1 found without value,
-		// 0-x value found 			// Common_Definition extracted assigned from active directory found
-		// in case =>-1 we need alternative Filename !!!
-*/
-
-
-
-//cmp_with_built_in_resources    	State #00: compare with built in resources
-//chk_if_method_is_avail_for_res	State #01: check if method is available for the resource
-//chk_if_scheme_is_avail_for_res	State #02: check if scheme is available for the resource
-//chk_if_mime_is_avail_for_res		State #03: check if mime is available for the resource
-//chk_if_the_res_row_is_enabled 	State #04: check if the resource row is enabled
-
-//get_cgi_data_row_no			State #04: ????Get the Cgi-Data-Row number for this Resource-Row
-
-//prepare_callback_and_execute		State #06: ??????pPrepare callback and execute
-//return_callback_is_prep		State #07: return, callback is prepared     ??????before identifying if msg is request or response
-//load_resource_not_found_cb		State #08: load 'resource not found' cb
-
-
-
-// ActiveDirID	special states						// States:
-#define STATE_FOUND_WITHOUT_VALUE	( (Common_Definition_t*) -1)	// -1 found without value
-#define STATE_EMPTY_AND_NO_ERROR	( (Common_Definition_t*) -2)	// -2 empty and no error
-#define STATE_ERROR_NOT_FOUND		( (Common_Definition_t*) -3)	// -3 error not found
+// tokenExecResult -> special states		// Result:
+#define TOKEN_ERROR_NO_MATCH		 0	// 00 Token Error! No Match!
+#define STATE_FOUND_WITHOUT_VALUE	 -1	// 00 found without value
+#define STATE_EMPTY_AND_NO_ERROR	-2	// -2 empty and no error
+#define STATE_ERROR_NOT_FOUND		-3	// -3 error not found
 
 // Query Resource processing steps (enum)
 enum step				// #XX for debugging
-  { s_strt_cmp_with_avail_bi_res= 0	// #00 State: Start compare with available resource
-  , s_chk_method_avail_for_res		// #01 check if the requested method is availabe for this this Resource-Row
-  , s_chk_scheme_avail_for_res		// #02 check if the requested scheme is availabe for this this Resource-Row
-  , s_chk_mime_avail_for_res		// #03 check if the requested mime type is availabe for this Resource-Row
-  , s_chk_if_res_is_enabled		// #04 check if this Resource-Row is enabled
-  , s_get_cgi_data_row_no		// #05 Get the Cgi-Data-Row number for this Resource-Row
-  , s_prep_callback_and_exe		// #06 Next Step: Prepare callback and execute
-  , s_return_callback_prep		// #07 before identifying if msg is request or response
-  , s_res_not_found_show_err		// #08 resource not found, load 'not found' cb
+  { s_cmp_with_built_in_resources= 0	// #00 compare with built in resources
+  , s_chk_if_method_is_avail_for_res	// #01 check if method is available for the resource
+  , s_chk_if_scheme_is_avail_for_res	// #02 check if scheme is available for the resource
+  , s_chk_if_mime_is_avail_for_res	// #03 check if mime is available for the resource
+  , s_chk_if_the_res_row_is_enabled	// #04 check if the resource row is enabled
+  , s_get_match_in_table_b		// #05 Get the Cgi-Data-Row number for this Resource-Row
+  , s_prepare_the_callback_data		// #06 prepare the callback data
+  , s_return_callback_is_prep		// #07 return, callback is prepared
+  , s_load_resource_not_found_cb	// #08 load resource not found callback
 };
 
 #define CURRENT_STEP() NextStep
@@ -5089,12 +4540,13 @@ enum step				// #XX for debugging
 void
 HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 {
-  UrlProcHelper_t MyUrlProcHelper;	// processing helper
+  int rowCnt_B;				// to adress row in table Active-Dir-Url-Res-Data B
+  int DocMime;				// for mime matching requirements
 
-  int RPCDRow;// = 0;			// Cgi Data Row
-  int DocMime;// = 0;			// ?
+  const char* SrcPtr;			// Ptr to the source -> requested url
+  const char* UrlSeekPtr;		// Ptr to the url in Active-Dir-Url-Res-Data
 
-  enum step NextStep = s_strt_cmp_with_avail_bi_res;
+  enum step NextStep = s_cmp_with_built_in_resources;
 
   #if SCDED_DBG >= 4
   printf("\n|Checking if Active-Dir-Url-Res-Data is available for path '%s'>",
@@ -5103,29 +4555,29 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 
 //--------------------------------------------------------------------------------------------------
 
-  // holds current Active-Directory-Url-Resource-Data A
+  // holds current Definitions Active-Directory-Url-Resource-Data A
   WebIf_ActiveResourcesDataA_t* ActiveDirUrlResDataA;
 
-  // holds current Active-Directory-Url-Resource-Data b
+  // holds current Definitions Active-Directory-Url-Resource-Data b
   WebIf_ActiveResourcesDataB_t* ActiveDirUrlResDataB;	
 
 //--------------------------------------------------------------------------------------------------
 
-  // current job: check if path is empty
-  // matched? -> go to state "load_resource_not_found_cb", will load 'resource not found' cb
+  // Current Job: Check if path is empty
+  // matched? -> go to state "load_resource_not_found_cb", will load 'resource not found' cb & ret
   // else     -> continue ...
-  if ( conn->url == NULL ) UPDATE_STEP (s_res_not_found_show_err);
+  if ( conn->url == NULL ) UPDATE_STEP (s_load_resource_not_found_cb);
   
 //--------------------------------------------------------------------------------------------------
 
-  // loop through Common_Definitions to get WebIf provided data
+  // Current Job: Loop through Common_Definitions to get WebIf provided data
   Common_Definition_t* Common_Definition;
 
   STAILQ_FOREACH (Common_Definition, &SCDERoot->HeadCommon_Definitions, entries) {
 
-  // current job: check if current definition has active resources
+  // Current Job: Check if current Definition has Active-Dir-Url-Res-Data
   // yes? -> continue - load them to loop the rows
-  // no?  -> do nothing -> load next definition (STAILQ_FOREACH)
+  // no?  -> do nothing -> results in load next definition (STAILQ_FOREACH)
   if (Common_Definition->ActiveResourcesDataA) {
 
 	// load Active-Resources-Data of current Definition
@@ -5140,18 +4592,18 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 			,Common_Definition->name);
   		# endif
 
-	// restart in buildin UrlResource Row  0
-	int BiResRow = 0;
+	// Before loop: restart row count in table Active-Dir-Url-Res-Data A
+	int rowCnt_A = 0;
 
 //--------------------------------------------------------------------------------------------------
 
-	// Current job: loop built in resources till we are at the end of the current definitions
+	// Current Job: Loop built in resources till we are at the end of the current definitions
 	//              "built in resources" list
 	// Matched -> go to state "cmp_with_built_in_resources", will compare with built in resources
 	// Else -> end UrlResource-Row matching loop ("*" endmark reached)
-	while ( ActiveDirUrlResDataA[BiResRow].Url[0] != '*' ) {
+	while ( ActiveDirUrlResDataA[rowCnt_A].Url[0] != '*' ) {
 
-		UPDATE_STEP(s_strt_cmp_with_avail_bi_res);
+		UPDATE_STEP(s_cmp_with_built_in_resources);
 
 //--------------------------------------------------------------------------------------------------
 
@@ -5169,85 +4621,101 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 
 			// State: Check if the path of the requested url (excluding mime) 
 			//        matches this active Resource-Row
-			case s_strt_cmp_with_avail_bi_res:
+			case s_cmp_with_built_in_resources:
+			;
+			// stores + inits the result of token execution
+			int tokenExecResult = 0;	// RESULT 00 Token Error! No Match!
 
-			// using ActiveID init for processing,
-			// -3 error not found,
-			// -2 empty and no error,
-			// -1 found without value,
-			// 0-x value found 
-			// in case =>-1 we need alternative Filename !!!
-
-			// ActiveID -> set initial status
-			conn->ActiveDirID = -2; 	
+			// ActiveID -> starting with 'we have no Definition'
+			conn->activeDirFndDefiniton = NULL;
 	
-			// Ptr to the source -> requested url
-			MyUrlProcHelper.SrcPtr = conn->url;
+			// An ptr to the source -> requested url
+			SrcPtr = conn->url;
 
-			// Ptr to the url in Active-Dir-Url-Res-Data
-			MyUrlProcHelper.UrlSeekPtr = ActiveDirUrlResDataA[BiResRow].Url;
+			// An ptr to the url in Active-Dir-Url-Res-Data
+			UrlSeekPtr = ActiveDirUrlResDataA[rowCnt_A].Url;
 
 			#if SCDED_DBG >= 4
-			printf("\n|R-Row %d CMP:",
-				BiResRow);
+			printf("\n|R-Row %d CMP:", rowCnt_A);
 			#endif
 
-			// Current job: Check if Url from Active-Dir-Url-Res-Data
-			// matches (\0 = string-end = 100% compared) !OR! is different.  
-			while (*MyUrlProcHelper.UrlSeekPtr != '\0') {
+			// Current Job: Check if Url from Active-Dir-Url-Res-Data matches 
+			// (\0 = string-end = 100% compared) !OR! is different. 
+			// If its different check + execute possible token for active content, too.
+			while (*UrlSeekPtr != '\0') {
 
 				// Inner compare loop. Loops till source str is zero or different. 
-				while ( (*MyUrlProcHelper.SrcPtr == *MyUrlProcHelper.UrlSeekPtr) &&
-					(*MyUrlProcHelper.SrcPtr != '\0') ) {
+				while ( (*SrcPtr == *UrlSeekPtr) &&
+					(*SrcPtr != '\0') ) {
 
 					#if SCDED_DBG >= 4
-					printf("%c", *MyUrlProcHelper.UrlSeekPtr);
+					printf("%c", *UrlSeekPtr);
 					#endif
 
-					MyUrlProcHelper.SrcPtr++;
-					MyUrlProcHelper.UrlSeekPtr++;
+					SrcPtr++;
+					UrlSeekPtr++;
 				}
 
-				// its different here -> maybe next char at UrlSeekPtr is a 
-				// comannd char to check active content? Call Chk4ActiveDirContent
-				// if active content not matching -> break the loop to stop compare
-				if (WebIf_ExecActiveDirToken(conn, Common_Definition, &MyUrlProcHelper)) break;
+				// Its different here -> Maybe next char at UrlSeekPtr is a token
+				// for active content. Call ExecActiveDirToken to check + execute.
+				// If Active-Content not matching -> Break the loop to stop compare
+				if (WebIf_ExecActiveDirToken(conn, Common_Definition,
+					&SrcPtr, &UrlSeekPtr, &tokenExecResult )) break;
+
+				// Matched! Continue compare loop!
+				// conn->activeDirFndDefiniton, SrcPtr, UrlSeekPtr, tokenExecResult updated now !
+				// conn->activeDirFndDefiniton MAY contain an matching Definition
+				// tokenExecResult MUST contain result code of token execution
+				// RESULT CODES:
+				// #00 Token Error! No Match!
+				// ??alllowed?? -2 init and no match no error //empty and no error
+				// -3 no match error from ExecActiveDirToken -> Start next Res-Row CMP
+				// -1 token executed ok, continue, no Definition, alt.filename requested
 			}
 
-			// Current job: Get result of previous outter compare loop. If UrlSeekPtr
-			// is at string-end (\0) and ADID doesnt indicate an error (-3)   
-			// if ok -> continue at state: s_chk_mime_avail_for_res
-			if ( (*MyUrlProcHelper.UrlSeekPtr == '\0') &&	// cmp till UrlSeekPtr-end?
-				(conn->ActiveDirID != -3) ) {		// no extraction error? (-3)
+			// Current job: Analyze result of previous Url-match-check. If UrlSeekPtr
+			// is at string-end (\0) and 'tokenExecResult' holds NOT an error/no match (0)   
+			// Matched ->  continue Mime check at state: s_chk_if_mime_is_avail_for_res
+			// Else -> End UrlResource-Row matching loop (no match)
+			if ( (*UrlSeekPtr == '\0') && (!tokenExecResult) ) {
 
 				# if SCDED_DBG >= 4
-				printf("|ADID:%p>",
-					conn->ActiveDirID);
+				if (tokenExecResult)
+					printf("|Url cmp result:%d>", tokenExecResult);
+				else    printf("|Url cmp no match!>");
+				
+				// the matching Definition name
+				if (conn->activeDirFndDefiniton) printf(">Definition '%.*s' matched. Its Module '%.*s' >",
+					conn->activeDirFndDefiniton->nameLen,
+					conn->activeDirFndDefiniton->name,
+					conn->activeDirFndDefiniton->module->ProvidedByModule->typeNameLen,
+					conn->activeDirFndDefiniton->module->ProvidedByModule->typeName);
 				# endif
 
-				UPDATE_STEP(s_chk_mime_avail_for_res);
+				UPDATE_STEP(s_chk_if_mime_is_avail_for_res);
 				STEP_UPDATED()
 			}
 
-			// extraction error (-3), break ..
+			// url (incl.tokens) not matching, break .
 			break;
 
 // -------------------------------------------------------------------------------------------------
 
-			// check if the requested url ends with an availabe mime for this Resource-Row
-			case s_chk_mime_avail_for_res:
+			// State: check if the requested url ends with an availabe mime
+			case s_chk_if_mime_is_avail_for_res:
 
+			// stores the identified mime. 0 = no mime
 			DocMime = 0;
 
 			// is there a mime? If not keep 0 -> no mime
-			if (*MyUrlProcHelper.SrcPtr == '.') {
+			if (*SrcPtr == '.') {
 
 				// skip the '.'
-				MyUrlProcHelper.SrcPtr++;
+				SrcPtr++;
 
 				// seek table - till found, or NULL (at least at pos 16)
 				while ( (AvailMimes[DocMime].ext != NULL) &&
-					(strcmp(MyUrlProcHelper.SrcPtr, AvailMimes[DocMime].ext) !=0) )
+					(strcmp(SrcPtr, AvailMimes[DocMime].ext) !=0) )
 					DocMime++;
 
 				// no valid doc mime found ?, break
@@ -5257,7 +4725,7 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 					break;
 				}
 
-				MyUrlProcHelper.SrcPtr += strlen(AvailMimes[DocMime].ext);
+				SrcPtr += strlen(AvailMimes[DocMime].ext);
 			}
 
 			# if SCDED_DBG >= 4
@@ -5265,14 +4733,15 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 				DocMime);
 			# endif
 
-			// check if a VALID (<16) mime is available for this resource
-			// and check if SrcPtr is 100% compared
-			// -> continue at state: s_chk_scheme_avail_for_cont
+			// Current Job: Check if a VALID (<16) mime is available for this resource
+			//              and check if SrcPtr is 100% compared
+			// Matched -> continue at state: s_chk_scheme_avail_for_cont
+			// Else -> End UrlResource-Row matching loop (no match)
 			if ( (DocMime < 16) &&
-				(ActiveDirUrlResDataA[BiResRow].AllowedDocMimesBF &
-				 1 << DocMime) && (*MyUrlProcHelper.SrcPtr == '\0') ) {	
+				(ActiveDirUrlResDataA[rowCnt_A].AllowedDocMimesBF &
+				 1 << DocMime) && (*SrcPtr == '\0') ) {	
 
-				UPDATE_STEP(s_chk_method_avail_for_res);
+				UPDATE_STEP(s_chk_if_method_is_avail_for_res);
 				STEP_UPDATED()	
 			}
 
@@ -5281,14 +4750,16 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 
 //--------------------------------------------------------------------------------------------------
 
-			// check if the requested method is availabe for this this Resource-Row
-			case s_chk_method_avail_for_res:
+			// State: Check if the requested method is availabe
+			case s_chk_if_method_is_avail_for_res:
 
-			// check if method is available -> continue at state: s_chk_scheme_avail_for_res
-			if ( (ActiveDirUrlResDataA[BiResRow].AllowedMethodsBF &
+			// Current Job: Check if method is available
+			// Matched -> continue at state: s_chk_if_scheme_is_avail_for_res
+			// Else -> End UrlResource-Row matching loop (no match)
+			if ( (ActiveDirUrlResDataA[rowCnt_A].AllowedMethodsBF &
 				(1 << conn->parser_method) ) && (conn->parser_method <= 31) ) {
 
-				UPDATE_STEP(s_chk_scheme_avail_for_res);
+				UPDATE_STEP(s_chk_if_scheme_is_avail_for_res);
 				STEP_UPDATED()	
 			}
 
@@ -5297,16 +4768,17 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 
 //--------------------------------------------------------------------------------------------------
 
-			// check if the requested scheme type is availabe for this Resource-Row
-			case s_chk_scheme_avail_for_res:
+			// State: Check if the requested scheme type is availabe
+			case s_chk_if_scheme_is_avail_for_res:
 
-			// check if scheme is available -> continue at state: s_chk_if_res_is_enabled
-			if ( (ActiveDirUrlResDataA[BiResRow].AllowedSchemesBF &
+			// Current Job: Check if scheme is available
+			// Matched -> continue at state: s_chk_if_the_res_row_is_enabled
+			// Else -> End UrlResource-Row matching loop (no match)
+			if ( (ActiveDirUrlResDataA[rowCnt_A].AllowedSchemesBF &
 				 1 << conn->parser_scheme) && (conn->parser_scheme <= 15) ) {
 
-				UPDATE_STEP(s_chk_if_res_is_enabled);
+				UPDATE_STEP(s_chk_if_the_res_row_is_enabled);
 				STEP_UPDATED()	
-
 			}
 
 			// requested scheme not available, break ..
@@ -5314,17 +4786,18 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 
 //--------------------------------------------------------------------------------------------------
 
-			// check if this Resource-Row is enabled
-			case s_chk_if_res_is_enabled:
+			// State: Check if this Resource-Row is enabled
+			case s_chk_if_the_res_row_is_enabled:
 
-			// check if Row is enabled -> continue at state: s_get_cgi_data_row_no
-			if ( (!ActiveDirUrlResDataA[BiResRow].EnaByBit) ||
+			// Current Job: Check if Row is enabled
+			// Matched -> continue at state: s_get_match_in_table_b
+			// Else -> End UrlResource-Row matching loop (no match)
+			if ( (!ActiveDirUrlResDataA[rowCnt_A].EnaByBit) ||
 				(conn->conn->HTTPD_InstCfg->DirConEnaCtrlFB &
-				(1 << (ActiveDirUrlResDataA[BiResRow].EnaByBit - 1) ) ) ) {
+				(1 << (ActiveDirUrlResDataA[rowCnt_A].EnaByBit - 1) ) ) ) {
 
-				UPDATE_STEP(s_get_cgi_data_row_no);
+				UPDATE_STEP(s_get_match_in_table_b);
 				STEP_UPDATED()
-
 			}
 
 			// resource row is not enabled, break ..
@@ -5332,90 +4805,93 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 
 //--------------------------------------------------------------------------------------------------
 
-			// Get the Cgi-Data-Row number for this Resource-Row
-			case s_get_cgi_data_row_no:
+			// State: Get the Cgi-Data-Row number for this Resource-Row
+			case s_get_match_in_table_b:
 
 			// check if Active Page Data is found -> continue at state: 
-			//     s_prep_callback_and_exe
+			//     s_prepare_the_callback_data
 			; //need this
+
+			// temp value for ???
 			uint32_t RPCFucIDMask = 0xffff0000 | (1 << DocMime); // any docmime allowed is ok
 
-			int RPCFucID = ( (ActiveDirUrlResDataA[BiResRow].RPCNo << 16) |
+			// temp value for ???
+			int RPCFucID = ( (ActiveDirUrlResDataA[rowCnt_A].RPCNo << 16) |
 				(1 << DocMime) );
 
-			// find and assign cgi function data
-			while ( (ActiveDirUrlResDataB[RPCDRow].RPCFucID &
-				 RPCFucIDMask) != RPCFucID) RPCDRow++;
+			// find and assign data in Active-Dir-Url-Res-Data B. We expect an match!
+			while ( (ActiveDirUrlResDataB[rowCnt_B].RPCFucID &
+				 RPCFucIDMask) != RPCFucID) rowCnt_B++;
 
 			# if SCDED_DBG >= 4
-			printf("|PC-Row:%d>", RPCDRow);
+			printf("|PC-Row:%d>", rowCnt_B);
 			# endif
 
-			UPDATE_STEP(s_prep_callback_and_exe);
+			UPDATE_STEP(s_prepare_the_callback_data);
 
 			STEP_UPDATED()
 
+			// no exec here ...
 			break;
 
 //--------------------------------------------------------------------------------------------------
 
-			// Prepare callback data
-			case s_prep_callback_and_exe: //s_prep_callback:
-		
-			// If prepared - continue at state:  s_callback_prep_and_done
-			//if (Stage == 4)
-			//	{
+			// State: Prepare the callback data from Active-Dir-Url-Res-Data
+			case s_prepare_the_callback_data:
+
 			// Clear cgi Data
-			conn->PCData = NULL; //debug!!!!!!!!!!!!!!!!!!!!!!!!
+			conn->PCData = NULL;
+
 			// Correct DestUrl pointer to real Filesystem url to get the right template "Switch.htm" ??????????? //conn->url;
-			conn->DestUrl = (char* volatile) conn->conn->HTTPD_InstCfg->BuiltInUrls[BiResRow].Url;	// DESTURL BENÖTIGT????????????????????????
+			conn->DestUrl = (char* volatile) conn->conn->HTTPD_InstCfg->BuiltInUrls[rowCnt_A].Url;	// DESTURL BENÖTIGT????????????????????????
 
-			// If ActiveDirID >= -1 we need alt. filename in case we want to load content from filesystem
-			// the alternative Filename is stored after the path "/\xfe/S0\x00 S0X.htm"
-			if (conn->ActiveDirID >= -1) {
+			// Current Job: Check if tokenExecResult >= -1. Then an alternative filename
+			//              is assigned to load content from standard file system
+			// Matched -> find and use alternative filename for content load stored after the path "/\xfe/S0\x00 S0X.htm"
+			// Else -> use requested filename for content load
+			if (tokenExecResult >= -1) {
 
-				MyUrlProcHelper.UrlSeekPtr++; // warum doppelt?????? einsparen das byte?
-				MyUrlProcHelper.UrlSeekPtr++;
-				conn->AltFSFile = (char* volatile) MyUrlProcHelper.UrlSeekPtr; // e.g. "SwITCH.htm";
+				// prepare conn->AltFSFile -> Alternative-File-System-File
+				UrlSeekPtr++; // \x00 to ' '
+				UrlSeekPtr++; //  ' ' to beginning of Alternative-File-System-File name
+				conn->AltFSFile = (char* volatile) UrlSeekPtr; // e.g. "SwITCH.htm";
 
 				#if SCDED_DBG >= 4
-				printf("FileName override: %s\n", conn->AltFSFile);
+				printf("File-Name alternative: %s\n", conn->AltFSFile);
 				#endif
 
 			}
 
-			else conn->AltFSFile = conn->url;	// use requested filename for content load...
+			// use requested filename (if no alternative is assigned) for content load...
+			else conn->AltFSFile = conn->url;
 
 			// Store cgi CB Function
-			conn->cgi = ActiveDirUrlResDataB[RPCDRow].PCb;
+			conn->cgi = ActiveDirUrlResDataB[rowCnt_B].PCb;
 
 			// Store cgi CB data
-			conn->PCArg = ActiveDirUrlResDataB[RPCDRow].PCArg;
+			conn->PCArg = ActiveDirUrlResDataB[rowCnt_B].PCArg;
 
-			//const int k = BuiltInActiveResources[RPCDRow].RPCData;		// optional Data  benötigt???????????????????? raus
-			//if (k != -1) conn->RPCData = k;			// +option not to take data
+			UPDATE_STEP(s_return_callback_is_prep);
 
- // Clear cgi Data
- conn->PCData = NULL; //Error nach update?
-
-			UPDATE_STEP(s_return_callback_prep);
 			STEP_UPDATED()
 
+			// no exec here ...
 			break;
 
 //--------------------------------------------------------------------------------------------------
 
-			// Processing finished, case callback for resource found and prepared, return
-			case s_return_callback_prep:
+			// State: Callback prepared, callback data loaded, return
+			case s_return_callback_is_prep:
 
 			return;
 
+			// no exec here ...
 			break;
 
 //--------------------------------------------------------------------------------------------------
 
 			// Processing finished, case resource not found callback loaded, return
-			case s_res_not_found_show_err:
+			case s_load_resource_not_found_cb:
 
 			#if SCDED_DBG >= 1
 			printf("|404 Cb!>");
@@ -5426,6 +4902,7 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 
 			return;
 
+			// no exec here ...
 			break;
 
 //--------------------------------------------------------------------------------------------------
@@ -5433,7 +4910,7 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 		}
 
 		// next urlResource-Row of current Definition
-		BiResRow++;	
+		rowCnt_A++;	
 
 	} // end of urlResource-Row matching loop (loops till "*" endmark)
 
@@ -5450,14 +4927,14 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 
   #if SCDED_DBG >= 4
 //  printf("\n|*, no matching Active-Dir-Url-Res-Data found, loading standard file-system cb\n");
-  printf("\n|Looped all Definitions. No match found. Loading file-system cb. Maybe its there ...\n");
+  printf("\n|Looped all Definitions. No match found. Loading file-system cb.\n");
   #endif
 	
   conn->cgi = WebIF_EspFSStdFileTX;	// load callback Fn for standard file tx
   conn->PCArg = NULL;			// data for callback Fn
 
   // Clear cgi Data
-  conn->PCData = NULL; //SCDED_DBG!!!!!!!!!!!!!!!!!!!!!!!!
+  conn->PCData = NULL;
  
   return;
 }
@@ -11301,6 +10778,7 @@ WebIf_Sub(Common_Definition_t* Common_Definition
 
 
 //  SCDEFn->HexDumpOutFn ("RX-HEX", conn, sizeof(WebIf_HTTPDConnSlotData_t));
+
 
 
 

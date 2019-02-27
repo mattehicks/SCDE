@@ -145,18 +145,18 @@ BH1750_Module.o: \
  /home/maikschulze/esp/SCDE/main/include/Platform.h \
  /home/maikschulze/esp/SCDE/main/include/SCDE_s.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h \
- /home/maikschulze/esp/SCDE/components/BH1750_Module/include/BH1750_Module.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
  /home/maikschulze/esp/SCDE/components/ESP32_I2C_Master_Module/include/ESP32_I2C_Master_Module_s.h \
+ /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/ringbuf.h \
+ /home/maikschulze/esp/SCDE/components/BH1750_Module/include/BH1750_Module.h \
  /home/maikschulze/esp/SCDE/main/include/SCDE_Main.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h \
+ /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSAdvFileTX.h \
  /home/maikschulze/esp/SCDE/components/ESP32_DeVICE_Module/include/HTools_cgi.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Content/include/ServAPCfg_tpl.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/CGI_Redirect.h
 
 /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h:
@@ -449,19 +449,21 @@ BH1750_Module.o: \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h:
 
-/home/maikschulze/esp/SCDE/components/BH1750_Module/include/BH1750_Module.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h:
-
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
 
 /home/maikschulze/esp/SCDE/components/ESP32_I2C_Master_Module/include/ESP32_I2C_Master_Module_s.h:
 
+/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h:
+
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/ringbuf.h:
+
+/home/maikschulze/esp/SCDE/components/BH1750_Module/include/BH1750_Module.h:
 
 /home/maikschulze/esp/SCDE/main/include/SCDE_Main.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h:
+
+/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h:
 
@@ -470,8 +472,6 @@ BH1750_Module.o: \
 /home/maikschulze/esp/SCDE/components/ESP32_DeVICE_Module/include/HTools_cgi.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Content/include/ServAPCfg_tpl.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/CGI_Redirect.h:
 /home/maikschulze/esp/SCDE/components/BH1750_Module/./BH1750_Module.c:

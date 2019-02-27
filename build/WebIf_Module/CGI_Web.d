@@ -145,8 +145,7 @@ CGI_Web.o: /home/maikschulze/esp/SCDE/components/WebIf_Module/CGI_Web.c \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h
+ /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h
 
 /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h:
 
@@ -441,6 +440,4 @@ CGI_Web.o: /home/maikschulze/esp/SCDE/components/WebIf_Module/CGI_Web.c \
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
 /home/maikschulze/esp/SCDE/components/WebIf_Module/./CGI_Web.c:

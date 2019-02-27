@@ -151,10 +151,10 @@ WebIf_Module.o: \
  /home/maikschulze/esp/SCDE/main/include/SCDE_Main.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/sockets.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/inet.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h \
+ /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_ActiveDirTokens.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module_Mimes.h \
@@ -467,13 +467,13 @@ WebIf_Module.o: \
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h:
 
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
-
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/sockets.h:
 
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/inet.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h:
+
+/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h:
 

@@ -7,7 +7,7 @@ enum ActiveDirContent			// CMDs in range 0xf0-0xff
   , ADC_FeatNr				// #0xf1 extract ADID of feature from number
   , ADC_ForceAFN			// #0xf2 force an alternative filename
 
-  , ADC_FeatureName			// #0xf1
+  , ADC_FeatureName			// #0xf3
 /*
   #if PROJECT_HAS_LiGHT == TRUE
   , ADC_LiGHTFN				// #0x??
@@ -52,7 +52,11 @@ int HTTPD_ADirADCFeatName( UrlProcHelper *MyUrlProcHelper, int NumFeat);
 int HTTPD_ADirFXFeatName( UrlProcHelper *MyUrlProcHelper, int NumFeat);
 int HTTPD_ADirRFIDFeatName( UrlProcHelper *MyUrlProcHelper, int NumFeat);*/
 
-int WebIf_ADirTokenFeatName(Common_Definition_t* Common_Definition, UrlProcHelper_t* MyUrlProcHelper);
-bool WebIf_ExecActiveDirToken(WebIf_HTTPDConnSlotData_t* conn, Common_Definition_t* Common_Definition, UrlProcHelper_t* MyUrlProcHelper);
+// execute Feature-Name-Match Active-Drectory-Token 
+WebIf_HTTPDConnSlotData_t* WebIf_ADirTokenFeatName(Common_Definition_t* Common_Definition, const char** SrcPtr, const char** UrlSeekPtr, int* tokenExecResult);
+
+// check and execute WebIf Active-Drectory-Tokens
+bool WebIf_ExecActiveDirToken(WebIf_HTTPDConnSlotData_t* conn, Common_Definition_t* Common_Definition, const char** SrcPtr, const char** UrlSeekPtr, int* tokenExecResult);
 
 #endif //WebIf_ActiveDirTokens
+
