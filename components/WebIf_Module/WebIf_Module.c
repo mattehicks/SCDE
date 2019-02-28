@@ -37,10 +37,10 @@
 
 
 // make data root locally available
-static SCDERoot_t* SCDERoot;
+//static SCDERoot_t* SCDERoot;
 
 // make locally available from data-root: SCDEFn (Functions / callbacks) for operation
-static SCDEFn_t* SCDEFn;
+//static SCDEFn_t* SCDEFn;
 
 //----------------------- new stuff ------------------------
 
@@ -4682,10 +4682,10 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 				# if SCDED_DBG >= 4
 				if (tokenExecResult)
 					printf("|Url cmp result:%d>", tokenExecResult);
-				else    printf("|Url cmp no match!>");
 				
 				// the matching Definition name
-				if (conn->activeDirFndDefiniton) printf(">Definition '%.*s' matched. Its Module '%.*s' >",
+				if (conn->activeDirFndDefiniton) 
+					printf(">Definition '%.*s' matched. Its Module '%.*s'>",
 					conn->activeDirFndDefiniton->nameLen,
 					conn->activeDirFndDefiniton->name,
 					conn->activeDirFndDefiniton->module->ProvidedByModule->typeNameLen,

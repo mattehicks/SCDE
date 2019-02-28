@@ -54,6 +54,26 @@ HTTPD_ADirDevName(UrlProcHelper *MyUrlProcHelper)
 */
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
  *--------------------------------------------------------------------------------------------------
  *FName: HTTPD_ADirFeatNr
@@ -63,10 +83,87 @@ HTTPD_ADirDevName(UrlProcHelper *MyUrlProcHelper)
  * Rets: Number of found feature (1-1); -3 if ERROR
  *--------------------------------------------------------------------------------------------------
  */
+Common_Definition_t*			//http://192.168.0.56/1/SwITCH.htm
+WebIf_ADirFeatureNr(Common_Definition_t* Common_Definition,
+	const char** SrcPtr,
+	const char** UrlSeekPtr,
+	int* tokenExecResult)
+{
 /*
-int ICACHE_FLASH_ATTR
-HTTPD_ADirFeatNr(UrlProcHelper *MyUrlProcHelper, int NumFeat)	// keine negativen Zahlen möglich
-  {
+  char* s = *SrcPtr;
+
+//#if SCDED_DBG >= 9
+  printf(">tokenFNr>");
+//#endif	
+
+  // for extracted number
+  int n = 0;
+
+  // extract number
+  while ( ( *s >= '0') && (*s <= '9') ) {
+
+	n = n * 10 + *s - '0';
+
+	s++;
+  }
+
+  // check if this number is valid
+
+
+  // Got number ! Lets get current number of this definition 
+  // !! ITS NOT DIRECTLY ASSIGNED - ONLY CURRENT POSITION IN LOOP !!!
+  // (count Module->assigned definitions till name match and verify with requested)
+  int count = 0;
+
+  // get the Common_Definitions for current module
+  Common_Definition_t *analyzeCommon_Definition;
+
+  STAILQ_FOREACH(analyzeCommon_Definition, &SCDERoot->HeadCommon_Definitions, entries) {
+
+	// matching module type
+	if (analyzeCommon_Definition->module == Common_Definition->module) {
+
+		// yes a match, count
+		count++;
+
+		// if the name matches we have it!
+		if ( (Common_Definition->nameLen == analyzeCommon_Definition->nameLen)
+			&& (!strncasecmp((const char*) Common_Definition->name,
+			   (const char*) analyzeCommon_Definition->name,
+			   Common_Definition->nameLen)) ) {
+
+			if ( n == count ) {
+
+				//	#if SCDED_DBG >= 9
+				printf(">match!>");
+//				#endif	
+
+				// correct ptr to verified position
+				*SrcPtr = s;
+
+				return Common_Definition;
+			}
+
+			else break;
+		}
+ 	}
+  }
+*/
+
+  // NO valid + existing number !
+
+//#if SCDED_DBG >= 9
+  printf(">no match!");
+//#endif	
+
+  *tokenExecResult = -3;
+
+  return NULL;
+}
+
+
+
+/*
   int n = 0;
 
   while (( *MyUrlProcHelper->SrcPtr >= '0')
@@ -87,49 +184,6 @@ HTTPD_ADirFeatNr(UrlProcHelper *MyUrlProcHelper, int NumFeat)	// keine negativen
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
  *--------------------------------------------------------------------------------------------------
  *FName: WebIf_ADirFeatureName
@@ -145,38 +199,44 @@ WebIf_ADirFeatureName(Common_Definition_t* Common_Definition,
 	const char** UrlSeekPtr,
 	int* tokenExecResult)
 {
-printf("outter|%p", SrcPtr);
-printf("brgin|%p", *SrcPtr);
-
-
-
- char* s = *SrcPtr;
-
-
-printf("st|%p", s);
-
+  char* s = *SrcPtr;
   char* d = (char *) Common_Definition->name;
   int dLen = Common_Definition->nameLen;
-  while ( (*s == *d) &&
-	(  *d != '\0') ) {
 
-printf("|d|%c", *s);
-	
+//	#if SCDED_DBG >= 9
+	printf(">tokenFName>");
+//	#endif	
+
+  while ( (*s == *d) &&
+//	(  *d != '\0') ) {
+	( dLen-- ) ) {
+
+//	#if SCDED_DBG >= 9
+	printf("%c", *s);
+//	#endif	
 
 	s++;
 	d++;
   }
 
-printf("en|%p", s);
+  // full length match ?
+ // if (*d == 0) {
+  if (!dLen) {
 
-  if (*d == 0) {
+//	#if SCDED_DBG >= 9
+	printf(">match!>");
+//	#endif	
 
+	// correct ptr to verified position
 	*SrcPtr = s;
-
-printf("ex|%p", s);
 
 	return Common_Definition;
   }
+
+ // NO full length match !
+//#if SCDED_DBG >= 9
+  printf(">no match!");
+//#endif	
 
   *tokenExecResult = -3;
 
@@ -234,9 +294,6 @@ WebIf_ExecActiveDirToken(WebIf_HTTPDConnSlotData_t* conn,
 	const char** UrlSeekPtr,
 	int* tokenExecResult)
 {
-
-printf(" U%p", *UrlSeekPtr);
-
   // ActiveID init for processing,
   // -3 error not found,
   // -2 empty and no error,
@@ -246,9 +303,8 @@ printf(" U%p", *UrlSeekPtr);
 
   // Check if the current token at UrlSeekPtr is in an 'Active Directory Content Token'
   if ( (**UrlSeekPtr >= ADC_DevName) && (**UrlSeekPtr < ADC_LAST) ) {
-printf(" v%d", **UrlSeekPtr);
-	// yes, load token as Special Function, and go to next char ptr++
-//	char SpecFunc = **UrlSeekPtr++;
+
+	// yes, load token as 'special function' and go to next char ptr++
 	char SpecFunc = **UrlSeekPtr;
 	*UrlSeekPtr = *UrlSeekPtr+1;
 
@@ -259,41 +315,38 @@ printf(" v%d", **UrlSeekPtr);
 //		HTTPD_ADirDevName(MyUrlProcHelper);		// -3 in case of ERROR, -1 OK
 
 	// Force alternative file name from file system ?
-	if (SpecFunc == ADC_ForceAFN) *tokenExecResult = -1;	// -1 -> force alternative filename
+	if (SpecFunc == ADC_ForceAFN) {
+
+		*tokenExecResult = -1;	// -1 -> force alternative filename
+
+//		#if SCDED_DBG >= 9
+		printf(">tokenAFN>");
+//		#endif
+	}
 
 	// all others: active content xxxxxxxwith 'No. of Features Information'
-	else {
+	else {	
 
-
-printf(" w%p", *UrlSeekPtr);
-			
-
-		// read: 'No. of Features Information'
-//		uint8_t HiByte = **UrlSeekPtr++;
-//		uint8_t LoByte = **UrlSeekPtr++;
+/*		// read: 'No. of Features Information'
 		uint8_t HiByte = **UrlSeekPtr;
 		uint8_t LoByte = **UrlSeekPtr;
 		*UrlSeekPtr = *UrlSeekPtr+1;
-		*UrlSeekPtr = *UrlSeekPtr+1;
+		*UrlSeekPtr = *UrlSeekPtr+1
+		int NumFeat = HiByte<<8 | LoByte;
+*/
 
-		/*int NumFeat = HiByte<<8 | LoByte;
+		// check: active directory content token -> Feature Number ?
+		// results: tokenExecResult -3 in case of ERROR
+		if (SpecFunc == ADC_FeatNr) conn->activeDirFndDefiniton =
+			WebIf_ADirFeatureNr(Common_Definition, SrcPtr, UrlSeekPtr, tokenExecResult);
 
-		# if SCDED_DBG >= 5
-		os_printf("|exp.max F:%d>",
-			NumFeat);
-		# endif*/
-
-	/*	// general - active directory feature number extraction
-		if (SpecFunc == ADC_FeatNr) conn->ActiveDirID =
-			 HTTPD_ADirFeatNr(MyUrlProcHelper,
-				NumFeat);		// -3 in case of ERROR*/
-	printf(" x%p", *UrlSeekPtr);
-		// active directory feature number extraction
+		// check: active directory content token -> Feature Name ?
+		// results: tokenExecResult -3 in case of ERROR
 		if (SpecFunc == ADC_FeatureName) conn->activeDirFndDefiniton =
-			WebIf_ADirFeatureName(Common_Definition, SrcPtr, UrlSeekPtr, tokenExecResult);	// -3 in case of ERROR
+			WebIf_ADirFeatureName(Common_Definition, SrcPtr, UrlSeekPtr, tokenExecResult);
 		}
-	printf(" y%p", *UrlSeekPtr);
-//	if (conn->ActiveDirID >= 0) conn->ActiveDirID++; // Name 0 is 1 to the user    ÄNDERN?????????
+
+//	if (conn->ActiveDirID >= 0) conn->ActiveDirID++; // Name 0 is 1 to the user    Ã¤NDERN?????????
 
 	// succesfull, in range, false continues loop in httpd.c, (if ADID is not -3)
 	return false;

@@ -28,8 +28,13 @@
 
 #define RECV_BUF_SIZE 2400 //2048
 
-Module_t Module;
 
+
+// make data root locally available
+SCDERoot_t* WebIf_SCDERoot;
+
+// make locally available from data-root: SCDEFn (Functions / callbacks) for operation
+SCDEFn_t* WebIf_SCDEFn;
 
 
 typedef struct HTTPDConnSlotPrivData HTTPDConnSlotPrivData;
@@ -40,12 +45,10 @@ typedef struct HTTPD_InstanceCfg_s HTTPD_InstanceCfg_t;
 
 
 // callback proc for ... ?
-typedef int (* PCallback)(WebIf_HTTPDConnSlotData_t *connData);
+typedef int (*PCallback) (WebIf_HTTPDConnSlotData_t *connData);
 
 // callback proc for header field processing
-typedef int (* HdrFldProcCb)(WebIf_HTTPDConnSlotData_t *connData,
-				const char *at,
-				size_t length);
+typedef int (*HdrFldProcCb) (WebIf_HTTPDConnSlotData_t *connData, const char *at, size_t length);
 
 
 
@@ -57,7 +60,8 @@ typedef int (* HdrFldProcCb)(WebIf_HTTPDConnSlotData_t *connData,
 
 
 /*
- *  WebIf - Data Table A for Active Resources - The content of the Active Directory - PART A (Resource-Data-Row) 
+ *  WebIf - Data Table A for Active Resources - The content of the Active Directory - 
+ *          PART A (Resource-Data-Row) 
  */
 typedef struct WebIf_ActiveResourcesDataA_s {
 
@@ -139,7 +143,7 @@ typedef struct WebIf_ActiveResourcesDataB_s {
 
 
 
-//typedef sint8 err_t;
+
 
 typedef void *espconn_handle;
 /** A callback prototype to inform about events for a espconn */
@@ -191,8 +195,7 @@ enum espconn_state {
 
 
 
-typedef struct _esp_tcp
-  {
+typedef struct _esp_tcp {
   int remote_port;
   int local_port;
   uint8_t local_ip[4];
@@ -201,22 +204,21 @@ typedef struct _esp_tcp
   espconn_reconnect_callback reconnect_callback;
   espconn_connect_callback disconnect_callback;
 //  espconn_connect_callback write_finish_fn;
-  } esp_tcp;
+} esp_tcp;
 
-typedef struct _esp_udp
-  {
+typedef struct _esp_udp {
   int remote_port;
   int local_port;
   uint8_t local_ip[4];
   uint8_t remote_ip[4];
-  } esp_udp;
+} esp_udp;
 
 
-typedef struct _remot_info{
+typedef struct _remot_info {
 	enum espconn_state state;
 	int remote_port;
 	uint8_t remote_ip[4];
-}remot_info;
+} remot_info;
 
 
 
@@ -263,11 +265,10 @@ typedef struct WebIf_Definition_s {
 
   enum espconn_type type;		// type of the espconn (TCP, UDP)
   enum espconn_state state;		// current state of the espconn
-  union
-	{
+  union {
 	esp_tcp *tcp;			// connection details IP,Ports, ...
 	esp_udp *udp;
-	} proto;
+  } proto;
     
   espconn_recv_callback recv_callback;	// A callback function for event: receive-data
 
