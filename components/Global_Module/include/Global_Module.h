@@ -3,12 +3,26 @@
 #ifndef GLOBAL_MODULE_H
 #define GLOBAL_MODULE_H
 
+// -------------------------------------------------------------------------------------------------
 
-
+// this Module is made for the Smart-Connected-Device-Engine
 #include "SCDE_s.h"
 
+// this Module provides functions for other Modules:
+// -- no ---
 
-//#include "WebIf_Module global types.h"
+// this Module uses an 1st stage:
+// -- no ---
+
+// -------------------------------------------------------------------------------------------------
+
+// stores the Root Data of the Smart Connected Devices Engine - at/for this Module
+SCDERoot_t* SCDERoot_at_Global_M;
+
+// stores SCDEFn (Functions / callbacks) provided for operation - at/for this Module
+SCDEFn_t* SCDEFn_at_Global_M;
+
+// -------------------------------------------------------------------------------------------------
 
 
 

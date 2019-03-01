@@ -31,31 +31,11 @@
 
 
 
-
-
-
-
-
-static char tag[] = "Global";
-
-
-
-
 // -------------------------------------------------------------------------------------------------
 
 // developers debug information 0 = off 5 max?
 #define SCDED_DBG 5
 #define SCDEH_DBG 5
-
-// -------------------------------------------------------------------------------------------------
-
-// make data root locally available
-static SCDERoot_t* SCDERoot;
-
-// make locally available from data-root: the SCDEFn (Functions / callbacks) for operation
-static SCDEFn_t* SCDEFn;
-
-// -------------------------------------------------------------------------------------------------
 
 
 
@@ -92,6 +72,7 @@ ProvidedByModule_t Global_ProvidedByModule = { // A-Z order
   ,NULL					// Sub
   ,NULL					// Undefine
   ,NULL					// Write
+  ,NULL					// FnProvided
   ,sizeof(Global_Definition_t)		// Modul specific Size (Common_Definition_t + X)
 };
 
@@ -111,12 +92,12 @@ Global_Initialize(SCDERoot_t* SCDERootptr)
   {
 
   // make data root locally available
-  SCDERoot = SCDERootptr;
+  SCDERoot_at_Global_M = SCDERootptr;
 
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
-  SCDEFn = SCDERootptr->SCDEFn;
+  SCDEFn_at_Global_M = SCDERootptr->SCDEFn;
 
-  SCDEFn->Log3Fn(Global_ProvidedByModule.typeName
+  SCDEFn_at_Global_M->Log3Fn(Global_ProvidedByModule.typeName
 		  ,Global_ProvidedByModule.typeNameLen
 		  ,3
 		  ,"InitializeFn called. Type '%.*s' now useable.\n"
@@ -169,7 +150,7 @@ Global_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 /*
   // check for loaded Module 'WebIf' -> get provided Fn
   Global_Definition->WebIf_Provided.WebIf_FnProvided =
-	NULL;//(WebIf_FnProvided_t *) SCDEFn->GetFnProvidedByModule("WebIf");
+	NULL;//(WebIf_FnProvided_t *) SCDEFn_at_Global_M->GetFnProvidedByModule("WebIf");
 
  // Providing data for WebIf? Initialise data provided for WebIf
   if (Global_Definition->WebIf_Provided.WebIf_FnProvided) {
@@ -184,7 +165,7 @@ Global_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 
   else	{
 
-	SCDEFn->Log3Fn(Common_Definition->name
+	SCDEFn_at_Global_M->Log3Fn(Common_Definition->name
 		,Common_Definition->nameLen
 		,1
 		,"Could not enable WebIf support for '%.*s'. Type '%.*s' detects Type 'WebIf' is NOT loaded!"
@@ -196,12 +177,12 @@ Global_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 */
 
   // there should be no return messages - we expect no return messages
-//  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global verbose 3", 21);
-//  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global logfile -", 21);
+//  SCDEFn_at_Global_M->AnalyzeCommandFn((const uint8_t *) "attr global verbose 3", 21);
+//  SCDEFn_at_Global_M->AnalyzeCommandFn((const uint8_t *) "attr global logfile -", 21);
 
-  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global configfile maker", 28);
-//  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global statefile state", 27);
-//  SCDEFn->AnalyzeCommandFn((const uint8_t *) "attr global port 1234", 21);
+  SCDEFn_at_Global_M->AnalyzeCommandFn((const uint8_t *) "attr global configfile maker", 28);
+//  SCDEFn_at_Global_M->AnalyzeCommandFn((const uint8_t *) "attr global statefile state", 27);
+//  SCDEFn_at_Global_M->AnalyzeCommandFn((const uint8_t *) "attr global port 1234", 21);
                                                        //|12
 // -------------------------------------------------------------------------------------------
 

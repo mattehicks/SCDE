@@ -462,32 +462,32 @@ typedef xMultipleStringSLTQE_t* (* WriteFn_t) (Common_Definition_t *Common_Defin
  * - information is sent to SCDE by module when loaded
  * - done by InitializeFn after module the loaded
  */
-struct ProvidedByModule_s {
-  uint8_t typeName[32];		// Type-Name of module
+struct ProvidedByModule_s {	// FnProvidedByModule
+  uint8_t typeName[32];		// Type-Name = Module Name
   size_t typeNameLen;
-
-  AddFn_t AddFn;		// called when Key=Value Attributes owned by this Module are assigned
-  AttributeFn_t AttributeFn;	// called in case of attribute changes, to check them
-  DefineFn_t DefineFn;		// called to create a new definition of this type
-  DeleteFn_t DeleteFn;		// clean up (delete logfile), called by delete after UndefFn
-  DirectReadFn_t DirectReadFn;	// ? called by select loop
-  DirectWriteFn_t DirectWriteFn;// ? called by select loop
-  ExceptFn_t ExceptFn;		// called if the global select reports an except field
+				//   new Fn names? FnProvidedByModule
+  AddFn_t AddFn;		//
+  AttributeFn_t AttributeFn;	// verifyAttributeFn , called in case of attribute changes, to check them
+  DefineFn_t DefineFn;		// defineDefinitionFn, called to create a new definition of this type
+  DeleteFn_t DeleteFn;		// deleteDefinitionFn, to cleanup (delete log), called by delete after UndefFn
+  DirectReadFn_t DirectReadFn;	// readDirectFn      , called from select loop to read
+  DirectWriteFn_t DirectWriteFn;// writeDirectFn     , called from select loop to write
+  ExceptFn_t ExceptFn;		//                   , called if the global select reports an except field
   GetFn_t GetFn;		// get some data from this device
-  IdleCbFn_t IdleCbFn;		// give module an Idle-Callback to process something
-  InitializeFn_t InitializeFn;	// returns module information (module_s) required for operation
-  NotifyFn_t NotifyFn;		// call this if some device changed its properties
-  ParseFn_t ParseFn;		// Interpret a new message
-  ReadFn_t ReadFn;		// Reading / receiving from a Device
-  ReadyFn_t ReadyFn;		// check for available data, if no FD
-  RenameFn_t RenameFn;		// called to inform the definition about its renameing
-  SetFn_t SetFn;		// set/activate this device
-  ShutdownFn_t ShutdownFn;	// called before shutdown
-  StateFn_t StateFn;		// set local info for this device, do not activate anything
-  SubFn_t SubFn;		// called when Attribute-Keys owned by this Module are deleted
-  UndefineFn_t UndefineFn;	// clean up (delete timer, close fd), called by delete and rereadcfg
+  IdleCbFn_t IdleCbFn;		//                   , give module an Idle-Callback to process something
+  InitializeFn_t InitializeFn;	// initializeModuleFn, set up module for operation (after load)
+  NotifyFn_t NotifyFn;		//                   , call this if some device changed its properties
+  ParseFn_t ParseFn;		//                   , Interpret a new message
+  ReadFn_t ReadFn;		//                   , Reading / receiving from a Device
+  ReadyFn_t ReadyFn;		//                   , check for available data, if no FD
+  RenameFn_t RenameFn;		// renameDefinitionFn, called to inform the definition about its renameing
+  SetFn_t SetFn;		// setDefinitionFn?  , set/activate this device
+  ShutdownFn_t ShutdownFn;	//                   ,called before shutdown
+  StateFn_t StateFn;		//                   ,set local info for this device, do not activate anything
+  SubFn_t SubFn;		//                   ,called when Attribute-Keys owned by this Module are deleted
+  UndefineFn_t UndefineFn;	//                   ,clean up (delete timer, close fd), called by delete and rereadcfg
   WriteFn_t WriteFn;		//
-// uint32_t *FnProvided;	// Link to Fn Provided for other Modules here?
+  void* CustomFn;		// ... provided by this Module (non-standard Fn). For other Modules.
   int SizeOfDefinition;		// Size of modul specific definition structure (Common_Definition_t + X)
 };
 

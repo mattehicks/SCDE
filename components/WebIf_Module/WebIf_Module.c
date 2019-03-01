@@ -36,12 +36,6 @@
 
 
 
-// make data root locally available
-//static SCDERoot_t* SCDERoot;
-
-// make locally available from data-root: SCDEFn (Functions / callbacks) for operation
-//static SCDEFn_t* SCDEFn;
-
 //----------------------- new stuff ------------------------
 
 
@@ -2068,7 +2062,7 @@ SCDEH_ParseStrToQueryResultKF(int num,
 
   // Query parsed complete
   # if SCDEH_DBG >= 5
-  SCDEFn->HexDumpOutFn ("|QueryResultKF-HEX",
+  SCDEFn_at_WebIf_M->HexDumpOutFn ("|QueryResultKF-HEX",
 	QueryResultKF,
 	memlen);
   # endif
@@ -2808,7 +2802,7 @@ SCDED_XmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 	# endif
 
 	# if SCDED_DBG >= 5
- 	 SCDEFn->HexDumpOutFn ("\nTX-HEX",
+ 	 SCDEFn_at_WebIf_M->HexDumpOutFn ("\nTX-HEX",
 		conn->sendBuff,
 		conn->sendBuffLen);
 	# endif
@@ -2878,7 +2872,7 @@ SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 	# endif
 
 	# if SCDED_DBG >= 5
- 	 SCDEFn->HexDumpOutFn ("\nTX-SendBuff",
+ 	 SCDEFn_at_WebIf_M->HexDumpOutFn ("\nTX-SendBuff",
 		conn->sendBuff,
 		conn->sendBuffLen);
 	# endif
@@ -3724,7 +3718,7 @@ WebIf_RecvCb(void *arg,
   #endif
 
   # if SCDED_DBG >= 5
-  SCDEFn->HexDumpOutFn ("RX-HEX", recvdata, recvlen);
+  SCDEFn_at_WebIf_M->HexDumpOutFn ("RX-HEX", recvdata, recvlen);
   # endif
 
 //--------------------------------------------------------------------------------------------------
@@ -4573,7 +4567,7 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
   // Current Job: Loop through Common_Definitions to get WebIf provided data
   Common_Definition_t* Common_Definition;
 
-  STAILQ_FOREACH (Common_Definition, &SCDERoot->HeadCommon_Definitions, entries) {
+  STAILQ_FOREACH (Common_Definition, &SCDERoot_at_WebIf_M->HeadCommon_Definitions, entries) {
 
   // Current Job: Check if current Definition has Active-Dir-Url-Res-Data
   // yes? -> continue - load them to loop the rows
@@ -9710,6 +9704,7 @@ const ProvidedByModule_t WebIf_ProvidedByModule = { // A-Z order
   ,WebIf_Sub				// Sub
   ,WebIf_Undefine			// Undefine
   ,NULL					// Write
+  ,NULL					// FnProvided
   ,sizeof(WebIf_Definition_t)		// Modul specific Size (Common_Definition_t + X)
 };
 
@@ -9845,12 +9840,12 @@ WebIf_Initialize(SCDERoot_t* SCDERootptr)
   {
 
   // make data root locally available
-  SCDERoot = SCDERootptr;
+  SCDERoot_at_WebIf_M = SCDERootptr;
 
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
-  SCDEFn = SCDERootptr->SCDEFn;
+  SCDEFn_at_WebIf_M = SCDERootptr->SCDEFn;
 
-  SCDEFn->Log3Fn(WebIf_ProvidedByModule.typeName
+  SCDEFn_at_WebIf_M->Log3Fn(WebIf_ProvidedByModule.typeName
 		  ,WebIf_ProvidedByModule.typeNameLen
 		  ,3
 		  ,"InitializeFn called. Type '%.*s' now useable.\n"
@@ -10036,7 +10031,7 @@ WebIf_UndefineRaw(WebIf_Definition_t* WebIf_Definition)
 
 
   // remove WebIf Definition
-  STAILQ_REMOVE(&SCDERoot->HeadCommon_Definitions
+  STAILQ_REMOVE(&SCDERoot_at_WebIf_M->HeadCommon_Definitions
 	,(Common_Definition_t*) WebIf_Definition
 	,Common_Definition_s
 	,entries);
@@ -10167,7 +10162,7 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 
 		{
 
-		SCDEFn->Log3Fn(WebIf_Definition->common.name
+		SCDEFn_at_WebIf_M->Log3Fn(WebIf_Definition->common.name
 				,WebIf_Definition->common.nameLen
 				,1
 				,"WebIf_Define ERROR: failed to create sock! retriing\n");
@@ -10185,7 +10180,7 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 
 	{
 
-	SCDEFn->Log3Fn(WebIf_Definition->common.name
+	SCDEFn_at_WebIf_M->Log3Fn(WebIf_Definition->common.name
 			,WebIf_Definition->common.nameLen
 			,1
 			,"WebIf_Define ERROR: 'setsockopt' failed! error:%d\n"
@@ -10202,7 +10197,7 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 
 		{
 
-		SCDEFn->Log3Fn(WebIf_Definition->common.name
+		SCDEFn_at_WebIf_M->Log3Fn(WebIf_Definition->common.name
 				,WebIf_Definition->common.nameLen
 				,1
 				,"WebIf_Define ERROR: 'bind' failed! retriing\n");
@@ -10237,7 +10232,7 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 
 		{
 
-		SCDEFn->Log3Fn(WebIf_Definition->common.name
+		SCDEFn_at_WebIf_M->Log3Fn(WebIf_Definition->common.name
 				,WebIf_Definition->common.nameLen
 				,1
 				,"WebIf_Define ERROR: 'listen' failed! retriing\n");
@@ -10263,7 +10258,7 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
   espconn_regist_connectcb(WebIf_Definition,
 	WebIf_ConnCb);
 
-  SCDEFn->Log3Fn(WebIf_Definition->common.name
+  SCDEFn_at_WebIf_M->Log3Fn(WebIf_Definition->common.name
 		  ,WebIf_Definition->common.nameLen
 		  ,1
 		  ,"Defined a WebIf at X.X.X.X:YYYY, FD is:%d\n"
@@ -10338,7 +10333,7 @@ WebIf_DirectRead(Common_Definition_t* Common_Definition)
 	// Check for no slots free error
 	if (NewSlotNo >= 32) {
 
-		SCDEFn->Log3Fn(WebIf_Definition->common.name
+		SCDEFn_at_WebIf_M->Log3Fn(WebIf_Definition->common.name
 			,WebIf_Definition->common.nameLen
 			,1
 			,"WebIf_DirectRead Error no slots free...\n");
@@ -10370,7 +10365,7 @@ WebIf_DirectRead(Common_Definition_t* Common_Definition)
 	// check for error
 	if (NewClientFD < 0) {
 
-		SCDEFn->Log3Fn(WebIf_Definition->common.name
+		SCDEFn_at_WebIf_M->Log3Fn(WebIf_Definition->common.name
 				,WebIf_Definition->common.nameLen
 				,1
 				,"WebIf_DirectRead Error! accept failed...\n");
@@ -10392,7 +10387,7 @@ WebIf_DirectRead(Common_Definition_t* Common_Definition)
 	memset(NewWebIf_Definition, 0, sizeof (WebIf_Definition_t));
 
 	// store new WebIf Definition
-	STAILQ_INSERT_HEAD(&SCDERoot->HeadCommon_Definitions
+	STAILQ_INSERT_HEAD(&SCDERoot_at_WebIf_M->HeadCommon_Definitions
 		,(Common_Definition_t*) NewWebIf_Definition
 		, entries);
 
@@ -10465,13 +10460,13 @@ WebIf_DirectRead(Common_Definition_t* Common_Definition)
 		,NewWebIf_Definition->proto.tcp->remote_port);
 
   // assign an unique number
-  NewWebIf_Definition->common.nr = SCDERoot->DevCount++;
+  NewWebIf_Definition->common.nr = SCDERoot_at_WebIf_M->DevCount++;
 
   // make this definition temporary
 	NewWebIf_Definition->common.defCtrlRegA |= F_TEMPORARY;
 
 	// official log entry
-	SCDEFn->Log3Fn(NewWebIf_Definition->common.name
+	SCDEFn_at_WebIf_M->Log3Fn(NewWebIf_Definition->common.name
 		,NewWebIf_Definition->common.nameLen
 		,1
 		,"Created a new Definition for conn - Name:%.*s TypeName:%.*s Slot:%d FD:%d\n"
@@ -10777,7 +10772,7 @@ WebIf_Sub(Common_Definition_t* Common_Definition
 
 
 
-//  SCDEFn->HexDumpOutFn ("RX-HEX", conn, sizeof(WebIf_HTTPDConnSlotData_t));
+//  SCDEFn_at_WebIf_M->HexDumpOutFn ("RX-HEX", conn, sizeof(WebIf_HTTPDConnSlotData_t));
 
 
 

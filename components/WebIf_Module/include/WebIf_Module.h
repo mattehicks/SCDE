@@ -1,14 +1,28 @@
-﻿// SCDE-Module WebIf
+﻿// SCDE-Module WebIf (provides web resources and access)
 
 #ifndef MODULEWEBIF_H
 #define MODULEWEBIF_H
 
+// -------------------------------------------------------------------------------------------------
 
-
-//#include "HCTRLD.h"
+// this Module is made for the Smart-Connected-Device-Engine
 #include "SCDE_s.h"
 
+// this Module provides functions for other Modules:
+// -- no ---
 
+// this Module uses an 1st stage:
+// -- no ---
+
+// -------------------------------------------------------------------------------------------------
+
+// stores the Root Data of the Smart Connected Devices Engine - at/for this Module
+SCDERoot_t* SCDERoot_at_WebIf_M;
+
+// stores SCDEFn (Functions / callbacks) provided for operation - at/for this Module
+SCDEFn_t* SCDEFn_at_WebIf_M;
+
+// -------------------------------------------------------------------------------------------------
 
 
 
@@ -29,12 +43,6 @@
 #define RECV_BUF_SIZE 2400 //2048
 
 
-
-// make data root locally available
-SCDERoot_t* WebIf_SCDERoot;
-
-// make locally available from data-root: SCDEFn (Functions / callbacks) for operation
-SCDEFn_t* WebIf_SCDEFn;
 
 
 typedef struct HTTPDConnSlotPrivData HTTPDConnSlotPrivData;
