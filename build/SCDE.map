@@ -17113,6 +17113,7 @@ LOAD /home/maikschulze/esp/SCDE/build/Deleteattr_Command/libDeleteattr_Command.a
 LOAD /home/maikschulze/esp/SCDE/build/ESP32_DeVICE_Module/libESP32_DeVICE_Module.a
 LOAD /home/maikschulze/esp/SCDE/build/ESP32_I2C_Master_Module/libESP32_I2C_Master_Module.a
 LOAD /home/maikschulze/esp/SCDE/build/ESP32_S0_Module/libESP32_S0_Module.a
+LOAD /home/maikschulze/esp/SCDE/build/ESP32_SPI_Module/libESP32_SPI_Module.a
 LOAD /home/maikschulze/esp/SCDE/build/ESP32_SwITCH_Module/libESP32_SwITCH_Module.a
 LOAD /home/maikschulze/esp/SCDE/build/Global_Module/libGlobal_Module.a
 LOAD /home/maikschulze/esp/SCDE/build/Help_Command/libHelp_Command.a
