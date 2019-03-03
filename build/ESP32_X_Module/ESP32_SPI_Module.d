@@ -1,5 +1,5 @@
 ESP32_SPI_Module.o: \
- /home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/ESP32_SPI_Module.c \
+ /home/maikschulze/esp/SCDE/components/ESP32_X_Module/ESP32_SPI_Module.c \
  /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h \
  /home/maikschulze/esp/SCDE/main/include/esp8266.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h \
@@ -146,13 +146,13 @@ ESP32_SPI_Module.o: \
  /home/maikschulze/esp/SCDE/main/include/SCDE_s.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
- /home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/include/ESP32_SPI_Module_s.h \
+ /home/maikschulze/esp/SCDE/components/ESP32_X_Module/include/ESP32_SPI_Module_s.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/spi_struct.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/lldesc.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/queue.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/ringbuf.h \
- /home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/include/ESP32_SPI_Module.h \
+ /home/maikschulze/esp/SCDE/components/ESP32_X_Module/include/ESP32_SPI_Module.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h \
@@ -465,7 +465,7 @@ ESP32_SPI_Module.o: \
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
 
-/home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/include/ESP32_SPI_Module_s.h:
+/home/maikschulze/esp/SCDE/components/ESP32_X_Module/include/ESP32_SPI_Module_s.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h:
 
@@ -477,7 +477,7 @@ ESP32_SPI_Module.o: \
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/ringbuf.h:
 
-/home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/include/ESP32_SPI_Module.h:
+/home/maikschulze/esp/SCDE/components/ESP32_X_Module/include/ESP32_SPI_Module.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h:
 
@@ -516,4 +516,4 @@ ESP32_SPI_Module.o: \
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h:
 
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_channel.h:
-/home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/./ESP32_SPI_Module.c:
+/home/maikschulze/esp/SCDE/components/ESP32_X_Module/./ESP32_SPI_Module.c:

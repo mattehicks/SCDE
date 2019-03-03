@@ -1,15 +1,11 @@
-ESP32_SPI_Module.o: \
- /home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/ESP32_SPI_Module.c \
- /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h \
- /home/maikschulze/esp/SCDE/main/include/esp8266.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h \
+tft.o: /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/tft.c \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/stdio.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/newlib.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/config.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/ieeefp.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/features.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core-isa.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/stdio.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/cdefs.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/_default_types.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/reent.h \
@@ -21,14 +17,16 @@ ESP32_SPI_Module.o: \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/stdlib.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/machine/stdlib.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/alloca.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/errno.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/sys/errno.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stat.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/time.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/machine/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/string.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/string.h \
+ /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOS.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdint.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_intsup.h \
- /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOS.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOSConfig.h \
  /home/maikschulze/esp/SCDE/build/include/sdkconfig.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_config.h \
@@ -41,6 +39,9 @@ ESP32_SPI_Module.o: \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_context.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/corebits.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/xtruntime-frames.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/stdlib.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/machine/stdlib.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/alloca.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/soc.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_assert.h \
@@ -81,32 +82,32 @@ ESP32_SPI_Module.o: \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/xtensa_api.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/touch_channel.h \
- /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/queue.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/task.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/limits.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/list.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/math.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/rom/tjpgd.h \
+ /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h \
+ /home/maikschulze/esp/SCDE/main/include/esp8266.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h \
+ /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/queue.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/semphr.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/queue.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/ip.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/opt.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/port/lwipopts.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/time.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/machine/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/unistd.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/fcntl.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_default_fcntl.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stat.h \
  /home/maikschulze/esp/esp-idf/components/vfs/include/sys/ioctl.h \
  /home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/select.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/esp_task.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/debug.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/arch.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/port/arch/cc.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/errno.h \
- /home/maikschulze/esp/esp-idf/components/newlib/include/sys/errno.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/port/arch/sys_arch.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/port/arch/vfs_lwip.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/def.h \
@@ -146,38 +147,20 @@ ESP32_SPI_Module.o: \
  /home/maikschulze/esp/SCDE/main/include/SCDE_s.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
- /home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/include/ESP32_SPI_Module_s.h \
+ /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module_s.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h \
+ /home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/include/ESP32_SPI_Module_s.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/spi_struct.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/lldesc.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/queue.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/ringbuf.h \
- /home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/include/ESP32_SPI_Module.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSAdvFileTX.h \
- /home/maikschulze/esp/SCDE/components/ESP32_DeVICE_Module/include/HTools_cgi.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Content/include/ServAPCfg_tpl.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/CGI_Redirect.h \
- /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/spi_reg.h \
- /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_reg.h \
- /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/esp_dport_access.h \
- /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h \
- /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/rtc_cntl_reg.h \
- /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_struct.h \
- /home/maikschulze/esp/esp-idf/components/driver/include/driver/uart.h \
- /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h \
- /home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h \
- /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h \
- /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_channel.h
+ /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module.h \
+ /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/stmpe610.h \
+ /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/tft.h \
+ /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module_s.h \
+ /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module.h
 
-/home/maikschulze/esp/SCDE/main/include/ProjectConfig.h:
-
-/home/maikschulze/esp/SCDE/main/include/esp8266.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h:
+/home/maikschulze/esp/esp-idf/components/newlib/include/stdio.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h:
 
@@ -190,8 +173,6 @@ ESP32_SPI_Module.o: \
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/features.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core-isa.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/stdio.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/cdefs.h:
 
@@ -215,21 +196,25 @@ ESP32_SPI_Module.o: \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h:
 
-/home/maikschulze/esp/esp-idf/components/newlib/include/stdlib.h:
+/home/maikschulze/esp/esp-idf/components/newlib/include/errno.h:
 
-/home/maikschulze/esp/esp-idf/components/newlib/include/machine/stdlib.h:
+/home/maikschulze/esp/esp-idf/components/newlib/include/sys/errno.h:
 
-/home/maikschulze/esp/esp-idf/components/newlib/include/alloca.h:
+/home/maikschulze/esp/esp-idf/components/newlib/include/sys/stat.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/time.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/machine/time.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/string.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/string.h:
 
+/home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOS.h:
+
 /home/maikschulze/esp/esp-idf/components/newlib/include/stdint.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_intsup.h:
-
-/home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOS.h:
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/FreeRTOSConfig.h:
 
@@ -254,6 +239,12 @@ ESP32_SPI_Module.o: \
 /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/corebits.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/xtruntime-frames.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/stdlib.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/machine/stdlib.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/alloca.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h:
 
@@ -335,13 +326,23 @@ ESP32_SPI_Module.o: \
 
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/touch_channel.h:
 
-/home/maikschulze/esp/esp-idf/components/freertos/include/freertos/queue.h:
-
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/task.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/limits.h:
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/list.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/math.h:
+
+/home/maikschulze/esp/esp-idf/components/esp32/include/rom/tjpgd.h:
+
+/home/maikschulze/esp/SCDE/main/include/ProjectConfig.h:
+
+/home/maikschulze/esp/SCDE/main/include/esp8266.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h:
+
+/home/maikschulze/esp/esp-idf/components/freertos/include/freertos/queue.h:
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/semphr.h:
 
@@ -352,10 +353,6 @@ ESP32_SPI_Module.o: \
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/opt.h:
 
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/port/lwipopts.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/time.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/machine/time.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/unistd.h:
 
@@ -369,8 +366,6 @@ ESP32_SPI_Module.o: \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_default_fcntl.h:
 
-/home/maikschulze/esp/esp-idf/components/newlib/include/sys/stat.h:
-
 /home/maikschulze/esp/esp-idf/components/vfs/include/sys/ioctl.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/platform_include/sys/select.h:
@@ -382,10 +377,6 @@ ESP32_SPI_Module.o: \
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/arch.h:
 
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/port/arch/cc.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/errno.h:
-
-/home/maikschulze/esp/esp-idf/components/newlib/include/sys/errno.h:
 
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/port/arch/sys_arch.h:
 
@@ -465,9 +456,11 @@ ESP32_SPI_Module.o: \
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
 
-/home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/include/ESP32_SPI_Module_s.h:
+/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module_s.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h:
+
+/home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/include/ESP32_SPI_Module_s.h:
 
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/spi_struct.h:
 
@@ -477,43 +470,13 @@ ESP32_SPI_Module.o: \
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/ringbuf.h:
 
-/home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/include/ESP32_SPI_Module.h:
+/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module.h:
 
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h:
+/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/stmpe610.h:
 
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
+/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/tft.h:
 
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h:
+/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module_s.h:
 
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSAdvFileTX.h:
-
-/home/maikschulze/esp/SCDE/components/ESP32_DeVICE_Module/include/HTools_cgi.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Content/include/ServAPCfg_tpl.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/CGI_Redirect.h:
-
-/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/spi_reg.h:
-
-/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_reg.h:
-
-/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h:
-
-/home/maikschulze/esp/esp-idf/components/esp32/include/esp_dport_access.h:
-
-/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h:
-
-/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/rtc_cntl_reg.h:
-
-/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_struct.h:
-
-/home/maikschulze/esp/esp-idf/components/driver/include/driver/uart.h:
-
-/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h:
-
-/home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h:
-
-/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h:
-
-/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_channel.h:
-/home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/./ESP32_SPI_Module.c:
+/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module.h:
+/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/./tft.c:

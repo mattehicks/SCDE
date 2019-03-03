@@ -3,6 +3,19 @@
 #ifndef ESP32_SPI_MODULE_S_H
 #define ESP32_SPI_MODULE_S_H
 
+// -------------------------------------------------------------------------------------------------
+
+// this Module is made for the Smart-Connected-Device-Engine
+#include "SCDE_s.h"
+
+// this Module provides functions for other Modules:
+#include "WebIf_Module global types.h"
+//#include "WebIf_Module_s.h"
+
+// this Module uses an 1st stage:
+// -- no ---
+
+// -------------------------------------------------------------------------------------------------
 
 // whats needed?
 #include "esp_err.h"
@@ -12,14 +25,6 @@
 #include "esp_intr.h"
 #include "esp_intr_alloc.h"
 #include "rom/lldesc.h"
-
-
-
-
-
-
-#include "SCDE_s.h"
-//#include "WebIf_Module global types.h"	// -> WebIf_Module_s.h"
 
 #include "freertos/ringbuf.h"
 
@@ -199,7 +204,7 @@ typedef ESP32_SPI_Module_spi_device_interface_config_t* ESP32_SPI_Module_spi_dev
  *         - ESP_ERR_NO_MEM        if out of memory
  *         - ESP_OK                on success
  */
-esp_err_t ESP32_SPI_Module_spi_bus_add_device(ESP32_SPI_Module_spi_host_device_t host, ESP32_SPI_Module_spi_bus_config_t *bus_config, ESP32_SPI_Module_spi_device_interface_config_t *dev_config, ESP32_SPI_Module_spi_device_handle_t *handle);
+esp_err_t ESP32_SPI_spi_bus_add_device(ESP32_SPI_Module_spi_host_device_t host, ESP32_SPI_Module_spi_bus_config_t *bus_config, ESP32_SPI_Module_spi_device_interface_config_t *dev_config, ESP32_SPI_Module_spi_device_handle_t *handle);
 
 /**
  * @brief Remove a device from the SPI bus. If after removal no other device is attached to the spi bus device, it is freed.
@@ -210,7 +215,7 @@ esp_err_t ESP32_SPI_Module_spi_bus_add_device(ESP32_SPI_Module_spi_host_device_t
  *         - ESP_ERR_INVALID_STATE if device already is freed
  *         - ESP_OK                on success
  */
-esp_err_t ESP32_SPI_Module_spi_bus_remove_device(ESP32_SPI_Module_spi_device_handle_t handle);
+esp_err_t ESP32_SPI_spi_bus_remove_device(ESP32_SPI_Module_spi_device_handle_t handle);
 
 /**
  * @brief Return the actuall SPI bus speed for the spi device in Hz
@@ -222,7 +227,7 @@ esp_err_t ESP32_SPI_Module_spi_bus_remove_device(ESP32_SPI_Module_spi_device_han
  * @return 
  *         - actuall SPI clock
  */
-uint32_t ESP32_SPI_Module_spi_get_speed(ESP32_SPI_Module_spi_device_handle_t handle);
+uint32_t ESP32_SPI_spi_get_speed(ESP32_SPI_Module_spi_device_handle_t handle);
 
 /**
  * @brief Set the new clock speed for the device, return the actuall SPI bus speed set, in Hz
@@ -237,7 +242,7 @@ uint32_t ESP32_SPI_Module_spi_get_speed(ESP32_SPI_Module_spi_device_handle_t han
  *         - actuall SPI clock
  *         - 0 if speed cannot be set
  */
-uint32_t ESP32_SPI_Module_spi_set_speed(ESP32_SPI_Module_spi_device_handle_t handle, uint32_t speed);
+uint32_t ESP32_SPI_spi_set_speed(ESP32_SPI_Module_spi_device_handle_t handle, uint32_t speed);
 
 /**
  * @brief Select spi device for transmission
@@ -254,7 +259,7 @@ uint32_t ESP32_SPI_Module_spi_set_speed(ESP32_SPI_Module_spi_device_handle_t han
  *         - ESP_ERR_INVALID_ARG   if parameter is invalid
  *         - ESP_OK                on success
  */
-esp_err_t ESP32_SPI_Module_spi_device_select(ESP32_SPI_Module_spi_device_handle_t handle, int force);
+esp_err_t ESP32_SPI_spi_device_select(ESP32_SPI_Module_spi_device_handle_t handle, int force);
 
 /**
  * @brief De-select spi device
@@ -269,7 +274,7 @@ esp_err_t ESP32_SPI_Module_spi_device_select(ESP32_SPI_Module_spi_device_handle_
  *         - ESP_ERR_INVALID_ARG   if parameter is invalid
  *         - ESP_OK                on success
  */
-esp_err_t ESP32_SPI_Module_spi_device_deselect(ESP32_SPI_Module_spi_device_handle_t handle);
+esp_err_t ESP32_SPI_spi_device_deselect(ESP32_SPI_Module_spi_device_handle_t handle);
 
 /**
  * @brief Check if spi bus uses native spi pins
@@ -280,7 +285,7 @@ esp_err_t ESP32_SPI_Module_spi_device_deselect(ESP32_SPI_Module_spi_device_handl
  *         - true        if native spi pins are used
  *         - false       if spi pins are routed through gpio matrix
  */
-bool ESP32_SPI_Module_spi_uses_native_pins(ESP32_SPI_Module_spi_device_handle_t handle);
+bool ESP32_SPI_spi_uses_native_pins(ESP32_SPI_Module_spi_device_handle_t handle);
 
 /**
  * @brief Get spi bus native spi pins
@@ -290,7 +295,7 @@ bool ESP32_SPI_Module_spi_uses_native_pins(ESP32_SPI_Module_spi_device_handle_t 
  * @return 
  *         places spi bus native pins in provided pointers
  */
-void ESP32_SPI_Module_get_native_pins(int host, int *sdi, int *sdo, int *sck);
+void ESP32_SPI_spi_get_native_pins(int host, int *sdi, int *sdo, int *sck);
 
 /**
  * @brief Transimit and receive data to/from spi device based on transaction data
@@ -316,13 +321,14 @@ void ESP32_SPI_Module_get_native_pins(int host, int *sdi, int *sdo, int *sck);
  *         - ESP_OK                on success
  *
  */
-esp_err_t ESP32_SPI_Module_spi_transfer_data(ESP32_SPI_Module_spi_device_handle_t handle, ESP32_SPI_Module_spi_transaction_t *trans);
+esp_err_t ESP32_SPI_spi_transfer_data(ESP32_SPI_Module_spi_device_handle_t handle, ESP32_SPI_Module_spi_transaction_t *trans);
 
 /*
  * SPI transactions uses the semaphore (taken in select function) to protect the transfer
  */
-esp_err_t ESP32_SPI_Module_spi_device_TakeSemaphore(ESP32_SPI_Module_spi_device_handle_t handle);
-void ESP32_SPI_Module_spi_device_GiveSemaphore(ESP32_SPI_Module_spi_device_handle_t handle);
+esp_err_t ESP32_SPI_spi_device_TakeSemaphore(ESP32_SPI_Module_spi_device_handle_t handle);
+
+void ESP32_SPI_spi_device_GiveSemaphore(ESP32_SPI_Module_spi_device_handle_t handle);
 
 /**
  * @brief Setup a DMA link chain
@@ -338,14 +344,14 @@ void ESP32_SPI_Module_spi_device_GiveSemaphore(ESP32_SPI_Module_spi_device_handl
  * @param data Data buffer to use for DMA transfer
  * @param isrx True if data is to be written into ``data``, false if it's to be read from ``data``.
  */
-void ESP32_SPI_Module_spi_setup_dma_desc_links(lldesc_t *dmadesc, int len, const uint8_t *data, bool isrx);
+void ESP32_SPI_spi_setup_dma_desc_links(lldesc_t *dmadesc, int len, const uint8_t *data, bool isrx);
 
 /**
  * @brief Check if a DMA reset is requested but has not completed yet
  *
  * @return True when a DMA reset is requested but hasn't completed yet. False otherwise.
  */
-bool ESP32_SPI_Module_spi_dmaworkaround_reset_in_progress();
+bool ESP32_SPI_spi_dmaworkaround_reset_in_progress();
 
 /**
  * @brief Mark a DMA channel as idle.
@@ -353,7 +359,7 @@ bool ESP32_SPI_Module_spi_dmaworkaround_reset_in_progress();
  * A call to this function tells the workaround logic that this channel will
  * not be affected by a global SPI DMA reset.
  */
-void ESP32_SPI_Module_spi_dmaworkaround_idle(int dmachan);
+void ESP32_SPI_spi_dmaworkaround_idle(int dmachan);
 
 /**
  * @brief Mark a DMA channel as active.
@@ -361,7 +367,7 @@ void ESP32_SPI_Module_spi_dmaworkaround_idle(int dmachan);
  * A call to this function tells the workaround logic that this channel will
  * be affected by a global SPI DMA reset, and a reset like that should not be attempted.
  */
-void ESP32_SPI_Module_spi_dmaworkaround_transfer_active(int dmachan);
+void ESP32_SPI_spi_dmaworkaround_transfer_active(int dmachan);
 
 
 
@@ -374,10 +380,50 @@ void ESP32_SPI_Module_spi_dmaworkaround_transfer_active(int dmachan);
  * This Fn are provided & made accessible for client modules - for operation
  */
 // typedef for ESP32_SPI_Module_spi_bus_add_deviceFn - 
-typedef esp_err_t (*ESP32_SPI_Module_spi_bus_add_deviceFn_t) (ESP32_SPI_Module_spi_host_device_t host, ESP32_SPI_Module_spi_bus_config_t *bus_config, ESP32_SPI_Module_spi_device_interface_config_t *dev_config, ESP32_SPI_Module_spi_device_handle_t *handle);
+typedef esp_err_t (*ESP32_SPI_spi_bus_add_deviceFn_t) (ESP32_SPI_Module_spi_host_device_t host, ESP32_SPI_Module_spi_bus_config_t *bus_config, ESP32_SPI_Module_spi_device_interface_config_t *dev_config, ESP32_SPI_Module_spi_device_handle_t *handle);
 
-// typedef for ESP32_SPI_Module_spi_bus_remove_deviceFn - 
-typedef esp_err_t (*ESP32_SPI_Module_spi_bus_remove_deviceFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
+// typedef for ESP32_SPI_spi_bus_remove_deviceFn - 
+typedef esp_err_t (*ESP32_SPI_spi_bus_remove_deviceFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
+
+// typedef for ESP32_SPI_spi_get_speedFn - 
+typedef uint32_t (*ESP32_SPI_spi_get_speedFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
+
+// typedef for ESP32_SPI_spi_set_speedFn - 
+typedef uint32_t (*ESP32_SPI_spi_set_speedFn_t) (ESP32_SPI_Module_spi_device_handle_t handle, uint32_t speed);
+
+// typedef for ESP32_SPI_spi_device_selectFn - 
+typedef esp_err_t (*ESP32_SPI_spi_device_selectFn_t) (ESP32_SPI_Module_spi_device_handle_t handle, int force);
+
+// typedef for ESP32_SPI_spi_device_deselectFn - 
+typedef esp_err_t (*ESP32_SPI_spi_device_deselectFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
+
+// typedef for ESP32_SPI_spi_uses_native_pinsFn - 
+typedef bool (*ESP32_SPI_spi_uses_native_pinsFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
+
+// typedef for ESP32_SPI_get_native_pinsFn - 
+typedef void (*ESP32_SPI_get_native_pinsFn_t) (int host, int *sdi, int *sdo, int *sck);
+void ESP32_SPI_get_native_pins(int host, int *sdi, int *sdo, int *sck);
+
+// typedef for ESP32_SPI_spi_transfer_dataFn - 
+typedef esp_err_t (*ESP32_SPI_spi_transfer_dataFn_t) (ESP32_SPI_Module_spi_device_handle_t handle, ESP32_SPI_Module_spi_transaction_t *trans);
+
+// typedef for ESP32_SPI_spi_device_TakeSemaphoreFn - 
+typedef esp_err_t (*ESP32_SPI_spi_device_TakeSemaphoreFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
+
+// typedef for ESP32_SPI_spi_device_GiveSemaphoreFn - 
+typedef void (*ESP32_SPI_spi_device_GiveSemaphoreFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
+
+// typedef for ESP32_SPI_spi_setup_dma_desc_linksFn - 
+typedef void (*ESP32_SPI_spi_setup_dma_desc_linksFn_t) (lldesc_t *dmadesc, int len, const uint8_t *data, bool isrx);
+
+// typedef for ESP32_SPI_spi_dmaworkaround_reset_in_progressFn - 
+typedef bool (*ESP32_SPI_spi_dmaworkaround_reset_in_progressFn_t) ();
+
+// typedef for ESP32_SPI_Module_spi_dmaworkaround_idleFn - 
+typedef void (*ESP32_SPI_spi_dmaworkaround_idleFn_t) (int dmachan);
+
+// typedef for ESP32_SPI_Module_spi_dmaworkaround_transfer_activeFn - 
+typedef void (*ESP32_SPI_spi_dmaworkaround_transfer_activeFn_t) (int dmachan);
 
 
 
@@ -386,8 +432,21 @@ typedef esp_err_t (*ESP32_SPI_Module_spi_bus_remove_deviceFn_t) (ESP32_SPI_Modul
  * Stores function callbacks provided & made accessible for client modules using this module
  */
 typedef struct ESP32_SPI_Fn_s {
-  ESP32_SPI_Module_spi_bus_add_deviceFn_t ESP32_SPI_Module_spi_bus_add_deviceFn;	// ?
-  ESP32_SPI_Module_spi_bus_remove_deviceFn_t ESP32_SPI_Module_spi_bus_remove_deviceFn;	// ?
+  ESP32_SPI_spi_bus_add_deviceFn_t ESP32_SPI_spi_bus_add_deviceFn;		// ?
+  ESP32_SPI_spi_bus_remove_deviceFn_t ESP32_SPI_spi_bus_remove_deviceFn;	// ?
+  ESP32_SPI_spi_get_speedFn_t ESP32_SPI_spi_get_speedFn;			// ?
+  ESP32_SPI_spi_set_speedFn_t ESP32_SPI_spi_set_speedFn;			// ?
+  ESP32_SPI_spi_device_selectFn_t ESP32_SPI_spi_device_selectFn;		// ?
+  ESP32_SPI_spi_device_deselectFn_t ESP32_SPI_spi_device_deselectFn;		// ?
+  ESP32_SPI_spi_uses_native_pinsFn_t ESP32_SPI_spi_uses_native_pinsFn;		// ?
+  ESP32_SPI_get_native_pinsFn_t ESP32_SPI_get_native_pinsFn;			// ?
+  ESP32_SPI_spi_transfer_dataFn_t ESP32_SPI_spi_transfer_dataFn;		// ?
+  ESP32_SPI_spi_device_TakeSemaphoreFn_t ESP32_SPI_spi_device_TakeSemaphoreFn;	// ?
+  ESP32_SPI_spi_device_GiveSemaphoreFn_t ESP32_SPI_spi_device_GiveSemaphoreFn;	// ?
+  ESP32_SPI_spi_setup_dma_desc_linksFn_t ESP32_SPI_spi_setup_dma_desc_linksFn;	// ?
+  ESP32_SPI_spi_dmaworkaround_reset_in_progressFn_t ESP32_SPI_spi_dmaworkaround_reset_in_progressFn;	// ?
+  ESP32_SPI_spi_dmaworkaround_idleFn_t ESP32_SPI_spi_dmaworkaround_idleFn;	// ?
+  ESP32_SPI_spi_dmaworkaround_transfer_activeFn_t ESP32_SPI_spi_dmaworkaround_transfer_activeFn;	// ?
 } ESP32_SPI_Fn_t;
 
 
