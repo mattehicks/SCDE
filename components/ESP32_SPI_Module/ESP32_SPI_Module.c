@@ -320,13 +320,44 @@ const WebIf_ActiveResourcesDataB_t ESP32_SPI_ActiveResourcesDataB_forWebIf[] =  
 
 
 
-/*
- * DName: ESP32_SPI_Fn (SCDE Functions)
- * Desc: Stores function callbacks provided & made accessible for client modules using this module,
- *       for operation and helpers
- * Data: 
+/**
+ * -------------------------------------------------------------------------------------------------
+ *  DName: ESP32_SPI_provided_Fn
+ *  Desc: Assigns common + custom functions this Module provides to the SCDE (and client Modules)
+ *  Data: ESP32_SPI_provided_fn_t
+ * -------------------------------------------------------------------------------------------------
  */
-ESP32_SPI_Fn_t ESP32_SPI_Fn = {
+ESP32_SPI_provided_fn_t ESP32_SPI_provided_fn = {   // A-Z order
+{
+// --- first the common module functions ---
+  "ESP32_SPI",		// Type-Name of module -> on Linux libfilename.so !
+  9,						// size of Type-Name
+
+  NULL,						// Add
+  ESP32_SPI_Attribute,				// Attribute
+  ESP32_SPI_Define,				// Define
+  NULL, 					// Delete
+  NULL, 					// DirectRead
+  NULL,						// DirectWrite
+  NULL,						// Except
+  NULL,						// Get
+  ESP32_SPI_IdleCb,				// IdleCb
+  ESP32_SPI_Initialize,				// Initialize
+  NULL,						// Notify
+  NULL,						// Parse
+  NULL,						// Read
+  NULL,						// Ready
+  NULL,						// Rename
+  ESP32_SPI_Set,				// Set
+  ESP32_SPI_Shutdown,				// Shutdown
+  NULL, 					// State
+  NULL, 					// Sub
+  ESP32_SPI_Undefine,				// Undefine
+  ESP32_SPI_Write,				// Write
+  NULL,						// FnProvided
+  sizeof(ESP32_SPI_provided_fn_t)		// Modul specific Size (Common_Definition_t + X)
+},
+// --- now the custom module fuctions ---
   ESP32_SPI_spi_bus_add_device,			// ?
   ESP32_SPI_spi_bus_remove_device,		// ?
   ESP32_SPI_spi_get_speed,			// ?
@@ -342,45 +373,6 @@ ESP32_SPI_Fn_t ESP32_SPI_Fn = {
   ESP32_SPI_spi_dmaworkaround_reset_in_progress,// ?
   ESP32_SPI_spi_dmaworkaround_idle,		// ?
   ESP32_SPI_spi_dmaworkaround_transfer_active	// ?
-};
-
-
-
-/**
- * -------------------------------------------------------------------------------------------------
- *  DName: ESP32_SPI_Module
- *  Desc: Data 'Provided By Module' for the ESP32_SPI module (functions + infos this module
- *        provides to SCDE)
- *  Data: 
- * -------------------------------------------------------------------------------------------------
- */
-ProvidedByModule_t ESP32_SPI_ProvidedByModule = {   // A-Z order
-  "ESP32_SPI"				// Type-Name of module -> on Linux libfilename.so !
-  ,9					// size of Type-Name
-
-  ,NULL					// Add
-  ,ESP32_SPI_Attribute			// Attribute
-  ,ESP32_SPI_Define			// Define
-  ,NULL					// Delete
-  ,NULL					// DirectRead
-  ,NULL					// DirectWrite
-  ,NULL					// Except
-  ,NULL					// Get
-  ,ESP32_SPI_IdleCb			// IdleCb
-  ,ESP32_SPI_Initialize			// Initialize
-  ,NULL					// Notify
-  ,NULL					// Parse
-  ,NULL					// Read
-  ,NULL					// Ready
-  ,NULL					// Rename
-  ,ESP32_SPI_Set			// Set
-  ,ESP32_SPI_Shutdown			// Shutdown
-  ,NULL					// State
-  ,NULL					// Sub
-  ,ESP32_SPI_Undefine			// Undefine
-  ,ESP32_SPI_Write			// Write
-  ,&ESP32_SPI_Fn			// FnProvided
-  ,sizeof(ESP32_SPI_Definition_t)	// Modul specific Size (Common_Definition_t + X)
 };
 
 
@@ -564,7 +556,7 @@ ESP32_SPI_Define(Common_Definition_t *Common_Definition)
   ESP32_SPI_Definition->common.fd = -1;
 
   // store table of function callbacks provided & made accessible for client modules
-  ESP32_SPI_Definition->ESP32_SPI_Fn = &ESP32_SPI_Fn;
+//  ESP32_SPI_Definition->ESP32_SPI_Fn = &ESP32_SPI_Fn;
 
 // ------------------------------------------------------------------------------------------------
 
@@ -858,12 +850,12 @@ ESP32_SPI_Initialize(SCDERoot_t* SCDERootptr)
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
   SCDEFn_at_ESP32_SPI_M = SCDERootptr->SCDEFn;
 
-  SCDEFn_at_ESP32_SPI_M->Log3Fn(ESP32_SPI_ProvidedByModule.typeName
-		  ,ESP32_SPI_ProvidedByModule.typeNameLen
+  SCDEFn_at_ESP32_SPI_M->Log3Fn(ESP32_SPI_provided_fn.common.typeName
+		  ,ESP32_SPI_provided_fn.common.typeNameLen
 		  ,3
 		  ,"InitializeFn called. Type '%.*s' now useable.\n"
-		  ,ESP32_SPI_ProvidedByModule.typeNameLen
-		  ,ESP32_SPI_ProvidedByModule.typeName);
+		  ,ESP32_SPI_provided_fn.common.typeNameLen
+		  ,ESP32_SPI_provided_fn.common.typeName);
 
   return 0;
 

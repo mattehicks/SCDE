@@ -428,13 +428,10 @@ typedef void (*ESP32_SPI_spi_dmaworkaround_transfer_activeFn_t) (int dmachan);
 
 
 /*
- * ESP32 SPI provided Fn - table
- * Stores common + custom functions this Module provides to the SCDE (and client Modules)
+ * ESP32_SPI_Master Fn (SPI Functions) - table
+ * Stores function callbacks provided & made accessible for client modules using this module
  */
-typedef struct ESP32_SPI_provided_fn_s {
-// --- first the provided common module functions ---
-  ProvidedByModule_t common;							// the common fn
-// --- now the provided custom module fuctions ---
+typedef struct ESP32_SPI_Fn_s {
   ESP32_SPI_spi_bus_add_deviceFn_t ESP32_SPI_spi_bus_add_deviceFn;		// ?
   ESP32_SPI_spi_bus_remove_deviceFn_t ESP32_SPI_spi_bus_remove_deviceFn;	// ?
   ESP32_SPI_spi_get_speedFn_t ESP32_SPI_spi_get_speedFn;			// ?
@@ -450,9 +447,34 @@ typedef struct ESP32_SPI_provided_fn_s {
   ESP32_SPI_spi_dmaworkaround_reset_in_progressFn_t ESP32_SPI_spi_dmaworkaround_reset_in_progressFn;	// ?
   ESP32_SPI_spi_dmaworkaround_idleFn_t ESP32_SPI_spi_dmaworkaround_idleFn;	// ?
   ESP32_SPI_spi_dmaworkaround_transfer_activeFn_t ESP32_SPI_spi_dmaworkaround_transfer_activeFn;	// ?
-} ESP32_SPI_provided_fn_t;
+} ESP32_SPI_Fn_t;
 
 
+//NEW
+/*
+ * ESP32_SPI_Master Fn (SPI Functions) - table
+ * Stores function callbacks provided & made accessible for client modules using this module
+ */
+typedef struct ESP32_SPI_provided_fn_s {
+// --- first the common module functions ---
+  ProvidedByModule_t ESP32_SPI_common_fn;	// the common functions ...
+// --- now the custom module fuctions ---
+  ESP32_SPI_spi_bus_add_deviceFn_t ESP32_SPI_spi_bus_add_deviceFn;		// ?
+  ESP32_SPI_spi_bus_remove_deviceFn_t ESP32_SPI_spi_bus_remove_deviceFn;	// ?
+  ESP32_SPI_spi_get_speedFn_t ESP32_SPI_spi_get_speedFn;			// ?
+  ESP32_SPI_spi_set_speedFn_t ESP32_SPI_spi_set_speedFn;			// ?
+  ESP32_SPI_spi_device_selectFn_t ESP32_SPI_spi_device_selectFn;		// ?
+  ESP32_SPI_spi_device_deselectFn_t ESP32_SPI_spi_device_deselectFn;		// ?
+  ESP32_SPI_spi_uses_native_pinsFn_t ESP32_SPI_spi_uses_native_pinsFn;		// ?
+  ESP32_SPI_get_native_pinsFn_t ESP32_SPI_get_native_pinsFn;			// ?
+  ESP32_SPI_spi_transfer_dataFn_t ESP32_SPI_spi_transfer_dataFn;		// ?
+  ESP32_SPI_spi_device_TakeSemaphoreFn_t ESP32_SPI_spi_device_TakeSemaphoreFn;	// ?
+  ESP32_SPI_spi_device_GiveSemaphoreFn_t ESP32_SPI_spi_device_GiveSemaphoreFn;	// ?
+  ESP32_SPI_spi_setup_dma_desc_linksFn_t ESP32_SPI_spi_setup_dma_desc_linksFn;	// ?
+  ESP32_SPI_spi_dmaworkaround_reset_in_progressFn_t ESP32_SPI_spi_dmaworkaround_reset_in_progressFn;	// ?
+  ESP32_SPI_spi_dmaworkaround_idleFn_t ESP32_SPI_spi_dmaworkaround_idleFn;	// ?
+  ESP32_SPI_spi_dmaworkaround_transfer_activeFn_t ESP32_SPI_spi_dmaworkaround_transfer_activeFn;	// ?
+} ESP32_SPI_provided_Fn_t;
 
 // -------------------------------------------------------------------------------------------------
 
@@ -468,7 +490,7 @@ typedef struct ESP32_SPI_Definition_s {
 //  uint8_t i2c_num;				/*!< the I2C hardware that should be used */
 //  i2c_config_t i2c_config;			/*!< i2c configuration */
 //  i2c_obj_t *i2c_obj;				/*!< the current i2c job */
- // ESP32_SPI_Fn_t* ESP32_SPI_Fn;	/*!< ESP32_I2C_MasterFn (Functions / callbacks) accessible for client modules */
+  ESP32_SPI_Fn_t* ESP32_SPI_Fn;	/*!< ESP32_I2C_MasterFn (Functions / callbacks) accessible for client modules */
 } ESP32_SPI_Definition_t;
 
 

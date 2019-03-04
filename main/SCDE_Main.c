@@ -1132,16 +1132,16 @@ app_main(void)
   CommandActivateModule(&ESP32_S0_ProvidedByModule);
 
   // Activate ESP32_SPI as SCDE built-in Module
-  extern ProvidedByModule_t ESP32_SPI_ProvidedByModule;
-  CommandActivateModule(&ESP32_SPI_ProvidedByModule);
+  extern ProvidedByModule_t ESP32_SPI_provided_fn;
+  CommandActivateModule(&ESP32_SPI_provided_fn);
 
   // Activate ESP32_SwITCH as SCDE built-in Module
   extern ProvidedByModule_t ESP32_SwITCH_ProvidedByModule;
   CommandActivateModule(&ESP32_SwITCH_ProvidedByModule);
 
   // Activate ESP32_TouchGUI1 as SCDE built-in Module
-  extern ProvidedByModule_t ESP32_TouchGUI1_ProvidedByModule;
-  CommandActivateModule(&ESP32_TouchGUI1_ProvidedByModule);
+  extern ProvidedByModule_t ESP32_TouchGUI1_provided_fn;
+  CommandActivateModule(&ESP32_TouchGUI1_provided_fn);
 
   // Activate SSD1306 as SCDE built-in Module
   extern ProvidedByModule_t SSD1306_ProvidedByModule;

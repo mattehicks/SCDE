@@ -1,0 +1,27 @@
+Types    xxx_t
+Struct   xxx_s
+pointers p_
+
+Naming:
+Struct      TitleCase
+Struct Members  lower_case or lowerCase
+
+Enum        ETitleCase
+Enum Members    ALL_CAPS or lowerCase
+
+Public functions    pfx_TitleCase (pfx = module prefix)
+Private functions   TitleCase
+Functions that are there, but shouldn't be called directly, or have obscure uses _TitleCase
+
+Trivial variables   i,x,n,f etc...
+Local variables lower_case or lowerCase
+Global variables    g_lowerCase or g_lower_case (searchable by g_ prefix)
+
+pointers p_
+
+All macros and constants in caps: MAX_BUFFER_SIZE, TRACKING_ID_PREFIX.
+Struct names and typedef's in camelcase: GtkWidget, TrackingOrder.
+Functions that operate on structs: classic C style: gtk_widget_show(), tracking_order_process().
+Pointers: nothing fancy here: GtkWidget *foo, TrackingOrder *bar.
+Global variables: just don't use global variables. They are evil.
+Functions that are there, but shouldn't be called directly, or have obscure uses, or whatever: one or more underscores at the beginning: _refrobnicate_data_tables(), _destroy_cache().

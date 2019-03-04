@@ -7,17 +7,33 @@
 
 
 
+// -------------------------------------------------------------------------------------------------
+// initial type definitions ...
+
 
 // nach unten verschieben ? doppelt ?
 typedef struct Common_Definition_s Common_Definition_t;
 
-typedef struct Common_StageXCHG_s Common_StageXCHG_t;
-
+// SCDE Root (type) holds the Smart Connected Devices Engine - root data
 typedef struct SCDERoot_s SCDERoot_t;
 
+// Module (type) stores information of loaded modules, required for module use and operation
 typedef struct Module_s Module_t;
 
+// Provided by Module (type) stores (the common) function callbacks for SCDE module operation
+typedef struct ProvidedByModule_s ProvidedByModule_t;
+
+// Command (type) stores commands made available for operation.
+typedef struct command_s command_t;
+
+// Common_Definition_t stores values (the common part) for operation of an definition
+typedef struct Common_Definition_s Common_Definition_t;
+
+// ?
+typedef struct Common_StageXCHG_s Common_StageXCHG_t;
+
 // -------------------------------------------------------------------------------------------------
+
 
 
 
@@ -371,11 +387,6 @@ typedef struct SCDEFn_s {
 
 
 
-// ProvidedByModule_t stores differnt function callbacks (Fn) - the heart of SCDE module operation
-typedef struct ProvidedByModule_s ProvidedByModule_t;
-
-
-
 // typedef for AddFn - experimental - provided my module
 typedef strTextMultiple_t* (* AddFn_t)(Common_Definition_t *Common_Definition, uint8_t *kvArgs, size_t kvArgsLen);
 
@@ -453,16 +464,13 @@ typedef xMultipleStringSLTQE_t* (* WriteFn_t) (Common_Definition_t *Common_Defin
 
 
 
-
-
-
 /* 
- * ProvidedByModule_s (struct)
- * - stores function callbacks for SCDE module operation
- * - information is sent to SCDE by module when loaded
+ * Provided by Module (struct)
+ * - stores (the common) function callbacks for SCDE module operation
+ * - information is sent to SCDE by module, when loaded
  * - done by InitializeFn after module the loaded
  */
-struct ProvidedByModule_s {	// FnProvidedByModule
+struct ProvidedByModule_s {
   uint8_t typeName[32];		// Type-Name = Module Name
   size_t typeNameLen;
 				//   new Fn names? FnProvidedByModule
@@ -497,12 +505,9 @@ struct ProvidedByModule_s {	// FnProvidedByModule
 
 
 
-// Module_t stores information of loaded modules, Fns required for module use and operation
-typedef struct Module_s Module_t;
-
 /*
- * Module_s (struct)
- * - stores information of loaded modules, Fns required for module use and operation
+ * Module (struct)
+ * - stores information of loaded modules, required for module use and operation
  * - data is associated when module is loaded
  * - done in InitializeFn (after module load)
  */
@@ -525,8 +530,8 @@ typedef struct xReadingSLTQE_s xReadingSLTQE_t;
 
 /*
  * xReadingsSLTQE_s (struct) 
- * is an singly linked tail queue element and stores one Reading
- * it is used when storing multiple Readings (in an singly tail linked queue)
+ * - is an singly linked tail queue element and stores one Reading
+ * - it is used when storing multiple Readings (in an singly tail linked queue)
  */
 struct xReadingSLTQE_s {
   STAILQ_ENTRY(xReadingSLTQE_s) entries;	// link to next xReadingsSLTQE_s element
@@ -566,13 +571,49 @@ struct bulkUpdateReadings_s {
 
 
 
-// Common_Definition_t stores values for operation of an definition (device)
-typedef struct Common_Definition_s Common_Definition_t;
+/*
+ * Reading singly linked tail queue element  (struct) 
+ * - stores information for one Reading
+ * - it is used when storing multiple Readings (in an singly linked tail queue)
+ */
+typedef struct Reading2_s {
+  time_t readingTist;				// timestamp of reading
+  xString_t nameString;				// text of reading-name, in allocated mem
+  xString_t valueString;			// text of reading-value, in allocated mem
+} Reading2_t;
+
+
+
+// xReadings2SLTQE_t - Singly Linked Tail Queue Element (try2) to hold multiple Readings
+typedef struct xReading2SLTQE_s xReading2SLTQE_t;
+
+/*
+ * Reading singly linked tail queue element  (struct) 
+ * - stores information for one Reading
+ * - it is used when storing multiple Readings (in an singly linked tail queue)
+ */
+
+struct xReading2SLTQE_s {
+  STAILQ_ENTRY(xReading2SLTQE_s) entries;	// link to next Reading2SLTQE element
+  Common_Definition_t* definition;		// the Definition th reading belongs to
+  Reading2_t* reading;				// ptr to the reading data
+};
+
+/*
+ * Constructor for the singly linked tail queue head, which may hold multiple linked Readings
+ * SLTQ can be used for an FIFO queue by adding entries at the tail and fetching entries from the head
+ * SLTQ is inefficient when removing arbitrary elements
+ */
+STAILQ_HEAD(readings2SLTQH_s, xReading2SLTQE_s);
+
+
+
+// -------------------------------------------------------------------------------------------------
 
 
 
 /* 
- * Common_Definition_s (struct)
+ * Common Definition (struct)
  * - stores values for operation of an definition (device), common part,  valid only for the defined
  * - instance of an loaded module. Values are initialized by the SCDE and finalized by the
  *   loaded module itself (defineFn).
@@ -630,8 +671,6 @@ struct Common_Definition_s {
 */
 };
 
-
-
 // Information Flags, stored in Common_Definition_s - for Definition Control
 enum Common_DefCtrlRegA {
 //hinzu CDCRA_Flag
@@ -639,8 +678,6 @@ enum Common_DefCtrlRegA {
   , F_VOLATILE		= 1 << 1	// indicates:Definition is volatile -> saved to statefile
   , CDCRA_F_weitere	= 1 << 2	//   
 };
-
-
 
 // Information Flags, stored in Common_Definition_s - for Connection Control
 enum Common_CtrlRegA {
@@ -735,18 +772,13 @@ struct providedByCommand_s {
 
 
 
-// command_t stores commands made available for operation.
-typedef struct command_s command_t;
-
 /* 
- * commands_s (struct)
+ * Commands (struct)
  * - stores commands made available for operation.
  * - some are buildin and initialized after start, others are loaded by user
  */
-struct command_s {
-
+struct command_s { // Command_s !!!
   STAILQ_ENTRY (command_s) entries;		// link to next loaded command
-
   providedByCommand_t *providedByCommand;	// ptr to provided-by-command Info
 };
 
@@ -785,11 +817,8 @@ struct attribute_s {
 
 
 
-// SCDERoot_t holds the Smart Connected Devices Engine - root data
-typedef struct SCDERoot_s SCDERoot_t;
-
 /* 
- * SCDERoot_s (struct)
+ * SCDERoot (struct)
  * - Smart Connected Devices Engine - root data
  */
 struct SCDERoot_s {
@@ -838,10 +867,6 @@ enum Global_CtrlRegA
   , F_INIT_DONE			= 1 << 1	// indicates: the SCDE has fiinished the init process
   , GCRA_F_weitere		= 1 << 2	//   
 };
-
-
-
-
 
 
 
