@@ -60,19 +60,15 @@ const uint8_t Set_helpText[] =
 const uint8_t Set_helpDetailText[] = 
   "Usagebwrebwerb: define <name> <type> <options>, to define a device";
 
-providedByCommand_t Set_ProvidedByCommand =
-  {
-   "Set"					// Command-Name of command -> libfilename.so !
-  ,3						// length of cmd
-  ,Set_InitializeCommandFn			// Initialize Fn
-  ,Set_CommandFn				// the Fn code
-  ,&Set_helpText
-  ,sizeof(Set_helpText)
-  ,&Set_helpDetailText
-  ,sizeof(Set_helpDetailText)
-  };
+ProvidedByCommand_t Set_ProvidedByCommand = {
+  "Set",					// Command-Name of command -> libfilename.so !
+  3,						// length of cmd
+  Set_InitializeCommandFn,			// Initialize Fn
+  Set_CommandFn,				// the Fn code
+  { &Set_helpText, sizeof(Set_helpText) },
+  { &Set_helpDetailText, sizeof(Set_helpDetailText) }
+};
 
-//(const uint8_t *) "Usage: define <name> <type> <options>, to define a device",57);	// CommandHelp, Len
 
 
 /* --------------------------------------------------------------------------------------------------
@@ -209,9 +205,9 @@ Set_CommandFn (const uint8_t *args
 	if ( (Common_Definition->nameLen == nameLen)
 		&& (!strncasecmp((const char*) Common_Definition->name, (const char*) name, nameLen)) ) {
 
-		if (Common_Definition->module->ProvidedByModule->SetFn) {
+		if (Common_Definition->module->provided->SetFn) {
 
-			retMsg = Common_Definition->module->ProvidedByModule->SetFn(Common_Definition, setArgs, setArgsLen);
+			retMsg = Common_Definition->module->provided->SetFn(Common_Definition, setArgs, setArgsLen);
 
 			// got an error msg?
 			if (retMsg) {
@@ -237,8 +233,8 @@ Set_CommandFn (const uint8_t *args
 				,Common_Definition->name
 				,setArgsLen
 				,setArgs
-			   	,Common_Definition->module->ProvidedByModule->typeNameLen
-				,Common_Definition->module->ProvidedByModule->typeName);
+			   	,Common_Definition->module->provided->typeNameLen
+				,Common_Definition->module->provided->typeName);
 
 			// insert retMsg in stail-queue
 		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);

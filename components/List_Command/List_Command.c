@@ -60,19 +60,15 @@ const uint8_t List_helpText[] =
 const uint8_t List_helpDetailText[] = 
   "list definitions and state info";
 
-providedByCommand_t List_ProvidedByCommand =
-{
-   "List"					// Command-Name of command -> libfilename.so !
-  ,4						// length of cmd
-  ,List_InitializeCommandFn			// Initialize Fn
-  ,List_CommandFn				// the Fn code
-  ,&List_helpText
-  ,sizeof(List_helpText)
-  ,&List_helpDetailText
-  ,sizeof(List_helpDetailText)
+ProvidedByCommand_t List_ProvidedByCommand = {
+  "List",					// Command-Name of command -> libfilename.so !
+  4,						// length of cmd
+  List_InitializeCommandFn,			// Initialize Fn
+  List_CommandFn,				// the Fn code
+  { &List_helpText, sizeof(List_helpText) },
+  { &List_helpDetailText, sizeof(List_helpDetailText) }
 };
 
-//(const uint8_t *) "Usage: define <name> <type> <options>, to define a device",57);	// CommandHelp, Len
 
 
 /* --------------------------------------------------------------------------------------------------
@@ -228,8 +224,8 @@ List_CommandFn (const uint8_t *args
 						strBufferOffset += snprintf(wBufStart + strBufferOffset
 							,strBufferLen
 							,"\r\nType-Name: %.*s\r\n"
-							,Module->ProvidedByModule->typeNameLen
-							,Module->ProvidedByModule->typeName);
+							,Module->provided->typeNameLen
+							,Module->provided->typeName);
 
 						strBufferOffset += snprintf(wBufStart + strBufferOffset
 							,strBufferLen
@@ -444,8 +440,8 @@ List_CommandFn (const uint8_t *args
 				,"  TYPE%.*s %.*s\r\n"
 				,10-4 //TYPE LEN
 				,"                                "
-				,Common_Definition->module->ProvidedByModule->typeNameLen
-				,Common_Definition->module->ProvidedByModule->typeName);
+				,Common_Definition->module->provided->typeNameLen
+				,Common_Definition->module->provided->typeName);
 
 
 			// add Attributes

@@ -145,19 +145,15 @@ const uint8_t Help_helpText[] =
 const uint8_t Help_helpDetailText[] = 
   "Usagebwrebwerb: define <name> <type> <options>, to define a device";
 
-providedByCommand_t Help_ProvidedByCommand =
-  {
-   "Help"					// Command-Name of command -> libfilename.so !
-  ,4						// length of cmd
-  ,Help_InitializeCommandFn			// Initialize Fn
-  ,Help_CommandFn				// the Fn code
-  ,&Help_helpText[0]
-  ,sizeof(Help_helpText)
-  ,&Help_helpDetailText[0]
-  ,sizeof(Help_helpDetailText)
-  };
+ProvidedByCommand_t Help_ProvidedByCommand = {
+  "Help",					// Command-Name of command -> libfilename.so !
+  4,						// length of cmd
+  Help_InitializeCommandFn,			// Initialize Fn
+  Help_CommandFn,				// the Fn code
+  { &Help_helpText, sizeof(Help_helpText) },
+  { &Help_helpDetailText, sizeof(Help_helpDetailText) }
+};
 
-//(const uint8_t *) "Usage: define <name> <type> <options>, to define a device",57);	// CommandHelp, Len
 
 
 /* --------------------------------------------------------------------------------------------------
@@ -304,7 +300,7 @@ Help_CommandFn (const uint8_t *args
 		 "----------------------------------------------------------------------\r\n");
 
 	// loop through  currently stored commands
-	command_t *command;
+	Command_t *command;
 
 	// loop throug available commands and determine length
 	STAILQ_FOREACH(command, &SCDERoot->headCommands, entries) {
@@ -316,14 +312,14 @@ Help_CommandFn (const uint8_t *args
 				,strBufferLen
 				,"%.*s%.*s%.*s\r\n"
 				 "%.*s\r\n"
-				,(int) command->providedByCommand->commandNameTextLen
-				,command->providedByCommand->commandNameText
-				,(int) (15 - command->providedByCommand->commandNameTextLen)
+				,(int) command->provided->commandNameTextLen
+				,command->provided->commandNameText
+				,(int) (15 - command->provided->commandNameTextLen)
 				,"               "
-				,(int) command->providedByCommand->helpTextLen
-				,command->providedByCommand->helpText	
-				,(int) command->providedByCommand->helpDetailTextLen
-				,command->providedByCommand->helpDetailText);
+				,(int) command->provided->helpString.length
+				,command->provided->helpString.characters	
+				,(int) command->provided->helpDetailString.length
+				,command->provided->helpDetailString.characters);
 
 		}
 

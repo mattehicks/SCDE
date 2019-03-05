@@ -1,6 +1,19 @@
 #ifndef _SCDE_H_
 #define _SCDE_H_
 
+// -------------------------------------------------------------------------------------------------
+
+// set default build verbose - if no external override
+#ifndef CORE_SCDE_DBG  
+#define CORE_SCDE_DBG  5	// 5 is default
+#endif 
+
+// set default build verbose - if no external override
+#ifndef Helpers_SCDE_DBG  
+#define Helpers_SCDE_DBG  5	// 5 is default
+#endif 
+
+// -------------------------------------------------------------------------------------------------
 
 
 // stores the Root Data of the Smart Connected Devices Engine
@@ -15,7 +28,6 @@ void InitSCDERoot(void);
 
 // ?
 void InitA();
-
 
 
 // -------------------------------------------------------------------------------------------------
@@ -123,10 +135,10 @@ struct headRetMsgMultiple_s WriteStatefile();
 Module_t* CommandActivateModule (ProvidedByModule_t* ProvidedByNEWModule);
 
 //
-command_t* CommandActivateCommand (providedByCommand_t* providedByNEWCommand);
+Command_t* CommandActivateCommand (ProvidedByCommand_t* providedByNEWCommand);
 
 //
-int CommandLoadCommand(const uint8_t *commandTxt, const size_t commandTxtLen, commandFn_t commandFn, const uint8_t *commandHelp, const size_t commandHelpLen);
+int CommandLoadCommand(const uint8_t *commandTxt, const size_t commandTxtLen, CommandFn_t CommandFn, const uint8_t *commandHelp, const size_t commandHelpLen);
 
 
 // internal Fn, but made available to Modules and Commands

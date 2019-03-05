@@ -58,15 +58,13 @@ const uint8_t IOWrite_helpText[] =
 const uint8_t IOWrite_helpDetailText[] = 
   "Usagebwrebwerb: iowrite <DevSpec> <data in hex[0-9|A-F]>, to write data to the IOWriteFn of definitions matching the DevSpec.";
 
-providedByCommand_t IOWrite_ProvidedByCommand = {
-  "IOWrite"					// Command-Name of command -> libfilename.so !
-  ,7						// length of cmd
-  ,IOWrite_InitializeCommandFn			// Initialize Fn
-  ,IOWrite_CommandFn				// the Fn code
-  ,&IOWrite_helpText
-  ,sizeof(IOWrite_helpText)
-  ,&IOWrite_helpDetailText
-  ,sizeof(IOWrite_helpDetailText)
+ProvidedByCommand_t IOWrite_ProvidedByCommand = {
+  "IOWrite",					// Command-Name of command -> libfilename.so !
+  7,						// length of cmd
+  IOWrite_InitializeCommandFn,			// Initialize Fn
+  IOWrite_CommandFn,				// the Fn code
+  { &IOWrite_helpText, sizeof(IOWrite_helpText) },
+  { &IOWrite_helpDetailText, sizeof(IOWrite_helpDetailText) }
 };
 
 
@@ -309,7 +307,7 @@ x.stqh_last = retMsgHeadMultipleStringSLTQ.stqh_last;
 
 
 		// if provided by Type -> call IOWrite Fn to send the pointer
-		if (Common_Definition->module->ProvidedByModule->WriteFn) {
+		if (Common_Definition->module->provided->WriteFn) {
 
 			#if IOWrite_Command_DBG >= 7
 			SCDEFn->Log3Fn(IOWrite_ProvidedByCommand.commandNameText
@@ -317,8 +315,8 @@ x.stqh_last = retMsgHeadMultipleStringSLTQ.stqh_last;
 				,7
 				,"Calling IOWriteFn of Module '%.*s' for Definition '%.*s'. "
 				 "Writing  %d bytes."
-				,Common_Definition->module->ProvidedByModule->typeNameLen
-				,Common_Definition->module->ProvidedByModule->typeName
+				,Common_Definition->module->provided->typeNameLen
+				,Common_Definition->module->provided->typeName
 				,Common_Definition->nameLen
 				,Common_Definition->name
 				,hexData.length);
@@ -326,7 +324,7 @@ x.stqh_last = retMsgHeadMultipleStringSLTQ.stqh_last;
 
 			// call Modules IOWriteFn. Interpret retMsgMultipleStringSLTQE != NULL as veto !
 			xMultipleStringSLTQE_t *retMsgMultipleStringSLTQE =
-				Common_Definition->module->ProvidedByModule->WriteFn(Common_Definition
+				Common_Definition->module->provided->WriteFn(Common_Definition
 					,hexData);
 
 			// singly linked tail queue element holding an return message? Insert it in queue.

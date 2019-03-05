@@ -50,12 +50,12 @@ typedef esp_err_t (*ESP32_SPI_spi_bus_add_deviceFn_t) (ESP32_SPI_Module_spi_host
  * ESP32 SPI provided Fn - table
  * Stores common + custom functions this Module provides to the SCDE (and client Modules)
  */
-typedef struct ESP32_TouchGUI1_provided_fn_s {
+typedef struct ESP32_TouchGUI1_ProvidedByModule_s {
 // --- first the provided common module functions ---
   ProvidedByModule_t common;							// the common fn
 // --- now the provided custom module fuctions ---
   // none!									// ?
-} ESP32_TouchGUI1_provided_fn_t;
+} ESP32_TouchGUI1_ProvidedByModule_t;
 
 
 

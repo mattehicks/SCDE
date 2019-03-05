@@ -61,18 +61,15 @@ const uint8_t Rename_helpDetailText[] =
   "Usagebwrebwerb: Rename <old> <new>, to rename a definition";	// CommandHelp, Len
 
 
-providedByCommand_t Rename_ProvidedByCommand = {
-  "Rename"					// Command-Name of command -> libfilename.so !
-  ,6						// length of cmd
-  ,Rename_InitializeCommandFn			// Initialize Fn
-  ,Rename_CommandFn				// the Fn code
-  ,&Rename_helpText
-  ,sizeof(Rename_helpText)
-  ,&Rename_helpDetailText
-  ,sizeof(Rename_helpDetailText)
+ProvidedByCommand_t Rename_ProvidedByCommand = {
+  "Rename",					// Command-Name of command -> libfilename.so !
+  6,						// length of cmd
+  Rename_InitializeCommandFn,			// Initialize Fn
+  Rename_CommandFn,				// the Fn code
+  { &Rename_helpText, sizeof(Rename_helpText) },
+  { &Rename_helpDetailText, sizeof(Rename_helpDetailText) }
 };
 
-//(const uint8_t *) "Usage: Rename <name> <type> <options>, to Rename a device",57);	// CommandHelp, Len
 
 
 /* --------------------------------------------------------------------------------------------------
@@ -214,11 +211,11 @@ Rename_CommandFn (const uint8_t *args
 				,Common_Definition->name);
 			
 			// RenameFn assigned by module ?
-  		if (Common_Definition->module->ProvidedByModule->RenameFn) {
+  		if (Common_Definition->module->provided->RenameFn) {
 							 
 				printf("Calling module '%.*s' RenameFN(%.*s,%.*s,%.*s)\n"
-					,Common_Definition->module->ProvidedByModule->typeNameLen
-     			,Common_Definition->module->ProvidedByModule->typeName
+					,Common_Definition->module->provided->typeNameLen
+     			,Common_Definition->module->provided->typeName
 					,Common_Definition->nameLen
       		,Common_Definition->name
 					,Common_Definition->nameLen
@@ -228,7 +225,7 @@ Rename_CommandFn (const uint8_t *args
 
     		// execute RenameFn and maybe get an error msg
    			strTextMultiple_t *retMsg = 
-    	  	Common_Definition->module->ProvidedByModule->RenameFn(Common_Definition
+    	  	Common_Definition->module->provided->RenameFn(Common_Definition
 						,Common_Definition->nameLen
 						,Common_Definition->name
 						,oldNameBackupLen

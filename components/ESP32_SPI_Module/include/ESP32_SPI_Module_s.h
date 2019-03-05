@@ -431,7 +431,7 @@ typedef void (*ESP32_SPI_spi_dmaworkaround_transfer_activeFn_t) (int dmachan);
  * ESP32 SPI provided Fn - table
  * Stores common + custom functions this Module provides to the SCDE (and client Modules)
  */
-typedef struct ESP32_SPI_provided_fn_s {
+typedef struct ESP32_SPI_ProvidedByModule_s {
 // --- first the provided common module functions ---
   ProvidedByModule_t common;							// the common fn
 // --- now the provided custom module fuctions ---
@@ -450,7 +450,7 @@ typedef struct ESP32_SPI_provided_fn_s {
   ESP32_SPI_spi_dmaworkaround_reset_in_progressFn_t ESP32_SPI_spi_dmaworkaround_reset_in_progressFn;	// ?
   ESP32_SPI_spi_dmaworkaround_idleFn_t ESP32_SPI_spi_dmaworkaround_idleFn;	// ?
   ESP32_SPI_spi_dmaworkaround_transfer_activeFn_t ESP32_SPI_spi_dmaworkaround_transfer_activeFn;	// ?
-} ESP32_SPI_provided_fn_t;
+} ESP32_SPI_ProvidedByModule_t;
 
 
 

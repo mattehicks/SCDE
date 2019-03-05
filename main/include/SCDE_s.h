@@ -24,7 +24,7 @@ typedef struct Module_s Module_t;
 typedef struct ProvidedByModule_s ProvidedByModule_t;
 
 // Command (type) stores commands made available for operation.
-typedef struct command_s command_t;
+typedef struct Command_s Command_t;
 
 // Common_Definition_t stores values (the common part) for operation of an definition
 typedef struct Common_Definition_s Common_Definition_t;
@@ -323,6 +323,9 @@ typedef struct SCDEFn_s {
   readingsBulkUpdateFn_t readingsBulkUpdateFn;	           // call this for every reading (bulk-update)
   readingsBulkUpdate2Fn_t readingsBulkUpdate2Fn;	   // call this to add an Reading to the running update
   readingsEndUpdateFn_t readingsEndUpdateFn;               // call this to after bulk-update to process readings
+
+
+
   TimeNowFn_t TimeNowFn;                                   // returns current system time (no TiSt)
   WriteStatefileFn_t WriteStatefileFn;                     // 
 // added Fn (Perl -> C)
@@ -473,7 +476,7 @@ typedef xMultipleStringSLTQE_t* (* WriteFn_t) (Common_Definition_t *Common_Defin
 struct ProvidedByModule_s {
   uint8_t typeName[32];		// Type-Name = Module Name
   size_t typeNameLen;
-				//   new Fn names? FnProvidedByModule
+
   AddFn_t AddFn;		//
   AttributeFn_t AttributeFn;	// verifyAttributeFn , called in case of attribute changes, to check them
   DefineFn_t DefineFn;		// defineDefinitionFn, called to create a new definition of this type
@@ -496,7 +499,7 @@ struct ProvidedByModule_s {
   UndefineFn_t UndefineFn;	//                   ,clean up (delete timer, close fd), called by delete and rereadcfg
   WriteFn_t WriteFn;		//
   void* CustomFn;		// ... provided by this Module (non-standard Fn). For other Modules.
-  int SizeOfDefinition;		// Size of modul specific definition structure (Common_Definition_t + X)
+  int SizeOfDefinition;//sizeOf..// Size of modul specific definition structure (Common_Definition_t + X)
 };
 
 
@@ -513,10 +516,10 @@ struct ProvidedByModule_s {
  */
 struct Module_s {
   STAILQ_ENTRY (Module_s) entries;		// Link to next loaded Module
-  ProvidedByModule_t *ProvidedByModule;		// Ptr to Provided by Module Info
+  ProvidedByModule_t *provided;				// Ptr to Provided by Module Info
   void *LibHandle;				// Handle to this loaded Module
 
- // place  ProvidedByModule  FNS here direct ?
+ // place  Provided  FNS here direct ?
 };
 
 
@@ -571,9 +574,12 @@ struct bulkUpdateReadings_s {
 
 
 
+// Reading2 (type) - stores the content of an reading
+typedef struct Reading2_s Reading2_t;
+
 /*
- * Reading singly linked tail queue element  (struct) 
- * - stores information for one Reading
+ * Reading2 (struct) 
+ * - stores the content of an reading
  * - it is used when storing multiple Readings (in an singly linked tail queue)
  */
 typedef struct Reading2_s {
@@ -584,7 +590,13 @@ typedef struct Reading2_s {
 
 
 
-// xReadings2SLTQE_t - Singly Linked Tail Queue Element (try2) to hold multiple Readings
+
+
+// -------------------------------------------------------------------------------------------------
+
+
+
+// xReading2SLTQE (type) - Singly Linked Tail Queue Element (try2) to hold multiple Readings
 typedef struct xReading2SLTQE_s xReading2SLTQE_t;
 
 /*
@@ -595,8 +607,8 @@ typedef struct xReading2SLTQE_s xReading2SLTQE_t;
 
 struct xReading2SLTQE_s {
   STAILQ_ENTRY(xReading2SLTQE_s) entries;	// link to next Reading2SLTQE element
-  Common_Definition_t* definition;		// the Definition th reading belongs to
   Reading2_t* reading;				// ptr to the reading data
+  Common_Definition_t* definition;		// the Definition the reading belongs to
 };
 
 /*
@@ -609,6 +621,26 @@ STAILQ_HEAD(readings2SLTQH_s, xReading2SLTQE_s);
 
 
 // -------------------------------------------------------------------------------------------------
+
+
+
+// bulkUpdateReadings2_t - stores bulk update information and the readings SLTQH
+typedef struct bulkUpdateReadings2_s bulkUpdateReadings2_t;
+
+/* 
+ * bulkUpdateReadings2_s (struct)
+ * - stores bulk update information and the readings singly linked tail queue head
+ */
+struct bulkUpdateReadings2_s {
+  struct readings2SLTQH_s readings2SLTQH;	// head of multiple updated Readings
+  time_t bulkUpdateTist;			// timestamp of bulk update
+};
+
+
+
+// -------------------------------------------------------------------------------------------------
+
+
 
 
 
@@ -655,6 +687,8 @@ struct Common_Definition_s {
   bulkUpdateReadings_t *bulkUpdateReadings;
   STAILQ_HEAD (stailhead6, reading_s) headReadings;	// Link to assigned Attributes
 
+  bulkUpdateReadings2_t *bulkUpdateReadings2;
+  STAILQ_HEAD (stailhead7, reading2_s) headReadings2;	// Link to assigned Attributes
 
   // Pointer to ActiveResourcesDataA, set at init time.
   void* ActiveResourcesDataA;
@@ -726,65 +760,51 @@ enum stageCtrlRegA {
 
 
 
-/*
- * typedef for generic, loadable Command-Callbacks
- * They provide User-Executable, loadable functions for SCDE
- */             //strTextMultiple_t
+// typedef for InitializeCommandFn - called to initialize an command (once called after loading it)
+typedef int (* InitializeCommandFn_t)(SCDERoot_t* SCDERoot);
 
-//
-typedef int (* initializeCommandFn_t)(SCDERoot_t* SCDERoot);
+// typedef for CommandFn - when SCDE finds matching command name, this Fn will be called - to exec.
+typedef struct headRetMsgMultiple_s (* CommandFn_t) (const uint8_t *args, const size_t argsLen);
 
-//
-typedef struct headRetMsgMultiple_s (* commandFn_t) (const uint8_t *args, const size_t argsLen);
+// Provided by Command (type) - stores function callbacks and information needed for cmd operation
+typedef struct ProvidedByCommand_s ProvidedByCommand_t;
 
-// providedByCommand_t stores function callbacks and information for command operation
-typedef struct providedByCommand_s providedByCommand_t;
+//--------------------------------------------------------------------------------------------------
 
 /* 
- * providedByCommand_s (struct)
+ * Provided by Command (struct)
  * - stores function callbacks and information for a modular command
  * - information is associated when the command is loaded
  * - (done in InitializeFn after command load)
  */
-struct providedByCommand_s {
+struct ProvidedByCommand_s {
 
-// strText_t commandName; NEU			// name text of command
+// strText_t nameString; NEU			// name text of command
   uint8_t commandNameText[32];			// name text of command
   size_t commandNameTextLen;
 
-  initializeCommandFn_t initializeCommandFn;	// returns module information (module_s)
-						// required for operation
-
-  commandFn_t commandFn;			// the command Fn
-
-// const strText_t help; NEU			// help text
-  const uint8_t *helpText;			// the help text
-  const size_t helpTextLen;			// and help text length
-
-// const strText_t helpDetail; NEU		// detailed help text
-  const uint8_t *helpDetailText;		// the detailed help text
-  const size_t helpDetailTextLen;		// and detailed help text length
+  InitializeCommandFn_t InitializeCommandFn;	// returns module information (module_s)
+  CommandFn_t CommandFn;			// the command Fn
+  const xString_t helpString;			// help text
+  const xString_t helpDetailString;		// detailed help text
 };
 
-
-
 //--------------------------------------------------------------------------------------------------
-
-
 
 /* 
  * Commands (struct)
  * - stores commands made available for operation.
  * - some are buildin and initialized after start, others are loaded by user
  */
-struct command_s { // Command_s !!!
-  STAILQ_ENTRY (command_s) entries;		// link to next loaded command
-  providedByCommand_t *providedByCommand;	// ptr to provided-by-command Info
+struct Command_s {
+  STAILQ_ENTRY (Command_s) entries;		// link to next loaded command
+  ProvidedByCommand_t *provided;		// ptr to provided-by-command Info
 };
 
 
 
 // -------------------------------------------------------------------------------------------------
+// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ typedefs and structs for Attribute operation ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 
 
 
@@ -795,7 +815,7 @@ typedef struct attribute_s attribute_t;
  * attribute_s (struct)
  * - stores attributes assigned to definitions, for operation and customization.
  */
-struct attribute_s {
+struct attribute_s { //Attribute_s
 
   STAILQ_ENTRY(attribute_s) entries;	// link to next attribute
 
@@ -822,7 +842,6 @@ struct attribute_s {
  * - Smart Connected Devices Engine - root data
  */
 struct SCDERoot_s {
-
   SCDEFn_t* SCDEFn;					// SCDEFn (Functions / callbacks) for faster operation
 //use vars qw($auth_refresh);
 //use vars qw($cmdFromAnalyze);   # used by the warnings-sub
@@ -831,6 +850,7 @@ struct SCDERoot_s {
   uint32_t DevCount;		// used to generate unique sequential number in definition = highest
   uint32_t FeatureLevel;				// for version management
   uint32_t globalCtrlRegA;				// global flags A
+  time_t lastTiSt;		// to check if requested TiSt is unique (higher than last time)
 //use vars qw($fhem_started);     # used for uptime calculation
 //use vars qw($init_done);        #
 //use vars qw($internal_data);    # FileLog/DbLog -> SVG data transport
@@ -841,7 +861,7 @@ struct SCDERoot_s {
 //use vars qw($selectTimestamp);  # used to check last select exit timestamp
 //use vars qw($winService);       # the Windows Service object
   STAILQ_HEAD (stailhead3, attribute_s) headAttributes;	// Link to assigned attributes
-  STAILQ_HEAD (stailhead4, command_s) headCommands;	// Link to available commands
+  STAILQ_HEAD (stailhead4, Command_s) headCommands;	// Link to available commands
 //use vars qw(%data);             # Hash for user data
 //use vars qw(%defaultattr);      # Default attributes, used by FHEM2FHEM
   STAILQ_HEAD (stailhead2, Common_Definition_s) HeadCommon_Definitions;// Link to Definitions (device, button, ...)

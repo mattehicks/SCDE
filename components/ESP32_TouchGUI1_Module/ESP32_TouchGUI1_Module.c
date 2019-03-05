@@ -343,7 +343,7 @@ ESP32_TouchGUI1_Fn_t ESP32_TouchGUI1_Fn = {
  *  Data: ESP32_TouchGUI1_provided_fn_t
  * -------------------------------------------------------------------------------------------------
  */
-ESP32_TouchGUI1_provided_fn_t ESP32_TouchGUI1_provided_fn = {   // A-Z order
+ESP32_TouchGUI1_ProvidedByModule_t ESP32_TouchGUI1_ProvidedByModule = {   // A-Z order
 {
 // --- first the common module functions ---
   "ESP32_TouchGUI1"	// Type-Name of module -> on Linux libfilename.so !
@@ -371,7 +371,7 @@ ESP32_TouchGUI1_provided_fn_t ESP32_TouchGUI1_provided_fn = {   // A-Z order
   ,ESP32_TouchGUI1_Undefine		// Undefine
   ,ESP32_TouchGUI1_Write		// Write
   ,NULL					// FnProvided
-  ,sizeof(ESP32_TouchGUI1_provided_fn_t)// Modul specific Size (Common_Definition_t + X)
+  ,sizeof(ESP32_TouchGUI1_ProvidedByModule_t)// Modul specific Size (Common_Definition_t + X)
 },
 // --- now the custom module fuctions ---
   // NONE				// ?
@@ -520,8 +520,8 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
 	,Common_Definition->nameLen
 	,5
 	,"DefineFn of Module '%.*s' is called to continue creation of Definition '%.*s' with args '%.*s'."
-	,ESP32_TouchGUI1_Definition->common.module->ProvidedByModule->typeNameLen
-	,ESP32_TouchGUI1_Definition->common.module->ProvidedByModule->typeName
+	,ESP32_TouchGUI1_Definition->common.module->provided->typeNameLen
+	,ESP32_TouchGUI1_Definition->common.module->provided->typeName
 	,ESP32_TouchGUI1_Definition->common.nameLen
 	,ESP32_TouchGUI1_Definition->common.name
 	,ESP32_TouchGUI1_Definition->common.definitionLen
@@ -588,8 +588,8 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
 		,"Could not enable WebIf support for '%.*s'. Type '%.*s' detects Type 'WebIf' is NOT loaded!"
 		,ESP32_TouchGUI1_Definition->common.nameLen
 		,ESP32_TouchGUI1_Definition->common.name
-		,ESP32_TouchGUI1_Definition->common.module->ProvidedByModule->typeNameLen
-		,ESP32_TouchGUI1_Definition->common.module->ProvidedByModule->typeName);
+		,ESP32_TouchGUI1_Definition->common.module->provided->typeNameLen
+		,ESP32_TouchGUI1_Definition->common.module->provided->typeName);
   }
 
 // ------------------------------------------------------------------------------------------------
@@ -721,8 +721,8 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
 	,"Found an first Stage defined as name '%.*s'. Its Type '%.*s' !"
 	,ESP32_SPI_Definition->common.nameLen
 	,ESP32_SPI_Definition->common.name
-	,ESP32_SPI_Definition->common.module->ProvidedByModule->typeNameLen
-	,ESP32_SPI_Definition->common.module->ProvidedByModule->typeName);
+	,ESP32_SPI_Definition->common.module->provided->typeNameLen
+	,ESP32_SPI_Definition->common.module->provided->typeName);
   #endif
 
 // ------------------------------------------------------------------------------------------------
@@ -732,8 +732,8 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
 	ESP32_SPI_Definition;
 
   // get table of function callbacks provided & made accessible from stage 1 Module
-  ESP32_SPI_provided_fn_t* ESP32_SPI_provided_fn = (ESP32_SPI_provided_fn_t*)
-	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->ProvidedByModule;
+  ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
+	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
 // ------------------------------------------------------------------------------------------------
 
@@ -1051,12 +1051,12 @@ ESP32_TouchGUI1_DirectWrite(
   	 "from Definition '%.*s' (Module '%.*s') to exec write job."
 	,ESP32_TouchGUI1_Definition_Stage1->common.nameLen
 	,ESP32_TouchGUI1_Definition_Stage1->common.name
-	,ESP32_TouchGUI1_Definition_Stage1->common.module->ProvidedByModule->typeNameLen
-	,ESP32_TouchGUI1_Definition_Stage1->common.module->ProvidedByModule->typeName
+	,ESP32_TouchGUI1_Definition_Stage1->common.module->provided->typeNameLen
+	,ESP32_TouchGUI1_Definition_Stage1->common.module->provided->typeName
 	,Common_Definition_Stage2->nameLen
 	,Common_Definition_Stage2->name
-	,Common_Definition_Stage2->module->ProvidedByModule->typeNameLen
-	,Common_Definition_Stage2->module->ProvidedByModule->typeName);
+	,Common_Definition_Stage2->module->provided->typeNameLen
+	,Common_Definition_Stage2->module->provided->typeName);
   #endif
 // -------------------------------------------------------------------------------------------------
   return retMsg;
@@ -1207,12 +1207,12 @@ ESP32_TouchGUI1_Initialize(SCDERoot_t* SCDERootptr)
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
   SCDEFn_at_ESP32_TouchGUI1_M = SCDERootptr->SCDEFn;
 
-  SCDEFn_at_ESP32_TouchGUI1_M->Log3Fn(ESP32_TouchGUI1_provided_fn.common.typeName
-		  ,ESP32_TouchGUI1_provided_fn.common.typeNameLen
+  SCDEFn_at_ESP32_TouchGUI1_M->Log3Fn(ESP32_TouchGUI1_ProvidedByModule.common.typeName
+		  ,ESP32_TouchGUI1_ProvidedByModule.common.typeNameLen
 		  ,3
 		  ,"InitializeFn called. Type '%.*s' now useable.\n"
-		  ,ESP32_TouchGUI1_provided_fn.common.typeNameLen
-		  ,ESP32_TouchGUI1_provided_fn.common.typeName);
+		  ,ESP32_TouchGUI1_ProvidedByModule.common.typeNameLen
+		  ,ESP32_TouchGUI1_ProvidedByModule.common.typeName);
 
   return 0;
 
@@ -3533,8 +3533,8 @@ wait_trans_finish(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	 uint8_t free_line) {
 
   // get table of function callbacks provided & made accessible from stage 1 Module
-  ESP32_SPI_provided_fn_t* ESP32_SPI_provided_fn = (ESP32_SPI_provided_fn_t*)
-	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->ProvidedByModule;
+  ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
+	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
   // Wait for SPI bus ready
   while (disp_spi->host->hw->cmd.usr);
@@ -3570,8 +3570,8 @@ esp_err_t IRAM_ATTR
 disp_select(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 {
   // get table of function callbacks provided & made accessible from stage 1 Module
-  ESP32_SPI_provided_fn_t* ESP32_SPI_provided_fn = (ESP32_SPI_provided_fn_t*)
-	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->ProvidedByModule;
+  ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
+	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
   wait_trans_finish(ESP32_TouchGUI1_Definition, 1);
   return ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(disp_spi, 0);
@@ -3584,8 +3584,8 @@ esp_err_t IRAM_ATTR
 disp_deselect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 {
   // get table of function callbacks provided & made accessible from stage 1 Module
-  ESP32_SPI_provided_fn_t* ESP32_SPI_provided_fn = (ESP32_SPI_provided_fn_t*)
-	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->ProvidedByModule;
+  ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
+	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
   wait_trans_finish(ESP32_TouchGUI1_Definition, 1);
 
@@ -3821,8 +3821,8 @@ _dma_send(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	uint32_t size)
 {
   // get table of function callbacks provided & made accessible from stage 1 Module
-  ESP32_SPI_provided_fn_t* ESP32_SPI_provided_fn = (ESP32_SPI_provided_fn_t*)
-	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->ProvidedByModule;
+  ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
+	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
     //Fill DMA descriptors
     ESP32_SPI_provided_fn->ESP32_SPI_spi_dmaworkaround_transfer_activeFn(disp_spi->host->dma_chan); //mark channel as active
@@ -4033,8 +4033,8 @@ read_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	uint8_t set_sp)
 {
   // get table of function callbacks provided & made accessible from stage 1 Module
-  ESP32_SPI_provided_fn_t* ESP32_SPI_provided_fn = (ESP32_SPI_provided_fn_t*)
-	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->ProvidedByModule;
+  ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
+	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
 	ESP32_SPI_Module_spi_transaction_t t;
 	uint32_t current_clock = 0;
@@ -4108,8 +4108,8 @@ touch_get_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	uint8_t type)
 {
   // get table of function callbacks provided & made accessible from stage 1 Module
-  ESP32_SPI_provided_fn_t* ESP32_SPI_provided_fn = (ESP32_SPI_provided_fn_t*)
-	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->ProvidedByModule;
+  ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
+	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
     /*
     esp_err_t ret;
@@ -4158,8 +4158,8 @@ stmpe610_write_reg(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	uint8_t val)
 {
   // get table of function callbacks provided & made accessible from stage 1 Module
-  ESP32_SPI_provided_fn_t* ESP32_SPI_provided_fn = (ESP32_SPI_provided_fn_t*)
-	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->ProvidedByModule;
+  ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
+	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
     ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(ts_spi, 0);
 
@@ -4180,8 +4180,8 @@ stmpe610_read_byte(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	uint8_t reg)
 {
   // get table of function callbacks provided & made accessible from stage 1 Module
-  ESP32_SPI_provided_fn_t* ESP32_SPI_provided_fn = (ESP32_SPI_provided_fn_t*)
-	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->ProvidedByModule;
+  ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
+	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
     ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(ts_spi, 0);
 
@@ -4201,8 +4201,8 @@ stmpe610_read_word(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	uint8_t reg)
 {
   // get table of function callbacks provided & made accessible from stage 1 Module
-  ESP32_SPI_provided_fn_t* ESP32_SPI_provided_fn = (ESP32_SPI_provided_fn_t*)
-	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->ProvidedByModule;
+  ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
+	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
     ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(ts_spi, 0);
 
@@ -4321,8 +4321,8 @@ uint32_t
 find_rd_speed(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 {
   // get table of function callbacks provided & made accessible from stage 1 Module
-  ESP32_SPI_provided_fn_t* ESP32_SPI_provided_fn =
-	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->ProvidedByModule;
+  ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn =
+	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
 	esp_err_t ret;
 	color_t color;

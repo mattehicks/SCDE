@@ -716,8 +716,8 @@ ESP32_DeVICE_Attribute(Common_Definition_t* Common_Definition
 	,Common_Definition->nameLen
 	,5
 	,"Executing AttributeFn of Module '%.*s' for Definition '%.*s' with attrCmd '%.*s' attrName '%.*s' attrVal '%.*s'."
-	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
-	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeName
+	,ESP32_DeVICE_Definition->common.module->provided->typeNameLen
+	,ESP32_DeVICE_Definition->common.module->provided->typeName
 	,ESP32_DeVICE_Definition->common.nameLen
 	,ESP32_DeVICE_Definition->common.name
 	,attrCmdTextLen
@@ -818,8 +818,8 @@ ESP32_DeVICE_Define(Common_Definition_t *Common_Definition)
 	,5
 	,"Executing DefineFn of Module '%.*s' to continue creation of Definition '%.*s' "
 	 "with args '%.*s'."
-	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
-	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeName
+	,ESP32_DeVICE_Definition->common.module->provided->typeNameLen
+	,ESP32_DeVICE_Definition->common.module->provided->typeName
 	,ESP32_DeVICE_Definition->common.nameLen
 	,ESP32_DeVICE_Definition->common.name
 	,ESP32_DeVICE_Definition->common.definitionLen
@@ -948,8 +948,8 @@ ESP32_DeVICE_Define(Common_Definition_t *Common_Definition)
 		 "Type '%.*s' detects Type 'WebIf' is NOT loaded!"
 		,ESP32_DeVICE_Definition->common.nameLen
 		,ESP32_DeVICE_Definition->common.name
-		,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
-		,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeName);
+		,ESP32_DeVICE_Definition->common.module->provided->typeNameLen
+		,ESP32_DeVICE_Definition->common.module->provided->typeName);
 	}
 
 // -------------------------------------------------------------------------------------------
@@ -1106,8 +1106,8 @@ ESP32_DeVICE_Rename(Common_Definition_t *Common_Definition
 		,5
 		,"Executing RenameFn of Module '%.*s'. "
 		 "An definition is renamed from old name '%.*s' to new name '%.*s'."
-		,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
-		,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeName
+		,ESP32_DeVICE_Definition->common.module->provided->typeNameLen
+		,ESP32_DeVICE_Definition->common.module->provided->typeName
 		,oldName
 		,oldNameLen
 		,newName
@@ -1245,8 +1245,8 @@ ESP32_DeVICE_Set(Common_Definition_t* Common_Definition
 		,Common_Definition->nameLen
 		,5
 		,"Executing SetFn of Module '%.*s' for Definition '%.*s' with attached args '%.*s'."
-		,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
-		,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeName
+		,ESP32_DeVICE_Definition->common.module->provided->typeNameLen
+		,ESP32_DeVICE_Definition->common.module->provided->typeName
 		,ESP32_DeVICE_Definition->common.nameLen
 		,ESP32_DeVICE_Definition->common.name
 		,setArgsTextLen
@@ -1365,8 +1365,8 @@ ESP32_DeVICE_Shutdown(Common_Definition_t* Common_Definition)
 	,Common_Definition->nameLen
 	,5
 	,"Executing ShutdownFn of Module '%.*s' for Definition '%.*s'."
-	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
-	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeName
+	,ESP32_DeVICE_Definition->common.module->provided->typeNameLen
+	,ESP32_DeVICE_Definition->common.module->provided->typeName
 		,ESP32_DeVICE_Definition->common.nameLen
 	,ESP32_DeVICE_Definition->common.name);
   #endif
@@ -1430,8 +1430,8 @@ ESP32_DeVICE_State(Common_Definition_t *Common_Definition
 	,5
 	,"Executing StateFn of Module '%.*s' for Definition '%.*s'. "
          "Should set State for '%.*s' with Value '%.*s' and Mime '%.*s'. TimeStamp '%.*s'."
-	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
-	,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeName
+	,ESP32_DeVICE_Definition->common.module->provided->typeNameLen
+	,ESP32_DeVICE_Definition->common.module->provided->typeName
 	,Common_Definition->nameLen
 	,Common_Definition->name
 	,stateNameString.length
@@ -1545,8 +1545,8 @@ ESP32_DeVICE_Undefine(Common_Definition_t* Common_Definition)
 		,Common_Definition->nameLen
 		,5
 		,"Executing UndefineFn of Module '%.*s' for Definition '%.*s'."
-		,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeNameLen
-		,ESP32_DeVICE_Definition->common.module->ProvidedByModule->typeName
+		,ESP32_DeVICE_Definition->common.module->provided->typeNameLen
+		,ESP32_DeVICE_Definition->common.module->provided->typeName
 		,ESP32_DeVICE_Definition->common.nameLen
 		,ESP32_DeVICE_Definition->common.name);
   #endif
@@ -3239,6 +3239,16 @@ printf ("XG");
 
 	// Reading 'WSAP_Password'
 	if (affectedReadings & ESP32_DeVICE_R_WSAP_Password) {
+
+/*
+WSAP_Password->nameString.length = strlen((const char *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Password].implementedKey);
+
+WSAP_Password->nameString.characters = (const uint8_t *) ESP32_DeVICE_Set_ImplementedKeys[ESP32_DeVICE_Set_IK_WSAP_Password].implementedKey;
+
+WSAP_Password->valueString.characters = argsText+parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].off;
+
+WSAP_Password->valueString.length = parsedKVInput->keyData_t[ESP32_DeVICE_Set_IK_WSAP_Password].len;
+*/
 
 		// create / update reading
 		SCDEFn_at_ESP32_DeVICE_M->readingsBulkUpdate2Fn((Common_Definition_t*) ESP32_DeVICE_Definition

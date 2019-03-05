@@ -59,18 +59,14 @@ const uint8_t Rereadcfg_helpText[] =
 const uint8_t Rereadcfg_helpDetailText[] =
   "Usagebwrebwerb: rereadcfg <filename>, to read the commands from <filenname>";
 
-
-providedByCommand_t Rereadcfg_ProvidedByCommand =
-  {
-   "Rereadcfg"			// command-name text -> libfilename.so !
-  ,9				// command-name text length
-  ,Rereadcfg_InitializeCommandFn	// Initialize Fn
-  ,Rereadcfg_CommandFn		// the Fn code
-  ,&Rereadcfg_helpText
-  ,sizeof(Rereadcfg_helpText)
-  ,&Rereadcfg_helpDetailText
-  ,sizeof(Rereadcfg_helpDetailText)
-  };
+ProvidedByCommand_t Rereadcfg_ProvidedByCommand = {
+  "Rereadcfg",			// command-name text -> libfilename.so !
+  9,				// command-name text length
+  Rereadcfg_InitializeCommandFn,	// Initialize Fn
+  Rereadcfg_CommandFn,		// the Fn code
+  { &Rereadcfg_helpText, sizeof(Rereadcfg_helpText) },
+  { &Rereadcfg_helpDetailText, sizeof(Rereadcfg_helpDetailText) }
+};
 
 
 

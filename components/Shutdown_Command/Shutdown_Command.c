@@ -60,17 +60,14 @@ const uint8_t Shutdown_helpDetailText[] =
   "Usagebwrebwerb: Shutdown [restart], to shutdown engine";
 
 
-providedByCommand_t Shutdown_ProvidedByCommand =
-  {
-   "Shutdown"					// Command-Name of command -> libfilename.so !
-  ,8						// length of cmd
-  ,Shutdown_InitializeCommandFn			// Initialize Fn
-  ,Shutdown_CommandFn				// the Fn code
-  ,&Shutdown_helpText
-  ,sizeof(Shutdown_helpText)
-  ,&Shutdown_helpDetailText
-  ,sizeof(Shutdown_helpDetailText)
-  };
+ProvidedByCommand_t Shutdown_ProvidedByCommand = {
+  "Shutdown",					// Command-Name of command -> libfilename.so !
+  8,						// length of cmd
+  Shutdown_InitializeCommandFn,			// Initialize Fn
+  Shutdown_CommandFn,				// the Fn code
+  { &Shutdown_helpText, sizeof(Shutdown_helpText) },
+  { &Shutdown_helpDetailText, sizeof(Shutdown_helpDetailText) }
+};
 
 
 
@@ -211,9 +208,9 @@ Shutdown_CommandFn (const uint8_t *argsText
   Common_Definition_t *Common_Definition = STAILQ_FIRST(&SCDERoot->HeadCommon_Definitions);
   while (Common_Definition != NULL) {
 
-	if (Common_Definition->module->ProvidedByModule->ShutdownFn) {
+	if (Common_Definition->module->provided->ShutdownFn) {
 
-		retMsg = Common_Definition->module->ProvidedByModule->ShutdownFn(Common_Definition);
+		retMsg = Common_Definition->module->provided->ShutdownFn(Common_Definition);
 
 		// got an error msg?
 		if (retMsg) {

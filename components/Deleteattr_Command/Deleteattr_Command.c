@@ -60,17 +60,14 @@ const uint8_t Deleteattr_helpDetailText[] =
   "Usagebwrebwerb: DeleteAttr <name> <type> <options>, to Define a device";
 
 
-providedByCommand_t Deleteattr_ProvidedByCommand =
-  {
-   "Deleteattr"					// Command-Name of command -> libfilename.so !
-  ,10						// length of cmd
-  ,Deleteattr_InitializeCommandFn		// Initialize Fn
-  ,Deleteattr_CommandFn				// the Fn code
-  ,&Deleteattr_helpText
-  ,sizeof(Deleteattr_helpText)
-  ,&Deleteattr_helpDetailText
-  ,sizeof(Deleteattr_helpDetailText)
-  };
+ProvidedByCommand_t Deleteattr_ProvidedByCommand = {
+  "Deleteattr",					// Command-Name of command -> libfilename.so !
+  10,						// length of cmd
+  Deleteattr_InitializeCommandFn,		// Initialize Fn
+  Deleteattr_CommandFn,				// the Fn code
+  { &Deleteattr_helpText, sizeof(Deleteattr_helpText) },
+  { &Deleteattr_helpDetailText, sizeof(Deleteattr_helpDetailText) }
+};
 
 
 
@@ -248,7 +245,7 @@ Deleteattr_CommandFn (const uint8_t *argsText
 // -------------------------------------------------------------------------------------------------
 
 	// call Attribute Fn to notify changes - if provided by Type
-	if (Common_Definition->module->ProvidedByModule->AttributeFn) {
+	if (Common_Definition->module->provided->AttributeFn) {
 
 		// prepare a dummy for attributeFn (required?)
 		size_t dummyAttrValTextLen = 0;
@@ -260,8 +257,8 @@ Deleteattr_CommandFn (const uint8_t *argsText
 			,"del");
 
 		printf("Calling AttributeFN of typeName:%.*s for defName:%.*s -> attrCmd:%.*s attrName:%.*s\n"
-			,Common_Definition->module->ProvidedByModule->typeNameLen
-			,Common_Definition->module->ProvidedByModule->typeName
+			,Common_Definition->module->provided->typeNameLen
+			,Common_Definition->module->provided->typeName
 			,Common_Definition->nameLen
 			,Common_Definition->name
 			,attrCmdTextLen
@@ -271,7 +268,7 @@ Deleteattr_CommandFn (const uint8_t *argsText
 
 		// call modules AttributeFn, if retMsg != NULL -> interpret as veto
 		strTextMultiple_t *retMsg = 
-			Common_Definition->module->ProvidedByModule->AttributeFn(Common_Definition
+			Common_Definition->module->provided->AttributeFn(Common_Definition
 			,attrCmdText
 			,attrCmdTextLen
 			,attrNameText

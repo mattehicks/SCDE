@@ -60,17 +60,14 @@ const uint8_t Include_helpDetailText[] =
   "Usagebwrebwerb: Include <filename>, to read the commands from <filenname>";
 
 
-providedByCommand_t Include_ProvidedByCommand =
-  {
-   "Include"			// command-name text -> libfilename.so !
-  ,7				// command-name text length
-  ,Include_InitializeCommandFn	// Initialize Fn
-  ,Include_CommandFn		// the Fn code
-  ,&Include_helpText
-  ,sizeof(Include_helpText)
-  ,&Include_helpDetailText
-  ,sizeof(Include_helpDetailText)
-  };
+ProvidedByCommand_t Include_ProvidedByCommand = {
+  "Include",			// command-name text -> libfilename.so !
+  7,				// command-name text length
+  Include_InitializeCommandFn,	// Initialize Fn
+  Include_CommandFn,		// the Fn code
+  { &Include_helpText, sizeof(Include_helpText) },
+  { &Include_helpDetailText, sizeof(Include_helpDetailText) }
+};
 
 
 

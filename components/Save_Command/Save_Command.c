@@ -60,16 +60,13 @@ const uint8_t Save_helpDetailText[] =
   "Usagebwrebwerb: save <filename>, to write the <configfile> and statefile";
 
 
-providedByCommand_t Save_ProvidedByCommand =
-{
-   "Save"			// command-name text -> libfilename.so !
-  ,sizeof("Save")-1		// command-name text length
-  ,Save_InitializeCommandFn	// Initialize Fn
-  ,Save_CommandFn		// the Fn code
-  ,&Save_helpText
-  ,sizeof(Save_helpText)
-  ,&Save_helpDetailText
-  ,sizeof(Save_helpDetailText)
+ProvidedByCommand_t Save_ProvidedByCommand = {
+  "Save",			// command-name text -> libfilename.so !
+  sizeof("Save")-1,		// command-name text length
+  Save_InitializeCommandFn,	// Initialize Fn
+  Save_CommandFn,		// the Fn code
+  { &Save_helpText, sizeof(Save_helpText) },
+  { &Save_helpDetailText, sizeof(Save_helpDetailText) }
 };
 
 

@@ -327,7 +327,7 @@ const WebIf_ActiveResourcesDataB_t ESP32_SPI_ActiveResourcesDataB_forWebIf[] =  
  *  Data: ESP32_SPI_provided_fn_t
  * -------------------------------------------------------------------------------------------------
  */
-ESP32_SPI_provided_fn_t ESP32_SPI_provided_fn = {   // A-Z order
+ESP32_SPI_ProvidedByModule_t ESP32_SPI_ProvidedByModule = {   // A-Z order
 {
 // --- first the common module functions ---
   "ESP32_SPI",		// Type-Name of module -> on Linux libfilename.so !
@@ -355,7 +355,7 @@ ESP32_SPI_provided_fn_t ESP32_SPI_provided_fn = {   // A-Z order
   ESP32_SPI_Undefine,				// Undefine
   ESP32_SPI_Write,				// Write
   NULL,						// FnProvided
-  sizeof(ESP32_SPI_provided_fn_t)		// Modul specific Size (Common_Definition_t + X)
+  sizeof(ESP32_SPI_ProvidedByModule_t)		// Modul specific Size (Common_Definition_t + X)
 },
 // --- now the custom module fuctions ---
   ESP32_SPI_spi_bus_add_device,			// ?
@@ -518,8 +518,8 @@ ESP32_SPI_Define(Common_Definition_t *Common_Definition)
 	,Common_Definition->nameLen
 	,5
 	,"DefineFn of Module '%.*s' is called to continue creation of Definition '%.*s' with args '%.*s'."
-	,ESP32_SPI_Definition->common.module->ProvidedByModule->typeNameLen
-	,ESP32_SPI_Definition->common.module->ProvidedByModule->typeName
+	,ESP32_SPI_Definition->common.module->provided->typeNameLen
+	,ESP32_SPI_Definition->common.module->provided->typeName
 	,ESP32_SPI_Definition->common.nameLen
 	,ESP32_SPI_Definition->common.name
 	,ESP32_SPI_Definition->common.definitionLen
@@ -586,8 +586,8 @@ ESP32_SPI_Define(Common_Definition_t *Common_Definition)
 		,"Could not enable WebIf support for '%.*s'. Type '%.*s' detects Type 'WebIf' is NOT loaded!"
 		,ESP32_SPI_Definition->common.nameLen
 		,ESP32_SPI_Definition->common.name
-		,ESP32_SPI_Definition->common.module->ProvidedByModule->typeNameLen
-		,ESP32_SPI_Definition->common.module->ProvidedByModule->typeName);
+		,ESP32_SPI_Definition->common.module->provided->typeNameLen
+		,ESP32_SPI_Definition->common.module->provided->typeName);
   }
 
 // ------------------------------------------------------------------------------------------------
@@ -781,12 +781,12 @@ ESP32_SPI_DirectWrite(
   	 "from Definition '%.*s' (Module '%.*s') to exec write job."
 	,ESP32_SPI_Definition_Stage1->common.nameLen
 	,ESP32_SPI_Definition_Stage1->common.name
-	,ESP32_SPI_Definition_Stage1->common.module->ProvidedByModule->typeNameLen
-	,ESP32_SPI_Definition_Stage1->common.module->ProvidedByModule->typeName
+	,ESP32_SPI_Definition_Stage1->common.module->provided->typeNameLen
+	,ESP32_SPI_Definition_Stage1->common.module->provided->typeName
 	,Common_Definition_Stage2->nameLen
 	,Common_Definition_Stage2->name
-	,Common_Definition_Stage2->module->ProvidedByModule->typeNameLen
-	,Common_Definition_Stage2->module->ProvidedByModule->typeName);
+	,Common_Definition_Stage2->module->provided->typeNameLen
+	,Common_Definition_Stage2->module->provided->typeName);
   #endif
 // -------------------------------------------------------------------------------------------------
   return retMsg;
@@ -850,12 +850,12 @@ ESP32_SPI_Initialize(SCDERoot_t* SCDERootptr)
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
   SCDEFn_at_ESP32_SPI_M = SCDERootptr->SCDEFn;
 
-  SCDEFn_at_ESP32_SPI_M->Log3Fn(ESP32_SPI_provided_fn.common.typeName
-		  ,ESP32_SPI_provided_fn.common.typeNameLen
+  SCDEFn_at_ESP32_SPI_M->Log3Fn(ESP32_SPI_ProvidedByModule.common.typeName
+		  ,ESP32_SPI_ProvidedByModule.common.typeNameLen
 		  ,3
 		  ,"InitializeFn called. Type '%.*s' now useable.\n"
-		  ,ESP32_SPI_provided_fn.common.typeNameLen
-		  ,ESP32_SPI_provided_fn.common.typeName);
+		  ,ESP32_SPI_ProvidedByModule.common.typeNameLen
+		  ,ESP32_SPI_ProvidedByModule.common.typeName);
 
   return 0;
 
@@ -1114,8 +1114,8 @@ ESP32_SPI_Write(Common_Definition_t *Common_Definition,
 	,Common_Definition->nameLen
 	,7
 	,"WriteFn of Module '%.*s' is called for Definition '%.*s'. Got %d bytes raw data."
-	,ESP32_SPI_Definition->common.module->ProvidedByModule->typeNameLen
-	,ESP32_SPI_Definition->common.module->ProvidedByModule->typeName
+	,ESP32_SPI_Definition->common.module->provided->typeNameLen
+	,ESP32_SPI_Definition->common.module->provided->typeName
 	,ESP32_SPI_Definition->common.nameLen
 	,ESP32_SPI_Definition->common.name
 	,data.length);

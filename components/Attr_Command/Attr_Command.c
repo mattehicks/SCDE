@@ -60,17 +60,14 @@ const uint8_t Attr_helpDetailText[] =
   "Usagebwrebwerb: Attr <name> <type> <options>, to Define a device";
 
 
-providedByCommand_t Attr_ProvidedByCommand =
-  {
-   "Attr"					// Command-Name of command -> libfilename.so !
-  ,4						// length of cmd
-  ,Attr_InitializeCommandFn			// Initialize Fn
-  ,Attr_CommandFn				// the Fn code
-  ,&Attr_helpText
-  ,sizeof(Attr_helpText)
-  ,&Attr_helpDetailText
-  ,sizeof(Attr_helpDetailText)
-  };
+ProvidedByCommand_t Attr_ProvidedByCommand = {
+  "Attr",					// Command-Name of command -> libfilename.so !
+  4,						// length of cmd
+  Attr_InitializeCommandFn,			// Initialize Fn
+  Attr_CommandFn,				// the Fn code
+  { &Attr_helpText, sizeof(Attr_helpText) },
+  { &Attr_helpDetailText, sizeof(Attr_helpDetailText) }
+};
 
 
 
@@ -294,7 +291,7 @@ Attr_CommandFn (const uint8_t *argsText
 // -------------------------------------------------------------------------------------------------
 
 	// call Attribute Fn to notify changes - if provided by Type
-	if (Common_Definition->module->ProvidedByModule->AttributeFn) {
+	if (Common_Definition->module->provided->AttributeFn) {
 
 		// build attribute command text
 		uint8_t *attrCmdText;
@@ -302,8 +299,8 @@ Attr_CommandFn (const uint8_t *argsText
 			,"add");
 
 		printf("Calling AttributeFN of typeName:%.*s for defName:%.*s -> attrCmd:%.*s attrName:%.*s attrVal:%.*s\n"
-			,Common_Definition->module->ProvidedByModule->typeNameLen
-			,Common_Definition->module->ProvidedByModule->typeName
+			,Common_Definition->module->provided->typeNameLen
+			,Common_Definition->module->provided->typeName
 			,Common_Definition->nameLen
 			,Common_Definition->name
 			,attrCmdTextLen
@@ -315,7 +312,7 @@ Attr_CommandFn (const uint8_t *argsText
 
 		// call modules AttributeFn, if retMsg != NULL -> interpret as veto
 		strTextMultiple_t *retMsg =  
-			Common_Definition->module->ProvidedByModule->AttributeFn(Common_Definition
+			Common_Definition->module->provided->AttributeFn(Common_Definition
 			,attrCmdText
 			,attrCmdTextLen
 			,attrNameText

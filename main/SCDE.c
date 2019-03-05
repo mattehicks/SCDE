@@ -10,15 +10,6 @@ OK   defName           defName
 */
 
 
-// set default build verbose - if no external override
-#ifndef CORE_SCDE_DBG  
-#define CORE_SCDE_DBG  5	// 5 is default
-#endif 
-
-// set default build verbose - if no external override
-#ifndef Helpers_SCDE_DBG  
-#define Helpers_SCDE_DBG  5	// 5 is default
-#endif 
 
 
 
@@ -208,141 +199,8 @@ SCDEFn_t SCDEFn = {
 
 
 
-/**
- * -------------------------------------------------------------------------------------------------
- *  FName: InitSCDERoot
- *  Desc: Initializes the SCDERoot data structure
- *  Info: 
- *  Para: -/- 
- *  Rets: -/-
- * -------------------------------------------------------------------------------------------------
- */
-void
-InitSCDERoot(void) {
-  SCDERoot.SCDEFn = &SCDEFn;
-
-  STAILQ_INIT(&SCDERoot.headAttributes);
-
-  STAILQ_INIT(&SCDERoot.headCommands);
-
-  STAILQ_INIT(&SCDERoot.HeadCommon_Definitions);
-
-  STAILQ_INIT(&SCDERoot.HeadModules);
-}
 
 
-
-/** Category: SCDE Core Fn
- * -------------------------------------------------------------------------------------------------
- *  FName: Devspec2Array
- *  Desc: Returns all (multiple) definitions (name) that match the given devicespecification (devspec)
- *  Info: devspec should contain data (check in advance!) ; 
- *  Para: const xString_s devspecString -> the devicespecification (devspec) string
- *  Rets: xHeadMultipleStringSLTQ_t -> singly linked tail queue head to store multiple strings
- *        (definition-names) that match the requested devicespecification (devspec),
- *        loop string entrys till STAILQ_EMPTY
- * -------------------------------------------------------------------------------------------------
- */
-struct xHeadMultipleStringSLTQ_s
-Devspec2Array(const xString_t devspecString)
-{
- // prepare STAILQ head for multiple definitions storage
-  struct xHeadMultipleStringSLTQ_s definitionHeadMultipleStringSLTQ;
-
-  // Initialize the queue head
-  STAILQ_INIT(&definitionHeadMultipleStringSLTQ);
-
-//---------------------------------------------------------------------------------------------------
-
-// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
-
-  // alloc an definitionMultipleString queue element
-  xMultipleStringSLTQE_t *definitionMultipleStringSLTQE =
-	malloc(sizeof(xMultipleStringSLTQE_t));
-
-  // fill string in queue element 
-  definitionMultipleStringSLTQE->string.length =
-	asprintf(&definitionMultipleStringSLTQE->string.characters
-		,"%.*s"
-		,devspecString.length
-		,devspecString.characters);
-
-  // insert definitionMultipleString queue element in stail-queue
-  STAILQ_INSERT_TAIL(&definitionHeadMultipleStringSLTQ, definitionMultipleStringSLTQE, entries);
-
-//---------------------------------------------------------------------------------------------------
-
-  // return STAILQ head, stores multiple (all) matching definitions, if STAILQ_EMPTY -> no matching definitions
-  return definitionHeadMultipleStringSLTQ;
-}
-
-
-
-/* helper
- * --------------------------------------------------------------------------------------------------
- *  FName: FmtDateTime 
- *  Desc: Creates formated date-time-text (uint8_t style - in this case zero terminated) from given
- *        time-stamp. Returned in msgText_t (text in allocated memory + length information)
-
- *  Note: DO NOT FORGET TO FREE MEMORY !! 
- *  Para: time_t tiSt -> the time-stamp that should be used
- *  Rets: strText_t -> formated date-time-text data
- * --------------------------------------------------------------------------------------------------
- */
-strText_t
-FmtDateTime(time_t tiSt)
-{
-  // our msg-text data packet
-  strText_t strText;
-
-  // get timeinfo for time-stamp
-  struct tm timeinfo;
-  localtime_r(&tiSt, &timeinfo);
-
-  // prepare formated-time-string in allocated memory
-  strText.strTextLen = asprintf((char**) &strText.strText
-	,"%04d-%02d-%02d %02d:%02d:%02d"
-	,timeinfo.tm_year+1900
-	,timeinfo.tm_mon+1
-	,timeinfo.tm_mday
-	,timeinfo.tm_hour
-	,timeinfo.tm_min
-	,timeinfo.tm_sec);
-
-  return strText;
-}
-	
-
-
-/* helper
- * --------------------------------------------------------------------------------------------------
- *  FName: FmtTime
- *  Desc: Creates formated time-text (uint8_t style - in this case zero terminated) from given
- *        time-stamp. Returned in msgText_t (text in allocated memory + length information)
- *  Note: DO NOT FORGET TO FREE MEMORY !! 
- *  Para: time_t tiSt -> the time-stamp that should be used
- *  Rets: strText_t -> formated time-text data
- * --------------------------------------------------------------------------------------------------
- */
-strText_t
-FmtTime(time_t tiSt)
-{
-  // our msg-text data packet
-  strText_t strText;
-
-  // get timeinfo for time-stamp
-  struct tm timeinfo;
-  localtime_r(&tiSt, &timeinfo);
-
-  // prepare formated-time-string in allocated memory
-  strText.strTextLen = asprintf((char**) &strText.strText
-	,"%02d:%02d:%02d"
-	,timeinfo.tm_hour
-	,timeinfo.tm_min
-	,timeinfo.tm_sec);
-
-  return strText;
-}
 
 
 
@@ -518,8 +376,8 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 				,"define %.*s %.*s %.*s\r\n"
 				,Common_Definition->nameLen
 				,Common_Definition->name
-				,Common_Definition->module->ProvidedByModule->typeNameLen
-				,Common_Definition->module->ProvidedByModule->typeName
+				,Common_Definition->module->provided->typeNameLen
+				,Common_Definition->module->provided->typeName
 				,Common_Definition->definitionLen
 				,Common_Definition->definition);
 		}
@@ -531,8 +389,8 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 				,"define %.*s %.*s\r\n"
 				,Common_Definition->nameLen
 				,Common_Definition->name
-				,Common_Definition->module->ProvidedByModule->typeNameLen
-				,Common_Definition->module->ProvidedByModule->typeName);
+				,Common_Definition->module->provided->typeNameLen
+				,Common_Definition->module->provided->typeName);
 		}
 		
 		// insert retMsg in stail-queue
@@ -607,149 +465,11 @@ GetDefAndAttr(Common_Definition_t *Common_Definition)
 
 
 
-/* Category: SCDE Core Fn
- * --------------------------------------------------------------------------------------------------
- *  FName: GetTiSt
- *  Desc: Returns current SCDE Time Stamp.
- *  Note: MAY DIFFER FROM SYSTEM TIME STAMP, BECAUSE REQUSTED UNIQUE TIME STAMPS MAY ADVANCE TIME
- *        time(&time_t) returns system time, GetTiSt(void) returns current SCDE Time-Stamp !
- *  Para: -/-
- *  Rets: time_t tiST -> SCDE Time Stamp
- * --------------------------------------------------------------------------------------------------
- */
-  static time_t uniqueTiSt;
-time_t
-GetTiSt(void)
-{
-  // for time stamp storage
-  time_t nowTiSt;
-
-  // get time stamp
-  time(&nowTiSt);
-
-  // only return uniqueTiSt when it is ahead of nowTiSt
-  if (uniqueTiSt > nowTiSt)
-	nowTiSt = uniqueTiSt;
-
-  return nowTiSt;
-}
 
 
 
-/* Category: SCDE Core Fn
- * --------------------------------------------------------------------------------------------------
- *  FName: GetUniqueTiSt 
- *  Desc: Returns an UNIQUE SCDE Time Stamp (in most cases the current Time Stamp).
- *  Note: REQUESTING TOO MUCH UNIQUE TIME STAMPS MAY ADVANCE TIME
- *        time(&time_t) returns system time, GetUniqueTiSt(void) returns an current+unique SCDE Time-Stamp !
- *  Para: -/-
- *  Rets: time_t uniqueTiSt -> SCDE Time Stamp (unique)
- * --------------------------------------------------------------------------------------------------
- */
-time_t
-GetUniqueTiSt(void)
-{
-  // for time stamp storage
-  time_t nowTiSt;
-
-  // get time stamp
-  time(&nowTiSt);
-
-  // if uniqueTiSt is smaller than nowTiSt -> nowTiSt is unique !
-  if (uniqueTiSt < nowTiSt)
-	 uniqueTiSt = nowTiSt;
-
-  // else lets make it unique by adding +1
-  else uniqueTiSt++;
-
-  return uniqueTiSt;
-}
 
 
-/** Category: SCDE Core Fn
- * -------------------------------------------------------------------------------------------------
- *  FName: GoodDeviceName
- *  Desc: Checks the given Device Name if it is in compliance with the device name rules:
- *        - normal letters, without special signs (A-Z, a-z)
- *        - numbers (0-9), point (.) and underscore (_)
- *  Info: Device Name rules = definition name rules
- *  Para: const xString_s nameString -> the Device Name string that should be checked
- *  Rets: bool false -> not good ; bool true -> good device name
- * -------------------------------------------------------------------------------------------------
- */
-bool
-GoodDeviceName(const xString_t nameString)
-{
-
-// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
-
-  return true;
-}
-
-
-
-/** Category: SCDE Core Fn
- * -------------------------------------------------------------------------------------------------
- *  FName: GoodReadingName
- *  Desc: Checks the given Reading Name if it is in compliance with the reading name rules
- *        - normal letters, without special signs (A-Z, a-z)
- *        - numbers (0-9), point (.), hyphen (-), slash (/) and underscore (_)
- *  Para: const xString_s nameString -> the Reading Name string that should be checked
- *  Rets: bool false -> not good ; bool true -> good reading name
- * -------------------------------------------------------------------------------------------------
- */
-bool
-GoodReadingName(const xString_t nameString)
-{
-
-// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
-
-  return true;
-}
-
-
-
-/** Category: SCDE Core Fn
- * -------------------------------------------------------------------------------------------------
- *  FName: MakeDeviceName
- *  Desc: Corrects the given Device Name.Then it is in compliance with the device name rules:
- *        - normal letters, without special signs (A-Z, a-z)
- *        - numbers (0-9), point (.) and underscore (_)
- *  Info: Characters that are not in comliance with the rules will be replaced by and underscore (_)
- *  Para: const xString_s nameString -> the Device Name string that should be corrected
- *  Rets: -/-
- * -------------------------------------------------------------------------------------------------
- */
-void
-MakeDeviceName(const xString_t nameString)
-{
-
-// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
-
-  return;
-}
-
-
-
-/** Category: SCDE Core Fn
- * -------------------------------------------------------------------------------------------------
- *  FName: MakeReadingName
- *  Desc: Corrects the given Reading Name.Then it is in compliance with the reading name rules:
- *        - normal letters, without special signs (A-Z, a-z)
- *        - numbers (0-9), point (.), hyphen (-), slash (/) and underscore (_)
- *  Info: Characters that are not in comliance with the rules will be replaced by and underscore (_)
- *  Para: const xString_s nameString -> the Reading Name string that should be corrected
- *  Rets: -/-
- * -------------------------------------------------------------------------------------------------
- */
-void
-MakeReadingName(const xString_t nameString)
-{
-
-// CODE HERE IS NOT COMPLETE - ONLY FOR DEBUGGING
-
-  return;
-}
 
 
 
@@ -1479,63 +1199,10 @@ Log4 (char *text)
 
 
 
-/* --------------------------------------------------------------------------------------------------
- *  FName: CommandActivateCommand
- *  Desc: Activates a Command which is included in this build (internal module) by adding it to
- *        SCDE Root (Commands)
- *  Info: Should be used if loading is not possible ...  
- *  Para: ProvidedByCommand_t* ProvidedByCommand -> ptr to in built included Command
- *  Rets: Command_t* -> Pointer to Command / NULL on error
- * --------------------------------------------------------------------------------------------------
- */
-command_t*
-CommandActivateCommand (providedByCommand_t* providedByNEWCommand)
-{
-  // Call the Initialize Function
-  providedByNEWCommand->initializeCommandFn(&SCDERoot);
-
-  // prepare new Command and store in SCDE root
-  command_t* newCommand;
-  newCommand = (command_t*) malloc(sizeof(command_t));
-  newCommand->providedByCommand = providedByNEWCommand;
-
-  //  NewModule->LibHandle = LibHandle;
-  STAILQ_INSERT_HEAD(&SCDERoot.headCommands, newCommand, entries);
-
-  Log("HCTRL",16,"Command xx activated by main Fn\n");
-
-  return newCommand;
-}
 
 
 
-/* --------------------------------------------------------------------------------------------------
- *  FName: CommandActivateModule
- *  Desc: Activates a Module which is included in this build (internal module) by adding it to
- *        SCDE Root (Modules)
- *  Info: Should be used if loading is not possible ...  
- *  Para: ProvidedByModule_t* ProvidedByModule -> ptr to in built included module
- *  Rets: Module_t* -> Pointer to Module / NULL on error
- * --------------------------------------------------------------------------------------------------
- */
-Module_t*
-CommandActivateModule (ProvidedByModule_t* ProvidedByNEWModule)
-{
-  // Call the Initialize Function
-  ProvidedByNEWModule->InitializeFn(&SCDERoot);
 
-  // prepare new module and store in SCDE root
-  Module_t* NewModule;
-  NewModule = (Module_t*) malloc(sizeof(Module_t));
-  NewModule->ProvidedByModule = ProvidedByNEWModule;
-
-  //  NewModule->LibHandle = LibHandle;
-  STAILQ_INSERT_HEAD(&SCDERoot.HeadModules, NewModule, entries);
-
-  Log("HCTRL",16,"Module xx activated by main Fn\n");
-
-  return NewModule;
-}
 
 
 
@@ -1604,7 +1271,7 @@ CommandReloadModule(const uint8_t *typeName
   // prepare new module and store 
   Module_t* NewModule;
   NewModule = (Module_t*) malloc(sizeof(Module_t));
-  NewModule->ProvidedByModule = ProvidedByNEWModule;
+  NewModule->provided = ProvidedByNEWModule;
 //  NewModule->LibHandle = LibHandle;
   STAILQ_INSERT_HEAD(&SCDERoot.HeadModules, NewModule, entries);
 
@@ -1626,8 +1293,8 @@ CommandReloadModule(const uint8_t *typeName
   STAILQ_FOREACH(Module, &SCDERoot.HeadModules, entries)
 	{
 	LOGD("LM Name:\"%.*s\"\n"
-		,Module->ProvidedByModule->typeNameLen
-		,Module->ProvidedByModule->typeName);
+		,Module->provided->typeNameLen
+		,Module->provided->typeName);
 	}
 
   return NewModule;
@@ -1635,50 +1302,7 @@ CommandReloadModule(const uint8_t *typeName
 
 
 
-/* --------------------------------------------------------------------------------------------------
- *  FName: CallGetFnByDefName
- *  Desc: xxx Creates a new Define with name "Name", and Module "TypeName" and calls Modules DefFn with
- *        args "Args"
- *  Info: 'Name' is custom definition name [azAZ09._] char[31]
- *        'TypeName' is module name
- *        'Definition+X' is passed to modules DefineFn, and stored in Definition->Definition
- *  Para: const uint8_t *args  -> prt to space seperated command text string "Command ..."
- *        const size_t argsLen -> length of args
- *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple RetMsg (errors), NULL=OK
- * --------------------------------------------------------------------------------------------------
- */
-int
-CallGetFnByDefName(const uint8_t *nameText
-	,const size_t nameTextLen
-	,Common_Definition_t *sourceCommon_Definition
-	, void *X)
-{
-  int retInt = 0;
 
-  // get the Common_Definition by Name
-  Common_Definition_t *Common_Definition;
-
-  STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries) {
-
-      if ( (Common_Definition->nameLen == nameTextLen)
-          && (!strncasecmp((const char*) Common_Definition->name, (const char*) nameText, nameTextLen)) ) {
-
-              if (Common_Definition->module->ProvidedByModule->GetFn) {
-
-                  retInt = Common_Definition->module->ProvidedByModule->GetFn(Common_Definition, sourceCommon_Definition, X);
-
-              }
-
-              else {
-
-
-              }
-
-      }
-  }
-
-  return retInt;
-}
 
 
 
@@ -1727,13 +1351,13 @@ CommandUndefine (const uint8_t *args, const size_t argsLen)	//Undefine 'Name' ->
   LOGD("\nCalling UndefineFN for Name:%.*s TypeName:%.*s\n"
 		  ,Common_Definition->nameLen
 		  ,Common_Definition->name
-		  ,Common_Definition->module->ProvidedByModule->typeNameLen
-		  ,Common_Definition->module->ProvidedByModule->typeName);
+		  ,Common_Definition->module->provided->typeNameLen
+		  ,Common_Definition->module->provided->typeName);
 
 
 
   // call modules UndefineFn
-  retMsg = Common_Definition->module->ProvidedByModule->UndefineFn(Common_Definition);
+  retMsg = Common_Definition->module->provided->UndefineFn(Common_Definition);
 
   // do we have an error msg?
   if (retMsg) {
@@ -1748,82 +1372,9 @@ CommandUndefine (const uint8_t *args, const size_t argsLen)	//Undefine 'Name' ->
   return retMsg;
 }
 
-/* --------------------------------------------------------------------------------------------------
- *  FName: GetDefinitionPtrByName
- *  Desc: 
- *  Para: const size_t definitionNameLen -> length of the Definition name
- *        const uint8_t *definitionName -> Definition name
- *  Rets: Common_Definition_t* -> Pointer to Definition / NULL if not found
- * --------------------------------------------------------------------------------------------------
- */
-Common_Definition_t*
-GetDefinitionPtrByName(const size_t definitionNameLen
-		, const uint8_t *definitionName)
-{
-  Common_Definition_t *Common_Definition;
-
-  STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries) {
-
-	if ( (Common_Definition->nameLen == definitionNameLen) &&
-             (!strncasecmp((const char*) Common_Definition->name, (const char*) definitionName, definitionNameLen)) ) {
-
- 		#if CORE_SCDE_DBG >= 7
-  		LOGD("GetDefinitionPtrByNameFn(%.*s), got Definition ptr.\n"
-		  	,definitionNameLen
-		  	,definitionName);
- 		#endif
-
-		return Common_Definition;
-	}
-  }
-
-  #if CORE_SCDE_DBG >= 1
-  LOGD("GetDefinitionPtrByNameFn(%.*s), Definition not found.\n"
-	,definitionNameLen
-	,definitionName);
-  #endif
-
-  return NULL;
-}
 
 
-/* --------------------------------------------------------------------------------------------------
- *  FName: GetLoadedModulePtrByName
- *  Desc: Returns the ptr to an already loaded Module
- *  Para: const uint8_t *typeName -> Type-Name
- *        const size_t typeNameLen -> length of the Type-Name
- *  Rets: Module_t* -> Pointer to Module / NULL if not found
- * --------------------------------------------------------------------------------------------------
- */
-Module_t*
-GetLoadedModulePtrByName(const uint8_t *typeName
-		, const size_t typeNameLen)
-{
-  Module_t *Module;
 
-  STAILQ_FOREACH(Module, &SCDERoot.HeadModules, entries) {
-
-	if ( (Module->ProvidedByModule->typeNameLen == typeNameLen) &&
-             (!strncasecmp((const char*) Module->ProvidedByModule->typeName, (const char*) typeName, typeNameLen)) ) {
-
- 		#if CORE_SCDE_DBG >= 7
-  		LOGD("GetLoadedModulePtrByNameFn(%.*s), got loaded Module ptr.\n"
-		  	,typeNameLen
-		  	,typeName);
- 		#endif
-
-		return Module;
-	}
-  }
-
-  #if CORE_SCDE_DBG >= 1
-  LOGD("GetLoadedModulePtrByNameFn(%.*s), Module name not loaded.\n"
-	,typeNameLen
-	,typeName);
-  #endif
-
-  return NULL;
-}
 
 
 
@@ -1842,12 +1393,12 @@ GetLoadedModulePtrByName(const uint8_t *typeName
 int
 CommandLoadCommand(const uint8_t *commandTxt
 		,const size_t commandTxtLen
-		,commandFn_t commandFn
+		,CommandFn_t CommandFn
 		,const uint8_t *commandHelp
 		,const size_t commandHelpLen)
   {
 /*
-  command_t* NewCommand;
+  Command_t* NewCommand;
 
   // alloc mem for command specific definition structure (Command_t)
   NewCommand = malloc(sizeof(Command_t));
@@ -2088,268 +1639,10 @@ DeleteAttribute(char* Definition
 		
 	
 
-/* --------------------------------------------------------------------------------------------------
- *  FName: AnalyzeCommand
- *  Desc: Seeks command and commandArgs from given args and calls the commandFn from an matching 
- *        module name (if loaded / available)
- *  Info: 
- *  Para: const uint8_t *args  -> ptr to space seperated "command args" text
- *        const size_t argsLen -> length of command and args
- *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple RetMsg (errors), NULL=OK/None
- * --------------------------------------------------------------------------------------------------
- */
-struct headRetMsgMultiple_s
-AnalyzeCommand(const uint8_t *args
-		, const size_t argsLen)
-{
-	LOGD("Fn AnalyzeCommand(%.*s,%d) called.\n"
-		,argsLen
-		,args
-		,argsLen);
 
-  // prepare STAILQ head for multiple RetMsg storage
-  struct headRetMsgMultiple_s headRetMsgMultiple;
-
-  // initialize the queue
-  STAILQ_INIT(&headRetMsgMultiple);
-
-  // set start of possible Command
-  const uint8_t *commandName = args;
-
-  // set start of possible Command-Arguments
-  const uint8_t *commandArgs = args;
-
-  // a seek-counter
-  int i = 0;
-
-  // seek to next space !'\32'
-  while( (i < argsLen) && (*commandArgs != ' ') ) {i++;commandArgs++;}
-
-  // length of command
-  size_t commandLen = i;
-
-  // seek to start position of Command-Arguments '\32'
-  while( (i < argsLen) && (*commandArgs == ' ') ) {i++;commandArgs++;}
-
-  // length of Command-Arguments
-  size_t commandArgsLen = argsLen - i;
-
- // veryfy lengths > 0, definition 0 allowed
-//  if ( (commandLen) == 0 || (commandArgsLen == 0) ) {
-  if (commandLen == 0 ) {
-
-	// alloc mem for retMsg
-	strTextMultiple_t *retMsg =
-		 malloc(sizeof(strTextMultiple_t));
-
-	// fill retMsg with error text
-	retMsg->strTextLen = asprintf((char**) &retMsg->strText
-		,"Could not interpret input '%.*s' ! Usage: <command> <command dependent arguments>"
-		,(int) argsLen
-		,args);
-
-	// insert retMsg in stail-queue
-	STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-	return headRetMsgMultiple;
-
-	}
-
-  // get the Command by Name
-  command_t *command;
-
-  // search for the command
-  STAILQ_FOREACH(command, &SCDERoot.headCommands, entries) {
-
-		if ( (command->providedByCommand->commandNameTextLen == commandLen)
-			&& (!strncasecmp((const char*) command->providedByCommand->commandNameText, (const char*) commandName, commandLen)) ) {
-
-			// call the CommandFn, if retMsg != NULL -> error ret Msg
-			struct headRetMsgMultiple_s headRetMsgMultipleFromFn
-				= command->providedByCommand->commandFn(commandArgs, commandArgsLen);
-
-			// retMsgMultiple stailq from Fn filled ?
-			if (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
-
-				// for the retMsg elements
-				strTextMultiple_t *retMsg;
-
-				// get the entries till empty
-				while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
-
-					retMsg = STAILQ_FIRST(&headRetMsgMultipleFromFn);
-
-					// insert retMsg in stail-queue
-					STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-					// done, remove this entry
-					STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
-				}
-			}
-
-			// return STAILQ head, it stores multiple RetMsg, if NULL -> no RetMsg-entries
-			return headRetMsgMultiple;
-		}
-	}
-
-// -------------------------------------------------------------------------------------------------
-
-  // alloc mem for retMsg
-  strTextMultiple_t *retMsg =
-		malloc(sizeof(strTextMultiple_t));
-
-  // fill retMsg with error text
-  retMsg->strTextLen = asprintf((char**) &retMsg->strText
-	,"Unknown command <%.*s> with arguments <%.*s>!"
-	,(int) commandLen
-	,commandName
-	,(int) commandArgsLen
-	,commandArgs);
-
-  // insert retMsg in stail-queue
-  STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-  // return STAILQ head, stores multiple RetMsg, if NULL -> no RetMsg-entries
-  return headRetMsgMultiple;
-}
 
 		
-//0d 0a problem cr lf
-/* --------------------------------------------------------------------------------------------------
- *  FName: AnalyzeCommandChain
- *  FName: AnalyzeCommand
- *  Desc: Seeks command and commandArgs from given args and calls the commandFn from an matching 
- *  AnalyzeCommandChain() ermöglicht die Ausführung von FHEM-Befehlsketten. 
- *  Dabei werden mehrere FHEM-Kommandos durch ein Semikolon getrennt und nacheinander mittels AnalyzeCommand() ausgeführt.
- *        module name (if loaded / available)
- *  Info: define dummy1 dummy; list dummy1; {Log(3,"dummy created")}
- *  Para: const uint8_t *args  -> ptr to space seperated "command args" text
- *        const size_t argsLen -> length of command and args
- *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple RetMsg (errors), NULL=OK/None
 
- *  Para: const uint8_t *argsString -> ptr to arguments string (SCDE commands sperated by ';')
- *        const size_t argsStringLen -> length of arguments string
- *  Rets: struct xHeadMultipleStringSLTQ_s -> singly linked tail queue head to store multiple 
- *                                            return message strings. Loop entrys till STAILQ_EMPTY!
- * --------------------------------------------------------------------------------------------------
- */
-struct headRetMsgMultiple_s //new xHeadMultipleStringSLTQ_s
-AnalyzeCommandChain(const uint8_t *argsString
-		,const size_t argsStringLen)
-{
-  LOGD("Fn AnalyzeCommandChain called with args '%.*s'"
-	,argsStringLen
-	,argsString);
-
-  // prepare STAILQ head for multiple RetMsg storage
-  struct headRetMsgMultiple_s headRetMsgMultiple;
-
-  // Initialize the queue
-  STAILQ_INIT(&headRetMsgMultiple);
-
-  // set start of possible Command
-  const uint8_t *commandName = argsString;
-
-  // set start of possible Command-Arguments
-  const uint8_t *commandArgs = argsString;
-
-  // a seek-counter
-  int i = 0;
-
-  // seek to next space !'\32'
-  while( (i < argsStringLen) && (*commandArgs != ' ') ) {i++;commandArgs++;}
-
-  // length of Name
-  size_t commandLen = i;
-
-  // seek to start position of Command-Arguments '\32'
-  while( (i < argsStringLen) && (*commandArgs == ' ') ) {i++;commandArgs++;}
-
-  // length of Command-Arguments
-
-  size_t commandArgsLen = argsStringLen - i;
-
-// -------------------------------------------------------------------------------------------------
-
- // veryfy lengths > 0, definition 0 allowed
-//  if ( (commandLen) == 0 || (commandArgsLen == 0) ) {
-  if ( commandLen == 0 ) {
-
-	// alloc mem for retMsg
-	strTextMultiple_t *retMsg =
-		malloc(sizeof(strTextMultiple_t));
-
-	// fill retMsg with error text
-	retMsg->strTextLen = asprintf((char**) &retMsg->strText
-		,"Could not interpret input '%.*s' ! Usage: <command> <command dependent arguments>"
-		,(int) argsStringLen
-		,argsString);
-
-	// insert retMsg in stail-queue
-	STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-	return headRetMsgMultiple;
-  }
-
-// -------------------------------------------------------------------------------------------------
-
-  // Command SLTQE
-  command_t *command;
-
-  // loop the implemented commands
-  STAILQ_FOREACH(command, &SCDERoot.headCommands, entries) {
-
-	// matching Command Name ?
-	if ( (command->providedByCommand->commandNameTextLen == commandLen)
-		&& (!strncasecmp((const char*) command->providedByCommand->commandNameText
-			,(const char*) commandName
-			,commandLen)) ) {
-
-		// call the CommandFn, if retMsg != NULL -> error ret Msg
-		struct headRetMsgMultiple_s headRetMsgMultipleFromFn
-			= command->providedByCommand->commandFn(commandArgs, commandArgsLen);
-
-		// retMsgMultiple stailq from Fn filled ?
-		while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
-
-			// for the retMsg elements
-			strTextMultiple_t *retMsg =
-				STAILQ_FIRST(&headRetMsgMultipleFromFn);
-
-			// first remove this entry from Fn ret queue
-			STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
-
-			// last insert entry in ret queue
-			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-		}
-
-	// return STAILQ head, it stores multiple RetMsg, if NULL -> no RetMsg-entries
-	return headRetMsgMultiple;
-	}
-  }
-
-// -------------------------------------------------------------------------------------------------
-
-  // alloc mem for retMsg
-  strTextMultiple_t *retMsg =
-	 malloc(sizeof(strTextMultiple_t));
-
-  // fill retMsg with error text
-  retMsg->strTextLen = asprintf((char**) &retMsg->strText
-	,"Unknown command <%.*s> with arguments <%.*s>!"
-	,(int) commandLen
-	,commandName
-	,(int) commandArgsLen
-	,commandArgs);
-
-  // insert retMsg in stail-queue
-  STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-  // return STAILQ head, stores multiple RetMsg, if NULL -> no RetMsg-entries
-  return headRetMsgMultiple;
-}
 	
 		
 	
@@ -2404,370 +1697,16 @@ Info
 		
 		
 		
-//#include <stdarg.h>
-/* --------------------------------------------------------------------------------------------------
- *  FName: Log3
- *  Desc: This is the main logging function with 3 infos:
- *        time-stamp, loglevel, creator ant the log-text
- *  Info: Level 0=System; 16=debug
- *        DO NOT FORGET TO FREE char* LogText -> ITS ALLOCATED MEMORY !!!
- *  Para: const uint8_t *name -> the creator name of this log entry
- *        const size_t nameLen -> length of the creator name of this log entry
- *        const uint8_t LogLevel -> the log level of this entry
- *        const char *format -> ptr to the text
- *        ... -> arguments to fill text
- *  Rets: -/-
- * --------------------------------------------------------------------------------------------------
- */
-void
-Log3 (const uint8_t *name
-		,const size_t nameLen
-		,const uint8_t LogLevel
-		,const char *format
-		,...)
-{
-  // for current time
-  time_t nowTist;
-
-  // get current time
-  time(&nowTist);
-
-  // create and fill timeinfo struct
-  struct tm timeinfo;
-  localtime_r(&nowTist, &timeinfo);
-
-  // time,loglevel,name
-  printf("Log3|%d.%d.%d %d:%d:%d %d: %.*s: "
-		,timeinfo.tm_year+1900
-		,timeinfo.tm_mon+1
-		,timeinfo.tm_mday
-		,timeinfo.tm_hour
-		,timeinfo.tm_min
-		,timeinfo.tm_sec
-		,LogLevel
-		,nameLen
-		,name);
-
-  // the variable arguments
-  va_list list;
-  va_start(list, format);
-  vprintf(format, list);
-  va_end(list);
-
-  // finalize line
-  printf("\n");
-
-
-
-
-
-
-
-
-  //= GetAssignedAttribute("global","verbose");
-
- // is Device
-//stp1: $dev = $dev->{NAME} if(defined($dev) && ref($dev) eq "HASH");
-
-/*stp2:
-  if(defined($dev) &&
-     defined($attr{$dev}) &&
-     defined (my $devlevel = $attr{$dev}{verbose}))
-	{
-    	return if($loglevel > $devlevel);
-	}
-  else
-	{
-	return if($loglevel > $attr{global}{verbose});
-	}*/
-
-
-
-
-/*  else
-	{
-	if ( > GetAttribute("global","verbose")
-
-
-  char* DevVerbose = GetAttribute(Dev,"verbose");
-  char* GlobalVerbose = GetAttribute("global","verbose");
-  if ( (GlobalVerbose) &&
-*/
-  }
-
-		
-		
-/* helper
- * --------------------------------------------------------------------------------------------------
- *  FName: TimeNow
- *  Desc: Returns current system time. (IT IS NOT THE SCDE TIME STAMP)
- *  Para: -/-
- *  Rets: time_t timeNow -> current system time
- * --------------------------------------------------------------------------------------------------
- */
-time_t
-TimeNow()
-{
-  // for time stamp storage
-  time_t timeNow;
-
-  // get time stamp
-  time(&timeNow);
-
-  return timeNow;
-}
-
-
-
-/* --------------------------------------------------------------------------------------------------
- *  FName: WriteStatefile
- *  Desc: Writes the statefile to filesystem.
- *  Info: 
- *  Para: -/-
- *  Rets: struct headRetMsgMultiple_s -> head from STAILQ, stores multiple (all) readings
- *        from requested Definition, NULL=NONE
- * --------------------------------------------------------------------------------------------------
- */
-struct headRetMsgMultiple_s
-WriteStatefile()
-{
-  // prepare multiple RetMsg storage
-  struct headRetMsgMultiple_s headRetMsgMultiple;
-
-  // Initialize the queue (init STAILQ head)
-  STAILQ_INIT(&headRetMsgMultiple);
-
-  // get attribute "global->statefile" value
-  strText_t attrStateFNDefName = {(char*) "global", 6};
-  strText_t attrStateFNAttrName = {(char*) "statefile", 9};
-  strText_t *attrStateFNValueName =
-		Get_attrVal_by_defName_and_attrName(&attrStateFNDefName, &attrStateFNAttrName);
-
-	// attribute not found
-	if (!attrStateFNValueName) {
-
-		// alloc mem for retMsg
-		strTextMultiple_t *retMsg =
-			malloc(sizeof(strTextMultiple_t));
-
-		// response with error text
-		retMsg->strTextLen = asprintf(&retMsg->strText
-			,"Error, Arribute %.*s not found in Definition %.*s !\r\n"
-			,attrStateFNAttrName.strTextLen
-			,attrStateFNAttrName.strText
-			,attrStateFNDefName.strTextLen
-			,attrStateFNDefName.strText);
-
-		// insert retMsg in stail-queue
-		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-		// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-		return headRetMsgMultiple;
-	}
-
-	// attribute found, but value not assigned
-	if (!attrStateFNValueName->strText) {
-		
-		// dealloc from FN GetAttrValTextByDefTextAttrText
-		free(attrStateFNValueName);
-
-		// alloc mem for retMsg
-		strTextMultiple_t *retMsg =
-			malloc(sizeof(strTextMultiple_t));
-
-		// response with error text
-		retMsg->strTextLen = asprintf(&retMsg->strText
-			,"Error, arribute %.*s found in Definition %.*s, but no value is assigned !\r\n"
-			,attrStateFNAttrName.strTextLen
-			,attrStateFNAttrName.strText
-			,attrStateFNDefName.strTextLen
-			,attrStateFNDefName.strText);
-
-		// insert retMsg in stail-queue
-		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-		// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-		return headRetMsgMultiple;
-	}
-	
-	// my $now = gettimeofday();
-	time_t now = TimeNow();
-			
-//todo: my @t = localtime($now);
-
-//todo: $stateFile = ResolveDateWildcards($stateFile, @t);
-
-	// create statefilename string
-	char *stateFile;
-	asprintf(&stateFile
-			,"/spiffs/%.*s.cfg"
-			,attrStateFNValueName->strTextLen
-			,attrStateFNValueName->strText);
-	 
-	// free attribute statefile value
-	free (attrStateFNValueName->strText);	 
-	free (attrStateFNValueName);
-		
-	// open statefile
-	FILE* sFH = fopen(stateFile, "w");
-	if (sFH == NULL) {
-
-		// alloc mem for retMsg
-		strTextMultiple_t *retMsg =
-			malloc(sizeof(strTextMultiple_t));
-
-		// response with error text
-		retMsg->strTextLen = asprintf(&retMsg->strText
-			,"Error, could not open $stateFile: %s!\r\n"
-			,stateFile);
-
-//   #Log 1, $errormsg; ???
-
-		free(stateFile);
-
-		// insert retMsg in stail-queue
-		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-		// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-		return headRetMsgMultiple;
-	}
-
-	// free our prepared filename
-	free(stateFile);	//Noch benötigt ? Vorher freigeben?, dann nicht doppelt
-
-	// stores the time		
-	struct tm timeinfo;
-
-  // to fill with: "Sat Aug 19 14:16:59 2017"
-	char strftime_buf[64];
-
-/*
-  // PREPARATIONS OF INTERNAL CLOCK
-	localtime_r(&now, &timeinfo);
-
-	// Set timezone to Eastern Standard Time and print local time
-	setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
-	tzset();
-	// END OF PREPARATION
-*/
-
-  // get time to struct timeinfo
-	localtime_r(&now, &timeinfo);
-
-  // get strftime-text into strftime_buf 
-	strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-
-  // start statefile with date:-> #Sat Aug 19 14:16:59 2017
-  fprintf(sFH,"#%s\r\n", strftime_buf);
-
-
-			
-
-
-
-
-
- 
-
-
-
-
-
-
-
-/*
-	                                               ## $d ist der Name!!!
- # foreach my $d (sort keys %defs) {
- #   next if($defs{$d}{TEMPORARY});		//temporäre nicht!!
- #   if($defs{$d}{VOLATILE}) {
- #     my $def = $defs{$d}{DEF};
- #     $def =~ s/;/;;/g; # follow-on-for-timer at
- #     print SFH "define $d $defs{$d}{TYPE} $def\n";
- #   }
- #   my @arr = GetAllReadings($d);
- #   print SFH join("\n", @arr)."\n" if(@arr);
- # }
- # return "$attr{global}{statefile}: $!" if(!close(SFH));
- # return "";
-		*/	
-
-
-	// loop the definition for processing
-	Common_Definition_t *Common_Definition;
-	STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries) {
-		
-//#       next if($defs{$d}{TEMPORARY});		//temporäre nicht!!
-		
-		LOGD("calling GetAllReadings for:%.*s\n"
-			,Common_Definition->nameLen
-			,Common_Definition->name);
-
-		struct headRetMsgMultiple_s headRetMsgMultipleFromFn =
-			GetAllReadings(Common_Definition);
-
-		// if RetMsgMultiple queue not empty -> got readings from definition
-		if (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
-
-			// get the queue entries from retMsgMultiple till empty
-			while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
-
-				// get a retMsg element from queue
-				strTextMultiple_t *retMsg =
-					STAILQ_FIRST(&headRetMsgMultipleFromFn);
-
-				LOGD("store setstate line to File: %.*s\n"
-					,retMsg->strTextLen
-					,retMsg->strText);
-
-				// store setstate line
-				fprintf(sFH,"%.*s\n"
-					,retMsg->strTextLen
-					,retMsg->strText);
-
-				// done, remove this entry
-				STAILQ_REMOVE_HEAD(&headRetMsgMultipleFromFn, entries);
-
-				free(retMsg->strText);
-				free(retMsg);
-			}
-		}
-	}
-
-	// close statefile
-	fclose(sFH);
-
-
-
-
-
-//filecontent debug
-int c;
-FILE *file;
-file = fopen("/spiffs/state.cfg", "r");
-if (file) {
-    while ((c = getc(file)) != EOF)
-        putchar(c);
-    fclose(file);
-}
-
-
-	// return STAILQ head, stores multiple retMsg with readings, if NULL -> none
-	return headRetMsgMultiple;
-
-}
 
 
 		
 		
-		
-		
-//#################################################################################################
-//#################################################################################################
-//#####################################  FN KLEIN GESCHRIEBEN #####################################
-//#################################################################################################
-//#################################################################################################		
-//#################################################################################################
-		
+
+
+
+
+
+
 		
 		
 		
@@ -2857,8 +1796,8 @@ readingsBeginUpdate(Common_Definition_t *Common_Definition)
   if (Common_Definition->bulkUpdateReadings) {
 
 	#if CORE_SCDE_DBG >= 1
-	Log3(Common_Definition->module->ProvidedByModule->typeName
-		,Common_Definition->module->ProvidedByModule->typeNameLen
+	Log3(Common_Definition->module->provided->typeName
+		,Common_Definition->module->provided->typeNameLen
 		,1
 		,"readingsBeginUpdateFn was already called for Definition '%.*s'. "
 		 "Can not begin new update! Error!"
@@ -2887,8 +1826,8 @@ readingsBeginUpdate(Common_Definition_t *Common_Definition)
   struct tm timeinfo;
   localtime_r(&Common_Definition->bulkUpdateReadings->bulkUpdateTist, &timeinfo);
 
-  Log3(Common_Definition->module->ProvidedByModule->typeName
-	,Common_Definition->module->ProvidedByModule->typeNameLen
+  Log3(Common_Definition->module->provided->typeName
+	,Common_Definition->module->provided->typeNameLen
 	,7
 	,"readingsBeginUpdateFn called for Definition '%.*s'. "
 	 "Readings will get TiSt '%d.%d.%d, %d:%d:%d'."
@@ -2930,8 +1869,8 @@ readingsBulkUpdate(Common_Definition_t *Common_Definition
   // check if bulk update begin was called
   if (!Common_Definition->bulkUpdateReadings) {
 
-	Log3(Common_Definition->module->ProvidedByModule->typeName
-		  ,Common_Definition->module->ProvidedByModule->typeNameLen
+	Log3(Common_Definition->module->provided->typeName
+		  ,Common_Definition->module->provided->typeNameLen
 		  ,1
 		  ,"Error! readingsBulkUpdateFn called without calling readingsBeginUpdateFn first in Def-Name: '%.*s'."
 		  ,Common_Definition->name
@@ -3011,8 +1950,8 @@ readingsBulkUpdate2(Common_Definition_t *Common_Definition
   if (!Common_Definition->bulkUpdateReadings) {
 
 	#if CORE_SCDE_DBG >= 1
-	Log3(Common_Definition->module->ProvidedByModule->typeName
-		,Common_Definition->module->ProvidedByModule->typeNameLen
+	Log3(Common_Definition->module->provided->typeName
+		,Common_Definition->module->provided->typeNameLen
 		,1
 		,"readingsBulkUpdateFn called for Definition '%.*s' "
 		 "without calling readingsBeginUpdateFn first! Error!"
@@ -3024,8 +1963,8 @@ readingsBulkUpdate2(Common_Definition_t *Common_Definition
   }
 
  #if CORE_SCDE_DBG >= 7
-  Log3(Common_Definition->module->ProvidedByModule->typeName
-	,Common_Definition->module->ProvidedByModule->typeNameLen
+  Log3(Common_Definition->module->provided->typeName
+	,Common_Definition->module->provided->typeNameLen
 	,7
 	,"readingsBulkUpdateFn is adding Reading Name: '%.*s' "
 	 "Value: '%.*s' for update."
@@ -3084,8 +2023,8 @@ readingsEndUpdate(Common_Definition_t *Common_Definition,
   if (!Common_Definition->bulkUpdateReadings) {
 
 	#if CORE_SCDE_DBG >= 1
-	Log3(Common_Definition->module->ProvidedByModule->typeName
-		,Common_Definition->module->ProvidedByModule->typeNameLen
+	Log3(Common_Definition->module->provided->typeName
+		,Common_Definition->module->provided->typeNameLen
 		,1
 		,"readingsEndUpdateFn called for Definition '%.*s' "
 		 "without calling readingsBeginUpdateFn first! Error!"
@@ -3215,6 +2154,385 @@ readingsEndUpdate(Common_Definition_t *Common_Definition,
 
   return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+ * --------------------------------------------------------------------------------------------------
+ *  FName: readingsBeginUpdateFn
+ *  Desc: Call readingsBeginUpdate before you start updating Readings. The updated Readings will all
+ *       get the same timestamp, which is the time when you called this subroutine.
+ *  Para: Common_Definition_t *Common_Definition -> the definition which wants to update readings
+ *  Rets: ?
+ * --------------------------------------------------------------------------------------------------
+ */
+/*
+Die Funktion readingsBeginUpdate() bereitet die Definition mit dem Hash $hash auf ein Update von Readings vor. Dies betrifft insbesondere das Setzen von Umgebungsvariablen sowie dem aktuellen Zeitstempel als Änderungszeitpunkt. Der Aufruf dieser Funktion ist notwendig um eigentliche Updates mit der Funktion readingsBulkUpdate() auf der gewünschten Definition durchführen zu können.*/
+int
+readingsBeginUpdate2(Common_Definition_t* Common_Definition)
+{
+  // check if bulk update is already called
+  if (Common_Definition->bulkUpdateReadings2) {
+
+	#if CORE_SCDE_DBG >= 1
+	Log3(Common_Definition->module->provided->typeName
+		,Common_Definition->module->provided->typeNameLen
+		,1
+		,"readingsBeginUpdate2Fn was already called for Definition '%.*s'. "
+		 "Can not begin new update! Error!"
+		,Common_Definition->name
+		,Common_Definition->nameLen);
+	#endif
+
+	return 0;
+  }
+
+  // alloc mem for bulk update structure (bulkUpdateReadings2_t)
+  Common_Definition->bulkUpdateReadings2 =
+	(bulkUpdateReadings2_t *) malloc(sizeof(bulkUpdateReadings2_t));
+
+  // zero the bulk update structure (bulkUpdateReadings_t)
+  memset(Common_Definition->bulkUpdateReadings2, 0, sizeof(bulkUpdateReadings2_t));
+
+  // bulk-update single-linked-tail queue - init head
+  STAILQ_INIT(&Common_Definition->bulkUpdateReadings2->readings2SLTQH);
+
+  // assign bulk update time stamp
+  Common_Definition->bulkUpdateReadings->bulkUpdateTist = GetUniqueTiSt();
+
+  #if CORE_SCDE_DBG >= 7
+  // prepare time for debug
+  struct tm timeinfo;
+  localtime_r(&Common_Definition->bulkUpdateReadings2->bulkUpdateTist, &timeinfo);
+
+  Log3(Common_Definition->module->provided->typeName
+	,Common_Definition->module->provided->typeNameLen
+	,7
+	,"readingsBeginUpdate2Fn called for Definition '%.*s'. "
+	 "Readings will get TiSt '%d.%d.%d, %d:%d:%d'."
+	,Common_Definition->nameLen
+	,Common_Definition->name
+	,timeinfo.tm_mday
+	,timeinfo.tm_mon+1
+	,timeinfo.tm_year+1900
+	,timeinfo.tm_hour
+	,timeinfo.tm_min
+	,timeinfo.tm_sec);
+  #endif
+
+  return 0;
+}
+
+
+/*
+ * --------------------------------------------------------------------------------------------------
+ *  FName: readingsBulkUpdate3Fn
+ *  Desc: Call readingsBulkUpdate to add an Reading to the running update of Readings
+ *  NOTE: Call readingsBeginUpdateFn first!
+ *  Para: Common_Definition_t *Common_Definition -> the Definition that requests updated readings
+ *        const size_t readingNameStringLength -> length of the name string
+ *        const uint8_t *readingNameStringCharacters -> ptr to the name string
+ *        const size_t readingValueStringLength -> length of the value string
+
+ *        const uint8_t *readingValueStringCharacters) -> ptr to the value string
+ *  Rets: ?
+ * --------------------------------------------------------------------------------------------------
+ */
+/*Die Funktion readingsBulkUpdate() führt ein Update eines einzelnen Readings für die Definition $hash durch. Dabei wird das Readings $reading auf den Wert $value gesetzt. Bevor diese Funktion benutzt werden kann, muss readingsBeginUpdate() zuvor aufgerufen werden, ansonsten werden keine Updates durchgeführt.
+
+changed optional
+Flag, ob ein Event für dieses Update erzeugt werden soll (Wert: 1). Oder ob definitiv kein Event erzeugt werden soll (Wert: 0). Wenn nicht gesetzt, wird aufgrund entsprechender Attribute in der Definition von $hash entschieden, ob ein Event zu erzeugen ist, oder nicht (Attribute: event-on-change-reading, event-on-update-reading, event-min-interval, ...)
+
+
+
+Rückgabewert $rv
+Zeichenkette bestehend aus Reading und Wert getrennt durch einen Doppelpunkt, welcher anzeigt, auf welchen Wert das Reading tatsächlich gesetzt wurde.*/
+
+int
+readingsBulkUpdate3(Common_Definition_t* Common_Definition,
+		    const Reading2_t* reading,
+		    const bool changed)
+
+/*		,const size_t readingNameStringLength
+		,const uint8_t *readingNameStringCharacters
+		,const size_t readingValueStringLength
+		,const uint8_t *readingValueStringCharacters
+		,const bool changed)*/
+{
+  // check if bulk update begin was called
+  if (!Common_Definition->bulkUpdateReadings) {
+
+	#if CORE_SCDE_DBG >= 1
+	Log3(Common_Definition->module->provided->typeName
+		,Common_Definition->module->provided->typeNameLen
+		,1
+		,"readingsBulkUpdateFn called for Definition '%.*s' "
+		 "without calling readingsBeginUpdateFn first! Error!"
+		,Common_Definition->name
+		,Common_Definition->nameLen);
+	#endif
+
+	return 0;
+  }
+
+ #if CORE_SCDE_DBG >= 7
+  Log3(Common_Definition->module->provided->typeName
+	,Common_Definition->module->provided->typeNameLen
+	,7
+	,"readingsBulkUpdateFn is adding Reading Name: '%.*s' "
+	 "Value: '%.*s' for update."
+	,reading->nameString.length
+	,reading->nameString.characters
+	,reading->valueString.length
+	,reading->valueString.characters);
+  #endif
+
+  // alloc mem for reading
+  xReading2SLTQE_t *newReading2SLTQE
+	= malloc( sizeof(xReading2SLTQE_t) );
+
+  // zero the struct ??? notwendig ???
+  memset(newReading2SLTQE, 0, sizeof(xReading2SLTQE_t));
+
+
+  // fill Reading with Reading
+  newReading2SLTQE->reading = reading;
+
+  // fill Reading with Definition - the Reading belongs to
+  newReading2SLTQE->definition = Common_Definition;
+
+  // add new Reading to definitions bulk-Update-Readings queue
+  STAILQ_INSERT_TAIL(&Common_Definition->bulkUpdateReadings2->readings2SLTQH
+	,newReading2SLTQE, entries);
+
+  return 0;
+}
+
+
+
+/*http://sancho.ccd.uniroma2.it/cgi-bin/man/man2html?STAILQ_INIT+3
+ * --------------------------------------------------------------------------------------------------
+ *  FName: readingsEndUpdate
+ *  Desc: Call readingsEndUpdate when you are done updating readings. This optionally calls DoTrigger
+ *        to propagate the changes.
+ *  Para: Common_Definition_t *Common_Definition -> the Definition that requests updated readings
+
+ *        bool doTrigger -> triggering readings ? false / true
+ *  Rets: -/-
+ * --------------------------------------------------------------------------------------------------
+ */
+/*Die Funktion readingsEndUpdate() beendet den Bulk-Update Prozess durch die Funktionen readingsBeginUpdate() & readingsBulkUpdate() und triggert optional die entsprechenden Events sämtlicher erzeugter Readings für die Definition $hash. Desweiteren werden nachgelagerte Tasks wie bspw. die Erzeugung von User-Readings (Attribut: userReadings), sowie die Erzeugung des STATE aufgrund des Attributs stateFormat durchgeführt. Sofern $do_trigger gesetzt ist, werden alle anstehenden Events nach Abschluss getriggert.*/
+int
+readingsEndUpdate2(Common_Definition_t *Common_Definition,
+	bool doTrigger)
+{
+  // check if bulk update begin was called
+  if (!Common_Definition->bulkUpdateReadings) {
+
+	#if CORE_SCDE_DBG >= 1
+	Log3(Common_Definition->module->provided->typeName
+		,Common_Definition->module->provided->typeNameLen
+		,1
+		,"readingsEndUpdateFn called for Definition '%.*s' "
+		 "without calling readingsBeginUpdateFn first! Error!"
+		,Common_Definition->name
+		,Common_Definition->nameLen);
+	#endif
+
+	return 0;
+  }
+
+  // loop through the bulk-update-readings - start with first entry
+  xReadingSLTQE_t *currentBUReadingSLTQE = 
+	STAILQ_FIRST(&Common_Definition->bulkUpdateReadings->readingsSLTQH);
+
+  while (currentBUReadingSLTQE != NULL) {
+
+	// set common tist to BU reading element
+	currentBUReadingSLTQE->readingTist =
+		Common_Definition->bulkUpdateReadings->bulkUpdateTist;
+
+/*	LOGD("Now proc. readingName:%.*s, readingValue:%.*s\n"
+		,currentBUReadingSLTQE->nameString.length
+
+		,currentBUReadingSLTQE->nameString.characters
+		,currentBUReadingSLTQE->valueString.length
+		,currentBUReadingSLTQE->valueString.characters);*/
+
+	// SLTQ Element to loop trough the old readings
+	xReadingSLTQE_t *existingReadingSLTQE = 
+		STAILQ_FIRST(&Common_Definition->headReadings);
+
+	// loop through the existing readings
+	while (true) {
+
+		// no old reading found ? Add new reading at tail of Readings-SLTQ
+		if (existingReadingSLTQE == NULL) {
+
+			// remove from Bulk-Update-Readings-SLTQ
+			STAILQ_REMOVE(&Common_Definition->bulkUpdateReadings->readingsSLTQH,
+				currentBUReadingSLTQE, xReadingSLTQE_s, entries);
+
+			// add new reading at tail of Readings-SLTQ
+			STAILQ_INSERT_TAIL(&Common_Definition->headReadings,
+				currentBUReadingSLTQE, entries);
+
+/*			LOGD("Added new reading - readingName:%.*s, readingValue:%.*s\n"
+				,currentBUReadingSLTQE->nameString.length
+
+				,currentBUReadingSLTQE->nameString.characters
+				,currentBUReadingSLTQE->valueString.length
+				,currentBUReadingSLTQE->valueString.characters);*/
+
+			// added new, break
+			break;
+		}
+
+		// is there an existing reading name that matches? Then replace old value. 
+		if ( (existingReadingSLTQE->nameString.length == 
+			currentBUReadingSLTQE->nameString.length)
+			&& (!strncmp((const char*) existingReadingSLTQE->nameString.characters,
+				(const char*) currentBUReadingSLTQE->nameString.characters,
+				currentBUReadingSLTQE->nameString.length)) ) {
+
+			// upd. existing reading, free existing valueString (take current valueString)
+			if (existingReadingSLTQE->valueString.characters) 
+				free(existingReadingSLTQE->valueString.characters);
+
+			// upd. existing reading, move current valueString length
+			existingReadingSLTQE->valueString.length = 
+				currentBUReadingSLTQE->valueString.length;
+
+			// upd. existing reading, move current valueString
+			existingReadingSLTQE->valueString.characters = 
+				currentBUReadingSLTQE->valueString.characters;
+
+			// upd. existing reading, free current nameString (keep existing nameString)
+			if (currentBUReadingSLTQE->nameString.characters) 
+				free(currentBUReadingSLTQE->nameString.characters);
+
+			// updating existing reading - move Time Stamp
+			existingReadingSLTQE->readingTist =
+				Common_Definition->bulkUpdateReadings->bulkUpdateTist;
+
+			// remove from Bulk-Update-Readings-SLTQ
+			STAILQ_REMOVE(&Common_Definition->bulkUpdateReadings->readingsSLTQH,
+				currentBUReadingSLTQE, xReadingSLTQE_s, entries);
+
+			// we have taken the data - free current bulk update reading SLTQE
+			free(currentBUReadingSLTQE);
+
+/*			LOGD("Updated old reading - readingName:%.*s, readingValue:%.*s\n"
+				,existingReadingSLTQE->nameString.length
+				,existingReadingSLTQE->nameString.characters
+				,existingReadingSLTQE->valueString.length
+				,existingReadingSLTQE->valueString.characters);*/
+
+			// found, break
+			break;
+		}
+
+		// get next existing reading for processing
+		existingReadingSLTQE = STAILQ_NEXT(existingReadingSLTQE, entries);
+
+	}
+
+	// continue loop - get next first bulk update reading
+	currentBUReadingSLTQE = 
+		STAILQ_FIRST(&Common_Definition->bulkUpdateReadings->readingsSLTQH);
+  }
+
+  // dealloc bulk-update data
+  free(Common_Definition->bulkUpdateReadings);
+
+  // clear bulk-update data (mark as not started)
+  Common_Definition->bulkUpdateReadings = NULL;
+
+/*printf("readingsEndUpdate finnished. Current readings for this definiton:\n");
+
+  // list readings stored for definition after processing
+//  xReadingSLTQE_t *currentBUReadingSLTQE;
+  STAILQ_FOREACH(currentBUReadingSLTQE, &Common_Definition->headReadings, entries) {
+
+
+	LOGD("L readingName:%.*s, readingValue:%.*s\n"
+		,currentBUReadingSLTQE->nameString.length
+		,currentBUReadingSLTQE->nameString.characters
+		,currentBUReadingSLTQE->valueString.length
+		,currentBUReadingSLTQE->valueString.characters);
+  }*/
+
+  return 0;
+}
+
+
+
+
+
+
+/*
+
+		// loop through  currently stored modules
+		Module_t* p_Module;
+
+		STAILQ_FOREACH(p_Module, &SCDERoot->HeadModules, entries) {
+
+			// get the Common_Definitions for current module
+			Common_Definition_t* p_Common_Definition;
+
+			STAILQ_FOREACH(p_Common_Definition, &SCDERoot->HeadCommon_Definitions, entries) {
+
+				if (Common_Definition->module == Module) {
+
+
+				}
+			}
+		}
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3788,67 +3106,7 @@ Get_attrVal_by_defName_and_attrName(const strText_t *defName
 		
 
 
-/* helper
- * -------------------------------------------------------------------------------------------------
- *  FName: HexDumpOut
- *  Desc: Prints data as Hex-Dump to debug terminal
- *  Info:  
- *  Para: char *desc -> ptr to leading description
- *        void *addr -> ptr to beginning of data data to dump
- *        int len -> length of the data to dump 
- *  Rets: -/-
- * -------------------------------------------------------------------------------------------------
- */
-void
-HexDumpOut (char *desc, void *addr, int len) 
-{
 
-  int i;
-  unsigned char buff[17];
-  unsigned char *pc = (unsigned char*)addr;
-
-  // Output description if given.
-  if (desc != NULL) printf ("%s:\n", desc);
-
-  // Process every byte in the data.
-  for (i = 0; i < len; i++) {
-
-        // Multiple of 16 means new line (with line offset).
-        if ((i % 16) == 0) {
-
-		// Just don't print ASCII for the zeroth line.
-            	if (i != 0) printf ("  %s\n", buff);
-
-		// Output the offset.
-		printf ("  %04x ", i);
-
-	}
-
-	// Now the hex code for the specific character.
-	printf (" %02x", pc[i]);
-
-	// And store a printable ASCII character for later.
-        if ((pc[i] < 0x20) || (pc[i] > 0x7e)) buff[i % 16] = '.';
-
-        else buff[i % 16] = pc[i];
-
-        buff[(i % 16) + 1] = '\0';
-
-  }
-
-  // Pad out last line if not exactly 16 characters.
-  while ((i % 16) != 0) {
-
-	printf ("   ");
-
-	i++;
-
-  }
-
-  // And print the final ASCII bit.
-  printf ("  %s\n", buff);
-
-}
 
 
 

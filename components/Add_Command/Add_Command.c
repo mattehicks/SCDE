@@ -60,17 +60,14 @@ const uint8_t Add_helpDetailText[] =
   "Usagebwrebwerb: Add <Type-Name> <Name> <Key> <Value>, to add a key=value pair to an device";
 
 
-providedByCommand_t Add_ProvidedByCommand =
-  {
-   "Add"					// Command-Name of command -> libfilename.so !
-  ,3						// length of cmd
-  ,Add_InitializeCommandFn			// Initialize Fn
-  ,Add_CommandFn				// the Fn code
-  ,&Add_helpText
-  ,sizeof(Add_helpText)
-  ,&Add_helpDetailText
-  ,sizeof(Add_helpDetailText)
-  };
+ProvidedByCommand_t Add_ProvidedByCommand = {
+  "Add",					// Command-Name of command -> libfilename.so !
+  3,						// length of cmd
+  Add_InitializeCommandFn,			// Initialize Fn
+  Add_CommandFn,				// the Fn code
+  { &Add_helpText, sizeof(Add_helpText) },
+  { &Add_helpDetailText, sizeof(Add_helpDetailText) }
+};
 
 
 
@@ -226,11 +223,11 @@ Add_CommandFn (const uint8_t *args
 		&& (!strncasecmp((const char*) Common_Definition->name, (const char*) name, nameLen)) ) {
 
 		// AddFn assigned by module ?
-		if (Module->ProvidedByModule->AddFn) {
+		if (Module->provided->AddFn) {
 
 			// execute AddFn and get error msg
 			strTextMultiple_t *retMsg = 
-				Module->ProvidedByModule->AddFn(Common_Definition, kvArgs, kvArgsLen);
+				Module->provided->AddFn(Common_Definition, kvArgs, kvArgsLen);
 
 			// got an error msg?
 			if (retMsg) {
@@ -254,8 +251,8 @@ Add_CommandFn (const uint8_t *args
 				,kvArgs
 				,Common_Definition->nameLen
 				,Common_Definition->name
-			   	,Common_Definition->module->ProvidedByModule->typeNameLen
-				,Common_Definition->module->ProvidedByModule->typeName);
+			   	,Common_Definition->module->provided->typeNameLen
+				,Common_Definition->module->provided->typeName);
 
 			// insert retMsg in stail-queue
 			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);

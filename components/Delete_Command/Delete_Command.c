@@ -58,19 +58,15 @@ const uint8_t Delete_helpText[] =
 const uint8_t Delete_helpDetailText[] = 
   "Usagebwrebwerb: define <name> <type> <options>, to define a device";
 
-providedByCommand_t Delete_ProvidedByCommand =
-  {
-   "Delete"					// Command-Name of command -> libfilename.so !
-  ,6						// length of cmd
-  ,Delete_InitializeCommandFn			// Initialize Fn
-  ,Delete_CommandFn				// the Fn code
-  ,&Delete_helpText
-  ,sizeof(Delete_helpText)
-  ,&Delete_helpDetailText
-  ,sizeof(Delete_helpDetailText)
-  };
+ProvidedByCommand_t Delete_ProvidedByCommand = {
+  "Delete",					// Command-Name of command -> libfilename.so !
+  6,						// length of cmd
+  Delete_InitializeCommandFn,			// Initialize Fn
+  Delete_CommandFn,				// the Fn code
+  { &Delete_helpText, sizeof(Delete_helpText) },
+  { &Delete_helpDetailText, sizeof(Delete_helpDetailText) }
+};
 
-//(const uint8_t *) "Usage: define <name> <type> <options>, to define a device",57);	// CommandHelp, Len
 
 
 /* --------------------------------------------------------------------------------------------------
@@ -203,11 +199,11 @@ Delete_CommandFn (const uint8_t *args
 	if ( (Common_Definition->nameLen == nameLen)
 		&& (!strncasecmp((const char*) Common_Definition->name, (const char*) name, nameLen)) ) {
 
-		if (Common_Definition->module->ProvidedByModule->UndefineFn) {
+		if (Common_Definition->module->provided->UndefineFn) {
 
 			// execute DefineFn and get error msg
 			strTextMultiple_t *retMsg =
-				Common_Definition->module->ProvidedByModule->UndefineFn(Common_Definition);
+				Common_Definition->module->provided->UndefineFn(Common_Definition);
 
 			// got an error msg?
 			if (retMsg) {
@@ -230,8 +226,8 @@ Delete_CommandFn (const uint8_t *args
 				,"Error! Could not execute UNDEFINE command on '%.*s', because a TYPE '%.*s' does not support it!"
 				,Common_Definition->nameLen
 				,Common_Definition->name
-			   	,Common_Definition->module->ProvidedByModule->typeNameLen
-				,Common_Definition->module->ProvidedByModule->typeName);
+			   	,Common_Definition->module->provided->typeNameLen
+				,Common_Definition->module->provided->typeName);
 
 			// insert retMsg in stail-queue
 			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);

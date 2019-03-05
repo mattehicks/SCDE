@@ -1,25 +1,26 @@
-Types    xxx_t
-Struct   xxx_s
-pointers p_
-
 Naming:
-Struct      TitleCase
-Struct Members  lower_case or lowerCase
 
-Enum        ETitleCase
-Enum Members    ALL_CAPS or lowerCase
+pointers p_
+struct names   TitleCase ot Title_Case, xxx_s
+typedef's      TitleCase ot Title_Case, xxx_t
+struct Members  lower_case or lowerCase
 
+Function naming:
 Public functions    pfx_TitleCase (pfx = module prefix)
 Private functions   TitleCase
 Functions that are there, but shouldn't be called directly, or have obscure uses _TitleCase
+
+_ underscore -> copy & paster helper prefix
 
 Trivial variables   i,x,n,f etc...
 Local variables lower_case or lowerCase
 Global variables    g_lowerCase or g_lower_case (searchable by g_ prefix)
 
-pointers p_
+Enum        ETitleCase
+Enum Members    ALL_CAPS or lowerCase
 
 All macros and constants in caps: MAX_BUFFER_SIZE, TRACKING_ID_PREFIX.
+
 Struct names and typedef's in camelcase: GtkWidget, TrackingOrder.
 Functions that operate on structs: classic C style: gtk_widget_show(), tracking_order_process().
 Pointers: nothing fancy here: GtkWidget *foo, TrackingOrder *bar.

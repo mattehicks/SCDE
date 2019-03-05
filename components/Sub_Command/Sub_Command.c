@@ -60,17 +60,14 @@ const uint8_t Sub_helpDetailText[] =
   "Usagebwrebwerb: Sub <Type-Name> <Name> <Key> <Value>, to Sub a key=value pair to an device";
 
 
-providedByCommand_t Sub_ProvidedByCommand =
-  {
-   "Sub"					// Command-Name of command -> libfilename.so !
-  ,3						// length of cmd
-  ,Sub_InitializeCommandFn			// Initialize Fn
-  ,Sub_CommandFn				// the Fn code
-  ,&Sub_helpText
-  ,sizeof(Sub_helpText)
-  ,&Sub_helpDetailText
-  ,sizeof(Sub_helpDetailText)
-  };
+ProvidedByCommand_t Sub_ProvidedByCommand = {
+  "Sub",					// Command-Name of command -> libfilename.so !
+  3,						// length of cmd
+  Sub_InitializeCommandFn,			// Initialize Fn
+  Sub_CommandFn,				// the Fn code
+  { &Sub_helpText, sizeof(Sub_helpText) },
+  { &Sub_helpDetailText, sizeof(Sub_helpDetailText) }
+};
 
 
 
@@ -238,9 +235,9 @@ Sub_CommandFn (const uint8_t *args
 	if ( (Common_Definition->nameLen == nameLen)
 		&& (!strncasecmp((const char*) Common_Definition->name, (const char*) name, nameLen)) ) {
 
-		if (Module->ProvidedByModule->SubFn) {
+		if (Module->provided->SubFn) {
 
-			retMsg = Module->ProvidedByModule->SubFn(Common_Definition, kArgs, kArgsLen);
+			retMsg = Module->provided->SubFn(Common_Definition, kArgs, kArgsLen);
 
 			// got an error msg?
 			if (retMsg) {
@@ -264,8 +261,8 @@ Sub_CommandFn (const uint8_t *args
 				,"Error! Could not SUB Key attributes from define '%.*s'! TYPE '%.*s' does not support it!"
 				,Common_Definition->nameLen
 				,Common_Definition->name
-			   	,Common_Definition->module->ProvidedByModule->typeNameLen
-				,Common_Definition->module->ProvidedByModule->typeName);
+			   	,Common_Definition->module->provided->typeNameLen
+				,Common_Definition->module->provided->typeName);
 
 			// get next Common_Definition for processing
 			Common_Definition = STAILQ_NEXT(Common_Definition, entries);

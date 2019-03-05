@@ -62,15 +62,13 @@ const uint8_t Setstate_helpDetailText[] =
   "Usagebwrebwerb: Setstate <definition> <state>, to set the state shown in the command list";
 
 
-providedByCommand_t Setstate_ProvidedByCommand = {
-   "Setstate"					// Command-Name of command -> libfilename.so !
-  ,sizeof("Setstate")-1				// length of cmd
-  ,Setstate_InitializeCommandFn			// Initialize Fn
-  ,Setstate_CommandFn				// the Fn code
-  ,&Setstate_helpText
-  ,sizeof(Setstate_helpText)
-  ,&Setstate_helpDetailText
-  ,sizeof(Setstate_helpDetailText)
+ProvidedByCommand_t Setstate_ProvidedByCommand = {
+  "Setstate",					// Command-Name of command -> libfilename.so !
+  sizeof("Setstate")-1,				// length of cmd
+  Setstate_InitializeCommandFn,			// Initialize Fn
+  Setstate_CommandFn,				// the Fn code
+  { &Setstate_helpText, sizeof(Setstate_helpText) },
+  { &Setstate_helpDetailText, sizeof(Setstate_helpDetailText) }
 };
 
 
@@ -594,7 +592,7 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 			xMultipleStringSLTQE_t *retMsgMultipleStringSLTQE = NULL;
 
 			// if provided by Type -> call State Fn to set the state
-			if (Common_Definition->module->ProvidedByModule->StateFn) {
+			if (Common_Definition->module->provided->StateFn) {
 
 				#if Setstate_Command_DBG >= 7
 				// prepare TiSt for LogFn
@@ -606,8 +604,8 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 					,7
 					,"Calling StateFn of Module '%.*s' for Definition '%.*s'. "
 					 "Reading '%.*s' gets new Value '%.*s', Mime '%.*s', TimeStamp '%.*s'."
-					,Common_Definition->module->ProvidedByModule->typeNameLen
-					,Common_Definition->module->ProvidedByModule->typeName
+					,Common_Definition->module->provided->typeNameLen
+					,Common_Definition->module->provided->typeName
 					,Common_Definition->nameLen
 					,Common_Definition->name
 					,stateNameString.length
@@ -625,7 +623,7 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 
 				// call Modules StateFn. Interpret retMsgMultipleStringSLTQE != NULL as veto !
 				retMsgMultipleStringSLTQE =
-					Common_Definition->module->ProvidedByModule->StateFn(Common_Definition
+					Common_Definition->module->provided->StateFn(Common_Definition
 						,readingTiSt
 						,stateNameString
 						,stateValueString
@@ -663,8 +661,8 @@ exe    		 my $ret = CallFn($sdev, "StateFn", $d, $tim, $sname, $sval);
 						 "(not A-Za-z/\\d_\\.-), notify the maintainer of the Module '%.*s'."
 						,stateNameString.length
 						,stateNameString.characters
-						,Common_Definition->module->ProvidedByModule->typeNameLen
-						,Common_Definition->module->ProvidedByModule->typeName);
+						,Common_Definition->module->provided->typeNameLen
+						,Common_Definition->module->provided->typeName);
 					#endif
 				}
 
@@ -895,7 +893,7 @@ if (stateMimeString.characters)
 // -------------------------------------------------------------------------------------------------
 
 			// if provided by Type -> call State Fn to set the state
-			if (Common_Definition->module->ProvidedByModule->StateFn) {
+			if (Common_Definition->module->provided->StateFn) {
 
 				#if Setstate_Command_DBG >= 7
 				// prepare TiSt for LogFn
@@ -907,8 +905,8 @@ if (stateMimeString.characters)
 					,7
 					,"Calling StateFn of Module '%.*s' for Definition '%.*s'. "
 					 "Reading '%.*s' gets new Value '%.*s', Mime '%.*s', TimeStamp '%.*s'."
-					,Common_Definition->module->ProvidedByModule->typeNameLen
-					,Common_Definition->module->ProvidedByModule->typeName
+					,Common_Definition->module->provided->typeNameLen
+					,Common_Definition->module->provided->typeName
 					,Common_Definition->nameLen
 					,Common_Definition->name
 					,stateNameString.length
@@ -926,7 +924,7 @@ if (stateMimeString.characters)
 
 				// call Modules StateFn. Interpret retMsgMultipleStringSLTQE != NULL as veto !
 				xMultipleStringSLTQE_t *retMsgMultipleStringSLTQE =
-					Common_Definition->module->ProvidedByModule->StateFn(Common_Definition
+					Common_Definition->module->provided->StateFn(Common_Definition
 						,readingTiSt
 						,stateNameString
 						,stateValueString

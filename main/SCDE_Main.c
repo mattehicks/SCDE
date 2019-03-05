@@ -671,12 +671,12 @@ IdleCbTask(void *pvParameters)
 	STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries) {
 
 		// check if F_WANTS_IDLE_TASK is set and IdleCbFn Fn is installed
-		if ( (Common_Definition->module->ProvidedByModule->IdleCbFn)
+		if ( (Common_Definition->module->provided->IdleCbFn)
 			&& (Common_Definition->Common_CtrlRegA & F_WANTS_IDLE_TASK) ) {
 
 			 os_printf("SCDE: Exec IdleCbFn!! Type-Name:%.*s Def-Name:%.*s FD:%d\n"
-				,Common_Definition->module->ProvidedByModule->typeNameLen
-				,Common_Definition->module->ProvidedByModule->typeName
+				,Common_Definition->module->provided->typeNameLen
+				,Common_Definition->module->provided->typeName
 				,Common_Definition->nameLen
 				,Common_Definition->name
 				,Common_Definition->fd);
@@ -686,7 +686,7 @@ IdleCbTask(void *pvParameters)
 
 
 			// execute the idle callback function
-			Common_Definition->module->ProvidedByModule->IdleCbFn((Common_Definition_t*) Common_Definition);
+			Common_Definition->module->provided->IdleCbFn((Common_Definition_t*) Common_Definition);
 
 			}
 
@@ -752,8 +752,8 @@ SelectQueryTask(void *pvParameters)
 	Common_Definition_t *Common_Definition;
 	STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries) {
 		printf("L Module:%.*s Name:%.*s FD:%d\n"
-				,Common_Definition->module->ProvidedByModule->typeNameLen
-				,Common_Definition->module->ProvidedByModule->typeName
+				,Common_Definition->module->provided->typeNameLen
+				,Common_Definition->module->provided->typeName
 				,Common_Definition->nameLen
 				,Common_Definition->name
 				,Common_Definition->fd);
@@ -785,7 +785,7 @@ SelectQueryTask(void *pvParameters)
 			 os_printf("SCDE: adding %.*s fd:%d\n",Def->nameLen,Def->name,Def->fd);
 
 			// select for reading, but only if an Fn is installed
-			if (Def->module->ProvidedByModule->DirectReadFn) {
+			if (Def->module->provided->DirectReadFn) {
 
 				FD_SET(sd , &readfds);
 
@@ -793,14 +793,14 @@ SelectQueryTask(void *pvParameters)
 
 			// select for writing (if wants to write), but only if an Fn is installed
 			if  ( (Def->Common_CtrlRegA & F_WANTS_WRITE)
-				&& (Def->module->ProvidedByModule->DirectWriteFn) ) {
+				&& (Def->module->provided->DirectWriteFn) ) {
 
 				FD_SET(sd , &writefds);
 
 				}
 
 			// select for exceptions, but only if an Fn is installed
-			if (Def->module->ProvidedByModule->ExceptFn) {
+			if (Def->module->provided->ExceptFn) {
 
 				FD_SET(sd , &exceptfds);
 
@@ -836,32 +836,32 @@ SelectQueryTask(void *pvParameters)
 
 				// first check for write availability, but only if 'F_WANTS_WRITE' and 'DirectWriteFn' is installed
 				if ( (Def->Common_CtrlRegA & F_WANTS_WRITE)
-					&& (Def->module->ProvidedByModule->DirectWriteFn)
+					&& (Def->module->provided->DirectWriteFn)
 					&& (FD_ISSET(sd , &writefds)) ) {
 
 					// clear Flag F_WANTS_WRITE, should be set again when more data should be sended
 					Def->Common_CtrlRegA &= ~F_WANTS_WRITE;
 
 					// execute the write function
-					Def->module->ProvidedByModule->DirectWriteFn((Common_Definition_t*) Def);
+					Def->module->provided->DirectWriteFn((Common_Definition_t*) Def);
 					
 					}
 
 				// second check for read availability. But only if a function is installed
-				if ( (Def->module->ProvidedByModule->DirectReadFn)
+				if ( (Def->module->provided->DirectReadFn)
 					&& (FD_ISSET(sd , &readfds)) ) {
 
 					// execute the read function
-					Def->module->ProvidedByModule->DirectReadFn((Common_Definition_t*) Def);
+					Def->module->provided->DirectReadFn((Common_Definition_t*) Def);
 
 					}
 
 				// third check for exceptions. But only if a function is installed
-				if ( (Def->module->ProvidedByModule->ExceptFn)
+				if ( (Def->module->provided->ExceptFn)
 					&& (FD_ISSET(sd , &exceptfds)) ) {
 
 					// execute the exception function
-					Def->module->ProvidedByModule->ExceptFn((Common_Definition_t*) Def);
+					Def->module->provided->ExceptFn((Common_Definition_t*) Def);
 
 					}
 
@@ -1037,67 +1037,67 @@ app_main(void)
 // embedd commands A-Z
 
   // Activate Add as SCDE built-in Command
-  extern providedByCommand_t Add_ProvidedByCommand;
+  extern ProvidedByCommand_t Add_ProvidedByCommand;
   CommandActivateCommand(&Add_ProvidedByCommand);
 
   // Activate Attr as SCDE built-in Command
-  extern providedByCommand_t Attr_ProvidedByCommand;
+  extern ProvidedByCommand_t Attr_ProvidedByCommand;
   CommandActivateCommand(&Attr_ProvidedByCommand);
 
   // Activate Define as SCDE built-in Command
-  extern providedByCommand_t Define_ProvidedByCommand;
+  extern ProvidedByCommand_t Define_ProvidedByCommand;
   CommandActivateCommand(&Define_ProvidedByCommand);
 
   // Activate Deleteattr as SCDE built-in Command
-  extern providedByCommand_t Deleteattr_ProvidedByCommand;
+  extern ProvidedByCommand_t Deleteattr_ProvidedByCommand;
   CommandActivateCommand(&Deleteattr_ProvidedByCommand);
 
   // Activate Delete as SCDE built-in Command
-  extern providedByCommand_t Delete_ProvidedByCommand;
+  extern ProvidedByCommand_t Delete_ProvidedByCommand;
   CommandActivateCommand(&Delete_ProvidedByCommand);
 
   // Activate Help as SCDE built-in Command
-  extern providedByCommand_t Help_ProvidedByCommand;
+  extern ProvidedByCommand_t Help_ProvidedByCommand;
   CommandActivateCommand(&Help_ProvidedByCommand);
 
   // Activate Include as SCDE built-in Command
-  extern providedByCommand_t Include_ProvidedByCommand;
+  extern ProvidedByCommand_t Include_ProvidedByCommand;
   CommandActivateCommand(&Include_ProvidedByCommand);
 
   // Activate IOWrite as SCDE built-in Command
-  extern providedByCommand_t IOWrite_ProvidedByCommand;
+  extern ProvidedByCommand_t IOWrite_ProvidedByCommand;
   CommandActivateCommand(&IOWrite_ProvidedByCommand);
 
   // Activate List as SCDE built-in Command
-  extern providedByCommand_t List_ProvidedByCommand;
+  extern ProvidedByCommand_t List_ProvidedByCommand;
   CommandActivateCommand(&List_ProvidedByCommand);
 
   // Activate Rename as SCDE built-in Command
-  extern providedByCommand_t Rename_ProvidedByCommand;
+  extern ProvidedByCommand_t Rename_ProvidedByCommand;
   CommandActivateCommand(&Rename_ProvidedByCommand);
 
   // Activate Rereadcfg as SCDE built-in Command
-  extern providedByCommand_t Rereadcfg_ProvidedByCommand;
+  extern ProvidedByCommand_t Rereadcfg_ProvidedByCommand;
   CommandActivateCommand(&Rereadcfg_ProvidedByCommand);
 
   // Activate Save as SCDE built-in Command
-  extern providedByCommand_t Save_ProvidedByCommand;
+  extern ProvidedByCommand_t Save_ProvidedByCommand;
   CommandActivateCommand(&Save_ProvidedByCommand);
 
   // Activate Set as SCDE built-in Command
-  extern providedByCommand_t Set_ProvidedByCommand;
+  extern ProvidedByCommand_t Set_ProvidedByCommand;
   CommandActivateCommand(&Set_ProvidedByCommand);
 
   // Activate Setstate as SCDE built-in Command
-  extern providedByCommand_t Setstate_ProvidedByCommand;
+  extern ProvidedByCommand_t Setstate_ProvidedByCommand;
   CommandActivateCommand(&Setstate_ProvidedByCommand);
 
   // Activate Shutdown as SCDE built-in Command
-  extern providedByCommand_t Shutdown_ProvidedByCommand;
+  extern ProvidedByCommand_t Shutdown_ProvidedByCommand;
   CommandActivateCommand(&Shutdown_ProvidedByCommand);
 
   // Activate Sub as SCDE built-in Command
-  extern providedByCommand_t Sub_ProvidedByCommand;
+  extern ProvidedByCommand_t Sub_ProvidedByCommand;
   CommandActivateCommand(&Sub_ProvidedByCommand);
 
 // -------------------------------------------------------------------------------------------------
@@ -1132,16 +1132,16 @@ app_main(void)
   CommandActivateModule(&ESP32_S0_ProvidedByModule);
 
   // Activate ESP32_SPI as SCDE built-in Module
-  extern ProvidedByModule_t ESP32_SPI_provided_fn;
-  CommandActivateModule(&ESP32_SPI_provided_fn);
+  extern ProvidedByModule_t ESP32_SPI_ProvidedByModule;
+  CommandActivateModule(&ESP32_SPI_ProvidedByModule);
 
   // Activate ESP32_SwITCH as SCDE built-in Module
   extern ProvidedByModule_t ESP32_SwITCH_ProvidedByModule;
   CommandActivateModule(&ESP32_SwITCH_ProvidedByModule);
 
   // Activate ESP32_TouchGUI1 as SCDE built-in Module
-  extern ProvidedByModule_t ESP32_TouchGUI1_provided_fn;
-  CommandActivateModule(&ESP32_TouchGUI1_provided_fn);
+  extern ProvidedByModule_t ESP32_TouchGUI1_ProvidedByModule;
+  CommandActivateModule(&ESP32_TouchGUI1_ProvidedByModule);
 
   // Activate SSD1306 as SCDE built-in Module
   extern ProvidedByModule_t SSD1306_ProvidedByModule;

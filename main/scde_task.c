@@ -73,7 +73,7 @@ scde_init_environment() {
 
 
  // Activate Help as SCDE built-in Command
-  extern providedByCommand_t Help_ProvidedByCommand;
+  extern ProvidedByCommand_t Help_ProvidedByCommand;
   CommandActivateCommand(&Help_ProvidedByCommand);
 
 }

@@ -59,15 +59,13 @@ const uint8_t Define_helpDetailText[] =
   "Usagebwrebwerb: Define <name> <type> <options>, to Define a device";
 
 
-providedByCommand_t Define_ProvidedByCommand = {
-  "Define"					// Command-Name of command -> libfilename.so !
-  ,6						// length of cmd
-  ,Define_InitializeCommandFn			// Initialize Fn
-  ,Define_CommandFn				// the Fn code
-  ,&Define_helpText
-  ,sizeof(Define_helpText)
-  ,&Define_helpDetailText
-  ,sizeof(Define_helpDetailText)
+ProvidedByCommand_t Define_ProvidedByCommand = {
+  "Define",					// Command-Name of command -> libfilename.so !
+  6,						// length of cmd
+  Define_InitializeCommandFn,			// Initialize Fn
+  Define_CommandFn,				// the Fn code
+  { &Define_helpText, sizeof(Define_helpText) },
+  { &Define_helpDetailText, sizeof(Define_helpDetailText) }
 };
 
 //(const uint8_t *) "Usage: Define <name> <type> <options>, to Define a device",57);	// CommandHelp, Len
@@ -218,10 +216,10 @@ Define_CommandFn (const uint8_t *args,
 
   // alloc mem for modul specific definition structure (Common_Definition_t + X)
   Common_Definition_t* NewCommon_Definition
-	= malloc(Module->ProvidedByModule->SizeOfDefinition);
+	= malloc(Module->provided->SizeOfDefinition);
 
   // zero the struct
-  memset(NewCommon_Definition, 0, Module->ProvidedByModule->SizeOfDefinition);
+  memset(NewCommon_Definition, 0, Module->provided->SizeOfDefinition);
 
   // prepare default fields in definition
 
@@ -244,8 +242,8 @@ Define_CommandFn (const uint8_t *args,
   printf("Defined Name:%.*s TypeName:%.*s\n"
     ,NewCommon_Definition->nameLen
     ,NewCommon_Definition->name
-    ,NewCommon_Definition->module->ProvidedByModule->typeNameLen
-    ,NewCommon_Definition->module->ProvidedByModule->typeName);
+    ,NewCommon_Definition->module->provided->typeNameLen
+    ,NewCommon_Definition->module->provided->typeName);
 
   // store Definition string in Defp->Definition
   NewCommon_Definition->definition = malloc(definitionLen);
@@ -263,7 +261,7 @@ Define_CommandFn (const uint8_t *args,
   STAILQ_INIT(&NewCommon_Definition->headReadings);
 
   // DefineFn assigned by module ?
-  if (Module->ProvidedByModule->DefineFn) {
+  if (Module->provided->DefineFn) {
 
 	#if Define_Command_DBG >= 7
 	SCDEFn->Log3Fn(Define_ProvidedByCommand.commandNameText,
@@ -271,8 +269,8 @@ Define_CommandFn (const uint8_t *args,
 		7,
 		"Calling DefineFn of Module '%.*s' for construction of new Definition '%.*s' "
 		"using arguments '%.*s'. (Nr.:%d, Initial State:%.*s)",
-		NewCommon_Definition->module->ProvidedByModule->typeNameLen,
-		NewCommon_Definition->module->ProvidedByModule->typeName,
+		NewCommon_Definition->module->provided->typeNameLen,
+		NewCommon_Definition->module->provided->typeName,
 		NewCommon_Definition->nameLen,
 		NewCommon_Definition->name,
 		NewCommon_Definition->definitionLen,
@@ -285,7 +283,7 @@ Define_CommandFn (const uint8_t *args,
 
 	// call Modules DefineFn. Interpret retMsgMultipleStringSLTQE != NULL as veto !
 	strTextMultiple_t *retMsg = 
-		Module->ProvidedByModule->DefineFn(NewCommon_Definition);
+		Module->provided->DefineFn(NewCommon_Definition);
 
 	// got an error msg?
 	if (retMsg) {
@@ -310,8 +308,8 @@ Define_CommandFn (const uint8_t *args,
 		,kvArgs
 		,Common_Definition->nameLen
 		,Common_Definition->name
-		,Common_Definition->module->ProvidedByModule->typeNameLen
-		,Common_Definition->module->ProvidedByModule->typeName);
+		,Common_Definition->module->provided->typeNameLen
+		,Common_Definition->module->provided->typeName);
 
 		// insert retMsg in stail-queue
 		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);

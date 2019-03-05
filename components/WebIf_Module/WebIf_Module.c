@@ -4682,8 +4682,8 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 					printf(">Definition '%.*s' matched. Its Module '%.*s'>",
 					conn->activeDirFndDefiniton->nameLen,
 					conn->activeDirFndDefiniton->name,
-					conn->activeDirFndDefiniton->module->ProvidedByModule->typeNameLen,
-					conn->activeDirFndDefiniton->module->ProvidedByModule->typeName);
+					conn->activeDirFndDefiniton->module->provided->typeNameLen,
+					conn->activeDirFndDefiniton->module->provided->typeName);
 				# endif
 
 				UPDATE_STEP(s_chk_if_mime_is_avail_for_res);
@@ -10472,8 +10472,8 @@ WebIf_DirectRead(Common_Definition_t* Common_Definition)
 		,"Created a new Definition for conn - Name:%.*s TypeName:%.*s Slot:%d FD:%d\n"
 		,NewWebIf_Definition->common.nameLen
 		,NewWebIf_Definition->common.name
-		,NewWebIf_Definition->common.module->ProvidedByModule->typeNameLen
-		,NewWebIf_Definition->common.module->ProvidedByModule->typeName
+		,NewWebIf_Definition->common.module->provided->typeNameLen
+		,NewWebIf_Definition->common.module->provided->typeName
 		,NewWebIf_Definition->SlotNo
 		,NewWebIf_Definition->common.fd);
 

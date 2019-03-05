@@ -39,6 +39,43 @@ typedef struct ESP32_DeVICE_Definition_s {
 
   uint32_t demo;			// custom data
 
+
+
+  // block #01
+  Reading2_t Name;
+  Reading2_t WSAP_Password;
+  Reading2_t WSAP_RF_Channel;
+  Reading2_t WSAP_Maximal_Connections;
+  Reading2_t WSAP_Authentication_Method;
+  Reading2_t WSAP_SSID;
+  Reading2_t WSAP_Beacon_Interval;
+
+  // block #02
+  Reading2_t WSAP_IP_Adress;
+  Reading2_t WSAP_Netmask;
+  Reading2_t WSAP_Gateway_Adress;
+
+  // block #03
+  Reading2_t ap_mac_addr;
+
+  // block #04
+  Reading2_t ap_wifi_bandwidth;
+
+  // block #05
+  Reading2_t country;
+
+  // block #06
+  Reading2_t sta_ip_info;
+
+  // block #07
+  Reading2_t sta_mac_addr;
+
+  // block #08
+  Reading2_t sta_autoconnect_status;
+
+  // block #09
+  Reading2_t wifiBandwidthSTA;
+
 } ESP32_DeVICE_Definition_t;
 
 
