@@ -26,6 +26,27 @@ SCDEFn_t* SCDEFn_at_ESP32_SPI_M;
 // -------------------------------------------------------------------------------------------------
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
  *  Functions provided to SCDE by Module - for type operation (A-Z)
  */

@@ -36,14 +36,22 @@
 // Maximum amount of bytes that can be put in one DMA descriptor
 #define SPI_MAX_DMA_LEN (4096-4)
 
+
+
+
+
+
+
+
+
 /**
- * @brief Enum with the three SPI peripherals that are software-accessible in it
+ * @brief Enum for the three SPI peripherals that are software-accessible
  */
 typedef enum {
-    TFT_SPI_HOST=0,                 ///< SPI1, SPI; Cannot be used in this driver!
-    TFT_HSPI_HOST=1,                ///< SPI2, HSPI
-    TFT_VSPI_HOST=2                 ///< SPI3, VSPI
-} ESP32_SPI_Module_spi_host_device_t;
+    SPI_HOST  = 0,                ///< SPI1, SPI; Cannot be used in this driver!
+    HSPI_HOST = 1,                ///< SPI2, HSPI
+    VSPI_HOST = 2                 ///< SPI3, VSPI
+} ESP32_SPI_host_device_t;
 
 
 
@@ -61,7 +69,14 @@ typedef struct {
     int quadwp_io_num;              ///< GPIO pin for WP (Write Protect) signal which is used as D2 in 4-bit communication modes, or -1 if not used.
     int quadhd_io_num;              ///< GPIO pin for HD (HolD) signal which is used as D3 in 4-bit communication modes, or -1 if not used.
     int max_transfer_sz;            ///< Maximum transfer size, in bytes. Defaults to 4094 if 0.
-} ESP32_SPI_Module_spi_bus_config_t;
+} ESP32_SPI_bus_config_t;
+
+
+
+
+
+
+
 
 
 
@@ -99,6 +114,7 @@ typedef struct {
     ESP32_SPI_Module_spi_transaction_cb_t post_cb;  ///< Callback to be called after a transmission has completed. This callback from 'spi_lobo_transfer_data' function.
     uint8_t selected;                   ///< **INTERNAL** 1 if the device's CS pin is active
 } ESP32_SPI_Module_spi_device_interface_config_t;
+//} ESP32_SPI_device_interface_config_t;
 
 
 
@@ -113,6 +129,7 @@ typedef struct {
 /**
  * Description for one SPI transmission
  */
+//struct ESP32_SPI_transaction_t {
 struct ESP32_SPI_Module_spi_transaction_t {
     uint32_t flags;                 ///< Bitwise OR of LB_SPI_TRANS_* flags
     uint16_t command;               ///< Command data. Specific length was given when device was added to the bus.
@@ -153,17 +170,17 @@ typedef struct {
     int dma_chan;
     int max_transfer_sz;
     QueueHandle_t ESP32_SPI_Module_spi_bus_mutex;
-    ESP32_SPI_Module_spi_bus_config_t cur_bus_config;
+    ESP32_SPI_bus_config_t cur_bus_config;
 } ESP32_SPI_Module_spi_host_t;
+//} ESP32_SPI_host_t;
 
 
-
-
+//struct ESP32_SPI_device_t {
 struct ESP32_SPI_Module_spi_device_t {
   ESP32_SPI_Module_spi_device_interface_config_t cfg;
   ESP32_SPI_Module_spi_host_t *host;
-  ESP32_SPI_Module_spi_bus_config_t bus_config;
-  ESP32_SPI_Module_spi_host_device_t host_dev;
+  ESP32_SPI_bus_config_t bus_config;
+  ESP32_SPI_host_device_t host_dev;
 };
 
 
@@ -172,6 +189,63 @@ struct ESP32_SPI_Module_spi_device_t {
 typedef ESP32_SPI_Module_spi_device_t* ESP32_SPI_Module_spi_device_handle_t;  ///< Handle for a device on a SPI bus
 typedef ESP32_SPI_Module_spi_host_t* ESP32_SPI_Module_spi_host_handle_t;
 typedef ESP32_SPI_Module_spi_device_interface_config_t* ESP32_SPI_Module_spi_device_interface_config_handle_t;
+
+
+
+
+
+
+
+// -------------------------------------------------------------------------------------------------
+
+
+
+/** 
+ * ESP32_SPI_Definition stores values for operation valid only for the defined instance of an
+ * loaded module. Values are initialized by HCTRLD an the loaded module itself.
+ */
+typedef struct ESP32_SPI_Definition_s {
+  Common_Definition_t common;			/*!< ... the common part of the definition */
+  WebIf_Provided_t WebIf_Provided;		/*!< provided data for WebIf */
+//  uint8_t i2c_num;				/*!< the I2C hardware that should be used */
+//  i2c_config_t i2c_config;			/*!< i2c configuration */
+//  i2c_obj_t *i2c_obj;				/*!< the current i2c job */
+
+  ESP32_SPI_Module_spi_host_t* spihost;		/*!< the current i2c job */
+
+  ESP32_SPI_host_device_t host;			/*!< the spi bus this definition is using */
+  ESP32_SPI_bus_config_t spi_bus_cfg;		/*!< this spi bus configuration (4 all devices) */
+
+} ESP32_SPI_Definition_t;
+
+
+
+// -------------------------------------------------------------------------------------------------
+
+
+
+/* 
+ * ESP32_SPI_StageXCHG stores values for operation of 2. stage design Modules (stage exchange)
+ */
+typedef struct ESP32_SPI_StageXCHG_s {
+  Common_StageXCHG_t common;		// ... the common part of the StageXCHG
+  // module specific here 
+
+} ESP32_SPI_StageXCHG_t;
+
+
+
+// -------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+static esp_err_t ESP32_SPI_bus_initialize(ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_host_device_t host, ESP32_SPI_bus_config_t* bus_config, int init);
 
 
 
@@ -204,7 +278,7 @@ typedef ESP32_SPI_Module_spi_device_interface_config_t* ESP32_SPI_Module_spi_dev
  *         - ESP_ERR_NO_MEM        if out of memory
  *         - ESP_OK                on success
  */
-esp_err_t ESP32_SPI_spi_bus_add_device(ESP32_SPI_Module_spi_host_device_t host, ESP32_SPI_Module_spi_bus_config_t *bus_config, ESP32_SPI_Module_spi_device_interface_config_t *dev_config, ESP32_SPI_Module_spi_device_handle_t *handle);
+esp_err_t ESP32_SPI_spi_bus_add_device(ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_host_device_t host, ESP32_SPI_Module_spi_device_interface_config_t *dev_config, ESP32_SPI_Module_spi_device_handle_t *handle);
 
 /**
  * @brief Remove a device from the SPI bus. If after removal no other device is attached to the spi bus device, it is freed.
@@ -215,7 +289,7 @@ esp_err_t ESP32_SPI_spi_bus_add_device(ESP32_SPI_Module_spi_host_device_t host, 
  *         - ESP_ERR_INVALID_STATE if device already is freed
  *         - ESP_OK                on success
  */
-esp_err_t ESP32_SPI_spi_bus_remove_device(ESP32_SPI_Module_spi_device_handle_t handle);
+esp_err_t ESP32_SPI_spi_bus_remove_device(ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_Module_spi_device_handle_t handle);
 
 /**
  * @brief Return the actuall SPI bus speed for the spi device in Hz
@@ -227,7 +301,7 @@ esp_err_t ESP32_SPI_spi_bus_remove_device(ESP32_SPI_Module_spi_device_handle_t h
  * @return 
  *         - actuall SPI clock
  */
-uint32_t ESP32_SPI_spi_get_speed(ESP32_SPI_Module_spi_device_handle_t handle);
+uint32_t ESP32_SPI_spi_get_speed(ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_Module_spi_device_handle_t handle);
 
 /**
  * @brief Set the new clock speed for the device, return the actuall SPI bus speed set, in Hz
@@ -242,7 +316,7 @@ uint32_t ESP32_SPI_spi_get_speed(ESP32_SPI_Module_spi_device_handle_t handle);
  *         - actuall SPI clock
  *         - 0 if speed cannot be set
  */
-uint32_t ESP32_SPI_spi_set_speed(ESP32_SPI_Module_spi_device_handle_t handle, uint32_t speed);
+uint32_t ESP32_SPI_spi_set_speed(ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_Module_spi_device_handle_t handle, uint32_t speed);
 
 /**
  * @brief Select spi device for transmission
@@ -259,7 +333,7 @@ uint32_t ESP32_SPI_spi_set_speed(ESP32_SPI_Module_spi_device_handle_t handle, ui
  *         - ESP_ERR_INVALID_ARG   if parameter is invalid
  *         - ESP_OK                on success
  */
-esp_err_t ESP32_SPI_spi_device_select(ESP32_SPI_Module_spi_device_handle_t handle, int force);
+esp_err_t ESP32_SPI_spi_device_select(ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_Module_spi_device_handle_t handle, int force);
 
 /**
  * @brief De-select spi device
@@ -321,7 +395,7 @@ void ESP32_SPI_spi_get_native_pins(int host, int *sdi, int *sdo, int *sck);
  *         - ESP_OK                on success
  *
  */
-esp_err_t ESP32_SPI_spi_transfer_data(ESP32_SPI_Module_spi_device_handle_t handle, ESP32_SPI_Module_spi_transaction_t *trans);
+esp_err_t ESP32_SPI_spi_transfer_data(ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_Module_spi_device_handle_t handle, ESP32_SPI_Module_spi_transaction_t *trans);
 
 /*
  * SPI transactions uses the semaphore (taken in select function) to protect the transfer
@@ -380,19 +454,19 @@ void ESP32_SPI_spi_dmaworkaround_transfer_active(int dmachan);
  * This Fn are provided & made accessible for client modules - for operation
  */
 // typedef for ESP32_SPI_Module_spi_bus_add_deviceFn - 
-typedef esp_err_t (*ESP32_SPI_spi_bus_add_deviceFn_t) (ESP32_SPI_Module_spi_host_device_t host, ESP32_SPI_Module_spi_bus_config_t *bus_config, ESP32_SPI_Module_spi_device_interface_config_t *dev_config, ESP32_SPI_Module_spi_device_handle_t *handle);
+typedef esp_err_t (*ESP32_SPI_spi_bus_add_deviceFn_t) (ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_host_device_t host, ESP32_SPI_Module_spi_device_interface_config_t *dev_config, ESP32_SPI_Module_spi_device_handle_t *handle);
 
 // typedef for ESP32_SPI_spi_bus_remove_deviceFn - 
-typedef esp_err_t (*ESP32_SPI_spi_bus_remove_deviceFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
+typedef esp_err_t (*ESP32_SPI_spi_bus_remove_deviceFn_t) (ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_Module_spi_device_handle_t handle);
 
 // typedef for ESP32_SPI_spi_get_speedFn - 
-typedef uint32_t (*ESP32_SPI_spi_get_speedFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
+typedef uint32_t (*ESP32_SPI_spi_get_speedFn_t) (ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_Module_spi_device_handle_t handle);
 
 // typedef for ESP32_SPI_spi_set_speedFn - 
-typedef uint32_t (*ESP32_SPI_spi_set_speedFn_t) (ESP32_SPI_Module_spi_device_handle_t handle, uint32_t speed);
+typedef uint32_t (*ESP32_SPI_spi_set_speedFn_t) (ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_Module_spi_device_handle_t handle, uint32_t speed);
 
 // typedef for ESP32_SPI_spi_device_selectFn - 
-typedef esp_err_t (*ESP32_SPI_spi_device_selectFn_t) (ESP32_SPI_Module_spi_device_handle_t handle, int force);
+typedef esp_err_t (*ESP32_SPI_spi_device_selectFn_t) (ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_Module_spi_device_handle_t handle, int force);
 
 // typedef for ESP32_SPI_spi_device_deselectFn - 
 typedef esp_err_t (*ESP32_SPI_spi_device_deselectFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
@@ -405,7 +479,7 @@ typedef void (*ESP32_SPI_get_native_pinsFn_t) (int host, int *sdi, int *sdo, int
 void ESP32_SPI_get_native_pins(int host, int *sdi, int *sdo, int *sck);
 
 // typedef for ESP32_SPI_spi_transfer_dataFn - 
-typedef esp_err_t (*ESP32_SPI_spi_transfer_dataFn_t) (ESP32_SPI_Module_spi_device_handle_t handle, ESP32_SPI_Module_spi_transaction_t *trans);
+typedef esp_err_t (*ESP32_SPI_spi_transfer_dataFn_t) (ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_Module_spi_device_handle_t handle, ESP32_SPI_Module_spi_transaction_t *trans);
 
 // typedef for ESP32_SPI_spi_device_TakeSemaphoreFn - 
 typedef esp_err_t (*ESP32_SPI_spi_device_TakeSemaphoreFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
@@ -454,41 +528,6 @@ typedef struct ESP32_SPI_ProvidedByModule_s {
 
 
 
-// -------------------------------------------------------------------------------------------------
-
-
-
-/** 
- * ESP32_SPI_Definition stores values for operation valid only for the defined instance of an
- * loaded module. Values are initialized by HCTRLD an the loaded module itself.
- */
-typedef struct ESP32_SPI_Definition_s {
-  Common_Definition_t common;			/*!< ... the common part of the definition */
-  WebIf_Provided_t WebIf_Provided;		/*!< provided data for WebIf */
-//  uint8_t i2c_num;				/*!< the I2C hardware that should be used */
-//  i2c_config_t i2c_config;			/*!< i2c configuration */
-//  i2c_obj_t *i2c_obj;				/*!< the current i2c job */
- // ESP32_SPI_Fn_t* ESP32_SPI_Fn;	/*!< ESP32_I2C_MasterFn (Functions / callbacks) accessible for client modules */
-} ESP32_SPI_Definition_t;
-
-
-
-// -------------------------------------------------------------------------------------------------
-
-
-
-/* 
- * ESP32_SPI_StageXCHG stores values for operation of 2. stage design Modules (stage exchange)
- */
-typedef struct ESP32_SPI_StageXCHG_s {
-  Common_StageXCHG_t common;		// ... the common part of the StageXCHG
-  // module specific here 
-
-} ESP32_SPI_StageXCHG_t;
-
-
-
-// -------------------------------------------------------------------------------------------------
 
 
 

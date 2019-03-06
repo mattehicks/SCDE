@@ -353,10 +353,21 @@ void TFT_fillRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int1
 	_fillRect(ESP32_TouchGUI1_Definition, x+dispWin.x1, y+dispWin.y1, w, h, color);
 }
 
+
+
 //==================================
-void TFT_fillScreen(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, color_t color) {
-	TFT_pushColorRep(ESP32_TouchGUI1_Definition, 0, 0, _width-1, _height-1, color, (uint32_t)(_height*_width));
+void TFT_fillScreen(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, color_t color)
+{
+  TFT_pushColorRep(ESP32_TouchGUI1_Definition,
+	0,
+	0,
+	ESP32_TouchGUI1_Definition->_width-1,
+	ESP32_TouchGUI1_Definition->_height-1,
+	color,
+	(uint32_t)(ESP32_TouchGUI1_Definition->_height*ESP32_TouchGUI1_Definition->_width) );
 }
+
+
 
 //==================================
 void TFT_fillWindow(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, color_t color) {
@@ -2106,7 +2117,7 @@ void TFT_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, u
     if (rot > 3) {
         uint8_t madctl = (rot & 0xF8); // for testing, manually set MADCTL register
 		if (disp_select(ESP32_TouchGUI1_Definition) == ESP_OK) {
-			disp_spi_transfer_cmd_data(TFT_MADCTL, &madctl, 1);
+			ESP32_SPI_transfer_cmd_and_data(ESP32_TouchGUI1_Definition->disp_spi, TFT_MADCTL, &madctl, 1);
 			disp_deselect(ESP32_TouchGUI1_Definition);
 		}
     }
@@ -2117,8 +2128,8 @@ void TFT_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, u
 
 	dispWin.x1 = 0;
 	dispWin.y1 = 0;
-	dispWin.x2 = _width-1;
-	dispWin.y2 = _height-1;
+	dispWin.x2 = ESP32_TouchGUI1_Definition->_width-1;
+	dispWin.y2 = ESP32_TouchGUI1_Definition->_height-1;
 
 	TFT_fillScreen(ESP32_TouchGUI1_Definition, _bg);
 }
@@ -2126,18 +2137,37 @@ void TFT_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, u
 // Send the command to invert all of the colors.
 // Input: i 0 to disable inversion; non-zero to enable inversion
 //==========================================
-void TFT_invertDisplay(const uint8_t mode) {
-  if ( mode == INVERT_ON ) disp_spi_transfer_cmd(TFT_INVONN);
-  else disp_spi_transfer_cmd(TFT_INVOFF);
+void TFT_invertDisplay(ESP32_SPI_Module_spi_device_handle_t spi_device_handle,
+	const uint8_t mode)
+{
+  if ( mode == INVERT_ON ) {
+
+	ESP32_SPI_transfer_only_cmd(spi_device_handle, TFT_INVONN);
+  }
+
+  else {
+
+	ESP32_SPI_transfer_only_cmd(spi_device_handle, TFT_INVOFF);
+  }
 }
+
+
 
 // Select gamma curve
 // Input: gamma = 0~3
 //==================================
-void TFT_setGammaCurve(uint8_t gm) {
+void TFT_setGammaCurve(ESP32_SPI_Module_spi_device_handle_t spi_device_handle,
+	uint8_t gm)
+{
   uint8_t gamma_curve = 1 << (gm & 0x03);
-  disp_spi_transfer_cmd_data(TFT_CMD_GAMMASET, &gamma_curve, 1);
+
+  ESP32_SPI_transfer_cmd_and_data(spi_device_handle,
+	TFT_CMD_GAMMASET,
+	&gamma_curve,
+	1);
 }
+
+
 
 //===========================================================
 color_t HSBtoRGB(float _hue, float _sat, float _brightness) {
@@ -2208,24 +2238,26 @@ color_t HSBtoRGB(float _hue, float _sat, float _brightness) {
  return color;
 }
 //=====================================================================
-void TFT_setclipwin(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
+void TFT_setclipwin(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 {
 	dispWin.x1 = x1;
 	dispWin.y1 = y1;
 	dispWin.x2 = x2;
 	dispWin.y2 = y2;
 
-	if (dispWin.x2 >= _width) dispWin.x2 = _width-1;
-	if (dispWin.y2 >= _height) dispWin.y2 = _height-1;
+	if (dispWin.x2 >= ESP32_TouchGUI1_Definition->_width) dispWin.x2 = 
+		ESP32_TouchGUI1_Definition->_width-1;
+	if (dispWin.y2 >= ESP32_TouchGUI1_Definition->_height) dispWin.y2 =
+		ESP32_TouchGUI1_Definition->_height-1;
 	if (dispWin.x1 > dispWin.x2) dispWin.x1 = dispWin.x2;
 	if (dispWin.y1 > dispWin.y2) dispWin.y1 = dispWin.y2;
 }
 
 //=====================
-void TFT_resetclipwin()
+void TFT_resetclipwin(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 {
-	dispWin.x2 = _width-1;
-	dispWin.y2 = _height-1;
+	dispWin.x2 = ESP32_TouchGUI1_Definition->_width-1;
+	dispWin.y2 = ESP32_TouchGUI1_Definition->_height-1;
 	dispWin.x1 = 0;
 	dispWin.y1 = 0;
 }
@@ -2893,11 +2925,11 @@ exit:
 #endif
 
 //=============================================
-int TFT_read_touch(int *x, int* y, uint8_t raw)
+int TFT_read_touch(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int *x, int* y, uint8_t raw)
 {
     *x = 0;
     *y = 0;
-	if (ts_spi == NULL) return 0;
+	if (ESP32_TouchGUI1_Definition->ts_spi == NULL) return 0;
     #if USE_TOUCH == TOUCH_TYPE_NONE
 	return 0;
     #else

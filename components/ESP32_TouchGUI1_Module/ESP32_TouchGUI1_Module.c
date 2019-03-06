@@ -744,7 +744,7 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
 
 // ==========================================================
 // Define which spi bus to use TFT_VSPI_HOST or TFT_HSPI_HOST
-#define SPI_BUS TFT_HSPI_HOST
+#define SPI_BUS HSPI_HOST
 // ==========================================================
 
 
@@ -754,9 +754,19 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
 
     // === SET GLOBAL VARIABLES ==========================
 
+
+
+  // Init Spi device handles for display and touch screen
+  ESP32_TouchGUI1_Definition->disp_spi = NULL;
+  ESP32_TouchGUI1_Definition->ts_spi = NULL;
+
+
+
+
     // ===================================================
+
     // ==== Set display type                         =====
-    tft_disp_type = DEFAULT_DISP_TYPE;
+    ESP32_TouchGUI1_Definition->tft_disp_type = DEFAULT_DISP_TYPE;
 	//tft_disp_type = DISP_TYPE_ILI9341;
 	//tft_disp_type = DISP_TYPE_ILI9488;
 	//tft_disp_type = DISP_TYPE_ST7735B;
@@ -766,11 +776,14 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
 	// === Set display resolution if NOT using default ===
 	// === DEFAULT_TFT_DISPLAY_WIDTH &                 ===
     // === DEFAULT_TFT_DISPLAY_HEIGHT                  ===
-	_width = DEFAULT_TFT_DISPLAY_WIDTH;  // smaller dimension
-	_height = DEFAULT_TFT_DISPLAY_HEIGHT; // larger dimension
+	ESP32_TouchGUI1_Definition->_width = DEFAULT_TFT_DISPLAY_WIDTH;  // smaller dimension
+	ESP32_TouchGUI1_Definition->_height = DEFAULT_TFT_DISPLAY_HEIGHT; // larger dimension
 	//_width = 128;  // smaller dimension
 	//_height = 160; // larger dimension
 	// ===================================================
+
+	// Converts colors to grayscale if set to 1
+	ESP32_TouchGUI1_Definition->gray_scale = 0;
 
 	// ===================================================
 	// ==== Set maximum spi clock for display read    ====
@@ -786,39 +799,28 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
 
     // ====  CONFIGURE SPI DEVICES(s)  ====================================================================================
 
-    ESP32_SPI_Module_spi_device_handle_t spi;
+    ESP32_SPI_Module_spi_device_handle_t disp_spi;
 	
-    ESP32_SPI_Module_spi_bus_config_t buscfg = {
-        .miso_io_num=PIN_NUM_MISO,				// set SPI MISO pin
-        .mosi_io_num=PIN_NUM_MOSI,				// set SPI MOSI pin
-        .sclk_io_num=PIN_NUM_CLK,				// set SPI CLK pin
-        .quadwp_io_num=-1,
-        .quadhd_io_num=-1,
-	.max_transfer_sz = 6*1024,
+    ESP32_SPI_bus_config_t buscfg = {
+        .miso_io_num = PIN_NUM_MISO,				// set SPI MISO pin
+        .mosi_io_num = PIN_NUM_MOSI,				// set SPI MOSI pin
+        .sclk_io_num = PIN_NUM_CLK,				// set SPI CLK pin
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+	.max_transfer_sz = 6 * 1024,
     };
 
     ESP32_SPI_Module_spi_device_interface_config_t devcfg = {
-        .clock_speed_hz=8000000,              		  	// Initial clock out at 8 MHz
-        .mode=0,                                		// SPI mode 0
-        .spics_io_num=-1,                       		// we will use external CS pin
-		.spics_ext_io_num=PIN_NUM_CS,           	// external CS pin
-		.flags=LB_SPI_DEVICE_HALFDUPLEX,        	// ALWAYS SET  to HALF DUPLEX MODE!! for display spi
+        .clock_speed_hz = 8000000,              // Initial clock out at 8 MHz
+        .mode = 0,                              // SPI mode 0
+        .spics_io_num = -1,                     // we will use external CS pin
+	.spics_ext_io_num = PIN_NUM_CS,         // external CS pin
+	.flags = LB_SPI_DEVICE_HALFDUPLEX,	// ALWAYS SET to HALF DUPLEX MODE!! for display spi
     };
 
 
+  vTaskDelay(500 / portTICK_RATE_MS);
 
-
-
-
-
-
-
-
-
-
-
-
-   vTaskDelay(500 / portTICK_RATE_MS);
   printf("\r\n==============================\r\n");
   printf("TFT display DEMO, LoBo 11/2017\r\n");
   printf("==============================\r\n");
@@ -839,22 +841,27 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
 	// ==================================================================
 	// ==== Initialize the SPI bus and attach the LCD to the SPI bus ====
 
-  ret = ESP32_SPI_provided_fn->ESP32_SPI_spi_bus_add_deviceFn(SPI_BUS, &buscfg, &devcfg, &spi);
+
+  ret = ESP32_SPI_provided_fn->ESP32_SPI_spi_bus_add_deviceFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, SPI_BUS,
+	//&buscfg,
+	&devcfg,
+	&disp_spi);
 
   assert(ret==ESP_OK);
 
   printf("SPI: display device added to spi bus (%d)\r\n", SPI_BUS);
 
-  disp_spi = spi;
+  // save display spi handle
+  ESP32_TouchGUI1_Definition->disp_spi = disp_spi;
 
   // ==== Test select/deselect ====
-  ret = ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(spi, 1);
+  ret = ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, disp_spi, 1);
 
   assert(ret==ESP_OK);
 
   printf("Err?1 (%d)\r\n", ret);
 
-  ret = ESP32_SPI_provided_fn->ESP32_SPI_spi_device_deselectFn(spi);
+  ret = ESP32_SPI_provided_fn->ESP32_SPI_spi_device_deselectFn(disp_spi);
 
   assert(ret==ESP_OK);
 
@@ -862,9 +869,9 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
 
 
   printf("SPI: attached display device, speed=%u\r\n",
-	 ESP32_SPI_provided_fn->ESP32_SPI_spi_get_speedFn(spi));
+	 ESP32_SPI_provided_fn->ESP32_SPI_spi_get_speedFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, disp_spi));
   printf("SPI: bus uses native pins: %s\r\n", 
-	ESP32_SPI_provided_fn->ESP32_SPI_spi_uses_native_pinsFn(spi) ? "true" : "false");
+	ESP32_SPI_provided_fn->ESP32_SPI_spi_uses_native_pinsFn(disp_spi) ? "true" : "false");
 
 
 
@@ -882,9 +889,9 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
 	printf("SPI: Max rd speed = %u\r\n", max_rdclock);
 
     // ==== Set SPI clock used for display operations ====
-	ESP32_SPI_provided_fn->ESP32_SPI_spi_set_speedFn(spi, DEFAULT_SPI_CLOCK);
+	ESP32_SPI_provided_fn->ESP32_SPI_spi_set_speedFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, disp_spi, DEFAULT_SPI_CLOCK);
 	printf("SPI: Changed speed to %u\r\n", 
-		ESP32_SPI_provided_fn->ESP32_SPI_spi_get_speedFn(spi));
+		ESP32_SPI_provided_fn->ESP32_SPI_spi_get_speedFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, disp_spi));
 
     printf("\r\n---------------------\r\n");
 	printf("Graphics demo started\r\n");
@@ -897,13 +904,17 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
 	text_wrap = 0;
 	font_transparent = 0;
 	font_forceFixed = 0;
-	gray_scale = 0;
-    TFT_setGammaCurve(DEFAULT_GAMMA_CURVE);
-	TFT_setRotation(ESP32_TouchGUI1_Definition, PORTRAIT);
-	TFT_setFont(DEFAULT_FONT, NULL);
-	TFT_resetclipwin();
+	ESP32_TouchGUI1_Definition->gray_scale = 0;
 
-TFT_print(ESP32_TouchGUI1_Definition, "Time is not set yet", CENTER, CENTER);
+  TFT_setGammaCurve(disp_spi, DEFAULT_GAMMA_CURVE);
+
+  TFT_setRotation(ESP32_TouchGUI1_Definition, PORTRAIT);
+
+  TFT_setFont(DEFAULT_FONT, NULL);
+
+  TFT_resetclipwin(ESP32_TouchGUI1_Definition);
+
+  TFT_print(ESP32_TouchGUI1_Definition, "Time is not set yet", CENTER, CENTER);
 
 
 
@@ -1091,7 +1102,7 @@ Redraw_Time(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 		tm_info->tm_sec);
 
 	TFT_saveClipWin();
-	TFT_resetclipwin();
+	TFT_resetclipwin(ESP32_TouchGUI1_Definition);
 
 	Font curr_font = cfont;
 
@@ -1106,15 +1117,15 @@ Redraw_Time(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 
 	TFT_fillRect(ESP32_TouchGUI1_Definition,
 		1,
-		_height-TFT_getfontheight()-8,
-		_width-3,
+		ESP32_TouchGUI1_Definition->_height-TFT_getfontheight()-8,
+		ESP32_TouchGUI1_Definition->_width-3,
 		TFT_getfontheight()+6,
 		_bg);
 
 	TFT_print(ESP32_TouchGUI1_Definition,
 		tmp_buff,
 		RIGHT,//CENTER,
-		_height-TFT_getfontheight()-5);
+		ESP32_TouchGUI1_Definition->_height-TFT_getfontheight()-5);
 
 	cfont = curr_font;
 	_fg = last_fg;
@@ -3493,20 +3504,20 @@ ESP32_TouchGUI1_SetAffectedReadings(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI
 // ==== Global variables, default values ==============
 
 // Converts colors to grayscale if set to 1
-uint8_t gray_scale = 0;
+//uint8_t gray_scale = 0;
 // Spi clock for reading data from display memory in Hz
 uint32_t max_rdclock = 8000000;
 
 // Default display dimensions
-int _width = DEFAULT_TFT_DISPLAY_WIDTH;
-int _height = DEFAULT_TFT_DISPLAY_HEIGHT;
+//int _width = DEFAULT_TFT_DISPLAY_WIDTH;
+//int _height = DEFAULT_TFT_DISPLAY_HEIGHT;
 
 // Display type, DISP_TYPE_ILI9488 or DISP_TYPE_ILI9341
-uint8_t tft_disp_type = DEFAULT_DISP_TYPE;
+//uint8_t tft_disp_type = DEFAULT_DISP_TYPE;
 
 // Spi device handles for display and touch screen
-ESP32_SPI_Module_spi_device_handle_t disp_spi = NULL;
-ESP32_SPI_Module_spi_device_handle_t ts_spi = NULL;
+//ESP32_SPI_Module_spi_device_handle_t disp_spi = NULL;
+//ESP32_SPI_Module_spi_device_handle_t ts_spi = NULL;
 
 // ====================================================
 
@@ -3537,7 +3548,7 @@ wait_trans_finish(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
   // Wait for SPI bus ready
-  while (disp_spi->host->hw->cmd.usr);
+  while (ESP32_TouchGUI1_Definition->disp_spi->host->hw->cmd.usr);
 
   if ((free_line) && (trans_cline)) {
 
@@ -3548,15 +3559,15 @@ wait_trans_finish(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
   if (_dma_sending) {
 
   //Tell common code DMA workaround that our DMA channel is idle. If needed, the code will do a DMA reset.
-	if (disp_spi->host->dma_chan) 
-		ESP32_SPI_provided_fn->ESP32_SPI_spi_dmaworkaround_idleFn(disp_spi->host->dma_chan);
+	if (ESP32_TouchGUI1_Definition->disp_spi->host->dma_chan) 
+		ESP32_SPI_provided_fn->ESP32_SPI_spi_dmaworkaround_idleFn(ESP32_TouchGUI1_Definition->disp_spi->host->dma_chan);
 
 	// Reset DMA
-	disp_spi->host->hw->dma_conf.val |= SPI_OUT_RST|SPI_IN_RST|SPI_AHBM_RST|SPI_AHBM_FIFO_RST;
-	disp_spi->host->hw->dma_out_link.start=0;
-	disp_spi->host->hw->dma_in_link.start=0;
-	disp_spi->host->hw->dma_conf.val &= ~(SPI_OUT_RST|SPI_IN_RST|SPI_AHBM_RST|SPI_AHBM_FIFO_RST);
-	disp_spi->host->hw->dma_conf.out_data_burst_en=1;
+	ESP32_TouchGUI1_Definition->disp_spi->host->hw->dma_conf.val |= SPI_OUT_RST|SPI_IN_RST|SPI_AHBM_RST|SPI_AHBM_FIFO_RST;
+	ESP32_TouchGUI1_Definition->disp_spi->host->hw->dma_out_link.start=0;
+	ESP32_TouchGUI1_Definition->disp_spi->host->hw->dma_in_link.start=0;
+	ESP32_TouchGUI1_Definition->disp_spi->host->hw->dma_conf.val &= ~(SPI_OUT_RST|SPI_IN_RST|SPI_AHBM_RST|SPI_AHBM_FIFO_RST);
+	ESP32_TouchGUI1_Definition->disp_spi->host->hw->dma_conf.out_data_burst_en=1;
 	_dma_sending = 0;
   }
 
@@ -3574,7 +3585,7 @@ disp_select(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
   wait_trans_finish(ESP32_TouchGUI1_Definition, 1);
-  return ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(disp_spi, 0);
+  return ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, ESP32_TouchGUI1_Definition->disp_spi, 0);
 }
 
 
@@ -3589,15 +3600,19 @@ disp_deselect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 
   wait_trans_finish(ESP32_TouchGUI1_Definition, 1);
 
-  return ESP32_SPI_provided_fn->ESP32_SPI_spi_device_deselectFn(disp_spi);
+  return ESP32_SPI_provided_fn->ESP32_SPI_spi_device_deselectFn(ESP32_TouchGUI1_Definition->disp_spi);
 }
 
 
 
+// verschieben zu ESP32_SPI_Module 
+// _ private Fn to start spi transfer
 //---------------------------------------------------------------------------------------------------
 static void IRAM_ATTR 
-_spi_transfer_start(ESP32_SPI_Module_spi_device_handle_t spi_dev, int wrbits, int rdbits) {
-
+_spi_transfer_start(ESP32_SPI_Module_spi_device_handle_t spi_dev,
+	int wrbits,
+	int rdbits)
+{
   // Load send buffer
   spi_dev->host->hw->user.usr_mosi_highpart = 0;
   spi_dev->host->hw->mosi_dlen.usr_mosi_dbitlen = wrbits-1;
@@ -3624,126 +3639,185 @@ _spi_transfer_start(ESP32_SPI_Module_spi_device_handle_t spi_dev, int wrbits, in
 
 
 
-// Send 1 byte display command, display must be selected
+// verschieben zu ESP32_SPI_Module PIN_NUM_DC?
+// Send command (1 byte) to spi device, device must be selected !
 //------------------------------------------------
 void IRAM_ATTR 
-disp_spi_transfer_cmd(int8_t cmd) {
-
+ESP32_SPI_transfer_only_cmd(ESP32_SPI_Module_spi_device_handle_t spi_device_handle,
+	int8_t cmd)
+{
   // Wait for SPI bus ready
-  while (disp_spi->host->hw->cmd.usr);
+  while (spi_device_handle->host->hw->cmd.usr);
 
   // Set DC to 0 (command mode);
   gpio_set_level(PIN_NUM_DC, 0);
 
-  disp_spi->host->hw->data_buf[0] = (uint32_t)cmd;
+  spi_device_handle->host->hw->data_buf[0] = (uint32_t) cmd;
 
-  _spi_transfer_start(disp_spi, 8, 0);
+  _spi_transfer_start(spi_device_handle, 8, 0);
 }
 
 
-
-// Send command with data to display, display must be selected
+// verschieben zu ESP32_SPI_Module PIN_NUM_DC?
+// Send command with attached data to spi device, device must be selected !
 //----------------------------------------------------------------------------------
 void IRAM_ATTR 
-disp_spi_transfer_cmd_data(int8_t cmd, uint8_t *data, uint32_t len) {
-	// Wait for SPI bus ready
-	while (disp_spi->host->hw->cmd.usr);
+ESP32_SPI_transfer_cmd_and_data(ESP32_SPI_Module_spi_device_handle_t spi_device_handle,
+	int8_t cmd,
+	uint8_t *data,
+	uint32_t len)
+{
+  // wait for SPI bus ready
+  while (spi_device_handle->host->hw->cmd.usr);
 
-    // Set DC to 0 (command mode);
-    gpio_set_level(PIN_NUM_DC, 0);
+  // Set DC to 0 (command mode);
+  gpio_set_level(PIN_NUM_DC, 0);
 
-    disp_spi->host->hw->data_buf[0] = (uint32_t)cmd;
-    _spi_transfer_start(disp_spi, 8, 0);
+  spi_device_handle->host->hw->data_buf[0] =
+	(uint32_t) cmd;
 
-	if ((len == 0) || (data == NULL)) return;
+  _spi_transfer_start(spi_device_handle, 8, 0);
 
-    // Set DC to 1 (data mode);
-	gpio_set_level(PIN_NUM_DC, 1);
+  if ( ( len == 0 ) || ( data == NULL ) ) return;
 
-	uint8_t idx=0, bidx=0;
-	uint32_t bits=0;
-	uint32_t count=0;
-	uint32_t wd = 0;
-	while (count < len) {
-		// get data byte from buffer
-		wd |= (uint32_t)data[count] << bidx;
+  // Set DC to 1 (data mode);
+  gpio_set_level(PIN_NUM_DC, 1);
+
+  uint8_t idx=0, bidx=0;
+  uint32_t bits=0;
+  uint32_t count=0;
+  uint32_t wd = 0;
+
+  while ( count < len ) {
+
+	// get data byte from buffer
+	wd |= (uint32_t)data[count] << bidx;
+
     	count++;
     	bits += 8;
-		bidx += 8;
-    	if (count == len) {
-    		disp_spi->host->hw->data_buf[idx] = wd;
+	bidx += 8;
+
+    	if ( count == len ) {
+
+    		spi_device_handle->host->hw->data_buf[idx] = wd;
+
     		break;
     	}
-		if (bidx == 32) {
-			disp_spi->host->hw->data_buf[idx] = wd;
-			idx++;
-			bidx = 0;
-			wd = 0;
-		}
-    	if (idx == 16) {
+
+	if ( bidx == 32 ) {
+
+		spi_device_handle->host->hw->data_buf[idx] = wd;
+
+		idx++;
+		bidx = 0;
+		wd = 0;
+	}
+
+    	if ( idx == 16 ) {
+
     		// SPI buffer full, send data
-			_spi_transfer_start(disp_spi, bits, 0);
+		_spi_transfer_start(spi_device_handle, bits, 0);
     		
-			bits = 0;
+		bits = 0;
     		idx = 0;
-			bidx = 0;
+		bidx = 0;
     	}
-    }
-    if (bits > 0) _spi_transfer_start(disp_spi, bits, 0);
+  }
+
+  if ( bits > 0 ) _spi_transfer_start(spi_device_handle, bits, 0);
 }
 
 
 
+// unklare funktion, setzt auch andere register? PIN_NUM_DC? Daten queuen?
 // Set the address window for display write & read commands, display must be selected
 //---------------------------------------------------------------------------------------------------
 static void IRAM_ATTR 
-disp_spi_transfer_addrwin(uint16_t x1, uint16_t x2, uint16_t y1, uint16_t y2) {
-	uint32_t wd;
+//TFT_set_spitransfer_addrwin
+disp_spi_transfer_addrwin(ESP32_SPI_Module_spi_device_handle_t spi_device_handle,
+	uint16_t x1,
+	uint16_t x2,
+	uint16_t y1,
+	uint16_t y2)
+{
+  // width data temp
+  uint32_t wd;
 
-    taskDISABLE_INTERRUPTS();
-	// Wait for SPI bus ready
-	while (disp_spi->host->hw->cmd.usr);
-    gpio_set_level(PIN_NUM_DC, 0);
+  taskDISABLE_INTERRUPTS();
 
-	disp_spi->host->hw->data_buf[0] = (uint32_t)TFT_CASET;
-	disp_spi->host->hw->user.usr_mosi_highpart = 0;
-	disp_spi->host->hw->mosi_dlen.usr_mosi_dbitlen = 7;
-	disp_spi->host->hw->user.usr_mosi = 1;
-	disp_spi->host->hw->miso_dlen.usr_miso_dbitlen = 0;
-	disp_spi->host->hw->user.usr_miso = 0;
+  // Wait for SPI bus ready
+  while (spi_device_handle->host->hw->cmd.usr);
 
-	disp_spi->host->hw->cmd.usr = 1; // Start transfer
+  // Set DC to 0 (command mode)
+  gpio_set_level(PIN_NUM_DC, 0);
 
-	wd = (uint32_t)(x1>>8);
-	wd |= (uint32_t)(x1&0xff) << 8;
-	wd |= (uint32_t)(x2>>8) << 16;
-	wd |= (uint32_t)(x2&0xff) << 24;
+  // write command TFT_CASET
+  spi_device_handle->host->hw->data_buf[0] = (uint32_t) TFT_CASET;
+  spi_device_handle->host->hw->mosi_dlen.usr_mosi_dbitlen = 7;
 
-	while (disp_spi->host->hw->cmd.usr); // wait transfer end
-	gpio_set_level(PIN_NUM_DC, 1);
-	disp_spi->host->hw->data_buf[0] = wd;
-	disp_spi->host->hw->mosi_dlen.usr_mosi_dbitlen = 31;
-	disp_spi->host->hw->cmd.usr = 1; // Start transfer
+  // ??
+  spi_device_handle->host->hw->user.usr_mosi_highpart = 0;
+  spi_device_handle->host->hw->user.usr_mosi = 1;
+  spi_device_handle->host->hw->miso_dlen.usr_miso_dbitlen = 0;
+  spi_device_handle->host->hw->user.usr_miso = 0;
 
-    while (disp_spi->host->hw->cmd.usr);
-    gpio_set_level(PIN_NUM_DC, 0);
-    disp_spi->host->hw->data_buf[0] = (uint32_t)TFT_PASET;
-	disp_spi->host->hw->mosi_dlen.usr_mosi_dbitlen = 7;
-	disp_spi->host->hw->cmd.usr = 1; // Start transfer
+  // Start transfer
+  spi_device_handle->host->hw->cmd.usr = 1;
 
-	wd = (uint32_t)(y1>>8);
-	wd |= (uint32_t)(y1&0xff) << 8;
-	wd |= (uint32_t)(y2>>8) << 16;
-	wd |= (uint32_t)(y2&0xff) << 24;
+  // calculate width data
+  wd  = (uint32_t) (x1 >> 8);
+  wd |= (uint32_t) (x1 & 0xff) << 8;
+  wd |= (uint32_t) (x2 >> 8) << 16;
+  wd |= (uint32_t) (x2 & 0xff) << 24;
 
-	while (disp_spi->host->hw->cmd.usr);
-	gpio_set_level(PIN_NUM_DC, 1);
+  // wait transfer end
+  while (spi_device_handle->host->hw->cmd.usr);
 
-	disp_spi->host->hw->data_buf[0] = wd;
-	disp_spi->host->hw->mosi_dlen.usr_mosi_dbitlen = 31;
-	disp_spi->host->hw->cmd.usr = 1; // Start transfer
-	while (disp_spi->host->hw->cmd.usr);
-    taskENABLE_INTERRUPTS();
+  // Set DC to 1 (data mode)
+  gpio_set_level(PIN_NUM_DC, 1);
+
+  // write width data
+  spi_device_handle->host->hw->data_buf[0] = wd;
+  spi_device_handle->host->hw->mosi_dlen.usr_mosi_dbitlen = 31;
+
+  // Start transfer
+  spi_device_handle->host->hw->cmd.usr = 1;
+
+  while (spi_device_handle->host->hw->cmd.usr);
+
+  // Set DC to 0 (command mode)
+  gpio_set_level(PIN_NUM_DC, 0);
+
+  // write command TFT_PASET
+  spi_device_handle->host->hw->data_buf[0] =
+	(uint32_t) TFT_PASET;
+
+  spi_device_handle->host->hw->mosi_dlen.usr_mosi_dbitlen = 7;
+
+  // Start transfer
+  spi_device_handle->host->hw->cmd.usr = 1;
+
+  // calculate width data
+  wd  = (uint32_t) (y1 >> 8);
+  wd |= (uint32_t) (y1 & 0xff) << 8;
+  wd |= (uint32_t) (y2 >> 8) << 16;
+  wd |= (uint32_t) (y2 & 0xff) << 24;
+
+  while (spi_device_handle->host->hw->cmd.usr);
+
+  // Set DC to 1 (data mode)
+  gpio_set_level(PIN_NUM_DC, 1);
+
+  // write width data
+  spi_device_handle->host->hw->data_buf[0] = wd;
+  spi_device_handle->host->hw->mosi_dlen.usr_mosi_dbitlen = 31;
+
+  // Start transfer
+  spi_device_handle->host->hw->cmd.usr = 1;
+
+  while (spi_device_handle->host->hw->cmd.usr);
+
+  taskENABLE_INTERRUPTS();
 }
 
 
@@ -3753,15 +3827,17 @@ disp_spi_transfer_addrwin(uint16_t x1, uint16_t x2, uint16_t y1, uint16_t y2) {
 static color_t IRAM_ATTR 
 color2gs(color_t color)
 {
-	color_t _color;
-    float gs_clr = GS_FACT_R * color.r + GS_FACT_G * color.g + GS_FACT_B * color.b;
-    if (gs_clr > 255) gs_clr = 255;
+  color_t _color;
 
-    _color.r = (uint8_t)gs_clr;
-    _color.g = (uint8_t)gs_clr;
-    _color.b = (uint8_t)gs_clr;
+  float gs_clr = GS_FACT_R * color.r + GS_FACT_G * color.g + GS_FACT_B * color.b;
 
-    return _color;
+  if (gs_clr > 255) gs_clr = 255;
+
+  _color.r = (uint8_t)gs_clr;
+  _color.g = (uint8_t)gs_clr;
+  _color.b = (uint8_t)gs_clr;
+
+  return _color;
 }
 
 
@@ -3775,7 +3851,7 @@ drawPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	color_t color,
 	uint8_t sel)
 {
-	if (!(disp_spi->cfg.flags & LB_SPI_DEVICE_HALFDUPLEX)) return;
+	if (!(ESP32_TouchGUI1_Definition->disp_spi->cfg.flags & LB_SPI_DEVICE_HALFDUPLEX)) return;
 
 	if (sel) {
 		if (disp_select(ESP32_TouchGUI1_Definition)) return;
@@ -3784,17 +3860,17 @@ drawPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 
 	uint32_t wd = 0;
     color_t _color = color;
-	if (gray_scale) _color = color2gs(color);
+	if (ESP32_TouchGUI1_Definition->gray_scale) _color = color2gs(color);
 
     taskDISABLE_INTERRUPTS();
-	disp_spi_transfer_addrwin(x, x+1, y, y+1);
+	disp_spi_transfer_addrwin(ESP32_TouchGUI1_Definition->disp_spi, x, x+1, y, y+1);
 
 	// Send RAM WRITE command
     gpio_set_level(PIN_NUM_DC, 0);
-    disp_spi->host->hw->data_buf[0] = (uint32_t)TFT_RAMWR;
-	disp_spi->host->hw->mosi_dlen.usr_mosi_dbitlen = 7;
-	disp_spi->host->hw->cmd.usr = 1;		// Start transfer
-	while (disp_spi->host->hw->cmd.usr);	// Wait for SPI bus ready
+    ESP32_TouchGUI1_Definition->disp_spi->host->hw->data_buf[0] = (uint32_t)TFT_RAMWR;
+	ESP32_TouchGUI1_Definition->disp_spi->host->hw->mosi_dlen.usr_mosi_dbitlen = 7;
+	ESP32_TouchGUI1_Definition->disp_spi->host->hw->cmd.usr = 1;		// Start transfer
+	while (ESP32_TouchGUI1_Definition->disp_spi->host->hw->cmd.usr);	// Wait for SPI bus ready
 
 	wd = (uint32_t)_color.r;
 	wd |= (uint32_t)_color.g << 8;
@@ -3803,10 +3879,10 @@ drawPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
     // Set DC to 1 (data mode);
 	gpio_set_level(PIN_NUM_DC, 1);
 
-	disp_spi->host->hw->data_buf[0] = wd;
-	disp_spi->host->hw->mosi_dlen.usr_mosi_dbitlen = 23;
-	disp_spi->host->hw->cmd.usr = 1;		// Start transfer
-	while (disp_spi->host->hw->cmd.usr);	// Wait for SPI bus ready
+	ESP32_TouchGUI1_Definition->disp_spi->host->hw->data_buf[0] = wd;
+	ESP32_TouchGUI1_Definition->disp_spi->host->hw->mosi_dlen.usr_mosi_dbitlen = 23;
+	ESP32_TouchGUI1_Definition->disp_spi->host->hw->cmd.usr = 1;		// Start transfer
+	while (ESP32_TouchGUI1_Definition->disp_spi->host->hw->cmd.usr);	// Wait for SPI bus ready
 
     taskENABLE_INTERRUPTS();
    if (sel) disp_deselect(ESP32_TouchGUI1_Definition);
@@ -3825,26 +3901,26 @@ _dma_send(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
     //Fill DMA descriptors
-    ESP32_SPI_provided_fn->ESP32_SPI_spi_dmaworkaround_transfer_activeFn(disp_spi->host->dma_chan); //mark channel as active
-    ESP32_SPI_provided_fn->ESP32_SPI_spi_setup_dma_desc_linksFn(disp_spi->host->dmadesc_tx, size, data, false);
+    ESP32_SPI_provided_fn->ESP32_SPI_spi_dmaworkaround_transfer_activeFn(ESP32_TouchGUI1_Definition->disp_spi->host->dma_chan); //mark channel as active
+    ESP32_SPI_provided_fn->ESP32_SPI_spi_setup_dma_desc_linksFn(ESP32_TouchGUI1_Definition->disp_spi->host->dmadesc_tx, size, data, false);
 
-    disp_spi->host->hw->user.usr_mosi_highpart=0;
-    disp_spi->host->hw->dma_out_link.addr=(int)(&disp_spi->host->dmadesc_tx[0]) & 0xFFFFF;
-    disp_spi->host->hw->dma_out_link.start=1;
-    disp_spi->host->hw->user.usr_mosi_highpart=0;
+    ESP32_TouchGUI1_Definition->disp_spi->host->hw->user.usr_mosi_highpart=0;
+    ESP32_TouchGUI1_Definition->disp_spi->host->hw->dma_out_link.addr=(int)(&ESP32_TouchGUI1_Definition->disp_spi->host->dmadesc_tx[0]) & 0xFFFFF;
+    ESP32_TouchGUI1_Definition->disp_spi->host->hw->dma_out_link.start=1;
+    ESP32_TouchGUI1_Definition->disp_spi->host->hw->user.usr_mosi_highpart=0;
 
-	disp_spi->host->hw->mosi_dlen.usr_mosi_dbitlen = (size * 8) - 1;
+	ESP32_TouchGUI1_Definition->disp_spi->host->hw->mosi_dlen.usr_mosi_dbitlen = (size * 8) - 1;
 
 	_dma_sending = 1;
 	// Start transfer
-	disp_spi->host->hw->cmd.usr = 1;
+	ESP32_TouchGUI1_Definition->disp_spi->host->hw->cmd.usr = 1;
 }
 
 
 
 //---------------------------------------------------------------------------
 static void IRAM_ATTR 
-_direct_send(color_t *color, uint32_t len, uint8_t rep)
+_direct_send(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, color_t *color, uint32_t len, uint8_t rep)
 {
 	uint32_t cidx = 0;	// color buffer index
 	uint32_t wd = 0;
@@ -3854,12 +3930,12 @@ _direct_send(color_t *color, uint32_t len, uint8_t rep)
 
     taskDISABLE_INTERRUPTS();
 	color_t _color = color[0];
-	if ((rep) && (gray_scale)) _color = color2gs(color[0]);
+	if ((rep) && (ESP32_TouchGUI1_Definition->gray_scale)) _color = color2gs(color[0]);
 
 	while (len) {
 		// ** Get color data from color buffer **
 		if (rep == 0) {
-			if (gray_scale) _color = color2gs(color[cidx]);
+			if (ESP32_TouchGUI1_Definition->gray_scale) _color = color2gs(color[cidx]);
 			else _color = color[cidx];
 		}
 
@@ -3868,7 +3944,7 @@ _direct_send(color_t *color, uint32_t len, uint8_t rep)
 		if (wbits == 32) {
 			bits += wbits;
 			wbits = 0;
-			disp_spi->host->hw->data_buf[idx++] = wd;
+			ESP32_TouchGUI1_Definition->disp_spi->host->hw->data_buf[idx++] = wd;
 			wd = 0;
 		}
 		wd |= (uint32_t)_color.g << wbits;
@@ -3876,7 +3952,7 @@ _direct_send(color_t *color, uint32_t len, uint8_t rep)
 		if (wbits == 32) {
 			bits += wbits;
 			wbits = 0;
-			disp_spi->host->hw->data_buf[idx++] = wd;
+			ESP32_TouchGUI1_Definition->disp_spi->host->hw->data_buf[idx++] = wd;
 			wd = 0;
 		}
 		wd |= (uint32_t)_color.b << wbits;
@@ -3884,16 +3960,16 @@ _direct_send(color_t *color, uint32_t len, uint8_t rep)
 		if (wbits == 32) {
 			bits += wbits;
 			wbits = 0;
-			disp_spi->host->hw->data_buf[idx++] = wd;
+			ESP32_TouchGUI1_Definition->disp_spi->host->hw->data_buf[idx++] = wd;
 			wd = 0;
 		}
     	len--;					// Decrement colors counter
         if (rep == 0) cidx++;	// if not repeating color, increment color buffer index
     }
 	if (bits) {
-		while (disp_spi->host->hw->cmd.usr);						// Wait for SPI bus ready
-		disp_spi->host->hw->mosi_dlen.usr_mosi_dbitlen = bits-1;	// set number of bits to be sent
-        disp_spi->host->hw->cmd.usr = 1;							// Start transfer
+		while (ESP32_TouchGUI1_Definition->disp_spi->host->hw->cmd.usr);						// Wait for SPI bus ready
+		ESP32_TouchGUI1_Definition->disp_spi->host->hw->mosi_dlen.usr_mosi_dbitlen = bits-1;	// set number of bits to be sent
+        ESP32_TouchGUI1_Definition->disp_spi->host->hw->cmd.usr = 1;							// Start transfer
 	}
     taskENABLE_INTERRUPTS();
 }
@@ -3915,26 +3991,26 @@ _TFT_pushColorRep(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	uint8_t wait)
 {
 	if (len == 0) return;
-	if (!(disp_spi->cfg.flags & LB_SPI_DEVICE_HALFDUPLEX)) return;
+	if (!(ESP32_TouchGUI1_Definition->disp_spi->cfg.flags & LB_SPI_DEVICE_HALFDUPLEX)) return;
 
 	// Send RAM WRITE command
     gpio_set_level(PIN_NUM_DC, 0);
-    disp_spi->host->hw->data_buf[0] = (uint32_t)TFT_RAMWR;
-	disp_spi->host->hw->mosi_dlen.usr_mosi_dbitlen = 7;
-	disp_spi->host->hw->cmd.usr = 1;		// Start transfer
-	while (disp_spi->host->hw->cmd.usr);	// Wait for SPI bus ready
+    ESP32_TouchGUI1_Definition->disp_spi->host->hw->data_buf[0] = (uint32_t)TFT_RAMWR;
+	ESP32_TouchGUI1_Definition->disp_spi->host->hw->mosi_dlen.usr_mosi_dbitlen = 7;
+	ESP32_TouchGUI1_Definition->disp_spi->host->hw->cmd.usr = 1;		// Start transfer
+	while (ESP32_TouchGUI1_Definition->disp_spi->host->hw->cmd.usr);	// Wait for SPI bus ready
 
 	gpio_set_level(PIN_NUM_DC, 1);								// Set DC to 1 (data mode);
 
 	if ((len*24) <= 512) {
 
-		_direct_send(color, len, rep);
+		_direct_send(ESP32_TouchGUI1_Definition, color, len, rep);
 
 	}
 	else if (rep == 0)  {
 		// ==== use DMA transfer ====
 		// ** Prepare data
-		if (gray_scale) {
+		if (ESP32_TouchGUI1_Definition->gray_scale) {
 			for (int n=0; n<len; n++) {
 				color[n] = color2gs(color[n]);
 			}
@@ -3958,7 +4034,7 @@ _TFT_pushColorRep(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 		}
 		*/
 
-		buf_colors = ((len > (_width*2)) ? (_width*2) : len);
+		buf_colors = ((len > (ESP32_TouchGUI1_Definition->_width*2)) ? (ESP32_TouchGUI1_Definition->_width*2) : len);
 		buf_bytes = buf_colors * 3;
 
 		// Prepare color buffer of maximum 2 color lines
@@ -3966,7 +4042,7 @@ _TFT_pushColorRep(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 		if (trans_cline == NULL) return;
 
 		// Prepare fill color
-		if (gray_scale) _color = color2gs(color[0]);
+		if (ESP32_TouchGUI1_Definition->gray_scale) _color = color2gs(color[0]);
 		else _color = color[0];
 
 		// Fill color buffer with fill color
@@ -3996,7 +4072,7 @@ TFT_pushColorRep(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,int x1
 	if (disp_select(ESP32_TouchGUI1_Definition) != ESP_OK) return;
 
 	// ** Send address window **
-	disp_spi_transfer_addrwin(x1, x2, y1, y2);
+	disp_spi_transfer_addrwin(ESP32_TouchGUI1_Definition->disp_spi, x1, x2, y1, y2);
 
 	_TFT_pushColorRep(ESP32_TouchGUI1_Definition, &color, len, 1, 1);
 
@@ -4012,7 +4088,7 @@ void IRAM_ATTR
 send_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x1, int y1, int x2, int y2, uint32_t len, color_t *buf)
 {
 	// ** Send address window **
-	disp_spi_transfer_addrwin(x1, x2, y1, y2);
+	disp_spi_transfer_addrwin(ESP32_TouchGUI1_Definition->disp_spi, x1, x2, y1, y2);
 	_TFT_pushColorRep(ESP32_TouchGUI1_Definition, buf, len, 0, 0);
 }
 
@@ -4045,17 +4121,17 @@ read_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	if (set_sp) {
 		if (disp_deselect(ESP32_TouchGUI1_Definition) != ESP_OK) return -1;
 		// Change spi clock if needed
-		current_clock = ESP32_SPI_provided_fn->ESP32_SPI_spi_get_speedFn(disp_spi);
-		if (max_rdclock < current_clock) ESP32_SPI_provided_fn->ESP32_SPI_spi_set_speedFn(disp_spi, max_rdclock);
+		current_clock = ESP32_SPI_provided_fn->ESP32_SPI_spi_get_speedFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, ESP32_TouchGUI1_Definition->disp_spi);
+		if (max_rdclock < current_clock) ESP32_SPI_provided_fn->ESP32_SPI_spi_set_speedFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, ESP32_TouchGUI1_Definition->disp_spi, max_rdclock);
 	}
 
 	if (disp_select(ESP32_TouchGUI1_Definition) != ESP_OK) return -2;
 
 	// ** Send address window **
-	disp_spi_transfer_addrwin(x1, x2, y1, y2);
+	disp_spi_transfer_addrwin(ESP32_TouchGUI1_Definition->disp_spi, x1, x2, y1, y2);
 
     // ** GET pixels/colors **
-	disp_spi_transfer_cmd(TFT_RAMRD);
+	ESP32_SPI_transfer_only_cmd(ESP32_TouchGUI1_Definition->disp_spi, TFT_RAMRD);
 
     t.length=0;                //Send nothing
     t.tx_buffer=NULL;
@@ -4063,13 +4139,14 @@ read_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
     t.rx_buffer=buf;
     //t.user = (void*)1;
 
-	esp_err_t res = ESP32_SPI_provided_fn->ESP32_SPI_spi_transfer_dataFn(disp_spi, &t); // Receive using direct mode
+	esp_err_t res = 
+	ESP32_SPI_provided_fn->ESP32_SPI_spi_transfer_dataFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, ESP32_TouchGUI1_Definition->disp_spi, &t); // Receive using direct mode
 
 	disp_deselect(ESP32_TouchGUI1_Definition);
 
 	if (set_sp) {
 		// Restore spi clock if needed
-		if (max_rdclock < current_clock) ESP32_SPI_provided_fn->ESP32_SPI_spi_set_speedFn(disp_spi, current_clock);
+		if (max_rdclock < current_clock) ESP32_SPI_provided_fn->ESP32_SPI_spi_set_speedFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition,  ESP32_TouchGUI1_Definition->disp_spi, current_clock);
 	}
 
     return res;
@@ -4127,13 +4204,13 @@ touch_get_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
     if (ret != ESP_OK) return -1;
     return (((int)(rxdata[0] << 8) | (int)(rxdata[1])) >> 4);
     */
-    ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(ts_spi, 0);
+    ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, ESP32_TouchGUI1_Definition->ts_spi, 0);
 
-    ts_spi->host->hw->data_buf[0] = type;
-    _spi_transfer_start(ts_spi, 24, 24);
-    uint16_t res = (uint16_t)(ts_spi->host->hw->data_buf[0] >> 8);
+    ESP32_TouchGUI1_Definition->ts_spi->host->hw->data_buf[0] = type;
+    _spi_transfer_start(ESP32_TouchGUI1_Definition->ts_spi, 24, 24);
+    uint16_t res = (uint16_t)(ESP32_TouchGUI1_Definition->ts_spi->host->hw->data_buf[0] >> 8);
 
-    ESP32_SPI_provided_fn->ESP32_SPI_spi_device_deselectFn(ts_spi);
+    ESP32_SPI_provided_fn->ESP32_SPI_spi_device_deselectFn(ESP32_TouchGUI1_Definition->ts_spi);
 
     return res;
 }
@@ -4161,12 +4238,12 @@ stmpe610_write_reg(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
   ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
 	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
-    ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(ts_spi, 0);
+    ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, ESP32_TouchGUI1_Definition->ts_spi, 0);
 
-    ts_spi->host->hw->data_buf[0] = (val << 8) | reg;
-    _spi_transfer_start(ts_spi, 16, 0);
+    ESP32_TouchGUI1_Definition->ts_spi->host->hw->data_buf[0] = (val << 8) | reg;
+    _spi_transfer_start(ESP32_TouchGUI1_Definition->ts_spi, 16, 0);
 
-    ESP32_SPI_provided_fn->ESP32_SPI_spi_device_deselectFn(ts_spi);
+    ESP32_SPI_provided_fn->ESP32_SPI_spi_device_deselectFn(ESP32_TouchGUI1_Definition->ts_spi);
 }
 
 
@@ -4183,13 +4260,13 @@ stmpe610_read_byte(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
   ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
 	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
-    ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(ts_spi, 0);
+    ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, ESP32_TouchGUI1_Definition->ts_spi, 0);
 
-    ts_spi->host->hw->data_buf[0] = (reg << 8) | (reg | 0x80);
-    _spi_transfer_start(ts_spi, 16, 16);
-    uint8_t res = ts_spi->host->hw->data_buf[0] >> 8;
+    ESP32_TouchGUI1_Definition->ts_spi->host->hw->data_buf[0] = (reg << 8) | (reg | 0x80);
+    _spi_transfer_start(ESP32_TouchGUI1_Definition->ts_spi, 16, 16);
+    uint8_t res = ESP32_TouchGUI1_Definition->ts_spi->host->hw->data_buf[0] >> 8;
 
-    ESP32_SPI_provided_fn->ESP32_SPI_spi_device_deselectFn(ts_spi);
+    ESP32_SPI_provided_fn->ESP32_SPI_spi_device_deselectFn(ESP32_TouchGUI1_Definition->ts_spi);
     return res;
 }
 
@@ -4204,14 +4281,14 @@ stmpe610_read_word(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
   ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
 	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
 
-    ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(ts_spi, 0);
+    ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, ESP32_TouchGUI1_Definition->ts_spi, 0);
 
-    ts_spi->host->hw->data_buf[0] = ((((reg+1) << 8) | ((reg+1) | 0x80)) << 16) | (reg << 8) | (reg | 0x80);
-    _spi_transfer_start(ts_spi, 32, 32);
-    uint16_t res = (uint16_t)(ts_spi->host->hw->data_buf[0] & 0xFF00);
-    res |= (uint16_t)(ts_spi->host->hw->data_buf[0] >> 24);
+    ESP32_TouchGUI1_Definition->ts_spi->host->hw->data_buf[0] = ((((reg+1) << 8) | ((reg+1) | 0x80)) << 16) | (reg << 8) | (reg | 0x80);
+    _spi_transfer_start(ESP32_TouchGUI1_Definition->ts_spi, 32, 32);
+    uint16_t res = (uint16_t)(ESP32_TouchGUI1_Definition->ts_spi->host->hw->data_buf[0] & 0xFF00);
+    res |= (uint16_t)(ESP32_TouchGUI1_Definition->ts_spi->host->hw->data_buf[0] >> 24);
 
-     ESP32_SPI_provided_fn->ESP32_SPI_spi_device_deselectFn(ts_spi);
+     ESP32_SPI_provided_fn->ESP32_SPI_spi_device_deselectFn(ESP32_TouchGUI1_Definition->ts_spi);
     return res;
 }
 
@@ -4321,9 +4398,9 @@ uint32_t
 find_rd_speed(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 {
   // get table of function callbacks provided & made accessible from stage 1 Module
-  ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn =
+  ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
 	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
-
+ 
 	esp_err_t ret;
 	color_t color;
 	uint32_t max_speed = 1000000;
@@ -4331,44 +4408,44 @@ find_rd_speed(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
     int line_check;
     color_t *color_line = NULL;
     uint8_t *line_rdbuf = NULL;
-    uint8_t gs = gray_scale;
+    uint8_t gs = ESP32_TouchGUI1_Definition->gray_scale;
 
-    gray_scale = 0;
-    cur_speed = ESP32_SPI_provided_fn->ESP32_SPI_spi_get_speedFn(disp_spi);
+    ESP32_TouchGUI1_Definition->gray_scale = 0;
+    cur_speed = ESP32_SPI_provided_fn->ESP32_SPI_spi_get_speedFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, ESP32_TouchGUI1_Definition->disp_spi);
 
-	color_line = malloc(_width*3);
+	color_line = malloc(ESP32_TouchGUI1_Definition->_width*3);
     if (color_line == NULL) goto exit;
 
-    line_rdbuf = malloc((_width*3)+1);
+    line_rdbuf = malloc((ESP32_TouchGUI1_Definition->_width*3)+1);
 	if (line_rdbuf == NULL) goto exit;
 
 	color_t *rdline = (color_t *)(line_rdbuf+1);
 
 	// Fill test line with colors
 	color = (color_t){0xEC,0xA8,0x74};
-	for (int x=0; x<_width; x++) {
+	for (int x=0; x<ESP32_TouchGUI1_Definition->_width; x++) {
 		color_line[x] = color;
 	}
 
 	// Find maximum read spi clock
 	for (uint32_t speed=2000000; speed<=cur_speed; speed += 1000000) {
-		change_speed = ESP32_SPI_provided_fn->ESP32_SPI_spi_set_speedFn(disp_spi, speed);
+		change_speed = ESP32_SPI_provided_fn->ESP32_SPI_spi_set_speedFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, ESP32_TouchGUI1_Definition->disp_spi, speed);
 		if (change_speed == 0) goto exit;
 
-		memset(line_rdbuf, 0, _width*sizeof(color_t)+1);
+		memset(line_rdbuf, 0, ESP32_TouchGUI1_Definition->_width*sizeof(color_t)+1);
 
 		if (disp_select(ESP32_TouchGUI1_Definition)) goto exit;
 		// Write color line
-		send_data(ESP32_TouchGUI1_Definition, 0, _height/2, _width-1, _height/2, _width, color_line);
+		send_data(ESP32_TouchGUI1_Definition, 0, ESP32_TouchGUI1_Definition->_height/2, ESP32_TouchGUI1_Definition->_width-1, ESP32_TouchGUI1_Definition->_height/2, ESP32_TouchGUI1_Definition->_width, color_line);
 		if (disp_deselect(ESP32_TouchGUI1_Definition)) goto exit;
 
 		// Read color line
-		ret = read_data(ESP32_TouchGUI1_Definition, 0, _height/2, _width-1, _height/2, _width, line_rdbuf, 0);
+		ret = read_data(ESP32_TouchGUI1_Definition, 0, ESP32_TouchGUI1_Definition->_height/2, ESP32_TouchGUI1_Definition->_width-1, ESP32_TouchGUI1_Definition->_height/2, ESP32_TouchGUI1_Definition->_width, line_rdbuf, 0);
 
 		// Compare
 		line_check = 0;
 		if (ret == ESP_OK) {
-			for (int y=0; y<_width; y++) {
+			for (int y=0; y<ESP32_TouchGUI1_Definition->_width; y++) {
 				if ((color_line[y].r & 0xFC) != (rdline[y].r & 0xFC)) line_check = 1;
 				else if ((color_line[y].g & 0xFC) != (rdline[y].g & 0xFC)) line_check = 1;
 				else if ((color_line[y].b & 0xFC) != (rdline[y].b & 0xFC)) line_check =  1;
@@ -4382,48 +4459,17 @@ find_rd_speed(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 	}
 
 exit:
-    gray_scale = gs;
+    ESP32_TouchGUI1_Definition->gray_scale = gs;
 	if (line_rdbuf) free(line_rdbuf);
 	if (color_line) free(color_line);
 
 	// restore spi clk
-	change_speed = ESP32_SPI_provided_fn->ESP32_SPI_spi_set_speedFn(disp_spi, cur_speed);
+	change_speed = ESP32_SPI_provided_fn->ESP32_SPI_spi_set_speedFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, ESP32_TouchGUI1_Definition->disp_spi, cur_speed);
 
 	return max_speed;
 }
 
 
-
-//---------------------------------------------------------------------------
-// Companion code to the initialization table.
-// Reads and issues a series of LCD commands stored in byte array
-//---------------------------------------------------------------------------
-static void 
-commandList(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, 
-	ESP32_SPI_Module_spi_device_handle_t spi,
-	 const uint8_t *addr)
-{
-  uint8_t  numCommands, numArgs, cmd;
-  uint16_t ms;
-
-  numCommands = *addr++;				// Number of commands to follow
-  while(numCommands--) {				// For each command...
-    cmd = *addr++;						// save command
-    numArgs  = *addr++;					// Number of args to follow
-    ms       = numArgs & TFT_CMD_DELAY;	// If high bit set, delay follows args
-    numArgs &= ~TFT_CMD_DELAY;			// Mask out delay bit
-
-	disp_spi_transfer_cmd_data(cmd, (uint8_t *)addr, numArgs);
-
-	addr += numArgs;
-
-    if(ms) {
-      ms = *addr++;              // Read post-command delay time (ms)
-      if(ms == 255) ms = 500;    // If 255, delay for 500 ms
-	  vTaskDelay(ms / portTICK_RATE_MS);
-    }
-  }
-}
 
 
 
@@ -4439,18 +4485,18 @@ _tft_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 
     if ((rotation & 1)) {
         // in landscape modes must be width > height
-        if (_width < _height) {
-            tmp = _width;
-            _width  = _height;
-            _height = tmp;
+        if (ESP32_TouchGUI1_Definition->_width < ESP32_TouchGUI1_Definition->_height) {
+            tmp = ESP32_TouchGUI1_Definition->_width;
+            ESP32_TouchGUI1_Definition->_width  = ESP32_TouchGUI1_Definition->_height;
+            ESP32_TouchGUI1_Definition->_height = tmp;
         }
     }
     else {
         // in portrait modes must be width < height
-        if (_width > _height) {
-            tmp = _width;
-            _width  = _height;
-            _height = tmp;
+        if (ESP32_TouchGUI1_Definition->_width > ESP32_TouchGUI1_Definition->_height) {
+            tmp = ESP32_TouchGUI1_Definition->_width;
+            ESP32_TouchGUI1_Definition->_width  = ESP32_TouchGUI1_Definition->_height;
+            ESP32_TouchGUI1_Definition->_height = tmp;
         }
     }
     #if TFT_INVERT_ROTATION
@@ -4519,7 +4565,10 @@ _tft_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 
 	if (disp_select(ESP32_TouchGUI1_Definition) == ESP_OK) {
 
-		disp_spi_transfer_cmd_data(TFT_MADCTL, &madctl, 1);
+		ESP32_SPI_transfer_cmd_and_data(ESP32_TouchGUI1_Definition->disp_spi,
+			TFT_MADCTL,
+			&madctl,
+			1);
 
 		disp_deselect(ESP32_TouchGUI1_Definition);
 	}
@@ -4565,61 +4614,221 @@ TFT_PinsInit(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 
 
 
+/** eigentlich ins ESP32_SPI_Module ? über WriteFn?
+ * --------------------------------------------------------------------------------------------------
+ *  FName: TFT_display_init (Write an Command List)
+ *  Desc: Initialize the display + set orientation + clear
+ *  Info: 
+ *  Para: ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition -> current_Definition handle
+ *        ESP32_SPI_Module_spi_device_handle_t spi -> the spi device that should receive the cmds
+ *	  const uint8_t *addr -> the Command List Table, including delays
+ *  Rets: -/-
+ * --------------------------------------------------------------------------------------------------
+ */
 // Initialize the display
 // ====================
 void 
 TFT_display_init(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 {
-    esp_err_t ret;
+  esp_err_t ret;
 
 #if PIN_NUM_RST
-    //Reset the display
-    gpio_set_level(PIN_NUM_RST, 0);
-    vTaskDelay(20 / portTICK_RATE_MS);
-    gpio_set_level(PIN_NUM_RST, 1);
-    vTaskDelay(150 / portTICK_RATE_MS);
+  //Reset the display
+  gpio_set_level(PIN_NUM_RST, 0);
+  vTaskDelay(20 / portTICK_RATE_MS);
+  gpio_set_level(PIN_NUM_RST, 1);
+  vTaskDelay(150 / portTICK_RATE_MS);
 #endif
 
-    ret = disp_select(ESP32_TouchGUI1_Definition);
-    assert(ret==ESP_OK);
-    //Send all the initialization commands
-	if (tft_disp_type == DISP_TYPE_ILI9341) {
-		commandList(ESP32_TouchGUI1_Definition, disp_spi, ILI9341_init);
-	}
-	else if (tft_disp_type == DISP_TYPE_ILI9488) {
-		commandList(ESP32_TouchGUI1_Definition, disp_spi, ILI9488_init);
-	}
-	else if (tft_disp_type == DISP_TYPE_ST7789V) {
-		commandList(ESP32_TouchGUI1_Definition, disp_spi, ST7789V_init);
-	}
-	else if (tft_disp_type == DISP_TYPE_ST7735) {
-		commandList(ESP32_TouchGUI1_Definition, disp_spi, STP7735_init);
-	}
-	else if (tft_disp_type == DISP_TYPE_ST7735R) {
-		commandList(ESP32_TouchGUI1_Definition, disp_spi, STP7735R_init);
-		commandList(ESP32_TouchGUI1_Definition, disp_spi, Rcmd2green);
-		commandList(ESP32_TouchGUI1_Definition, disp_spi, Rcmd3);
-	}
-	else if (tft_disp_type == DISP_TYPE_ST7735B) {
-		commandList(ESP32_TouchGUI1_Definition, disp_spi, STP7735R_init);
-		commandList(ESP32_TouchGUI1_Definition, disp_spi, Rcmd2red);
-		commandList(ESP32_TouchGUI1_Definition, disp_spi, Rcmd3);
-	    uint8_t dt = 0xC0;
-		disp_spi_transfer_cmd_data(TFT_MADCTL, &dt, 1);
-	}
-	else assert(0);
+  // select device for current write activities
+  ret = disp_select(ESP32_TouchGUI1_Definition);
 
-    ret = disp_deselect(ESP32_TouchGUI1_Definition);
-	assert(ret==ESP_OK);
+  assert(ret==ESP_OK);
 
-	// Clear screen
-    _tft_setRotation(ESP32_TouchGUI1_Definition, PORTRAIT);
-	TFT_pushColorRep(ESP32_TouchGUI1_Definition, 0, 0, _width-1, _height-1, (color_t){0,0,0}, (uint32_t)(_height*_width));
+  // get the display type
+  uint8_t tft_disp_type = ESP32_TouchGUI1_Definition->tft_disp_type;
 
-	///Enable backlight
-#if PIN_NUM_BCKL
-    gpio_set_level(PIN_NUM_BCKL, PIN_BCKL_ON);
-#endif
+  // Send the initialization commands
+  if (tft_disp_type == DISP_TYPE_ILI9341) {
+
+	WriteCommandList(ESP32_TouchGUI1_Definition,
+		ESP32_TouchGUI1_Definition->disp_spi, ILI9341_init);
+  }
+
+  else if (tft_disp_type == DISP_TYPE_ILI9488) {
+
+	WriteCommandList(ESP32_TouchGUI1_Definition,
+		ESP32_TouchGUI1_Definition->disp_spi, ILI9488_init);
+  }
+
+  else if (tft_disp_type == DISP_TYPE_ST7789V) {
+
+	WriteCommandList(ESP32_TouchGUI1_Definition,
+		ESP32_TouchGUI1_Definition->disp_spi, ST7789V_init);
+  }
+
+  else if (tft_disp_type == DISP_TYPE_ST7735) {
+
+	WriteCommandList(ESP32_TouchGUI1_Definition,
+		ESP32_TouchGUI1_Definition->disp_spi, STP7735_init);
+  }
+
+  else if (tft_disp_type == DISP_TYPE_ST7735R) {
+
+	WriteCommandList(ESP32_TouchGUI1_Definition,
+		ESP32_TouchGUI1_Definition->disp_spi, STP7735R_init);
+	WriteCommandList(ESP32_TouchGUI1_Definition,
+		ESP32_TouchGUI1_Definition->disp_spi, Rcmd2green);
+	WriteCommandList(ESP32_TouchGUI1_Definition,
+		ESP32_TouchGUI1_Definition->disp_spi, Rcmd3);
+  }
+
+  else if (tft_disp_type == DISP_TYPE_ST7735B) {
+	WriteCommandList(ESP32_TouchGUI1_Definition,
+		ESP32_TouchGUI1_Definition->disp_spi, STP7735R_init);
+	WriteCommandList(ESP32_TouchGUI1_Definition,
+		ESP32_TouchGUI1_Definition->disp_spi, Rcmd2red);
+	WriteCommandList(ESP32_TouchGUI1_Definition,
+		ESP32_TouchGUI1_Definition->disp_spi, Rcmd3);
+
+	uint8_t dt = 0xC0;
+		ESP32_SPI_transfer_cmd_and_data(ESP32_TouchGUI1_Definition->disp_spi,
+			TFT_MADCTL,
+			&dt,
+			1);
+  }
+
+  else assert(0);
+
+  // select device for current write activities
+  ret = disp_deselect(ESP32_TouchGUI1_Definition);
+
+  assert(ret==ESP_OK);
+
+  // set rotation, clear screen
+  _tft_setRotation(ESP32_TouchGUI1_Definition, PORTRAIT);
+
+  TFT_pushColorRep(ESP32_TouchGUI1_Definition,
+	0,
+	0,
+	ESP32_TouchGUI1_Definition->_width - 1,
+	ESP32_TouchGUI1_Definition->_height - 1,
+	(color_t){0,0,0},
+	(uint32_t)(ESP32_TouchGUI1_Definition->_height * ESP32_TouchGUI1_Definition->_width) );
+
+  ///Enable backlight
+  #if PIN_NUM_BCKL
+  gpio_set_level(PIN_NUM_BCKL, PIN_BCKL_ON);
+  #endif
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//  ################# functions to move ################## 
+
+
+
+/** eigentlich ins ESP32_SPI_Module ? über WriteFn?
+ * --------------------------------------------------------------------------------------------------
+ *  FName: WriteCommandList (Write an Command List)
+ *  Desc: Reads and sends a series of SPI commands stored in byte array, incl. delays.
+ *  Info: 
+ *  Para: ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition -> current_Definition handle
+ *        ESP32_SPI_Module_spi_device_handle_t spi -> the spi device that should receive the cmds
+ *	  const uint8_t *addr -> the Command List Table, including delays
+ *  Rets: -/-
+ * --------------------------------------------------------------------------------------------------
+ */
+static void 
+WriteCommandList(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, 
+	ESP32_SPI_Module_spi_device_handle_t spi,
+	 const uint8_t *addr)
+{
+  uint8_t numCommands, numArgs, cmd;
+  uint16_t ms;
+
+  // read number of commands to follow
+  numCommands = *addr++;
+
+  // for each command...
+  while (numCommands--) {
+
+	// read command
+	cmd = *addr++;
+
+	// read number of args to follow
+	numArgs  = *addr++;
+
+	// If high bit set, delay time (ms) follows the args
+	ms = numArgs & TFT_CMD_DELAY;
+
+	// mask out delay bit, to get the real args
+	numArgs &= ~TFT_CMD_DELAY;
+
+
+	// transfer to spi
+	ESP32_SPI_transfer_cmd_and_data(ESP32_TouchGUI1_Definition->disp_spi,
+		cmd,
+		(uint8_t *)addr,
+		numArgs);
+
+	addr += numArgs;
+
+
+	// delay requested ?
+	if (ms) {
+
+		// Read post-command (delay time (ms) )
+
+		ms = *addr++;
+
+		// override / special
+		if (ms == 255) ms = 500;    // If 255, delay for 500 ms
+
+		// now the delay
+		vTaskDelay(ms / portTICK_RATE_MS);
+	}
+  }
 }
 
 

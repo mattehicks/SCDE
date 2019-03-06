@@ -122,6 +122,8 @@ SCDEFn_t* SCDEFn_at_ESP32_TouchGUI1_M;
 #define DISP_TYPE_ST7735B	5
 #define DISP_TYPE_MAX		6
 
+
+/*
 #if CONFIG_EXAMPLE_DISPLAY_TYPE == 1
 
 // ** Set the correct configuration for ESP32-WROVER-KIT v3
@@ -211,7 +213,7 @@ SCDEFn_t* SCDEFn_at_ESP32_TouchGUI1_M;
 // ---------------------------------------------------------
 
 #else
-
+*/
 
 
 
@@ -251,7 +253,6 @@ SCDEFn_t* SCDEFn_at_ESP32_TouchGUI1_M;
 // ** Set Reset and Backlight pins to 0 if not used !
 // ** If you want to use them, set them to some valid GPIO number
 #define PIN_NUM_RST  33  	// GPIO used for RESET control
-
 #define PIN_NUM_BCKL 0  	// GPIO used for backlight control
 #define PIN_BCKL_ON  0  	// GPIO value for backlight ON
 #define PIN_BCKL_OFF 1  	// GPIO value for backlight OFF
@@ -275,7 +276,7 @@ SCDEFn_t* SCDEFn_at_ESP32_TouchGUI1_M;
 #define DEFAULT_DISP_TYPE   DISP_TYPE_ILI9341
 //----------------------------------------------------------------------------
 
-#endif  // CONFIG_EXAMPLE_ESP_WROVER_KIT
+//#endif  // CONFIG_EXAMPLE_ESP_WROVER_KIT
 
 
 // ##############################################################
@@ -283,21 +284,21 @@ SCDEFn_t* SCDEFn_at_ESP32_TouchGUI1_M;
 // ##############################################################
 
 // ==== Converts colors to grayscale if 1 =======================
-extern uint8_t gray_scale;
+//extern uint8_t gray_scale;
 
 // ==== Spi clock for reading data from display memory in Hz ====
 extern uint32_t max_rdclock;
 
 // ==== Display dimensions in pixels ============================
-extern int _width;
-extern int _height;
+//extern int _width;
+//extern int _height;
 
 // ==== Display type, DISP_TYPE_ILI9488 or DISP_TYPE_ILI9341 ====
-extern uint8_t tft_disp_type;
+//extern uint8_t tft_disp_type;
 
 // ==== Spi device handles for display and touch screen =========
-extern ESP32_SPI_Module_spi_device_handle_t disp_spi;
-extern ESP32_SPI_Module_spi_device_handle_t ts_spi;
+//extern ESP32_SPI_Module_spi_device_handle_t disp_spi;
+//extern ESP32_SPI_Module_spi_device_handle_t ts_spi;
 
 // ##############################################################
 
@@ -314,15 +315,15 @@ typedef struct __attribute__((__packed__)) {
 } color_t ;
 
 // ==== Display commands constants ====
-#define TFT_INVOFF     0x20
-#define TFT_INVONN     0x21
-#define TFT_DISPOFF    0x28
-#define TFT_DISPON     0x29
-#define TFT_MADCTL	   0x36
-#define TFT_PTLAR 	   0x30
-#define TFT_ENTRYM 	   0xB7
+#define TFT_INVOFF    		0x20
+#define TFT_INVONN     		0x21
+#define TFT_DISPOFF    		0x28
+#define TFT_DISPON     		0x29
+#define TFT_MADCTL	   	0x36
+#define TFT_PTLAR 	  	0x30
+#define TFT_ENTRYM 	  	0xB7
 
-#define TFT_CMD_NOP			0x00
+#define TFT_CMD_NOP		0x00
 #define TFT_CMD_SWRESET		0x01
 #define TFT_CMD_RDDID		0x04
 #define TFT_CMD_RDDST		0x09
@@ -336,7 +337,7 @@ typedef struct __attribute__((__packed__)) {
 #define TFT_CMD_RDMADCTL	0x0B
 #define TFT_CMD_RDPIXFMT	0x0C
 #define TFT_CMD_RDIMGFMT	0x0D
-#define TFT_CMD_RDSELFDIAG  0x0F
+#define TFT_CMD_RDSELFDIAG  	0x0F
 
 #define TFT_CMD_GAMMASET	0x26
 
@@ -367,56 +368,61 @@ typedef struct __attribute__((__packed__)) {
 #define TFT_CMD_POWER_SEQ	0xED
 #define TFT_CMD_DTCA		0xE8
 #define TFT_CMD_DTCB		0xEA
-#define TFT_CMD_PRC			0xF7
+#define TFT_CMD_PRC		0xF7
 #define TFT_CMD_3GAMMA_EN	0xF2
 
-#define ST_CMD_VCOMS       0xBB
-#define ST_CMD_FRCTRL2      0xC6
+#define ST_CMD_VCOMS       	0xBB
+#define ST_CMD_FRCTRL2      	0xC6
 #define ST_CMD_PWCTR1		0xD0
 
-#define ST7735_FRMCTR1 0xB1
-#define ST7735_FRMCTR2 0xB2
-#define ST7735_FRMCTR3 0xB3
-#define ST7735_INVCTR  0xB4
-#define ST7735_DISSET5 0xB6
+#define ST7735_FRMCTR1 		0xB1
+#define ST7735_FRMCTR2 		0xB2
+#define ST7735_FRMCTR3 		0xB3
+#define ST7735_INVCTR  		0xB4
+#define ST7735_DISSET5 		0xB6
 
-#define ST7735_PWCTR1  0xC0
-#define ST7735_PWCTR2  0xC1
-#define ST7735_PWCTR3  0xC2
-#define ST7735_PWCTR4  0xC3
-#define ST7735_PWCTR5  0xC4
-#define ST7735_VMCTR1  0xC5
+#define ST7735_PWCTR1  		0xC0
+#define ST7735_PWCTR2  		0xC1
+#define ST7735_PWCTR3  		0xC2
+#define ST7735_PWCTR4  		0xC3
+#define ST7735_PWCTR5 		 0xC4
+#define ST7735_VMCTR1  		0xC5
 
-#define ST7735_RDID1   0xDA
-#define ST7735_RDID2   0xDB
-#define ST7735_RDID3   0xDC
-#define ST7735_RDID4   0xDD
-#define ST7735_NOP     0x00
-#define ST7735_SWRESET 0x01
-#define ST7735_RDDID   0x04
-#define ST7735_RDDST   0x09
+#define ST7735_RDID1   		0xDA
+#define ST7735_RDID2   		0xDB
+#define ST7735_RDID3   		0xDC
+#define ST7735_RDID4   		0xDD
+#define ST7735_NOP     		0x00
+#define ST7735_SWRESET 		0x01
+#define ST7735_RDDID   		0x04
+#define ST7735_RDDST   		0x09
 
-#define ST7735_SLPIN   0x10
-#define ST7735_SLPOUT  0x11
-#define ST7735_PTLON   0x12
-#define ST7735_NORON   0x13
-#define ST7735_PWCTR6  0xFC
-#define ST7735_GMCTRP1 0xE0
-#define ST7735_GMCTRN1 0xE1
+#define ST7735_SLPIN   		0x10
+#define ST7735_SLPOUT  		0x11
+#define ST7735_PTLON   		0x12
+#define ST7735_NORON  		0x13
+#define ST7735_PWCTR6  		0xFC
+#define ST7735_GMCTRP1 		0xE0
+#define ST7735_GMCTRN1 		0xE1
 
-#define MADCTL_MY  0x80
-#define MADCTL_MX  0x40
-#define MADCTL_MV  0x20
-#define MADCTL_ML  0x10
-#define MADCTL_MH  0x04
+#define MADCTL_MY  		0x80
+#define MADCTL_MX  		0x40
+#define MADCTL_MV 		0x20
+#define MADCTL_ML  		0x10
+#define MADCTL_MH  		0x04
 
 #define TFT_CASET		0x2A
 #define TFT_PASET		0x2B
 #define TFT_RAMWR		0x2C
 #define TFT_RAMRD		0x2E
-#define TFT_CMD_PIXFMT	0x3A
+#define TFT_CMD_PIXFMT		0x3A
 
-#define TFT_CMD_DELAY	0x80
+#define TFT_CMD_DELAY		0x80
+
+
+
+//----------------------------------------------------------------------------------
+
 
 
 // Initialization sequence for ILI7749
@@ -445,6 +451,12 @@ static const uint8_t ST7789V_init[] = {
   TFT_CMD_SLPOUT, TFT_CMD_DELAY, 120,				//  Sleep out,	//  120 ms delay
   TFT_DISPON, TFT_CMD_DELAY, 120,
 };
+
+
+
+//----------------------------------------------------------------------------------
+
+
 
 // Initialization sequence for ILI7341
 // ====================================
@@ -485,6 +497,12 @@ static const uint8_t ILI9341_init[] = {
   200,			 									//  120 ms delay
   TFT_DISPON, TFT_CMD_DELAY, 200,
 };
+
+
+
+//----------------------------------------------------------------------------------
+
+
 
 // Initialization sequence for ILI9488
 // ====================================
@@ -555,6 +573,11 @@ static const uint8_t ILI9488_init[] = {
 };
 
 
+
+//----------------------------------------------------------------------------------
+
+
+
 // Initialization commands for 7735B screens
 // ------------------------------------
 static const uint8_t STP7735_init[] = {
@@ -618,6 +641,12 @@ static const uint8_t STP7735_init[] = {
   TFT_DISPON ,   TFT_CMD_DELAY,  	// 18: Main screen turn on, no args, w/delay
   255						//     255 = 500 ms delay
 };
+
+
+
+//----------------------------------------------------------------------------------
+
+
 
 // Init for 7735R, part 1 (red or green tab)
 // --------------------------------------
@@ -709,19 +738,38 @@ static const uint8_t Rcmd3[] = {
 };
 
 
+
 // ==== Public functions =========================================================
 
+
+
 // == Low level functions; usually not used directly ==
+
+//
 esp_err_t wait_trans_finish(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint8_t free_line);
 
-void disp_spi_transfer_cmd(int8_t cmd);
-void disp_spi_transfer_cmd_data(int8_t cmd, uint8_t *data, uint32_t len);
+//
+void ESP32_SPI_transfer_only_cmd(ESP32_SPI_Module_spi_device_handle_t spi_device_handle, int8_t cmd);
 
+//
+void ESP32_SPI_transfer_cmd_and_data(ESP32_SPI_Module_spi_device_handle_t spi_device_handle, int8_t cmd, uint8_t *data, uint32_t len);
+
+//
 void drawPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, color_t color, uint8_t sel);
+
+//
 void send_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x1, int y1, int x2, int y2, uint32_t len, color_t *buf);
+
+//
 void TFT_pushColorRep(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x1, int y1, int x2, int y2, color_t data, uint32_t len);
+
+//
 int read_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x1, int y1, int x2, int y2, int len, uint8_t *buf, uint8_t set_sp);
+
+//
 color_t readPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y);
+
+//
 int touch_get_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint8_t type);
 
 
@@ -770,8 +818,8 @@ uint32_t stmpe610_getID(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition
 // ===============================================================================
 
 
-
-
+//
+static void WriteCommandList(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, ESP32_SPI_Module_spi_device_handle_t spi, const uint8_t *addr);
 
 
 

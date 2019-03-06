@@ -913,6 +913,10 @@ app_main(void)
 {
   LOGD("Free heap at start: %d", esp_get_free_heap_size());
 
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector    
+
  // LOGD("Free IRAM: %d",  xPortGetFreeHeapSizeTagged(MALLOC_CAP_32BIT));
 
 //--------------------------------------------------------------------------------------------------

@@ -509,14 +509,14 @@ void set_7seg_font_atrib(uint8_t l, uint8_t w, int outline, color_t color);
  *
  */
 //----------------------------------------------------------------------
-void TFT_setclipwin(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
+void TFT_setclipwin(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 
 /*
  * Resets the clipping area to full screen (0,0),(_wodth,_height)
  *
  */
 //----------------------
-void TFT_resetclipwin();
+void TFT_resetclipwin(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition);
 
 /*
  * Save current clipping area to temporary variable
@@ -552,7 +552,7 @@ void TFT_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, u
  *
  */
 //-----------------------------------------
-void TFT_invertDisplay(const uint8_t mode);
+void TFT_invertDisplay(ESP32_SPI_Module_spi_device_handle_t spi_device_handle, const uint8_t mode);
 
 /*
  * Select gamma curve
@@ -560,7 +560,7 @@ void TFT_invertDisplay(const uint8_t mode);
  *      gamma: gama curve, values 0~3
  */
 //=================================
-void TFT_setGammaCurve(uint8_t gm);
+void TFT_setGammaCurve(ESP32_SPI_Module_spi_device_handle_t spi_device_handle, uint8_t gm);
 
 /*
  * Compare two color structures
@@ -653,7 +653,7 @@ int TFT_bmp_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int 
  * 		1 if touch panel is touched; x&y are the valid coordinates
  */
 //----------------------------------------------
-int TFT_read_touch(int *x, int* y, uint8_t raw);
+int TFT_read_touch(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int *x, int* y, uint8_t raw);
 
 
 /*

@@ -1,4 +1,5 @@
-SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
+Devspec2Array.o: \
+ /home/maikschulze/esp/SCDE/components/SCDE/Devspec2Array.c \
  /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h \
  /home/maikschulze/esp/SCDE/main/include/esp8266.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h \
@@ -141,34 +142,9 @@ SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
  /home/maikschulze/esp/esp-idf/components/log/include/esp_log_internal.h \
  /home/maikschulze/esp/SCDE/main/include/Platform.h \
  /home/maikschulze/esp/SCDE/main/include/espmissingincludes.h \
- /home/maikschulze/esp/esp-idf/components/nvs_flash/include/nvs_flash.h \
- /home/maikschulze/esp/esp-idf/components/nvs_flash/include/nvs.h \
- /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/event_groups.h \
- /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/timers.h \
- /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/task.h \
- /home/maikschulze/esp/esp-idf/components/driver/include/driver/ledc.h \
- /home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h \
- /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_reg.h \
- /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/esp_dport_access.h \
- /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h \
- /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h \
- /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/api.h \
- /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/netbuf.h \
- /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/sys.h \
- /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/sockets.h \
- /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/inet.h \
- /home/maikschulze/esp/SCDE/main/include/vfs.h \
  /home/maikschulze/esp/SCDE/main/include/SCDE_s.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h \
- /home/maikschulze/esp/SCDE/main/include/SCDE_Main.h \
- /home/maikschulze/esp/SCDE/main/include/SCDE.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h \
- /home/maikschulze/esp/SCDE/main/include/scde_task.h \
- /home/maikschulze/esp/esp-idf/components/heap/include/esp_heap_alloc_caps.h \
- /home/maikschulze/esp/SCDE/main/include/logging.h \
- /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/rtc_cntl_reg.h \
- /home/maikschulze/esp/esp-idf/components/spiffs/include/esp_spiffs.h
+ /home/maikschulze/esp/SCDE/main/include/SCDE.h
 
 /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h:
 
@@ -454,59 +430,9 @@ SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
 
 /home/maikschulze/esp/SCDE/main/include/espmissingincludes.h:
 
-/home/maikschulze/esp/esp-idf/components/nvs_flash/include/nvs_flash.h:
-
-/home/maikschulze/esp/esp-idf/components/nvs_flash/include/nvs.h:
-
-/home/maikschulze/esp/esp-idf/components/freertos/include/freertos/event_groups.h:
-
-/home/maikschulze/esp/esp-idf/components/freertos/include/freertos/timers.h:
-
-/home/maikschulze/esp/esp-idf/components/freertos/include/freertos/task.h:
-
-/home/maikschulze/esp/esp-idf/components/driver/include/driver/ledc.h:
-
-/home/maikschulze/esp/esp-idf/components/driver/include/driver/periph_ctrl.h:
-
-/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_reg.h:
-
-/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/dport_access.h:
-
-/home/maikschulze/esp/esp-idf/components/esp32/include/esp_dport_access.h:
-
-/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/uart_reg.h:
-
-/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/periph_defs.h:
-
-/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/api.h:
-
-/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/netbuf.h:
-
-/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/sys.h:
-
-/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/sockets.h:
-
-/home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/inet.h:
-
-/home/maikschulze/esp/SCDE/main/include/vfs.h:
-
 /home/maikschulze/esp/SCDE/main/include/SCDE_s.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h:
 
-/home/maikschulze/esp/SCDE/main/include/SCDE_Main.h:
-
 /home/maikschulze/esp/SCDE/main/include/SCDE.h:
-
-/home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h:
-
-/home/maikschulze/esp/SCDE/main/include/scde_task.h:
-
-/home/maikschulze/esp/esp-idf/components/heap/include/esp_heap_alloc_caps.h:
-
-/home/maikschulze/esp/SCDE/main/include/logging.h:
-
-/home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/rtc_cntl_reg.h:
-
-/home/maikschulze/esp/esp-idf/components/spiffs/include/esp_spiffs.h:
-/home/maikschulze/esp/SCDE/main/./SCDE_Main.c:
+/home/maikschulze/esp/SCDE/components/SCDE/./Devspec2Array.c:

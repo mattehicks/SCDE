@@ -79,6 +79,21 @@ typedef struct ESP32_TouchGUI1_Definition_s {
 
  time_t time_last;
 
+
+  // Display dimensions
+  int _width;
+  int _height;
+
+  // Converts colors to grayscale if set to 1
+  uint8_t gray_scale;
+
+  // Display type, DISP_TYPE_ILI9488 or DISP_TYPE_ILI9341
+  uint8_t tft_disp_type;
+
+  // Spi device handles for display and touch screen
+  ESP32_SPI_Module_spi_device_handle_t disp_spi;
+  ESP32_SPI_Module_spi_device_handle_t ts_spi;
+
 //  uint8_t i2c_num;				/*!< the I2C hardware that should be used */
 //  i2c_config_t i2c_config;			/*!< i2c configuration */
 //  i2c_obj_t *i2c_obj;				/*!< the current i2c job */
