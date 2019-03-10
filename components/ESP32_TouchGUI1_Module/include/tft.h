@@ -552,7 +552,7 @@ void TFT_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, u
  *
  */
 //-----------------------------------------
-void TFT_invertDisplay(ESP32_SPI_Module_spi_device_handle_t spi_device_handle, const uint8_t mode);
+void TFT_invertDisplay(ESP32_SPI_device_handle_t spi_device_handle, const uint8_t mode);
 
 /*
  * Select gamma curve
@@ -560,7 +560,7 @@ void TFT_invertDisplay(ESP32_SPI_Module_spi_device_handle_t spi_device_handle, c
  *      gamma: gama curve, values 0~3
  */
 //=================================
-void TFT_setGammaCurve(ESP32_SPI_Module_spi_device_handle_t spi_device_handle, uint8_t gm);
+void TFT_setGammaCurve(ESP32_SPI_device_handle_t spi_device_handle, uint8_t gm);
 
 /*
  * Compare two color structures

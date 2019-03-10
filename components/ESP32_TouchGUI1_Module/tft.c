@@ -18,6 +18,7 @@
 #include "rom/tjpgd.h"
 #include "esp_heap_caps.h"
 
+#include "stdatomic.h"
 
 
 
@@ -89,7 +90,7 @@ const color_t TFT_PINK        = { 252, 192, 202 };
 
 // ==============================================================
 // ==== Set default values of global variables ==================
-uint8_t orientation = LANDSCAPE;// screen orientation
+uint8_t orientation = LANDSCAPE;	// screen orientation
 uint16_t font_rotate = 0;		// font rotation
 uint8_t	font_transparent = 0;
 uint8_t	font_forceFixed = 0;
@@ -1989,122 +1990,169 @@ static void _draw7seg(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, 
 }
 //==============================================================================
 
-//======================================
-void TFT_print(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, char *st, int x, int y) {
-	int stl, i, tmpw, tmph, fh;
-	uint8_t ch;
 
-	if (cfont.bitmap == 0) return; // wrong font selected
 
-	// ** Rotated strings cannot be aligned
-	if ((font_rotate != 0) && ((x <= CENTER) || (y <= CENTER))) return;
 
-	if ((x < LASTX) || (font_rotate == 0)) TFT_OFFSET = 0;
+void TFT_print(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+	char *st,
+	int x,
+	int y)
+{
+  int stl, i, tmpw, tmph, fh;
+  uint8_t ch;
 
-	if ((x >= LASTX) && (x < LASTY)) x = TFT_X + (x-LASTX);
-	else if (x > CENTER) x += dispWin.x1;
+  if (cfont.bitmap == 0) return; // wrong font selected
 
-	if (y >= LASTY) y = TFT_Y + (y-LASTY);
-	else if (y > CENTER) y += dispWin.y1;
+  // ** Rotated strings cannot be aligned
+  if ( ( font_rotate != 0 ) && ( ( x <= CENTER ) || ( y <= CENTER ) ) ) return;
 
-	// ** Get number of characters in string to print
-	stl = strlen(st);
+  if ( ( x < LASTX ) || (font_rotate == 0) ) TFT_OFFSET = 0;
 
-	// ** Calculate CENTER, RIGHT or BOTTOM position
-	tmpw = TFT_getStringWidth(st);	// string width in pixels
-	fh = cfont.y_size;			// font height
-	if ((cfont.x_size != 0) && (cfont.bitmap == 2)) {
-		// 7-segment font
-		fh = (3 * (2 * cfont.y_size + 1)) + (2 * cfont.x_size);  // 7-seg character height
+  if ( ( x >= LASTX ) && ( x < LASTY ) ) x = TFT_X + ( x - LASTX );
+
+  else if (x > CENTER) x += dispWin.x1;
+
+  if ( y >= LASTY ) y = TFT_Y + ( y - LASTY );
+
+  else if ( y > CENTER ) y += dispWin.y1;
+
+  // ** Get number of characters in string to print
+  stl = strlen(st);
+
+  // ** Calculate CENTER, RIGHT or BOTTOM position
+  tmpw = TFT_getStringWidth(st);	// string width in pixels
+  fh = cfont.y_size;			// font height
+
+  if ( ( cfont.x_size != 0 ) && ( cfont.bitmap == 2 ) ) {
+
+  	// 7-segment font
+  	fh = (3 * (2 * cfont.y_size + 1)) + (2 * cfont.x_size);  // 7-seg character height
+  }
+
+  if (x == RIGHT) x = dispWin.x2 - tmpw + dispWin.x1;
+
+  else if (x == CENTER) x = (((dispWin.x2 - dispWin.x1 + 1) - tmpw) / 2) + dispWin.x1;
+
+  if (y == BOTTOM) y = dispWin.y2 - fh + dispWin.y1;
+
+  else if (y==CENTER) y = (((dispWin.y2 - dispWin.y1 + 1) - (fh/2)) / 2) + dispWin.y1;
+
+  if (x < dispWin.x1) x = dispWin.x1;
+
+  if (y < dispWin.y1) y = dispWin.y1;
+
+  if ((x > dispWin.x2) || (y > dispWin.y2)) return;
+
+  TFT_X = x;
+  TFT_Y = y;
+
+  // ** Adjust y position
+  tmph = cfont.y_size; // font height
+
+  // for non-proportional fonts, char width is the same for all chars
+  tmpw = cfont.x_size;
+
+  if (cfont.x_size != 0) {
+
+	if (cfont.bitmap == 2) {	// 7-segment font
+
+		tmpw = _7seg_width();	// character width
+		tmph = _7seg_height();	// character height
+	}
+  }
+
+  else TFT_OFFSET = 0;	// fixed font; offset not needed
+
+  if ((TFT_Y + tmph - 1) > dispWin.y2) return;
+
+  int offset = TFT_OFFSET;
+
+  for (i=0; i<stl; i++) {
+
+	ch = st[i]; // get string character
+
+	if (ch == 0x0D) { // === '\r', erase to eol ====
+
+		if ((!font_transparent) && (font_rotate==0))
+			_fillRect(ESP32_TouchGUI1_Definition,
+			 TFT_X, TFT_Y,  dispWin.x2+1-TFT_X, tmph, _bg);
+		}
+
+	else if (ch == 0x0A) { // ==== '\n', new line ====
+
+		if (cfont.bitmap == 1) {
+
+			TFT_Y += tmph + font_line_space;
+
+			if (TFT_Y > (dispWin.y2-tmph)) break;
+
+			TFT_X = dispWin.x1;
+		}
 	}
 
-	if (x == RIGHT) x = dispWin.x2 - tmpw + dispWin.x1;
-	else if (x == CENTER) x = (((dispWin.x2 - dispWin.x1 + 1) - tmpw) / 2) + dispWin.x1;
+	else { // ==== other characters ====
 
-	if (y == BOTTOM) y = dispWin.y2 - fh + dispWin.y1;
-	else if (y==CENTER) y = (((dispWin.y2 - dispWin.y1 + 1) - (fh/2)) / 2) + dispWin.y1;
+		if (cfont.x_size == 0) {
 
-	if (x < dispWin.x1) x = dispWin.x1;
-	if (y < dispWin.y1) y = dispWin.y1;
-	if ((x > dispWin.x2) || (y > dispWin.y2)) return;
+			// for proportional font get character data to 'fontChar'
+			if (getCharPtr(ch)) tmpw = fontChar.xDelta;
 
-	TFT_X = x;
-	TFT_Y = y;
-
-	// ** Adjust y position
-	tmph = cfont.y_size; // font height
-	// for non-proportional fonts, char width is the same for all chars
-	tmpw = cfont.x_size;
-	if (cfont.x_size != 0) {
-		if (cfont.bitmap == 2) {	// 7-segment font
-			tmpw = _7seg_width();	// character width
-			tmph = _7seg_height();	// character height
-		}
-	}
-	else TFT_OFFSET = 0;	// fixed font; offset not needed
-
-	if ((TFT_Y + tmph - 1) > dispWin.y2) return;
-
-	int offset = TFT_OFFSET;
-
-	for (i=0; i<stl; i++) {
-		ch = st[i]; // get string character
-
-		if (ch == 0x0D) { // === '\r', erase to eol ====
-			if ((!font_transparent) && (font_rotate==0)) _fillRect(ESP32_TouchGUI1_Definition, TFT_X, TFT_Y,  dispWin.x2+1-TFT_X, tmph, _bg);
+			else continue;
 		}
 
-		else if (ch == 0x0A) { // ==== '\n', new line ====
-			if (cfont.bitmap == 1) {
-				TFT_Y += tmph + font_line_space;
-				if (TFT_Y > (dispWin.y2-tmph)) break;
-				TFT_X = dispWin.x1;
-			}
+		// check if character can be displayed in the current line
+		if ((TFT_X+tmpw) > (dispWin.x2)) {
+
+			if (text_wrap == 0) break;
+
+			TFT_Y += tmph + font_line_space;
+
+			if (TFT_Y > (dispWin.y2-tmph)) break;
+
+			TFT_X = dispWin.x1;
 		}
 
-		else { // ==== other characters ====
-			if (cfont.x_size == 0) {
-				// for proportional font get character data to 'fontChar'
-				if (getCharPtr(ch)) tmpw = fontChar.xDelta;
-				else continue;
-			}
+		// Let's print the character
+		if (cfont.x_size == 0) {
 
-			// check if character can be displayed in the current line
-			if ((TFT_X+tmpw) > (dispWin.x2)) {
-				if (text_wrap == 0) break;
-				TFT_Y += tmph + font_line_space;
-				if (TFT_Y > (dispWin.y2-tmph)) break;
-				TFT_X = dispWin.x1;
-			}
+			// == proportional font
+			if (font_rotate == 0) TFT_X += 
+				printProportionalChar(ESP32_TouchGUI1_Definition, TFT_X, TFT_Y) + 1;
 
-			// Let's print the character
-			if (cfont.x_size == 0) {
-				// == proportional font
-				if (font_rotate == 0) TFT_X += printProportionalChar(ESP32_TouchGUI1_Definition, TFT_X, TFT_Y) + 1;
-				else {
-					// rotated proportional font
-					offset += rotatePropChar(ESP32_TouchGUI1_Definition, x, y, offset);
-					TFT_OFFSET = offset;
-				}
-			}
 			else {
-				if (cfont.bitmap == 1) {
-					// == fixed font
-					if ((ch < cfont.offset) || ((ch-cfont.offset) > cfont.numchars)) ch = cfont.offset;
-					if (font_rotate == 0) {
-						printChar(ESP32_TouchGUI1_Definition, ch, TFT_X, TFT_Y);
-						TFT_X += tmpw;
-					}
-					else rotateChar(ESP32_TouchGUI1_Definition, ch, x, y, i);
+				// rotated proportional font
+				offset += rotatePropChar(ESP32_TouchGUI1_Definition, x, y, offset);
+				TFT_OFFSET = offset;
+			}
+		}
+
+		else {
+			if (cfont.bitmap == 1) {
+
+				// == fixed font
+				if ((ch < cfont.offset) || ((ch-cfont.offset) > cfont.numchars)) ch = cfont.offset;
+
+				if (font_rotate == 0) {
+
+					printChar(ESP32_TouchGUI1_Definition, ch, TFT_X, TFT_Y);
+
+					TFT_X += tmpw;
 				}
-				else if (cfont.bitmap == 2) {
-					// == 7-segment font ==
-					_draw7seg(ESP32_TouchGUI1_Definition, TFT_X, TFT_Y, ch, cfont.y_size, cfont.x_size, _fg);
-					TFT_X += (tmpw + 2);
-				}
+
+				else rotateChar(ESP32_TouchGUI1_Definition, ch, x, y, i);
+			}
+
+			else if (cfont.bitmap == 2) {
+
+				// == 7-segment font ==
+				_draw7seg(ESP32_TouchGUI1_Definition,
+					TFT_X, TFT_Y, ch, cfont.y_size, cfont.x_size, _fg);
+
+				TFT_X += (tmpw + 2);
 			}
 		}
 	}
+  }
 }
 
 
@@ -2113,31 +2161,40 @@ void TFT_print(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, char *s
 // Change the screen rotation.
 // Input: m new rotation value (0 to 3)
 //=================================
-void TFT_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint8_t rot) {
-    if (rot > 3) {
-        uint8_t madctl = (rot & 0xF8); // for testing, manually set MADCTL register
-		if (disp_select(ESP32_TouchGUI1_Definition) == ESP_OK) {
-			ESP32_SPI_transfer_cmd_and_data(ESP32_TouchGUI1_Definition->disp_spi, TFT_MADCTL, &madctl, 1);
-			disp_deselect(ESP32_TouchGUI1_Definition);
-		}
-    }
-	else {
-		orientation = rot;
+void 
+TFT_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+	uint8_t rot)
+{
+  if (rot > 3) {
+
+	uint8_t madctl = (rot & 0xF8); // for testing, manually set MADCTL register
+
+	ESP32_SPI_polling_transmit_cmd_and_data(ESP32_TouchGUI1_Definition->disp_handle,
+		TFT_MADCTL,
+		&madctl, 1);
+  }
+
+  else {
+
+	orientation = rot;
+
         _tft_setRotation(ESP32_TouchGUI1_Definition, rot);
-	}
+  }
 
-	dispWin.x1 = 0;
-	dispWin.y1 = 0;
-	dispWin.x2 = ESP32_TouchGUI1_Definition->_width-1;
-	dispWin.y2 = ESP32_TouchGUI1_Definition->_height-1;
+  dispWin.x1 = 0;
+  dispWin.y1 = 0;
+  dispWin.x2 = ESP32_TouchGUI1_Definition->_width-1;
+  dispWin.y2 = ESP32_TouchGUI1_Definition->_height-1;
 
-	TFT_fillScreen(ESP32_TouchGUI1_Definition, _bg);
+  TFT_fillScreen(ESP32_TouchGUI1_Definition, _bg);
 }
+
+
 
 // Send the command to invert all of the colors.
 // Input: i 0 to disable inversion; non-zero to enable inversion
 //==========================================
-void TFT_invertDisplay(ESP32_SPI_Module_spi_device_handle_t spi_device_handle,
+void TFT_invertDisplay(ESP32_SPI_device_handle_t spi_device_handle,
 	const uint8_t mode)
 {
   if ( mode == INVERT_ON ) {
@@ -2156,12 +2213,12 @@ void TFT_invertDisplay(ESP32_SPI_Module_spi_device_handle_t spi_device_handle,
 // Select gamma curve
 // Input: gamma = 0~3
 //==================================
-void TFT_setGammaCurve(ESP32_SPI_Module_spi_device_handle_t spi_device_handle,
+void TFT_setGammaCurve(ESP32_SPI_device_handle_t spi_device_handle,
 	uint8_t gm)
 {
   uint8_t gamma_curve = 1 << (gm & 0x03);
 
-  ESP32_SPI_transfer_cmd_and_data(spi_device_handle,
+  ESP32_SPI_polling_transmit_cmd_and_data(spi_device_handle,
 	TFT_CMD_GAMMASET,
 	&gamma_curve,
 	1);
@@ -2253,14 +2310,18 @@ void TFT_setclipwin(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, ui
 	if (dispWin.y1 > dispWin.y2) dispWin.y1 = dispWin.y2;
 }
 
+
+
 //=====================
 void TFT_resetclipwin(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 {
-	dispWin.x2 = ESP32_TouchGUI1_Definition->_width-1;
-	dispWin.y2 = ESP32_TouchGUI1_Definition->_height-1;
-	dispWin.x1 = 0;
-	dispWin.y1 = 0;
+  dispWin.x2 = ESP32_TouchGUI1_Definition->_width-1;
+  dispWin.y2 = ESP32_TouchGUI1_Definition->_height-1;
+  dispWin.x1 = 0;
+  dispWin.y1 = 0;
 }
+
+
 
 //==========================================================================
 void set_7seg_font_atrib(uint8_t l, uint8_t w, int outline, color_t color) {
@@ -2929,7 +2990,7 @@ int TFT_read_touch(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int
 {
     *x = 0;
     *y = 0;
-	if (ESP32_TouchGUI1_Definition->ts_spi == NULL) return 0;
+	if (ESP32_TouchGUI1_Definition->ts_handle == NULL) return 0;
     #if USE_TOUCH == TOUCH_TYPE_NONE
 	return 0;
     #else

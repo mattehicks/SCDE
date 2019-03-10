@@ -83,7 +83,6 @@ typedef enum {
 
 
 
-
 /**
  * @brief This is a configuration structure for a SPI bus.
  *
@@ -165,9 +164,9 @@ typedef struct {
 #define SPI_DEVICE_NO_DUMMY                (1<<6)
 
 
+
 typedef struct ESP32_SPI_transaction_t ESP32_SPI_transaction_t;
 typedef void(*transaction_cb_t)(ESP32_SPI_transaction_t *trans);
-
 
 
 
@@ -226,9 +225,6 @@ typedef struct {
 
 
 
-
-
-
 /**
  * This structure describes one SPI transaction. The descriptor should not be modified until the transaction finishes.
  */
@@ -261,12 +257,6 @@ struct ESP32_SPI_transaction_t {
 
 
 
-
-
-
-
-
-
 /**
  * This struct is for SPI transactions which may change their address and command length.
  * Please do set the flags in base to ``SPI_TRANS_VARIABLE_CMD_ADR`` to use the bit length here.
@@ -279,31 +269,25 @@ typedef struct {
 
 
 
+// Handle for a device on a SPI bus (equal to ESP32_SPI_device_t*)
+typedef struct ESP32_SPI_device_t* ESP32_SPI_device_handle_t;
 
-
-
-
-
-typedef struct ESP32_SPI_device_t* ESP32_SPI_device_handle_t;  ///< Handle for a device on a SPI bus
-
-
-
-
+typedef struct ESP32_SPI_Definition_s ESP32_SPI_Definition_t;
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
+#define SPICOMMON_BUSFLAG_SLAVE         0          ///< Initialize I/O in slave mode
+#define SPICOMMON_BUSFLAG_MASTER        (1<<0)     ///< Initialize I/O in master mode
+#define SPICOMMON_BUSFLAG_NATIVE_PINS   (1<<1)     ///< Check using iomux pins. Or indicates the pins are configured through the IO mux rather than GPIO matrix.
+#define SPICOMMON_BUSFLAG_SCLK          (1<<2)     ///< Check existing of SCLK pin. Or indicates CLK line initialized.
+#define SPICOMMON_BUSFLAG_MISO          (1<<3)     ///< Check existing of MISO pin. Or indicates MISO line initialized.
+#define SPICOMMON_BUSFLAG_MOSI          (1<<4)     ///< Check existing of MOSI pin. Or indicates CLK line initialized.
+#define SPICOMMON_BUSFLAG_DUAL          (1<<5)     ///< Check MOSI and MISO pins can output. Or indicates bus able to work under DIO mode.
+#define SPICOMMON_BUSFLAG_WPHD          (1<<6)     ///< Check existing of WP and HD pins. Or indicates WP & HD pins initialized.
+#define SPICOMMON_BUSFLAG_QUAD          (SPICOMMON_BUSFLAG_DUAL|SPICOMMON_BUSFLAG_WPHD)     ///< Check existing of MOSI/MISO/WP/HD pins as output. Or indicates bus able to work under QIO mode.
 
 
 
@@ -312,10 +296,100 @@ typedef struct ESP32_SPI_device_t* ESP32_SPI_device_handle_t;  ///< Handle for a
 
 
 
+// -------------------------------------------------------------------------------------------------
+
+typedef struct ESP32_SPI_device_t ESP32_SPI_device_t;
+
+typedef typeof(SPI1.clock) ESP32_SPI_clock_reg_t;
+
+#define NO_CS 3     			// Number of CS pins per SPI host
+
+/// struct to hold private transaction data (like tx and rx buffer for DMA).
+typedef struct {
+    ESP32_SPI_transaction_t   *trans;
+    const uint32_t *buffer_to_send;   	// equals to tx_data, if SPI_TRANS_USE_RXDATA is applied; otherwise if original buffer wasn't in DMA-capable memory, this gets the address of a temporary buffer that is;
+                                	// otherwise sets to the original buffer or NULL if no buffer is assigned.
+    uint32_t *buffer_to_rcv;    	// similar to buffer_to_send
+} ESP32_SPI_trans_priv_t;
+
+typedef struct {
+  ESP32_SPI_host_device_t host_device; 	// the spi pheriperal we are using for this 
+					// definition(added by maik)
+
+    _Atomic(ESP32_SPI_device_t*) device[NO_CS];
+    intr_handle_t intr;
+    spi_dev_t *hw;
+    ESP32_SPI_trans_priv_t cur_trans_buf;
+    int cur_cs;     			// current device doing transaction
+    int prev_cs;    			// last device doing transaction, used to avoid re-configure registers if the device not changed
+    atomic_int acquire_cs; 		// the device acquiring the bus, NO_CS if no one is doing so.
+    bool polling;   			// in process of a polling, avoid of queue new transactions into ISR
+    bool isr_free;  			// the isr is not sending transactions
+    bool bus_locked;			// the bus is controlled by a device
+    lldesc_t *dmadesc_tx;
+    lldesc_t *dmadesc_rx;
+    uint32_t flags;
+    int dma_chan;
+    int max_transfer_sz;
+    ESP32_SPI_bus_config_t bus_cfg;
+#ifdef CONFIG_PM_ENABLE
+    esp_pm_lock_handle_t pm_lock;
+#endif
+} ESP32_SPI_host_t;
+
+typedef struct {
+    ESP32_SPI_clock_reg_t reg;
+    int eff_clk;
+    int dummy_num;
+    int miso_delay;
+} clock_config_t;
+
+struct ESP32_SPI_device_t {
+ // ESP32_SPI_Definition_t* ESP32_SPI_Definition; // added by maik - to get the host data but its there. will we need it?
+    int id;
+    QueueHandle_t trans_queue;
+    QueueHandle_t ret_queue;
+    ESP32_SPI_device_interface_config_t cfg;
+    clock_config_t clk_cfg;
+    ESP32_SPI_host_t* host;
+    SemaphoreHandle_t semphr_polling;   // semaphore to notify the device it claimed the bus
+    bool waiting;			// the device is waiting for the exclusive control of the bus
+};
+
+
+// -------------------------------------------------------------------------------------------------
 
 
 
+/** 
+ * ESP32_SPI_Definition stores values for operation valid only for the defined instance of an
+ * loaded module. Values are initialized by HCTRLD an the loaded module itself.
+ */
+typedef struct ESP32_SPI_Definition_s {
+  Common_Definition_t common;		/*!< ... the common part of the definition */
+  WebIf_Provided_t WebIf_Provided;	/*!< provided data for WebIf */
+  ESP32_SPI_host_t host;                /*!< the spi bus pheripheral this definition is using */
+  ESP32_SPI_bus_config_t bus_config;	/*!< this definitions spi bus configuration (4 all devices??) */
+} ESP32_SPI_Definition_t;
 
+
+
+// -------------------------------------------------------------------------------------------------
+
+
+
+/* 
+ * ESP32_SPI_StageXCHG stores values for operation of 2. stage design Modules (stage exchange)
+ */
+typedef struct ESP32_SPI_StageXCHG_s {
+  Common_StageXCHG_t common;		// ... the common part of the StageXCHG
+  // module specific here 
+
+} ESP32_SPI_StageXCHG_t;
+
+
+
+// -------------------------------------------------------------------------------------------------
 
 
 
@@ -361,13 +435,12 @@ bool ESP32_SPI_common_periph_in_use(ESP32_SPI_host_device_t host);
 bool ESP32_SPI_common_periph_free(ESP32_SPI_host_device_t host);
 
 
-
-
 /**
  * @brief Try to claim a SPI DMA channel
  *
  *  Call this if your driver wants to use SPI with a DMA channnel.
  *
+
  * @param dma_chan channel to claim
  *
  * @return True if success; false otherwise.
@@ -392,21 +465,8 @@ bool ESP32_SPI_common_dma_chan_in_use(int dma_chan);
  */
 bool ESP32_SPI_common_dma_chan_free(int dma_chan);
 
-#define SPICOMMON_BUSFLAG_SLAVE         0          ///< Initialize I/O in slave mode
-#define SPICOMMON_BUSFLAG_MASTER        (1<<0)     ///< Initialize I/O in master mode
-#define SPICOMMON_BUSFLAG_NATIVE_PINS   (1<<1)     ///< Check using iomux pins. Or indicates the pins are configured through the IO mux rather than GPIO matrix.
-#define SPICOMMON_BUSFLAG_SCLK          (1<<2)     ///< Check existing of SCLK pin. Or indicates CLK line initialized.
-#define SPICOMMON_BUSFLAG_MISO          (1<<3)     ///< Check existing of MISO pin. Or indicates MISO line initialized.
-#define SPICOMMON_BUSFLAG_MOSI          (1<<4)     ///< Check existing of MOSI pin. Or indicates CLK line initialized.
-#define SPICOMMON_BUSFLAG_DUAL          (1<<5)     ///< Check MOSI and MISO pins can output. Or indicates bus able to work under DIO mode.
-#define SPICOMMON_BUSFLAG_WPHD          (1<<6)     ///< Check existing of WP and HD pins. Or indicates WP & HD pins initialized.
-#define SPICOMMON_BUSFLAG_QUAD          (SPICOMMON_BUSFLAG_DUAL|SPICOMMON_BUSFLAG_WPHD)     ///< Check existing of MOSI/MISO/WP/HD pins as output. Or indicates bus able to work under QIO mode.
 
-
-
-
-
-
+// -------------------------------------------------------------------------------------------------
 
 
 /**
@@ -426,6 +486,7 @@ bool ESP32_SPI_common_dma_chan_free(int dma_chan);
  *              - ``SPICOMMON_BUSFLAG_SCLK``, ``SPICOMMON_BUSFLAG_MISO``, ``SPICOMMON_BUSFLAG_MOSI``:
  *                  Make sure SCLK/MISO/MOSI is/are set to a valid GPIO. Also check output capability according to the mode.
  *              - ``SPICOMMON_BUSFLAG_DUAL``: Make sure both MISO and MOSI are output capable so that DIO mode is capable.
+
  *              - ``SPICOMMON_BUSFLAG_WPHD`` Make sure WP and HD are set to valid output GPIOs.
  *              - ``SPICOMMON_BUSFLAG_QUAD``: Combination of ``SPICOMMON_BUSFLAG_DUAL`` and ``SPICOMMON_BUSFLAG_WPHD``.
  * @param[out] flags_o A SPICOMMON_BUSFLAG_* flag combination of bus abilities will be written to this address.
@@ -440,7 +501,7 @@ bool ESP32_SPI_common_dma_chan_free(int dma_chan);
  *         - ESP_ERR_INVALID_ARG   if parameter is invalid
  *         - ESP_OK                on success
  */
-esp_err_t ESP32_SPI_common_bus_initialize_io(ESP32_SPI_host_device_t host, const ESP32_SPI_bus_config_t *bus_config, int dma_chan, uint32_t flags, uint32_t *flags_o);
+strTextMultiple_t* ESP32_SPI_common_bus_initialize_io(ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_host_device_t host, const ESP32_SPI_bus_config_t *bus_config, int dma_chan, uint32_t flags, uint32_t *flags_o);
 
 /**
  * @brief Free the IO used by a SPI peripheral
@@ -450,6 +511,7 @@ esp_err_t ESP32_SPI_common_bus_initialize_io(ESP32_SPI_host_device_t host, const
  *
  * @return
  *         - ESP_ERR_INVALID_ARG   if parameter is invalid
+
  *         - ESP_OK                on success
  */
 esp_err_t ESP32_SPI_common_bus_free_io(ESP32_SPI_host_device_t host) __attribute__((deprecated));
@@ -507,6 +569,7 @@ void ESP32_SPI_common_cs_free_io(int cs_gpio_num);
  * @param len Length of buffer
  * @param data Data buffer to use for DMA transfer
  * @param isrx True if data is to be written into ``data``, false if it's to be read from ``data``.
+
  */
 void ESP32_SPI_common_setup_dma_desc_links(lldesc_t *dmadesc, int len, const uint8_t *data, bool isrx);
 
@@ -542,6 +605,7 @@ typedef void(*dmaworkaround_cb_t)(void *arg);
  * as such can only done safely when both DMA channels are idle. These functions coordinate this.
  *
  * Essentially, when a reset is needed, a driver can request this using spicommon_dmaworkaround_req_reset. This is supposed to be called
+
  * with an user-supplied function as an argument. If both DMA channels are idle, this call will reset the DMA subsystem and return true.
  * If the other DMA channel is still busy, it will return false; as soon as the other DMA channel is done, however, it will reset the
  * DMA subsystem and call the callback. The callback is then supposed to be used to continue the SPI drivers activity.
@@ -574,6 +638,7 @@ bool ESP32_SPI_common_dmaworkaround_reset_in_progress();
 void ESP32_SPI_common_dmaworkaround_idle(int dmachan);
 
 /**
+
  * @brief Mark a DMA channel as active.
  *
  * A call to this function tells the workaround logic that this channel will
@@ -589,18 +654,7 @@ void ESP32_SPI_common_dmaworkaround_transfer_active(int dmachan);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+// -------------------------------------------------------------------------------------------------
 
 
 
@@ -628,8 +682,9 @@ void ESP32_SPI_common_dmaworkaround_transfer_active(int dmachan);
  *         - ESP_ERR_INVALID_STATE if host already is in use
  *         - ESP_ERR_NO_MEM        if out of memory
  *         - ESP_OK                on success
+
  */
-esp_err_t ESP32_SPI_bus_initialize(ESP32_SPI_host_device_t host, const ESP32_SPI_bus_config_t *bus_config, int dma_chan);
+strTextMultiple_t* ESP32_SPI_bus_initialize(ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_host_device_t host_device, const ESP32_SPI_bus_config_t *bus_config, int dma_chan);
 
 /**
  * @brief Free a SPI bus
@@ -642,7 +697,7 @@ esp_err_t ESP32_SPI_bus_initialize(ESP32_SPI_host_device_t host, const ESP32_SPI
  *         - ESP_ERR_INVALID_STATE if not all devices on the bus are freed
  *         - ESP_OK                on success
  */
-esp_err_t ESP32_SPI_bus_free(ESP32_SPI_host_device_t host);
+strTextMultiple_t* ESP32_SPI_bus_free(ESP32_SPI_Definition_t* ESP32_SPI_Definition);
 
 /**
  * @brief Allocate a device on a SPI bus
@@ -658,12 +713,13 @@ esp_err_t ESP32_SPI_bus_free(ESP32_SPI_host_device_t host);
  * @param dev_config SPI interface protocol config for the device
  * @param handle Pointer to variable to hold the device handle
  * @return
+
  *         - ESP_ERR_INVALID_ARG   if parameter is invalid
  *         - ESP_ERR_NOT_FOUND     if host doesn't have any free CS slots
  *         - ESP_ERR_NO_MEM        if out of memory
  *         - ESP_OK                on success
  */
-esp_err_t ESP32_SPI_bus_add_device(ESP32_SPI_host_device_t host, const ESP32_SPI_device_interface_config_t *dev_config, ESP32_SPI_device_handle_t *handle);
+strTextMultiple_t*  ESP32_SPI_bus_add_device(ESP32_SPI_Definition_t* ESP32_SPI_Definition, const ESP32_SPI_device_interface_config_t *dev_config, ESP32_SPI_device_handle_t *handle);
 
 
 /**
@@ -682,6 +738,7 @@ esp_err_t ESP32_SPI_bus_remove_device(ESP32_SPI_device_handle_t handle);
  * @brief Queue a SPI transaction for interrupt transaction execution. Get the result by ``spi_device_get_trans_result``.
  *
  * @note Normally a device cannot start (queue) polling and interrupt
+
  *      transactions simultaneously.
  *
  * @param handle Device handle obtained using spi_host_add_dev
@@ -710,7 +767,9 @@ esp_err_t ESP32_SPI_device_queue_trans(ESP32_SPI_device_handle_t handle, ESP32_S
  * @param trans_desc Pointer to variable able to contain a pointer to the description of the transaction
         that is executed. The descriptor should not be modified until the descriptor is returned by
         spi_device_get_trans_result.
+
  * @param ticks_to_wait Ticks to wait until there's a returned item; use portMAX_DELAY to never time
+
                         out.
  * @return
  *         - ESP_ERR_INVALID_ARG   if parameter is invalid
@@ -733,6 +792,7 @@ esp_err_t ESP32_SPI_device_get_trans_result(ESP32_SPI_device_handle_t handle, ES
  * @param handle Device handle obtained using spi_host_add_dev
  * @param trans_desc Description of transaction to execute
  * @return
+
  *         - ESP_ERR_INVALID_ARG   if parameter is invalid
  *         - ESP_OK                on success
  */
@@ -787,6 +847,7 @@ esp_err_t ESP32_SPI_device_polling_end(ESP32_SPI_device_handle_t handle, TickTyp
  *
  * @note This function is not thread safe when multiple tasks access the same SPI device.
  *      Normally a device cannot start (queue) polling and interrupt
+
  *      transactions simutanuously.
  *
  * @param handle Device handle obtained using spi_host_add_dev
@@ -818,6 +879,7 @@ esp_err_t ESP32_SPI_device_acquire_bus(ESP32_SPI_device_handle_t device, TickTyp
  * @brief Release the SPI bus occupied by the device. All other devices can start sending transactions.
  *
  * @param dev The device to release the bus.
+
  */
 void ESP32_SPI_device_release_bus(ESP32_SPI_device_handle_t dev);
 
@@ -841,6 +903,7 @@ int ESP32_SPI_cal_clock(int fapb, int hz, int duty_cycle, uint32_t* reg_o);
   * @param eff_clk Effective clock frequency (in Hz) from spi_cal_clock.
   * @param dummy_o Address of dummy bits used output. Set to NULL if not needed.
   * @param cycles_remain_o Address of cycles remaining (after dummy bits are used) output.
+
   *         - -1 If too many cycles remaining, suggest to compensate half a clock.
   *         - 0 If no remaining cycles or dummy bits are not used.
   *         - positive value: cycles suggest to compensate.
@@ -862,116 +925,6 @@ int ESP32_SPI_get_freq_limit(bool gpio_is_used, int input_delay_ns);
 
 
 
-// -------------------------------------------------------------------------------------------------
-
-typedef struct ESP32_SPI_device_t ESP32_SPI_device_t;
-typedef typeof(SPI1.clock) ESP32_SPI_clock_reg_t;
-
-#define NO_CS 3     //Number of CS pins per SPI host
-
-/// struct to hold private transaction data (like tx and rx buffer for DMA).
-typedef struct {
-    ESP32_SPI_transaction_t   *trans;
-    const uint32_t *buffer_to_send;   //equals to tx_data, if SPI_TRANS_USE_RXDATA is applied; otherwise if original buffer wasn't in DMA-capable memory, this gets the address of a temporary buffer that is;
-                                //otherwise sets to the original buffer or NULL if no buffer is assigned.
-    uint32_t *buffer_to_rcv;    // similar to buffer_to_send
-} ESP32_SPI_trans_priv_t;
-
-typedef struct {
-    _Atomic(ESP32_SPI_device_t*) device[NO_CS];
-    intr_handle_t intr;
-    spi_dev_t *hw;
-    ESP32_SPI_trans_priv_t cur_trans_buf;
-    int cur_cs;     //current device doing transaction
-    int prev_cs;    //last device doing transaction, used to avoid re-configure registers if the device not changed
-    atomic_int acquire_cs; //the device acquiring the bus, NO_CS if no one is doing so.
-    bool polling;   //in process of a polling, avoid of queue new transactions into ISR
-    bool isr_free;  //the isr is not sending transactions
-    bool bus_locked;//the bus is controlled by a device
-    lldesc_t *dmadesc_tx;
-    lldesc_t *dmadesc_rx;
-    uint32_t flags;
-    int dma_chan;
-    int max_transfer_sz;
-    ESP32_SPI_bus_config_t bus_cfg;
-#ifdef CONFIG_PM_ENABLE
-    esp_pm_lock_handle_t pm_lock;
-#endif
-} ESP32_SPI_host_t;
-
-typedef struct {
-    ESP32_SPI_clock_reg_t reg;
-    int eff_clk;
-    int dummy_num;
-    int miso_delay;
-} clock_config_t;
-
-struct ESP32_SPI_device_t {
-    int id;
-    QueueHandle_t trans_queue;
-    QueueHandle_t ret_queue;
-    ESP32_SPI_device_interface_config_t cfg;
-    clock_config_t clk_cfg;
-    ESP32_SPI_host_t *host;
-    SemaphoreHandle_t semphr_polling;   //semaphore to notify the device it claimed the bus
-    bool        waiting;                //the device is waiting for the exclusive control of the bus
-};
-
-
-// -------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/** 
- * ESP32_SPI_Definition stores values for operation valid only for the defined instance of an
- * loaded module. Values are initialized by HCTRLD an the loaded module itself.
- */
-typedef struct ESP32_SPI_Definition_s {
-  Common_Definition_t common;			/*!< ... the common part of the definition */
-  WebIf_Provided_t WebIf_Provided;		/*!< provided data for WebIf */
-//  uint8_t i2c_num;				/*!< the I2C hardware that should be used */
-//  i2c_config_t i2c_config;			/*!< i2c configuration */
-//  i2c_obj_t *i2c_obj;				/*!< the current i2c job */
-
-  ESP32_SPI_host_t* spihost;			/*!< the current i2c job */
-
-  ESP32_SPI_host_device_t host;			/*!< the spi bus this definition is using */
-
-  ESP32_SPI_bus_config_t spi_bus_cfg;		/*!< this spi bus configuration (4 all devices) */
-
-} ESP32_SPI_Definition_t;
-
-
-
-// -------------------------------------------------------------------------------------------------
-
-
-
-/* 
- * ESP32_SPI_StageXCHG stores values for operation of 2. stage design Modules (stage exchange)
- */
-typedef struct ESP32_SPI_StageXCHG_s {
-  Common_StageXCHG_t common;		// ... the common part of the StageXCHG
-  // module specific here 
-
-} ESP32_SPI_StageXCHG_t;
-
-
-
-// -------------------------------------------------------------------------------------------------
 
 
 
@@ -984,7 +937,7 @@ typedef struct ESP32_SPI_StageXCHG_s {
  * This Fn are provided & made accessible for client modules - for operation
  */
 // typedef for ESP32_SPI_Module_spi_bus_add_deviceFn - adds an device to the definitions host
-typedef esp_err_t (*ESP32_SPI_bus_add_deviceFn_t) (ESP32_SPI_host_device_t host, const ESP32_SPI_device_interface_config_t *dev_config, ESP32_SPI_device_handle_t *handle);
+typedef strTextMultiple_t*  (*ESP32_SPI_bus_add_deviceFn_t) (ESP32_SPI_Definition_t* ESP32_SPI_Definition, const ESP32_SPI_device_interface_config_t *dev_config, ESP32_SPI_device_handle_t *handle);
 
 // typedef for ESP32_SPI_spi_bus_remove_deviceFn - removes an device from the definitions host
 typedef esp_err_t (*ESP32_SPI_bus_remove_deviceFn_t) (ESP32_SPI_device_handle_t handle);
@@ -996,76 +949,31 @@ typedef esp_err_t (*ESP32_SPI_device_queue_transFn_t) (ESP32_SPI_device_handle_t
 typedef esp_err_t (*ESP32_SPI_device_get_trans_resultFn_t) (ESP32_SPI_device_handle_t handle, ESP32_SPI_transaction_t **trans_desc, TickType_t ticks_to_wait);
 
 // typedef for ESP32_SPI_device_transmitFn - to send transaction, waits to complete, return result
-typedef uint32_t (*ESP32_SPI_device_transmitFn_t) (ESP32_SPI_device_handle_t handle, ESP32_SPI_transaction_t *trans_desc);
+typedef esp_err_t (*ESP32_SPI_device_transmitFn_t) (ESP32_SPI_device_handle_t handle, ESP32_SPI_transaction_t *trans_desc);
 
 // typedef for ESP32_SPI_device_polling_startFn - to immediately start a polling transaction
-typedef uint32_t (*ESP32_SPI_device_polling_startFn_t) (ESP32_SPI_device_handle_t handle, ESP32_SPI_transaction_t *trans_desc, TickType_t ticks_to_wait);
+typedef esp_err_t (*ESP32_SPI_device_polling_startFn_t) (ESP32_SPI_device_handle_t handle, ESP32_SPI_transaction_t *trans_desc, TickType_t ticks_to_wait);
 
 // typedef for ESP32_SPI_device_polling_endFn - to poll until the transaction ends
-typedef uint32_t (*ESP32_SPI_device_polling_endFn_t) (ESP32_SPI_device_handle_t handle, TickType_t ticks_to_wait);
+typedef esp_err_t (*ESP32_SPI_device_polling_endFn_t) (ESP32_SPI_device_handle_t handle, TickType_t ticks_to_wait);
 
 // typedef for ESP32_SPI_device_polling_transmitFn - send polling transaction, wait, return result
-typedef uint32_t (*ESP32_SPI_device_polling_transmitFn_t) (ESP32_SPI_device_handle_t handle, ESP32_SPI_transaction_t *trans_desc);
+typedef esp_err_t (*ESP32_SPI_device_polling_transmitFn_t) (ESP32_SPI_device_handle_t handle, ESP32_SPI_transaction_t *trans_desc);
 
 // typedef for ESP32_SPI_device_acquire_busFn - to occupy the SPI bus for transactions on a device
-typedef uint32_t (*ESP32_SPI_device_acquire_busFn_t) (ESP32_SPI_device_handle_t device, TickType_t wait);
+typedef esp_err_t (*ESP32_SPI_device_acquire_busFn_t) (ESP32_SPI_device_handle_t device, TickType_t wait);
 
 // typedef for ESP32_SPI_device_release_busFn - to release the occupied SPI bus
-typedef uint32_t (*ESP32_SPI_device_release_busFn_t) (ESP32_SPI_device_handle_t dev);
+typedef void (*ESP32_SPI_device_release_busFn_t) (ESP32_SPI_device_handle_t dev);
 
 // typedef for ESP32_SPI_cal_clockFn - to calculate the working frequency
-typedef uint32_t (*ESP32_SPI_cal_clockFn_t) (int fapb, int hz, int duty_cycle, uint32_t* reg_o);
+typedef esp_err_t (*ESP32_SPI_cal_clockFn_t) (int fapb, int hz, int duty_cycle, uint32_t* reg_o);
 
 // typedef for ESP32_SPI_get_timingFn - to calculate the timing settings of specified freq.
-typedef uint32_t (*ESP32_SPI_get_timingFn_t) (bool gpio_is_used, int input_delay_ns, int eff_clk, int* dummy_o, int* cycles_remain_o);
+typedef void (*ESP32_SPI_get_timingFn_t) (bool gpio_is_used, int input_delay_ns, int eff_clk, int* dummy_o, int* cycles_remain_o);
 
 // typedef for ESP32_SPI_get_freq_limitFn - to get the frequency limit of current configuration
-typedef uint32_t (*ESP32_SPI_get_freq_limitFn_t) (bool gpio_is_used, int input_delay_ns);
-
-
-
-
-
-/*
-// typedef for ESP32_SPI_spi_get_speedFn - 
-typedef uint32_t (*ESP32_SPI_spi_get_speedFn_t) (ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_Module_spi_device_handle_t handle);
-
-// typedef for ESP32_SPI_spi_set_speedFn - 
-typedef uint32_t (*ESP32_SPI_spi_set_speedFn_t) (ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_Module_spi_device_handle_t handle, uint32_t speed);
-
-// typedef for ESP32_SPI_spi_device_selectFn - 
-typedef esp_err_t (*ESP32_SPI_spi_device_selectFn_t) (ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_Module_spi_device_handle_t handle, int force);
-
-// typedef for ESP32_SPI_spi_device_deselectFn - 
-typedef esp_err_t (*ESP32_SPI_spi_device_deselectFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
-
-// typedef for ESP32_SPI_spi_uses_native_pinsFn - 
-typedef bool (*ESP32_SPI_spi_uses_native_pinsFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
-
-// typedef for ESP32_SPI_get_native_pinsFn - 
-typedef void (*ESP32_SPI_get_native_pinsFn_t) (int host, int *sdi, int *sdo, int *sck);
-void ESP32_SPI_get_native_pins(int host, int *sdi, int *sdo, int *sck);
-
-// typedef for ESP32_SPI_spi_transfer_dataFn - 
-typedef esp_err_t (*ESP32_SPI_spi_transfer_dataFn_t) (ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_Module_spi_device_handle_t handle, ESP32_SPI_Module_spi_transaction_t *trans);
-
-// typedef for ESP32_SPI_spi_device_TakeSemaphoreFn - 
-typedef esp_err_t (*ESP32_SPI_spi_device_TakeSemaphoreFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
-
-// typedef for ESP32_SPI_spi_device_GiveSemaphoreFn - 
-typedef void (*ESP32_SPI_spi_device_GiveSemaphoreFn_t) (ESP32_SPI_Module_spi_device_handle_t handle);
-
-// typedef for ESP32_SPI_spi_setup_dma_desc_linksFn - 
-typedef void (*ESP32_SPI_spi_setup_dma_desc_linksFn_t) (lldesc_t *dmadesc, int len, const uint8_t *data, bool isrx);
-
-// typedef for ESP32_SPI_spi_dmaworkaround_reset_in_progressFn - 
-typedef bool (*ESP32_SPI_spi_dmaworkaround_reset_in_progressFn_t) ();
-
-// typedef for ESP32_SPI_Module_spi_dmaworkaround_idleFn - 
-typedef void (*ESP32_SPI_spi_dmaworkaround_idleFn_t) (int dmachan);
-
-// typedef for ESP32_SPI_Module_spi_dmaworkaround_transfer_activeFn - 
-typedef void (*ESP32_SPI_spi_dmaworkaround_transfer_activeFn_t) (int dmachan);*/
+typedef esp_err_t (*ESP32_SPI_get_freq_limitFn_t) (bool gpio_is_used, int input_delay_ns);
 
 
 
@@ -1091,21 +999,6 @@ typedef struct ESP32_SPI_ProvidedByModule_s {
   ESP32_SPI_cal_clockFn_t ESP32_SPI_cal_clockFn;				// to calculate the working frequency
   ESP32_SPI_get_timingFn_t ESP32_SPI_get_timingFn;				// to calculate the timing settings of specified freq.
   ESP32_SPI_get_freq_limitFn_t ESP32_SPI_get_freq_limitFn;			// to get the frequency limit of current configuration
-
-/*
-  ESP32_SPI_spi_get_speedFn_t ESP32_SPI_spi_get_speedFn;			// ?
-  ESP32_SPI_spi_set_speedFn_t ESP32_SPI_spi_set_speedFn;			// ?
-  ESP32_SPI_spi_device_selectFn_t ESP32_SPI_spi_device_selectFn;		// ?
-  ESP32_SPI_spi_device_deselectFn_t ESP32_SPI_spi_device_deselectFn;		// ?
-  ESP32_SPI_spi_uses_native_pinsFn_t ESP32_SPI_spi_uses_native_pinsFn;		// ?
-  ESP32_SPI_get_native_pinsFn_t ESP32_SPI_get_native_pinsFn;			// ?
-  ESP32_SPI_spi_transfer_dataFn_t ESP32_SPI_spi_transfer_dataFn;		// ?
-  ESP32_SPI_spi_device_TakeSemaphoreFn_t ESP32_SPI_spi_device_TakeSemaphoreFn;	// ?
-  ESP32_SPI_spi_device_GiveSemaphoreFn_t ESP32_SPI_spi_device_GiveSemaphoreFn;	// ?
-  ESP32_SPI_spi_setup_dma_desc_linksFn_t ESP32_SPI_spi_setup_dma_desc_linksFn;	// ?
-  ESP32_SPI_spi_dmaworkaround_reset_in_progressFn_t ESP32_SPI_spi_dmaworkaround_reset_in_progressFn;	// ?
-  ESP32_SPI_spi_dmaworkaround_idleFn_t ESP32_SPI_spi_dmaworkaround_idleFn;	// ?
-  ESP32_SPI_spi_dmaworkaround_transfer_activeFn_t ESP32_SPI_spi_dmaworkaround_transfer_activeFn;	// ?*/
 } ESP32_SPI_ProvidedByModule_t;
 
 

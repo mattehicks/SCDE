@@ -1,4 +1,6 @@
 ESP32_SPI_Module for SCDE (Smart Connedcted Device Engine) V2
+may be renamed to:
+ESP32_SPI_Master_Module for SCDE (Smart Connedcted Device Engine) V2
 
 - ESP32_ -> intended for use on ESP32 SoC hardware only ! 
 

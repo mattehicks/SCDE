@@ -45,6 +45,9 @@ typedef struct Common_StageXCHG_s Common_StageXCHG_t;
 //typedef size_t uint32_t;
 
 
+// ptr zur Fehlermeldung in allokierter strTextMultiple_t WENN NOCH KEIN FEHLER WAR
+#define SCDE_OK  NULL
+
 
 // -------------------------------------------------------------------------------------------------
 

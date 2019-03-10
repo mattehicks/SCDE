@@ -305,7 +305,6 @@ extern uint32_t max_rdclock;
 
 
 
-
 // 24-bit color type structure
 typedef struct __attribute__((__packed__)) {
 //typedef struct {
@@ -749,10 +748,10 @@ static const uint8_t Rcmd3[] = {
 esp_err_t wait_trans_finish(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint8_t free_line);
 
 //
-void ESP32_SPI_transfer_only_cmd(ESP32_SPI_Module_spi_device_handle_t spi_device_handle, int8_t cmd);
+void ESP32_SPI_transfer_only_cmd(ESP32_SPI_device_handle_t spi_device_handle, int8_t cmd);
 
 //
-void ESP32_SPI_transfer_cmd_and_data(ESP32_SPI_Module_spi_device_handle_t spi_device_handle, int8_t cmd, uint8_t *data, uint32_t len);
+void ESP32_SPI_transfer_cmd_and_data(ESP32_SPI_device_handle_t spi_device_handle, int8_t cmd, uint8_t *data, uint32_t len);
 
 //
 void drawPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, color_t color, uint8_t sel);
@@ -796,7 +795,7 @@ void _tft_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, 
 // Initialize all pins used by display driver
 // ** MUST be executed before SPI interface initialization
 //=================
-void TFT_PinsInit(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition);
+//void TFT_PinsInit(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition);
 
 // Perform display initialization sequence
 // Sets orientation to landscape; clears the screen
@@ -804,7 +803,7 @@ void TFT_PinsInit(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition);
 // * SPI interface must already be setup
 // * 'tft_disp_type', 'COLOR_BITS', '_width', '_height' variables must be set
 //======================
-void TFT_display_init(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition);
+strTextMultiple_t* TFT_display_init(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, ESP32_SPI_device_handle_t disp_handle, DisplayConfig_t display_config);
 
 //===================
 void stmpe610_Init(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition);
@@ -818,12 +817,12 @@ uint32_t stmpe610_getID(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition
 // ===============================================================================
 
 
-//
-static void WriteCommandList(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, ESP32_SPI_Module_spi_device_handle_t spi, const uint8_t *addr);
 
+// 
+void ESP32_SPI_write_cmd_list(ESP32_SPI_device_handle_t spi_device_handle, const uint8_t* addr);
 
-
-
+// transmits cmd and data via polling 
+void ESP32_SPI_polling_transmit_cmd_and_data(ESP32_SPI_device_handle_t spi_device_handle, int8_t cmd, const uint8_t* data, uint32_t len);
 
 
 

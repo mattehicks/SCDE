@@ -27,10 +27,38 @@
 #include "rom/lldesc.h"
 
 #include "freertos/ringbuf.h"
+//#include "tft.h"
+// -------------------------------------------------------------------------------------------------
+
+// ptr zur Fehlermeldung in allokierter strTextMultiple_t WENN NOCH KEIN FEHLER WAR
+#define SCDE_OK  NULL
+
 
 
 // -------------------------------------------------------------------------------------------------
 
+// display details
+typedef struct DisplayConfig_s {
+  uint8_t tft_disp_type;  	///< Display type, DISP_TYPE_ILI9488 or DISP_TYPE_ILI9341
+} DisplayConfig_t;
+
+// tft globals
+typedef struct TFTGlobals_s {
+  uint8_t orientation;		// screen orientation
+  uint16_t font_rotate;		// font rotation
+  uint8_t font_transparent;
+  uint8_t font_forceFixed;
+  uint8_t text_wrap;		// character wrapping to new line
+  color_t _fg;
+  color_t _bg;
+  uint8_t image_debug;
+  float _angleOffset;
+  int TFT_X;
+  int TFT_Y;
+  uint32_t tp_calx;
+  uint32_t tp_caly;
+  dispWin_t dispWin;
+} TFTGlobals_t;
 
 // -------------------------------------------------------------------------------------------------
 
@@ -87,12 +115,19 @@ typedef struct ESP32_TouchGUI1_Definition_s {
   // Converts colors to grayscale if set to 1
   uint8_t gray_scale;
 
-  // Display type, DISP_TYPE_ILI9488 or DISP_TYPE_ILI9341
-  uint8_t tft_disp_type;
+  // the display configuration
+  DisplayConfig_t display_config;
 
-  // Spi device handles for display and touch screen
-  ESP32_SPI_Module_spi_device_handle_t disp_spi;
-  ESP32_SPI_Module_spi_device_handle_t ts_spi;
+  // globals for tft painting?
+  TFTGlobals_t TFT_globals;
+
+  // Spi device configuration + handle - for display
+  ESP32_SPI_device_interface_config_t disp_interface_config;
+  ESP32_SPI_device_handle_t disp_handle;
+
+  // Spi device configuration + handle - for touch screen
+  ESP32_SPI_device_interface_config_t ts_interface_config;
+  ESP32_SPI_device_handle_t ts_handle;
 
 //  uint8_t i2c_num;				/*!< the I2C hardware that should be used */
 //  i2c_config_t i2c_config;			/*!< i2c configuration */

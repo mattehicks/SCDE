@@ -87,6 +87,7 @@ tft.o: /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/tft.c \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/list.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/math.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/tjpgd.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/stdatomic.h \
  /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h \
  /home/maikschulze/esp/SCDE/main/include/esp8266.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/ctype.h \
@@ -335,6 +336,8 @@ tft.o: /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/tft.c \
 /home/maikschulze/esp/esp-idf/components/newlib/include/math.h:
 
 /home/maikschulze/esp/esp-idf/components/esp32/include/rom/tjpgd.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/include/stdatomic.h:
 
 /home/maikschulze/esp/SCDE/main/include/ProjectConfig.h:
 
