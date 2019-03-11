@@ -33,11 +33,12 @@
 #include "WebIf_Module.h"
 
 // this Modules structures & types ...
+#include "tft.h"
 #include "ESP32_TouchGUI1_Module_s.h"
 #include "ESP32_TouchGUI1_Module.h"
 
 
-#include "tft.h"
+
 //#include "SCDE_Main.h"
 //#include "driver/gpio.h"
 
@@ -822,11 +823,11 @@ GREY_SCALE
 	//tft_disp_type = DISP_TYPE_ST7735B;
 
   // Set display resolution
-  ESP32_TouchGUI1_Definition->_width = DEFAULT_TFT_DISPLAY_WIDTH;  // smaller dimension
-  ESP32_TouchGUI1_Definition->_height = DEFAULT_TFT_DISPLAY_HEIGHT; // larger dimension
+ // ESP32_TouchGUI1_Definition->_width = DEFAULT_TFT_DISPLAY_WIDTH;  // smaller dimension
+//  ESP32_TouchGUI1_Definition->_height = DEFAULT_TFT_DISPLAY_HEIGHT; // larger dimension
 
   // Converts colors to grayscale if set to 1
-  ESP32_TouchGUI1_Definition->gray_scale = 0;
+//  ESP32_TouchGUI1_Definition->gray_scale = 0;
 
 
   // Pins MUST be initialized before SPI interface initialization
@@ -874,14 +875,41 @@ printf("post:%p.\r\n", ESP32_TouchGUI1_Definition->disp_interface_config.post_cb
 
 
  
+  ESP32_TouchGUI1_Definition->TFT_globals = (TFTGlobals_t) {
+  .orientation = LANDSCAPE,	// screen orientation
+  .font_rotate = 0,		// font rotation
+  .font_transparent = 0,
+  .font_forceFixed = 0,
+  .text_wrap = 0,		// character wrapping to new line
+//._fg = {  0, 255,   0},
+//._bg = {  0,   0,   0},
+  .image_debug = 0,
+  ._angleOffset = DEFAULT_ANGLE_OFFSET,
+  .TFT_X = 0,
+  .TFT_Y = 0,
+  .tp_calx = 7472920,
+  .tp_caly = 122224794,
+ // dispWin_t dispWin;
+  .font_buffered_char = 1,
+  .font_line_space = 0,
+
+  // Display dimensions
+  ._width = DEFAULT_TFT_DISPLAY_WIDTH,
+  ._height = DEFAULT_TFT_DISPLAY_HEIGHT,
+
+  // Converts colors to grayscale if set to 1
+  .gray_scale = 0;
+};
 
 
 
-  font_rotate = 0;
-  text_wrap = 0;
-  font_transparent = 0;
-  font_forceFixed = 0;
-  ESP32_TouchGUI1_Definition->gray_scale = 0;
+
+
+ // font_rotate = 0;
+ // text_wrap = 0;
+ // font_transparent = 0;
+ // font_forceFixed = 0;
+ // ESP32_TouchGUI1_Definition->gray_scale = 0;
 
 
   TFT_setGammaCurve(ESP32_TouchGUI1_Definition->disp_handle, DEFAULT_GAMMA_CURVE);
@@ -4060,7 +4088,8 @@ _direct_send(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, color_t *
 // ================================================================
 //----------------------------------------------------------------------------------------------
 static void IRAM_ATTR 
-_TFT_pushColorRep(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+_TFT_pushColorRep(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
 	color_t *color,
 	uint32_t len, // len in pixel! (3 bytes?)
 	uint8_t rep,
@@ -4069,20 +4098,20 @@ _TFT_pushColorRep(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
   if (len == 0) return;
 
   // send cmd: write to disp. ram
-  ESP32_SPI_transfer_only_cmd(ESP32_TouchGUI1_Definition->disp_handle, (const int8_t) TFT_RAMWR);
+  ESP32_SPI_transfer_only_cmd(disp_handle, (const int8_t) TFT_RAMWR);
 
   // short transfer? helper does the job
-  if ( (len * 24 ) <= 512 ) {
+  if ( ( len * 24 ) <= 512 ) {
 
-	//ESP32_SPI_transfer_only_data(ESP32_TouchGUI1_Definition->disp_handle, int8_t TFT_RAMWR)
-	//_direct_send(ESP32_TouchGUI1_Definition, color, len, rep);
+	// ESP32_SPI_transfer_only_data(ESP32_TouchGUI1_Definition->disp_handle, int8_t TFT_RAMWR)
+	// _direct_send(ESP32_TouchGUI1_Definition, color, len, rep);
   }
 
   // false: we send len color data
-  else if (rep == 0)  {
+  else if ( rep == 0 )  {
 
 	// repare data (rgb - gs conversion)
-	if (ESP32_TouchGUI1_Definition->gray_scale) {
+	if (TFT_globals->gray_scale) {
 
 		for ( int n = 0 ; n < len ; n++ ) {
 
@@ -4090,7 +4119,7 @@ _TFT_pushColorRep(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 		}
 	}
 
-	ESP32_SPI_transfer_only_data(ESP32_TouchGUI1_Definition->disp_handle,
+	ESP32_SPI_transfer_only_data(disp_handle,
 		(uint8_t*) color,
 		len * 3);
 
@@ -4104,7 +4133,7 @@ _TFT_pushColorRep(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	uint32_t buf_colors;
 	int buf_bytes, to_send;
 
-	buf_colors = (( len > (ESP32_TouchGUI1_Definition->_width * 2 )) ? ( ESP32_TouchGUI1_Definition->_width * 2) : len);
+	buf_colors = (( len > (TFT_globals->_width * 2 )) ? ( TFT_globals->_width * 2) : len);
 
 	buf_bytes = buf_colors * 3;
 
@@ -4113,7 +4142,7 @@ _TFT_pushColorRep(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	if (trans_cline == NULL) return;
 
 	// Prepare fill color
-	if (ESP32_TouchGUI1_Definition->gray_scale) _color = color2gs(color[0]);
+	if (TFT_globals->gray_scale) _color = color2gs(color[0]);
 	else _color = color[0];
 
 	// Fill color buffer with fill color
@@ -4127,7 +4156,7 @@ _TFT_pushColorRep(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 
 	while (to_send > 0) {
 
-		ESP32_SPI_transfer_only_data(ESP32_TouchGUI1_Definition->disp_handle,
+		ESP32_SPI_transfer_only_data(disp_handle,
 			(uint8_t*) trans_cline,
 			( (to_send > buf_colors) ? buf_bytes : (to_send * 3) ) );
 
@@ -4218,8 +4247,9 @@ _TFT_pushColorRep(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 // Write 'len' repeated color data to TFT 'window' (x1,y2),(x2,y2)
 //-------------------------------------------------------------------------------------------
 void IRAM_ATTR 
-TFT_pushColorRep(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
-int x1,
+TFT_pushColorRep(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int x1,
 	int y1,
 	int x2,
 	int y2,
@@ -4227,10 +4257,10 @@ int x1,
 	uint32_t len)
 {
   // set address window
-  disp_spi_transfer_addrwin(ESP32_TouchGUI1_Definition->disp_handle, x1, x2, y1, y2);
+  disp_spi_transfer_addrwin(disp_handle, x1, x2, y1, y2);
 
   // send data
-  _TFT_pushColorRep(ESP32_TouchGUI1_Definition, &color, len, 1, 1);
+  _TFT_pushColorRep(disp_handle, TFT_globals, &color, len, 1, 1);
 }
 
 
@@ -4238,7 +4268,8 @@ int x1,
 // Write 'len' color data to TFT 'window' (x1,y2),(x2,y2) from given buffer
 //-----------------------------------------------------------------------------------
 void IRAM_ATTR 
-send_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+send_data(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
 	int x1,
 	int y1,
 	int x2,
@@ -4247,10 +4278,10 @@ send_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
  	color_t *buf)
 {
   // set address window
-  disp_spi_transfer_addrwin(ESP32_TouchGUI1_Definition->disp_handle, x1, x2, y1, y2);
+  disp_spi_transfer_addrwin(disp_handle, x1, x2, y1, y2);
 
   // send data
-  _TFT_pushColorRep(ESP32_TouchGUI1_Definition, buf, len, 0, 0);
+  _TFT_pushColorRep(disp_handle, TFT_globals, buf, len, 0, 0);
 }
 
 
@@ -4638,7 +4669,8 @@ exit:
 
 //==================================
 void 
-_tft_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+_tft_setRotation(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
 	uint8_t rot)
 {
   uint8_t rotation = rot & 3; // can't be higher than 3
@@ -4649,24 +4681,24 @@ _tft_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
   if ((rotation & 1)) {
 
 	// in landscape modes must be width > height
-	if (ESP32_TouchGUI1_Definition->_width < ESP32_TouchGUI1_Definition->_height) {
+	if (TFT_globals->_width < TFT_globals->_height) {
 
-		tmp = ESP32_TouchGUI1_Definition->_width;
-            	ESP32_TouchGUI1_Definition->_width  = ESP32_TouchGUI1_Definition->_height;
-           	ESP32_TouchGUI1_Definition->_height = tmp;
+		tmp = TFT_globals->_width;
+            	TFT_globals->_width  = TFT_globals->_height;
+           	TFT_globals->_height = tmp;
 	}
   }
 
   else {
 
 	// in portrait modes must be width < height
-        if (ESP32_TouchGUI1_Definition->_width > ESP32_TouchGUI1_Definition->_height) {
+        if (TFT_globals->_width > TFT_globals->_height) {
 
-		tmp = ESP32_TouchGUI1_Definition->_width;
+		tmp = TFT_globals->_width;
 
-		ESP32_TouchGUI1_Definition->_width  = ESP32_TouchGUI1_Definition->_height;
+		TFT_globals->_width  = TFT_globals->_height;
 
-		ESP32_TouchGUI1_Definition->_height = tmp;
+		TFT_globals->_height = tmp;
         }
     }
 
@@ -4734,7 +4766,7 @@ _tft_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 
   if (send) {
 
-	ESP32_SPI_polling_transmit_cmd_and_data(ESP32_TouchGUI1_Definition->disp_handle,
+	ESP32_SPI_polling_transmit_cmd_and_data(disp_handle,
 		TFT_MADCTL,
 		&madctl,
 		1);
@@ -4855,15 +4887,15 @@ TFT_display_init(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 
   // set rotation, clear screen
 
-  _tft_setRotation(ESP32_TouchGUI1_Definition, PORTRAIT);
+  _tft_setRotation(disp_handle, &ESP32_TouchGUI1_Definition->TFT_globals, PORTRAIT);
 
-  TFT_pushColorRep(ESP32_TouchGUI1_Definition,
+  TFT_pushColorRep(disp_handle, &ESP32_TouchGUI1_Definition->TFT_globals,
 	0,
 	0,
 	ESP32_TouchGUI1_Definition->_width - 1,
 	ESP32_TouchGUI1_Definition->_height - 1,
 	(color_t){0,0,0},
-	(uint32_t)(ESP32_TouchGUI1_Definition->_height * ESP32_TouchGUI1_Definition->_width) );
+	(uint32_t)(ESP32_TouchGUI1_Definition->TFT_globals._height * ESP32_TouchGUI1_Definition->TFT_globals._width) );
 
   // enable backlight
   #if PIN_NUM_BCKL

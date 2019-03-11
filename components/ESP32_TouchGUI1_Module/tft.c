@@ -2156,37 +2156,41 @@ void TFT_print(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 }
 
 
+
 // ================ Service functions ==========================================
+
+
 
 // Change the screen rotation.
 // Input: m new rotation value (0 to 3)
 //=================================
 void 
-TFT_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+TFT_setRotation(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
 	uint8_t rot)
 {
-  if (rot > 3) {
+  if ( rot > 3 ) {
 
-	uint8_t madctl = (rot & 0xF8); // for testing, manually set MADCTL register
+	uint8_t madctl = (rot & 0xF8);
 
-	ESP32_SPI_polling_transmit_cmd_and_data(ESP32_TouchGUI1_Definition->disp_handle,
+	ESP32_SPI_polling_transmit_cmd_and_data(disp_handle,
 		TFT_MADCTL,
 		&madctl, 1);
   }
 
   else {
 
-	orientation = rot;
+	TFT_globals->orientation = rot;
 
-        _tft_setRotation(ESP32_TouchGUI1_Definition, rot);
+        _tft_setRotation(disp_handle, rot);
   }
 
-  dispWin.x1 = 0;
-  dispWin.y1 = 0;
-  dispWin.x2 = ESP32_TouchGUI1_Definition->_width-1;
-  dispWin.y2 = ESP32_TouchGUI1_Definition->_height-1;
+  TFT_globals->dispWin.x1 = 0;
+  TFT_globals->dispWin.y1 = 0;
+  TFT_globals->dispWin.x2 = TFT_globals->_width - 1;
+  TFT_globals->dispWin.y2 = TFT_globals->_height - 1;
 
-  TFT_fillScreen(ESP32_TouchGUI1_Definition, _bg);
+  TFT_fillScreen(ESP32_TouchGUI1_Definition, TFT_globals->_bg);
 }
 
 
@@ -2213,12 +2217,12 @@ void TFT_invertDisplay(ESP32_SPI_device_handle_t spi_device_handle,
 // Select gamma curve
 // Input: gamma = 0~3
 //==================================
-void TFT_setGammaCurve(ESP32_SPI_device_handle_t spi_device_handle,
+void TFT_setGammaCurve(ESP32_SPI_device_handle_t disp_handle,
 	uint8_t gm)
 {
   uint8_t gamma_curve = 1 << (gm & 0x03);
 
-  ESP32_SPI_polling_transmit_cmd_and_data(spi_device_handle,
+  ESP32_SPI_polling_transmit_cmd_and_data(disp_handle,
 	TFT_CMD_GAMMASET,
 	&gamma_curve,
 	1);

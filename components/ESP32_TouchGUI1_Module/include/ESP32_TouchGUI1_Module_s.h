@@ -42,23 +42,7 @@ typedef struct DisplayConfig_s {
   uint8_t tft_disp_type;  	///< Display type, DISP_TYPE_ILI9488 or DISP_TYPE_ILI9341
 } DisplayConfig_t;
 
-// tft globals
-typedef struct TFTGlobals_s {
-  uint8_t orientation;		// screen orientation
-  uint16_t font_rotate;		// font rotation
-  uint8_t font_transparent;
-  uint8_t font_forceFixed;
-  uint8_t text_wrap;		// character wrapping to new line
-  color_t _fg;
-  color_t _bg;
-  uint8_t image_debug;
-  float _angleOffset;
-  int TFT_X;
-  int TFT_Y;
-  uint32_t tp_calx;
-  uint32_t tp_caly;
-  dispWin_t dispWin;
-} TFTGlobals_t;
+
 
 // -------------------------------------------------------------------------------------------------
 
@@ -109,11 +93,11 @@ typedef struct ESP32_TouchGUI1_Definition_s {
 
 
   // Display dimensions
-  int _width;
-  int _height;
+//  int _width;
+//  int _height;
 
   // Converts colors to grayscale if set to 1
-  uint8_t gray_scale;
+//  uint8_t gray_scale;
 
   // the display configuration
   DisplayConfig_t display_config;

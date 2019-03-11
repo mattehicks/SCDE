@@ -757,10 +757,10 @@ void ESP32_SPI_transfer_cmd_and_data(ESP32_SPI_device_handle_t spi_device_handle
 void drawPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, color_t color, uint8_t sel);
 
 //
-void send_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x1, int y1, int x2, int y2, uint32_t len, color_t *buf);
+void send_data(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int x1, int y1, int x2, int y2, uint32_t len, color_t *buf);
 
 //
-void TFT_pushColorRep(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x1, int y1, int x2, int y2, color_t data, uint32_t len);
+void TFT_pushColorRep(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals,, int x1, int y1, int x2, int y2, color_t data, uint32_t len);
 
 //
 int read_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x1, int y1, int x2, int y2, int len, uint8_t *buf, uint8_t set_sp);
@@ -790,7 +790,7 @@ uint32_t find_rd_speed(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 // Change the screen rotation.
 // Input: m new rotation value (0 to 3)
 //=================================
-void _tft_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint8_t rot);
+void _tft_setRotation(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, uint8_t rot);
 
 // Initialize all pins used by display driver
 // ** MUST be executed before SPI interface initialization

@@ -9,27 +9,57 @@
 
 #include <stdlib.h>
 //#include "tftspi.h"
-#include "ESP32_TouchGUI1_Module_s.h"
+//#include "ESP32_TouchGUI1_Module_s.h"
 #include "ESP32_TouchGUI1_Module.h"
 
+
+
 typedef struct {
-	uint16_t        x1;
-	uint16_t        y1;
-	uint16_t        x2;
-	uint16_t        y2;
+  uint16_t x1;
+  uint16_t y1;
+  uint16_t x2;
+  uint16_t y2;
 } dispWin_t;
 
 typedef struct {
-	uint8_t 	*font;
-	uint8_t 	x_size;
-	uint8_t 	y_size;
-	uint8_t	    offset;
-	uint16_t	numchars;
-    uint16_t	size;
-	uint8_t 	max_x_size;
-    uint8_t     bitmap;
-	color_t     color;
-} Font;
+  uint8_t *font;
+  uint8_t x_size;
+  uint8_t y_size;
+  uint8_t offset;
+  uint16_t numchars;
+  uint16_t size;
+  uint8_t max_x_size;
+  uint8_t bitmap;
+  color_t color;
+} Font; //font_t
+
+// tft globals
+typedef struct TFTGlobals_s {
+  uint8_t orientation;		// screen orientation
+  uint16_t font_rotate;		// font rotation
+  uint8_t font_transparent;
+  uint8_t font_forceFixed;
+  uint8_t text_wrap;		// character wrapping to new line
+  color_t _fg;
+  color_t _bg;
+  uint8_t image_debug;
+  float _angleOffset;
+  int TFT_X;
+  int TFT_Y;
+  uint32_t tp_calx;
+  uint32_t tp_caly;
+  dispWin_t dispWin;
+  uint8_t font_buffered_char;
+  uint8_t font_line_space;
+
+  // Display dimensions
+  int _width;
+  int _height;
+
+  // Converts colors to grayscale if set to 1
+  uint8_t gray_scale;
+} TFTGlobals_t;
+
 
 
 //==========================================================================================
@@ -38,24 +68,25 @@ typedef struct {
 extern uint8_t   orientation;		// current screen orientation
 extern uint16_t  font_rotate;   	// current font font_rotate angle (0~395)
 extern uint8_t   font_transparent;	// if not 0 draw fonts transparent
-extern uint8_t   font_forceFixed;   // if not zero force drawing proportional fonts with fixed width
+extern uint8_t   font_forceFixed;  	// if not zero force drawing proportional fonts with fixed width
 extern uint8_t   font_buffered_char;
 extern uint8_t   font_line_space;	// additional spacing between text lines; added to font height
-extern uint8_t   text_wrap;         // if not 0 wrap long text to the new line, else clip
+extern uint8_t   text_wrap;        	// if not 0 wrap long text to the new line, else clip
 extern color_t   _fg;            	// current foreground color for fonts
 extern color_t   _bg;            	// current background for non transparent fonts
-extern dispWin_t dispWin;			// display clip window
+extern dispWin_t dispWin;		// display clip window
 extern float	  _angleOffset;		// angle offset for arc, polygon and line by angle functions
 extern uint8_t	  image_debug;		// print debug messages during image decode if set to 1
 
-extern Font cfont;					// Current font structure
+extern Font cfont;			// Current font structure
 
-extern int	TFT_X;					// X position of the next character after TFT_print() function
-extern int	TFT_Y;					// Y position of the next character after TFT_print() function
+extern int	TFT_X;			// X position of the next character after TFT_print() function
+extern int	TFT_Y;			// Y position of the next character after TFT_print() function
 
-extern uint32_t tp_calx;			// touch screen X calibration constant
-extern uint32_t tp_caly;			// touch screen Y calibration constant
+extern uint32_t tp_calx;		// touch screen X calibration constant
+extern uint32_t tp_caly;		// touch screen Y calibration constant
 // =========================================================================================
+
 
 
 // Buffer is created during jpeg decode for sending data
@@ -63,24 +94,37 @@ extern uint32_t tp_caly;			// touch screen Y calibration constant
 // The size must be multiple of 256 bytes !!
 #define JPG_IMAGE_LINE_BUF_SIZE 512
 
+
+
 // --- Constants for ellipse function ---
 #define TFT_ELLIPSE_UPPER_RIGHT 0x01
 #define TFT_ELLIPSE_UPPER_LEFT  0x02
 #define TFT_ELLIPSE_LOWER_LEFT  0x04
 #define TFT_ELLIPSE_LOWER_RIGHT 0x08
 
+
+
 // Constants for Arc function
 // number representing the maximum angle (e.g. if 100, then if you pass in start=0 and end=50, you get a half circle)
 // this can be changed with setArcParams function at runtime
 #define DEFAULT_ARC_ANGLE_MAX 360
+
+
+
 // rotational offset in degrees defining position of value 0 (-90 will put it at the top of circle)
 // this can be changed with setAngleOffset function at runtime
 #define DEFAULT_ANGLE_OFFSET -90
 
+
+
 #define PI 3.14159265359
+
+
 
 #define MIN_POLIGON_SIDES	3
 #define MAX_POLIGON_SIDES	60
+
+
 
 // === Color names constants ===
 extern const color_t TFT_BLACK;
@@ -103,17 +147,25 @@ extern const color_t TFT_ORANGE;
 extern const color_t TFT_GREENYELLOW;
 extern const color_t TFT_PINK;
 
+
+
 // === Color invert constants ===
 #define INVERT_ON		1
 #define INVERT_OFF		0
+
+
 
 // === Special coordinates constants ===
 #define CENTER	-9003
 #define RIGHT	-9004
 #define BOTTOM	-9004
 
+
+
 #define LASTX	7000
 #define LASTY	8000
+
+
 
 // === Embedded fonts constants ===
 #define DEFAULT_FONT	0
@@ -123,14 +175,15 @@ extern const color_t TFT_PINK;
 #define COMIC24_FONT	4
 #define MINYA24_FONT	5
 #define TOONEY32_FONT	6
-#define SMALL_FONT		7
+#define SMALL_FONT	7
 #define DEF_SMALL_FONT	8
-#define FONT_7SEG		9
-#define USER_FONT		10  // font will be read from file
+#define FONT_7SEG	9
+#define USER_FONT	10  // font will be read from file
 
 
 
 // ===== PUBLIC FUNCTIONS =========================================================================
+
 
 
 /*
@@ -145,7 +198,7 @@ extern const color_t TFT_PINK;
  *          send all pixels an deactivate CS after all pixela was sent
 */
 //-------------------------------------------------------------------
-void TFT_drawPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, color_t color, uint8_t sel);
+void TFT_drawPixel(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int16_t x, int16_t y, color_t color, uint8_t sel);
 
 /*
  * Read pixel color value from display GRAM at given x,y coordinates
@@ -158,7 +211,7 @@ void TFT_drawPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int
  *      pixel color at x,y
 */
 //------------------------------------------
-color_t TFT_readPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y);
+color_t TFT_readPixel(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int16_t x, int16_t y);
 
 /*
  * Draw vertical line at given x,y coordinates
@@ -170,7 +223,7 @@ color_t TFT_readPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, 
  *   color: line color
 */
 //---------------------------------------------------------------------
-void TFT_drawFastVLine(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int16_t h, color_t color);
+void TFT_drawFastVLine(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int16_t x, int16_t y, int16_t h, color_t color);
 
 /*
  * Draw horizontal line at given x,y coordinates
@@ -182,7 +235,7 @@ void TFT_drawFastVLine(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
  *   color: line color
 */
 //---------------------------------------------------------------------
-void TFT_drawFastHLine(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int16_t w, color_t color);
+void TFT_drawFastHLine(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int16_t x, int16_t y, int16_t w, color_t color);
 
 /*
  * Draw line on screen
@@ -195,7 +248,7 @@ void TFT_drawFastHLine(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
  *   color: line color
 */
 //-------------------------------------------------------------------------------
-void TFT_drawLine(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x0, int16_t y0, int16_t x1, int16_t y1, color_t color);
+void TFT_drawLine(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int16_t x0, int16_t y0, int16_t x1, int16_t y1, color_t color);
 
 
 /*
@@ -212,7 +265,7 @@ void TFT_drawLine(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int1
  *   color: line color
 */
 //-----------------------------------------------------------------------------------------------------------
-void TFT_drawLineByAngle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x, uint16_t y, uint16_t start, uint16_t len, uint16_t angle, color_t color);
+void TFT_drawLineByAngle(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, uint16_t x, uint16_t y, uint16_t start, uint16_t len, uint16_t angle, color_t color);
 
 /*
  * Fill given rectangular screen region with color
@@ -225,7 +278,7 @@ void TFT_drawLineByAngle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definitio
  *   color: fill color
 */
 //---------------------------------------------------------------------------
-void TFT_fillRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int16_t w, int16_t h, color_t color);
+void TFT_fillRect(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int16_t x, int16_t y, int16_t w, int16_t h, color_t color);
 
 /*
  * Draw rectangle on screen
@@ -238,7 +291,7 @@ void TFT_fillRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int1
  *   color: rect line color
 */
 //------------------------------------------------------------------------------
-void TFT_drawRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x1,uint16_t y1,uint16_t w,uint16_t h, color_t color);
+void TFT_drawRect(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, uint16_t x1,uint16_t y1,uint16_t w,uint16_t h, color_t color);
 
 /*
  * Draw rectangle with rounded corners on screen
@@ -252,7 +305,7 @@ void TFT_drawRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint
  *   color: rectangle color
 */
 //----------------------------------------------------------------------------------------------
-void TFT_drawRoundRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t r, color_t color);
+void TFT_drawRoundRect(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t r, color_t color);
 
 /*
  * Fill given rectangular screen region with rounded corners with color
@@ -266,7 +319,7 @@ void TFT_drawRoundRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
  *   color: fill color
 */
 //----------------------------------------------------------------------------------------------
-void TFT_fillRoundRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t r, color_t color);
+void TFT_fillRoundRect(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t r, color_t color);
 
 /*
  * Fill the whole screen with color
@@ -275,7 +328,7 @@ void TFT_fillRoundRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
  *   color: fill color
 */
 //--------------------------------
-void TFT_fillScreen(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, color_t color);
+void TFT_fillScreen(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, color_t color);
 
 /*
  * Fill the current clip window with color
@@ -284,7 +337,7 @@ void TFT_fillScreen(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, co
  *   color: fill color
 */
 //---------------------------------
-void TFT_fillWindow(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, color_t color);
+void TFT_fillWindow(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, color_t color);
 
 /*
  * Draw triangle on screen
@@ -299,7 +352,7 @@ void TFT_fillWindow(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, co
  *   color: triangle color
 */
 //-----------------------------------------------------------------------------------------------------------------
-void TFT_drawTriangle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, color_t color);
+void TFT_drawTriangle(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, color_t color);
 
 /*
  * Fill triangular screen region with color
@@ -314,7 +367,7 @@ void TFT_drawTriangle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, 
  *   color: fill color
 */
 //-----------------------------------------------------------------------------------------------------------------
-void TFT_fillTriangle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, color_t color);
+void TFT_fillTriangle(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, color_t color);
 
 /*
  * Draw circle on screen
@@ -326,7 +379,7 @@ void TFT_fillTriangle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, 
  *   color: circle color
 */
 //-------------------------------------------------------------------
-void TFT_drawCircle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int radius, color_t color);
+void TFT_drawCircle(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int16_t x, int16_t y, int radius, color_t color);
 
 /*
  * Fill circle on screen with color
@@ -338,7 +391,7 @@ void TFT_drawCircle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, in
  *   color: circle fill color
 */
 //-------------------------------------------------------------------
-void TFT_fillCircle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,int16_t x, int16_t y, int radius, color_t color);
+void TFT_fillCircle(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int16_t x, int16_t y, int radius, color_t color);
 
 /*
  * Draw ellipse on screen
@@ -358,7 +411,7 @@ void TFT_fillCircle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,int
  *   color: circle color
 */
 //------------------------------------------------------------------------------------------------------
-void TFT_drawEllipse(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x0, uint16_t y0, uint16_t rx, uint16_t ry, color_t color, uint8_t option);
+void TFT_drawEllipse(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, uint16_t x0, uint16_t y0, uint16_t rx, uint16_t ry, color_t color, uint8_t option);
 
 /*
  * Fill elliptical region on screen
@@ -378,7 +431,7 @@ void TFT_drawEllipse(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, u
  *   color: fill color
 */
 //------------------------------------------------------------------------------------------------------
-void TFT_fillEllipse(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x0, uint16_t y0, uint16_t rx, uint16_t ry, color_t color, uint8_t option);
+void TFT_fillEllipse(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, uint16_t x0, uint16_t y0, uint16_t rx, uint16_t ry, color_t color, uint8_t option);
 
 
 /*
@@ -397,7 +450,7 @@ void TFT_fillEllipse(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, u
  * fillcolor: arc fill color
 */
 //----------------------------------------------------------------------------------------------------------------------------
-void TFT_drawArc(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t cx, uint16_t cy, uint16_t r, uint16_t th, float start, float end, color_t color, color_t fillcolor);
+void TFT_drawArc(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, uint16_t cx, uint16_t cy, uint16_t r, uint16_t th, float start, float end, color_t color, color_t fillcolor);
 
 
 /*
@@ -414,11 +467,11 @@ void TFT_drawArc(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint1
  *        th: thickness of the polygon outline
 */
 //--------------------------------------------------------------------------------------------------------------
-void TFT_drawPolygon(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int cx, int cy, int sides, int diameter, color_t color, color_t fill, int deg, uint8_t th);
+void TFT_drawPolygon(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int cx, int cy, int sides, int diameter, color_t color, color_t fill, int deg, uint8_t th);
 
 
 //--------------------------------------------------------------------------------------
-//void TFT_drawStar(int cx, int cy, int diameter, color_t color, bool fill, float factor);
+//void TFT_drawStar(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int cx, int cy, int diameter, color_t color, bool fill, float factor);
 
 
 /*
@@ -482,7 +535,7 @@ int TFT_getfontheight();
  *
  */
 //-------------------------------------
-void TFT_print(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, char *st, int x, int y);
+void TFT_print(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, char *st, int x, int y);
 
 /*
  * Set atributes for 7 segment vector font
@@ -509,28 +562,28 @@ void set_7seg_font_atrib(uint8_t l, uint8_t w, int outline, color_t color);
  *
  */
 //----------------------------------------------------------------------
-void TFT_setclipwin(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
+void TFT_setclipwin(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 
 /*
  * Resets the clipping area to full screen (0,0),(_wodth,_height)
  *
  */
 //----------------------
-void TFT_resetclipwin(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition);
+void TFT_resetclipwin(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals);
 
 /*
  * Save current clipping area to temporary variable
  *
  */
 //---------------------
-void TFT_saveClipWin();
+void TFT_saveClipWin(TFTGlobals_t* TFT_globals, );
 
 /*
  * Restore current clipping area from temporary variable
  *
  */
 //------------------------
-void TFT_restoreClipWin();
+void TFT_restoreClipWin(TFTGlobals_t* TFT_globals, );
 
 /*
  * Set the screen rotation
@@ -542,7 +595,7 @@ void TFT_restoreClipWin();
  *
  */
 //--------------------------------
-void TFT_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint8_t rot);
+void TFT_setRotation(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, uint8_t rot); //OK
 
 /*
  * Set inverted/normal colors
@@ -552,7 +605,7 @@ void TFT_setRotation(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, u
  *
  */
 //-----------------------------------------
-void TFT_invertDisplay(ESP32_SPI_device_handle_t spi_device_handle, const uint8_t mode);
+void TFT_invertDisplay(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, const uint8_t mode);
 
 /*
  * Select gamma curve
@@ -560,7 +613,7 @@ void TFT_invertDisplay(ESP32_SPI_device_handle_t spi_device_handle, const uint8_
  *      gamma: gama curve, values 0~3
  */
 //=================================
-void TFT_setGammaCurve(ESP32_SPI_device_handle_t spi_device_handle, uint8_t gm);
+void TFT_setGammaCurve(ESP32_SPI_device_handle_t disp_handle, uint8_t gm); //OK
 
 /*
  * Compare two color structures
@@ -583,7 +636,7 @@ int TFT_getStringWidth(char* str);
 /*
  * Fills the rectangle occupied by string with current background color
  */
-void TFT_clearStringRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x, int y, char *str);
+void TFT_clearStringRect(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int x, int y, char *str);
 
 /*
  * Converts the components of a color, as specified by the HSB model,
@@ -620,7 +673,7 @@ color_t HSBtoRGB(float _hue, float _sat, float _brightness);
  *
  */
 //-----------------------------------------------------------------------------------
-void TFT_jpg_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x, int y, uint8_t scale, char *fname, uint8_t *buf, int size);
+void TFT_jpg_image(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int x, int y, uint8_t scale, char *fname, uint8_t *buf, int size);
 
 /*
  * Decodes and displays BMP image
@@ -637,7 +690,7 @@ void TFT_jpg_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int
  *
  */
 //-------------------------------------------------------------------------------------
-int TFT_bmp_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x, int y, uint8_t scale, char *fname, uint8_t *imgbuf, int size);
+int TFT_bmp_image(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int x, int y, uint8_t scale, char *fname, uint8_t *imgbuf, int size);
 
 /*
  * Get the touch panel coordinates.
@@ -653,7 +706,7 @@ int TFT_bmp_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int 
  * 		1 if touch panel is touched; x&y are the valid coordinates
  */
 //----------------------------------------------
-int TFT_read_touch(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int *x, int* y, uint8_t raw);
+//int TFT_read_touch(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int *x, int* y, uint8_t raw);
 
 
 /*
