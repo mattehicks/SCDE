@@ -72,6 +72,24 @@ static const char* I2S_TAG = "I2S";
 
 
 
+// macro to CHECK, if FALSE -> load error msg in strTextMultiple_t and return
+#define SCDE_CHECK_LOAD_ERROR_TEXT_GOTO(a, str, dest) do {			\
+  if (!(a)) {									\
+	/* alloc mem for retMsg */						\
+	p_retMsg = malloc(sizeof(strTextMultiple_t));				\
+										\
+	/* response with error text */						\
+	p_retMsg->strTextLen = asprintf(&p_retMsg->strText			\
+		,"Parsing Error! %s(%d): %s!",					\
+		__FUNCTION__, __LINE__, str);					\
+	goto dest;								\
+  }										\
+} while(0)
+
+
+
+
+
 
 // -------------------------------------------------------------------------------------------------
 
@@ -502,7 +520,7 @@ static const char* I2C_TAG = "i2c";
 void 
 lcd_spi_pre_transfer_callback(ESP32_SPI_transaction_t* t)
 {
-  printf("pre.\r\n");
+  printf("pre........\r\n");
   int dc = (int) t->user;
   gpio_set_level(PIN_NUM_DC, dc);
 }
@@ -510,7 +528,7 @@ lcd_spi_pre_transfer_callback(ESP32_SPI_transaction_t* t)
 void 
 lcd_spi_post_transfer_callback(ESP32_SPI_transaction_t* t)
 {
- printf("post.\r\n");
+ printf("post.......\r\n");
 //    int dc = (int) t->user;
 //    gpio_set_level(PIN_NUM_DC, dc);
 }
@@ -538,73 +556,73 @@ lcd_get_id(ESP32_SPI_device_handle_t spi)
 
 
 
-/**
+/** public function
  * -------------------------------------------------------------------------------------------------
  *  FName: ESP32_TouchGUI1_Define
- *  Desc: Finalizes the defines a new "device" of 'ESP32_S0' type. Contains devicespecific init code.
- *  Info: 
- *  Para: Common_Definition_t *Common_Definition -> prefilled ESP32Control Definition
- *        char *Definition -> the last part of the CommandDefine arg* 
- *  Rets: strTextMultiple_t* -> response text NULL=no text
+ *  Desc: Finalizes the creation of the requested Definition of this Module. Includes executing type
+ *        specific inits.
+ *  Info: Invoked by cmd-line 'Define custom_definition_name module_name'
+ *  Para: Common_Definition_t* p_Common_Definition -> prefilled 'This'_Module Definition (should be casted)
+ *  Rets: strTextMultiple_t* p_retMsg (error text) -> forces VETO! ; NULL = SCDE_OK
  * -------------------------------------------------------------------------------------------------
  */
 strTextMultiple_t*
-ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
+ESP32_TouchGUI1_Define(Common_Definition_t* p_Common_Definition)
 {
 
   // make common ptr to modul specific ptr
-  ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition =
-		  (ESP32_TouchGUI1_Definition_t*) Common_Definition;
+  ESP32_TouchGUI1_Definition_t* p_ESP32_TouchGUI1_Definition =
+		  (ESP32_TouchGUI1_Definition_t*) p_Common_Definition;
 
   // for Fn response msg
-  strTextMultiple_t *retMsg = SCDE_OK;
+  strTextMultiple_t* p_retMsg = SCDE_OK;
 
 // -------------------------------------------------------------------------------------------------
 
   #if ESP32_TouchGUI1_Module_DBG >= 5
-  SCDEFn_at_ESP32_TouchGUI1_M->Log3Fn(Common_Definition->name
-	,Common_Definition->nameLen
-	,5
-	,"DefineFn of Module '%.*s' is called to continue creation of Definition '%.*s' with args '%.*s'."
-	,ESP32_TouchGUI1_Definition->common.module->provided->typeNameLen
-	,ESP32_TouchGUI1_Definition->common.module->provided->typeName
-	,ESP32_TouchGUI1_Definition->common.nameLen
-	,ESP32_TouchGUI1_Definition->common.name
-	,ESP32_TouchGUI1_Definition->common.definitionLen
-	,ESP32_TouchGUI1_Definition->common.definition);
+  SCDEFn_at_ESP32_TouchGUI1_M->Log3Fn(p_Common_Definition->name,
+	p_Common_Definition->nameLen,
+	5,
+	"DefineFn of Module '%.*s' is called to continue creation of Definition '%.*s' with args '%.*s'.",
+	p_ESP32_TouchGUI1_Definition->common.module->provided->typeNameLen,
+	p_ESP32_TouchGUI1_Definition->common.module->provided->typeName,
+	p_ESP32_TouchGUI1_Definition->common.nameLen,
+	p_ESP32_TouchGUI1_Definition->common.name,
+	p_ESP32_TouchGUI1_Definition->common.definitionLen,
+	p_ESP32_TouchGUI1_Definition->common.definition);
   #endif
 
 // ------------------------------------------------------------------------------------------------
 
   // new conversation
-  uint8_t *defArgsText = Common_Definition->definition;
-  size_t defArgsTextLen = Common_Definition->definitionLen;
+  uint8_t *p_defArgsText = p_Common_Definition->definition;
+  size_t defArgsTextLen = p_Common_Definition->definitionLen;
 
   // Check for args. This type requires args...
   if (!defArgsTextLen) {
 
 	// alloc mem for retMsg
-	retMsg = malloc(sizeof(strTextMultiple_t));
+	p_retMsg = malloc(sizeof(strTextMultiple_t));
 
 	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
+	p_retMsg->strTextLen = asprintf(&p_retMsg->strText
 		,"Parsing Error! Expected Args!");
 
-	return retMsg;
+	return p_retMsg;
   }
 
 // ------------------------------------------------------------------------------------------------
 
-//  xSemaphoreTake(ESP32_TouchGUI1_Definition->def_mux
+//  xSemaphoreTake(p_ESP32_TouchGUI1_Definition->def_mux
 //    ,portMAX_DELAY);
 
 // ------------------------------------------------------------------------------------------------
 
   // store FD to Definition. Will than be processed in global loop ... -> THIS MODULE USES NO FD
-  ESP32_TouchGUI1_Definition->common.fd = -1;
+  p_ESP32_TouchGUI1_Definition->common.fd = -1;
 
   // store table of function callbacks provided & made accessible for client modules
- // ESP32_TouchGUI1_Definition->ESP32_TouchGUI1_Fn = &ESP32_TouchGUI1_Fn;
+ // p_ESP32_TouchGUI1_Definition->ESP32_TouchGUI1_Fn = &ESP32_TouchGUI1_Fn;
 
 // ------------------------------------------------------------------------------------------------
 
@@ -613,58 +631,58 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
 //	&ESP32Control_Definition->WebIf_Provided;
 
   // check for loaded Module 'WebIf' -> get provided Fn
-  ESP32_TouchGUI1_Definition->WebIf_Provided.WebIf_FnProvided =
+  p_ESP32_TouchGUI1_Definition->WebIf_Provided.WebIf_FnProvided =
 	NULL;//(WebIf_FnProvided_t *) SCDEFn_at_ESP32_TouchGUI1_M->GetFnProvidedByModule("WebIf");
 
  // Providing data for WebIf? Initialise data provided for WebIf
-  if (ESP32_TouchGUI1_Definition->WebIf_Provided.WebIf_FnProvided) {
+  if (p_ESP32_TouchGUI1_Definition->WebIf_Provided.WebIf_FnProvided) {
 
-	ESP32_TouchGUI1_Definition->WebIf_Provided.ActiveResourcesDataA =
+	p_ESP32_TouchGUI1_Definition->WebIf_Provided.ActiveResourcesDataA =
 		(WebIf_ActiveResourcesDataA_t *) &ESP32_TouchGUI1_ActiveResourcesDataA_forWebIf;
 
-	ESP32_TouchGUI1_Definition->WebIf_Provided.ActiveResourcesDataB =
+	p_ESP32_TouchGUI1_Definition->WebIf_Provided.ActiveResourcesDataB =
 		(WebIf_ActiveResourcesDataB_t *) &ESP32_TouchGUI1_ActiveResourcesDataB_forWebIf;
   }
 
   else	{
 
-	SCDEFn_at_ESP32_TouchGUI1_M->Log3Fn(Common_Definition->name
-		,Common_Definition->nameLen
+	SCDEFn_at_ESP32_TouchGUI1_M->Log3Fn(p_Common_Definition->name
+		,p_Common_Definition->nameLen
 		,1
 		,"Could not enable WebIf support for '%.*s'. Type '%.*s' detects Type 'WebIf' is NOT loaded!"
-		,ESP32_TouchGUI1_Definition->common.nameLen
-		,ESP32_TouchGUI1_Definition->common.name
-		,ESP32_TouchGUI1_Definition->common.module->provided->typeNameLen
-		,ESP32_TouchGUI1_Definition->common.module->provided->typeName);
+		,p_ESP32_TouchGUI1_Definition->common.nameLen
+		,p_ESP32_TouchGUI1_Definition->common.name
+		,p_ESP32_TouchGUI1_Definition->common.module->provided->typeNameLen
+		,p_ESP32_TouchGUI1_Definition->common.module->provided->typeName);
   }
 
 // ------------------------------------------------------------------------------------------------
 
   // Parse define-args (KEY=VALUE) protocol -> gets parsedKVInput in allocated mem, NULL = ERROR
-  parsedKVInputArgs_t *parsedKVInput = 
+  parsedKVInputArgs_t* p_parsedKVInput = 
 	SCDEFn_at_ESP32_TouchGUI1_M->ParseKVInputArgsFn(ESP32_TouchGUI1_SET_NUMBER_OF_IK		// Num Implementated KEYs MAX
 	,ESP32_TouchGUI1_Set_ImplementedKeys					// Implementated Keys
-	,defArgsText								// our args text
+	,p_defArgsText								// our args text
 	,defArgsTextLen);							// our args text len
 
   // parsing may report an problem. args contain: unknown keys, double keys, ...?
-  if (!parsedKVInput) {
+  if (!p_parsedKVInput) {
 
 	// alloc mem for retMsg
-	retMsg = malloc(sizeof(strTextMultiple_t));
+	p_retMsg = malloc(sizeof(strTextMultiple_t));
 
 	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
+	p_retMsg->strTextLen = asprintf(&p_retMsg->strText
 		,"Parsing Error! Args '%.*s' not taken! Check the KEYs!"
 		,defArgsTextLen
-		,defArgsText);
+		,p_defArgsText);
 
-	if (parsedKVInput) {
+	if (p_parsedKVInput) {
 
-		free(parsedKVInput);
+		free(p_parsedKVInput);
 	}
 
-	return retMsg;
+	return p_retMsg;
   }
 
 // ------------------------------------------------------------------------------------------------
@@ -672,7 +690,7 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
   // try 1 - arguments for configuration as i2c master ?
 
   // set required Keys -> Keys that should be there in this request
-  parsedKVInput->requiredKVBF = 	( (1 << ESP32_TouchGUI1_SET_I2C_NUM)
+  p_parsedKVInput->requiredKVBF = 	( (1 << ESP32_TouchGUI1_SET_I2C_NUM)
 					| (1 << ESP32_TouchGUI1_SET_I2C_MODE)
 					| (1 << ESP32_TouchGUI1_SET_SDA_IO)
 					| (1 << ESP32_TouchGUI1_SET_SDA_IO_PULLUP)
@@ -682,44 +700,44 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
 					);
 
   // set forbidden Keys -> Keys that are not allowed in this request
-  parsedKVInput->forbiddenKVBF = 	( (1 << ESP32_TouchGUI1_SET_SLAVE_10BIT_ENA)
+  p_parsedKVInput->forbiddenKVBF = 	( (1 << ESP32_TouchGUI1_SET_SLAVE_10BIT_ENA)
 					| (1 << ESP32_TouchGUI1_SET_SLAVE_ADRESS)
  					);
 /*
   // process the set-args (key=value@) protocol
   if (ESP32_TouchGUI1_ProcessKVInputArgs(ESP32_TouchGUI1_Definition
-	,parsedKVInput				// KVInput parsed
-	,defArgsText				// our args text
+	,p_parsedKVInput				// KVInput parsed
+	,p_defArgsText				// our args text
 	,defArgsTextLen) ) {			// our args text len
 
 	// Processing reports an problem. Args not taken. Response with error text.
 
 	// alloc mem for retMsg
-	retMsg = malloc(sizeof(strTextMultiple_t));
+	p_retMsg = malloc(sizeof(strTextMultiple_t));
 
 	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
+	p_retMsg->strTextLen = asprintf(&p_retMsg->strText
 		,"Processing Error! Args '%.*s' not taken! Check the VALUEs!"
 		,defArgsTextLen
-		,defArgsText);
+		,p_defArgsText);
 
 	// free allocated memory for query result key-field
-	free(parsedKVInput);
+	free(p_parsedKVInput);
 
-	return retMsg;
+	return p_retMsg;
 
   }
 */
 // ------------------------------------------------------------------------------------------------
 
   // set affected readings
- // ESP32_TouchGUI1_SetAffectedReadings(ESP32_TouchGUI1_Definition
-//	,parsedKVInput->affectedReadingsBF);
+ // ESP32_TouchGUI1_SetAffectedReadings(p_ESP32_TouchGUI1_Definition
+//	,p_parsedKVInput->affectedReadingsBF);
 
 // ------------------------------------------------------------------------------------------------
 
   // free allocated memory for query result key-field
-  free(parsedKVInput);
+  free(p_parsedKVInput);
 
 // ------------------------------------------------------------------------------------------------
 
@@ -732,54 +750,54 @@ ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition)
   // + poll intervall*/
 
   // temp build 'ESP32_TouchGUI1'
-	ESP32_TouchGUI1_Definition->stage1definitionNameLen = 
-		asprintf(&ESP32_TouchGUI1_Definition->stage1definitionName,"SPI");
+  p_ESP32_TouchGUI1_Definition->stage1definitionNameLen = 
+		asprintf( (char**) &p_ESP32_TouchGUI1_Definition->stage1definitionName,"SPI");
 
 // ------------------------------------------------------------------------------------------------
 
   // get pointer to 1st stage modul (we developing for...)
-  ESP32_SPI_Definition_t* ESP32_SPI_Definition =
+  ESP32_SPI_Definition_t* p_ESP32_SPI_Definition =
 		(ESP32_SPI_Definition_t*) SCDEFn_at_ESP32_TouchGUI1_M->GetDefinitionPtrByNameFn(
-		ESP32_TouchGUI1_Definition->stage1definitionNameLen,
-		ESP32_TouchGUI1_Definition->stage1definitionName);
+		p_ESP32_TouchGUI1_Definition->stage1definitionNameLen,
+		p_ESP32_TouchGUI1_Definition->stage1definitionName);
 
   // not found - retMsg & define-veto
-  if (!ESP32_SPI_Definition) {
+  if (!p_ESP32_SPI_Definition) {
 
 	// alloc mem for retMsg
-	retMsg = malloc(sizeof(strTextMultiple_t));
+	p_retMsg = malloc(sizeof(strTextMultiple_t));
 
 	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
+	p_retMsg->strTextLen = asprintf(&p_retMsg->strText
 		,"Stage 1 Module '%.*s' not found! Stopping define!"
-		,ESP32_TouchGUI1_Definition->stage1definitionNameLen
-		,ESP32_TouchGUI1_Definition->stage1definitionName);
+		,p_ESP32_TouchGUI1_Definition->stage1definitionNameLen
+		,p_ESP32_TouchGUI1_Definition->stage1definitionName);
 
-	return retMsg;
+	return p_retMsg;
   }
 
 // ------------------------------------------------------------------------------------------------
 
-  #if BMP180_Module_DBG >= 7
-  SCDEFn_at_ESP32_TouchGUI1_M->Log3Fn(Common_Definition->name
-	,Common_Definition->nameLen
+  #if ESP32_TouchGUI1_Module_DBG >= 7
+  SCDEFn_at_ESP32_TouchGUI1_M->Log3Fn(p_Common_Definition->name
+	,p_Common_Definition->nameLen
 	,7
 	,"Found an first Stage defined as name '%.*s'. Its Type '%.*s' !"
-	,ESP32_SPI_Definition->common.nameLen
-	,ESP32_SPI_Definition->common.name
-	,ESP32_SPI_Definition->common.module->provided->typeNameLen
-	,ESP32_SPI_Definition->common.module->provided->typeName);
+	,p_ESP32_SPI_Definition->common.nameLen
+	,p_ESP32_SPI_Definition->common.name
+	,p_ESP32_SPI_Definition->common.module->provided->typeNameLen
+	,p_ESP32_SPI_Definition->common.module->provided->typeName);
   #endif
 
 // ------------------------------------------------------------------------------------------------
 
   // store link to stage 1
-  ESP32_TouchGUI1_Definition->ESP32_SPI_Definition = 
-	ESP32_SPI_Definition;
+  p_ESP32_TouchGUI1_Definition->p_ESP32_SPI_Definition = 
+	p_ESP32_SPI_Definition;
 
   // get table of function callbacks provided & made accessible from stage 1 Module
-  ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
-	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
+  ESP32_SPI_ProvidedByModule_t* p_ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
+	p_ESP32_TouchGUI1_Definition->p_ESP32_SPI_Definition->common.module->provided;
 
 // ------------------------------------------------------------------------------------------------
 
@@ -817,130 +835,158 @@ GREY_SCALE
 
 
 
-  // Set display type
-  ESP32_TouchGUI1_Definition->display_config.tft_disp_type = DEFAULT_DISP_TYPE;
+
+
+
+
+
+// ------------------------------------------------------------------------------------------------
+
+  // alloc mem for the TFT Globals (TFTGlobals_t)
+  TFTGlobals_t* p_TFT_globals =
+	malloc(sizeof(TFTGlobals_t));
+
+  // check if we got memory? Else load retMsg an goto NOMEMORY
+  SCDE_CHECK_LOAD_ERROR_TEXT_GOTO(p_TFT_globals,
+		"Could not allocate TFTGlobals_t", error_cleanup_1;);
+
+  // store the display configuration
+  p_ESP32_TouchGUI1_Definition->p_TFT_globals = p_TFT_globals;
+
+  // zero / start clean TFTGlobals_t
+  memset(p_TFT_globals, 0, sizeof(TFTGlobals_t));
+
+  // initial fill ...
+
+  p_TFT_globals = &(TFTGlobals_t) {
+	.orientation = LANDSCAPE,	// screen orientation
+	.font_rotate = 0,		// font rotation
+	.font_transparent = 0,
+	.font_forceFixed = 0,
+	.text_wrap = 0,			// character wrapping to new line
+	._fg = {  0, 255,   0},		// forderground color
+	._bg = {  0,   0,   0},		// backgroung color
+	.image_debug = 0,		// for debug output in image extraction 
+	._angleOffset = DEFAULT_ANGLE_OFFSET, 	// ?
+	.TFT_X = 0,
+	.TFT_Y = 0,
+	.tp_calx = 7472920,
+	.tp_caly = 122224794,
+
+	.dispWin = {			// all drawings are clipped to 'dispWin'
+		.x1 = 0,
+		.y1 = 0,
+		.x2 = DEFAULT_TFT_DISPLAY_WIDTH,
+		.y2 = DEFAULT_TFT_DISPLAY_HEIGHT
+	},
+
+	.font_buffered_char = 1,
+	.font_line_space = 0,
+
+	// display dimension of hardware screen
+	._width = DEFAULT_TFT_DISPLAY_WIDTH,
+	._height = DEFAULT_TFT_DISPLAY_HEIGHT,
+
+	// Converts colors to grayscale if set to 1
+	.gray_scale = 0,
+
+	// stores the selected userfont
+	.userfont = NULL,
+	.TFT_OFFSET = 0,
+	._arcAngleMax = DEFAULT_ARC_ANGLE_MAX,
+};
+
+// ------------------------------------------------------------------------------------------------
+
+  // alloc mem for the SPI device interface config (ESP32_SPI_device_interface_config_t)
+  ESP32_SPI_device_interface_config_t* p_disp_interface_config =
+	malloc(sizeof(ESP32_SPI_device_interface_config_t));
+
+  // check if we got memory? Else load retMsg an goto NOMEMORY
+  SCDE_CHECK_LOAD_ERROR_TEXT_GOTO(p_disp_interface_config,
+		"Could not allocate ESP32_SPI_device_interface_config_t", error_cleanup_2);
+
+  // store the display configuration
+  p_ESP32_TouchGUI1_Definition->p_disp_interface_config = p_disp_interface_config;
+
+  // zero / start clean ESP32_SPI_device_interface_config_t
+  memset(p_disp_interface_config, 0, sizeof(ESP32_SPI_device_interface_config_t));
+
+  // initial fill ...
+
+  p_disp_interface_config = &(ESP32_SPI_device_interface_config_t) {
+//      .clock_speed_hz = 26*1000*1000,        		// Clock out at 26 MHz (overclock)
+	.clock_speed_hz = 10*1000*1000,        		// Clock out at 10 MHz
+	.mode = 0,                            	 	// SPI mode 0
+	.spics_io_num = PIN_NUM_CS,             	// CS pin
+	.queue_size = 7,                       		// We want to be able to queue 7 transactions at a time
+	.pre_cb = lcd_spi_pre_transfer_callback,	//Specify pre-transfer callback to handle D/C line
+	.post_cb = lcd_spi_post_transfer_callback,
+};
+
+// ------------------------------------------------------------------------------------------------
+
+
+  printf("pre:%p.\r\n", p_disp_interface_config->pre_cb);
+  printf("post:%p.\r\n", p_disp_interface_config->post_cb);
+
+// ------------------------------------------------------------------------------------------------
+
+  // set display type
+  p_ESP32_TouchGUI1_Definition->display_config.tft_disp_type = DEFAULT_DISP_TYPE;
 	//tft_disp_type = DISP_TYPE_ILI9341;
 	//tft_disp_type = DISP_TYPE_ILI9488;
 	//tft_disp_type = DISP_TYPE_ST7735B;
 
-  // Set display resolution
- // ESP32_TouchGUI1_Definition->_width = DEFAULT_TFT_DISPLAY_WIDTH;  // smaller dimension
-//  ESP32_TouchGUI1_Definition->_height = DEFAULT_TFT_DISPLAY_HEIGHT; // larger dimension
-
-  // Converts colors to grayscale if set to 1
-//  ESP32_TouchGUI1_Definition->gray_scale = 0;
-
-
-  // Pins MUST be initialized before SPI interface initialization
-//  TFT_PinsInit(ESP32_TouchGUI1_Definition);
-
-
-printf("pre:%p.\r\n", ESP32_TouchGUI1_Definition->disp_interface_config.pre_cb);
-printf("post:%p.\r\n", ESP32_TouchGUI1_Definition->disp_interface_config.post_cb);
-
-
-  // test fill cfg
-//      .clock_speed_hz = 26*1000*1000,         // Clock out at 26 MHz (overclock)
-  ESP32_TouchGUI1_Definition->disp_interface_config.clock_speed_hz = 10*1000*1000;        	// Clock out at 10 MHz
-  ESP32_TouchGUI1_Definition->disp_interface_config.mode = 0;                             	// SPI mode 0
-  ESP32_TouchGUI1_Definition->disp_interface_config.spics_io_num = PIN_NUM_CS;             	// CS pin
-  ESP32_TouchGUI1_Definition->disp_interface_config.queue_size = 7;                       	// We want to be able to queue 7 transactions at a time
-  ESP32_TouchGUI1_Definition->disp_interface_config.pre_cb = lcd_spi_pre_transfer_callback;	//Specify pre-transfer callback to handle D/C line
-
-  ESP32_TouchGUI1_Definition->disp_interface_config.post_cb = lcd_spi_post_transfer_callback;
-
-
-
-
   // Attach this Definitions display (SPI device) to given Definition (ESP32_SPI_Module!) SPI bus host
-  retMsg = ESP32_SPI_provided_fn->ESP32_SPI_bus_add_deviceFn(ESP32_SPI_Definition,
-	&ESP32_TouchGUI1_Definition->disp_interface_config,	// spi interface cfg. for display
-	&ESP32_TouchGUI1_Definition->disp_handle);		// the handle will be stored here
+  p_retMsg = p_ESP32_SPI_provided_fn->ESP32_SPI_bus_add_deviceFn(p_ESP32_SPI_Definition,
+	p_disp_interface_config,				// spi interface cfg. for display
+	&p_ESP32_TouchGUI1_Definition->p_disp_handle);		// the handle will be stored here
+
   // error occured ? We have message -> deinit
-  if ( retMsg ) goto error;
+  if (p_retMsg) goto error_cleanup_3;
+
 
   printf("GUI: display device connected to spi Module, we have handle (host %d) at %p\r\n",
-	ESP32_SPI_Definition->host.host_device,
-	ESP32_TouchGUI1_Definition->disp_handle);
+	p_ESP32_SPI_Definition->p_host->host_device,
+	p_ESP32_TouchGUI1_Definition->p_disp_handle);
 
 
 
-
-
-
-
-  ESP32_TouchGUI1_Definition->TFT_globals = (TFTGlobals_t) {
-  .orientation = LANDSCAPE,	// screen orientation
-  .font_rotate = 0,		// font rotation
-  .font_transparent = 0,
-  .font_forceFixed = 0,
-  .text_wrap = 0,		// character wrapping to new line
-//._fg = {  0, 255,   0},
-//._bg = {  0,   0,   0},
-  .image_debug = 0,
-  ._angleOffset = DEFAULT_ANGLE_OFFSET,
-  .TFT_X = 0,
-  .TFT_Y = 0,
-  .tp_calx = 7472920,
-  .tp_caly = 122224794,
- // dispWin_t dispWin;
-  .font_buffered_char = 1,
-  .font_line_space = 0,
-
-  // Display dimensions
-  ._width = DEFAULT_TFT_DISPLAY_WIDTH,
-  ._height = DEFAULT_TFT_DISPLAY_HEIGHT,
-
-  // Converts colors to grayscale if set to 1
-  .gray_scale = 0,
-
-
-  .userfont = NULL,
-  .TFT_OFFSET = 0,
-  ._arcAngleMax = DEFAULT_ARC_ANGLE_MAX,
-};
-
-
-
-
-
-
+// ------------------------------------------------------------------------------------------------
 
   // Init this Definitions display (SPI device). It is connected now.
-  retMsg = TFT_display_init(ESP32_TouchGUI1_Definition->disp_handle,
-	&ESP32_TouchGUI1_Definition->TFT_globals,
-	&ESP32_TouchGUI1_Definition->display_config);
+  p_retMsg = TFT_display_init(p_ESP32_TouchGUI1_Definition->p_disp_handle,
+	p_ESP32_TouchGUI1_Definition->p_TFT_globals,
+	&p_ESP32_TouchGUI1_Definition->display_config);
+
   // error occured ? We have message -> deinit
-  if ( retMsg ) goto error;
+  if (p_retMsg) goto error_cleanup_4;
 
    printf("SPI: display init done.\r\n");
 
+// ------------------------------------------------------------------------------------------------
+
+  // do the initial stuff ...
+  ESP32_SPI_device_handle_t p_disp_handle = p_ESP32_TouchGUI1_Definition->p_disp_handle;
+
+  TFT_setGammaCurve(p_disp_handle, DEFAULT_GAMMA_CURVE);
+
+  TFT_setRotation(p_disp_handle, p_ESP32_TouchGUI1_Definition->p_TFT_globals, PORTRAIT);
+
+  TFT_setFont(p_TFT_globals, DEFAULT_FONT, NULL);
+
+  TFT_resetclipwin(p_TFT_globals);
+
+  TFT_print(p_disp_handle, p_TFT_globals, "Time is not set yet", CENTER, CENTER);
+
+// ------------------------------------------------------------------------------------------------
 
 
- 
 
 
 
 
-
-
- // font_rotate = 0;
- // text_wrap = 0;
- // font_transparent = 0;
- // font_forceFixed = 0;
- // ESP32_TouchGUI1_Definition->gray_scale = 0;
-
-
-  TFT_setGammaCurve(ESP32_TouchGUI1_Definition->disp_handle, DEFAULT_GAMMA_CURVE);
-
-  TFT_setRotation(ESP32_TouchGUI1_Definition->disp_handle, &ESP32_TouchGUI1_Definition->TFT_globals, PORTRAIT);
-
-
-  TFT_setFont(&ESP32_TouchGUI1_Definition->TFT_globals, DEFAULT_FONT, NULL);
-
-  TFT_resetclipwin(&ESP32_TouchGUI1_Definition->TFT_globals);
-
-  TFT_print(ESP32_TouchGUI1_Definition->disp_handle, &ESP32_TouchGUI1_Definition->TFT_globals, "Time is not set yet", CENTER, CENTER);
 
 
 
@@ -1211,23 +1257,39 @@ printf("post:%p.\r\n", ESP32_TouchGUI1_Definition->disp_interface_config.post_cb
 // ------------------------------------------------------------------------------------------------
 
   // set up 1st idle Callback
-  ESP32_TouchGUI1_Definition->common.Common_CtrlRegA |= F_WANTS_IDLE_TASK;
+  p_ESP32_TouchGUI1_Definition->common.Common_CtrlRegA |= F_WANTS_IDLE_TASK;
 
-  return retMsg;
+  return p_retMsg;
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+// alternative end in case of errors - free all allocated things and return with retMsg as veto.
 
-// alternative end in case of errors - free / destroy all allocated things and return with msg.
-error:
+error_cleanup_4:
+
+ // ??? -> retMsg + retMsg AddFn fehlt !!!!!!!!!!!?
+ // Free this Definitions display (SPI device) from SPI bus host
+  p_ESP32_SPI_provided_fn->ESP32_SPI_bus_remove_deviceFn(p_ESP32_TouchGUI1_Definition->p_disp_handle);
+
+error_cleanup_3:
+
+  // the ESP32_SPI_device_interface_config_t is allocated here
+  free(p_ESP32_TouchGUI1_Definition->p_disp_interface_config);
+
+error_cleanup_2:
+
+  // the TFTGlobals_t is allocated here
+  free(p_ESP32_TouchGUI1_Definition->p_TFT_globals);
+
+error_cleanup_1:
 /*
-  if (parsedKVInput) {
+  if (p_parsedKVInput) {
 
-    free(parsedKVInput);
+    free(p_parsedKVInput);
 
   }
 
 */
-  return retMsg;
+  return p_retMsg;
 }
 
 
@@ -1286,65 +1348,73 @@ ESP32_TouchGUI1_DirectWrite(
 
 
 void
-Redraw_Time(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
+Redraw_Time(ESP32_TouchGUI1_Definition_t* p_ESP32_TouchGUI1_Definition)
 {
   time_t time_now;
+
   struct tm* tm_info;
+
   char tmp_buff[64];
 
   // redraw time
   time(&time_now);
 
-  if (time_now > ESP32_TouchGUI1_Definition->time_last) {
+  if (time_now > p_ESP32_TouchGUI1_Definition->time_last) {
 
+	// to backup fg+bg
 	color_t last_fg, last_bg;
 
-	ESP32_TouchGUI1_Definition->time_last = time_now;
+	// save updated time
+	p_ESP32_TouchGUI1_Definition->time_last = time_now;
 
+	// prepare time
 	tm_info = localtime(&time_now);
 
+	// make time text
 	sprintf(tmp_buff, "%02d:%02d:%02d",
 		tm_info->tm_hour,
 		tm_info->tm_min,
 		tm_info->tm_sec);
 
-	// to work with display ..
-	ESP32_SPI_device_handle_t disp_handle = ESP32_TouchGUI1_Definition->disp_handle;
-	TFTGlobals_t* TFT_globals = &ESP32_TouchGUI1_Definition->TFT_globals;
+	// create p_disp_handle to work with display ..
+	ESP32_SPI_device_handle_t p_disp_handle = p_ESP32_TouchGUI1_Definition->p_disp_handle;
 
-	TFT_saveClipWin(TFT_globals);
-	TFT_resetclipwin(TFT_globals);
+	// create p_TFT_globals to work with screen
+	TFTGlobals_t* p_TFT_globals = p_ESP32_TouchGUI1_Definition->p_TFT_globals;
+
+	TFT_saveClipWin(p_TFT_globals);
+	TFT_resetclipwin(p_TFT_globals);
 
 	Font curr_font = cfont;
 
-	last_bg = TFT_globals->_bg;
-	last_fg = TFT_globals->_fg;
+	last_bg = p_TFT_globals->_bg;
+	last_fg = p_TFT_globals->_fg;
 
-	TFT_globals->_fg = TFT_YELLOW;
+	p_TFT_globals->_fg = TFT_YELLOW;
 
-	TFT_globals->_bg = (color_t){ 64, 64, 64 };
+	p_TFT_globals->_bg = (color_t){ 64, 64, 64 };
 
-	TFT_setFont(&ESP32_TouchGUI1_Definition->TFT_globals, DEFAULT_FONT, NULL);
+	TFT_setFont(p_ESP32_TouchGUI1_Definition->p_TFT_globals, DEFAULT_FONT, NULL);
 
-	TFT_fillRect(disp_handle,
-		TFT_globals,
+	TFT_fillRect(p_disp_handle,
+		p_TFT_globals,
 		1,
-		TFT_globals->_height - TFT_getfontheight() - 8,
-		TFT_globals->_width - 3,
+		p_TFT_globals->_height - TFT_getfontheight() - 8,
+		p_TFT_globals->_width - 3,
 		TFT_getfontheight() + 6,
-		TFT_globals->_bg);
+		p_TFT_globals->_bg);
 
-	TFT_print(disp_handle,
-		TFT_globals,
+	TFT_print(p_disp_handle,
+		p_TFT_globals,
 		tmp_buff,
 		RIGHT,//CENTER,
-		TFT_globals->_height - TFT_getfontheight()-5);
+		p_TFT_globals->_height - TFT_getfontheight()-5);
 
 	cfont = curr_font;
-	TFT_globals->_fg = last_fg;
-	TFT_globals->_bg = last_bg;
+	p_TFT_globals->_fg = last_fg;
+	p_TFT_globals->_bg = last_bg;
 
-	TFT_restoreClipWin(TFT_globals);
+	TFT_restoreClipWin(p_TFT_globals);
   }
 
   return;
@@ -1370,32 +1440,38 @@ Redraw_Time(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
  * ------------------------------------------------------------------------------------------------
  */
 int //feedModuleTask
-ESP32_TouchGUI1_IdleCb(Common_Definition_t *Common_Definition)
+ESP32_TouchGUI1_IdleCb(Common_Definition_t *p_Common_Definition)
 {
-
   // make common ptr to modul specific ptr
-  ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition =
-		  (ESP32_TouchGUI1_Definition_t*) Common_Definition;
+  ESP32_TouchGUI1_Definition_t* p_ESP32_TouchGUI1_Definition =
+		  (ESP32_TouchGUI1_Definition_t*) p_Common_Definition;
 
-  #if ESP32_TouchGUI1_Module_DBG >= 5
-  printf("\n|ESP32_TouchGUI1_IdleCb, Def:%.*s>"
-	,ESP32_TouchGUI1_Definition->common.nameLen
-	,ESP32_TouchGUI1_Definition->common.name);
+  // for Fn response msg
+ // strTextMultiple_t* p_retMsg = SCDE_OK;
+
+// -------------------------------------------------------------------------------------------------
+
+  #if ESP32_TouchGUI1_Module_DBG >= 9
+  SCDEFn_at_ESP32_TouchGUI1_M->Log3Fn(p_Common_Definition->name,
+	p_Common_Definition->nameLen,
+	9,
+	"IdleCbFn for Definition '%.*s' (Module '%.*s') is called.",
+	p_ESP32_TouchGUI1_Definition->common.nameLen,
+	p_ESP32_TouchGUI1_Definition->common.name,
+	p_ESP32_TouchGUI1_Definition->common.module->provided->typeNameLen,
+	p_ESP32_TouchGUI1_Definition->common.module->provided->typeName);
   #endif
 
-// -------------------------------------------------------------------------------------------
-
-
+// ------------------------------------------------------------------------------------------------
 
   // redraw the time at bottom, if changed
-  Redraw_Time(ESP32_TouchGUI1_Definition);
+  Redraw_Time(p_ESP32_TouchGUI1_Definition);
 
 
   // set up next idle Callback
-  ESP32_TouchGUI1_Definition->common.Common_CtrlRegA |= F_WANTS_IDLE_TASK;
+  p_ESP32_TouchGUI1_Definition->common.Common_CtrlRegA |= F_WANTS_IDLE_TASK;
 
   return 0;
-
 }
 
 
@@ -1439,7 +1515,6 @@ ESP32_TouchGUI1_Initialize(SCDERoot_t* SCDERootptr)
 		  ,ESP32_TouchGUI1_ProvidedByModule.common.typeName);
 
   return 0;
-
 }
 
 
@@ -1620,46 +1695,62 @@ ESP32_TouchGUI1_Shutdown(Common_Definition_t *Common_Definition)
 
 
 
-/**
+/** public function
  * --------------------------------------------------------------------------------------------------
  *  FName: ESP32_TouchGUI1_Undefine
- *  Desc: Removes the define of an "device" of 'WebIF' type. Contains devicespecific init code.
- *  Info: Invoked by cmd-line 'Undefine ESP32Control_Definition.common.Name'
- *  Para: ESP32Control_Definition_t *ESP32Control_Definition -> WebIF Definition that should be removed
- *  Rets: strTextMultiple_t* -> response text NULL=no text
+ *  Desc: Removes the requested Definition of this Module. Includes executing type specific cleanup.
+ *  Info: Invoked by cmd-line 'Undefine custom_definition_name'
+ *  Para: Common_Definition_t* p_Common_Definition -> An Definition of this Module to remove (should be casted)
+ *  Rets: strTextMultiple_t* -> p_retMsg (error text) -> forces VETO! ; NULL=SCDE_OK
  * --------------------------------------------------------------------------------------------------
  */
 strTextMultiple_t* ICACHE_FLASH_ATTR
-ESP32_TouchGUI1_Undefine(Common_Definition_t *Common_Definition)
+ESP32_TouchGUI1_Undefine(Common_Definition_t* p_Common_Definition)
 {
+  // make common ptr to modul specific ptr
+  ESP32_TouchGUI1_Definition_t* p_ESP32_TouchGUI1_Definition =
+		  (ESP32_TouchGUI1_Definition_t*) p_Common_Definition;
 
   // for Fn response msg
-  strTextMultiple_t *retMsg = NULL;
+  strTextMultiple_t* p_retMsg = SCDE_OK;
 
-  // make common ptr to modul specific ptr
-  ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition =
-	(ESP32_TouchGUI1_Definition_t*) Common_Definition;
+// -------------------------------------------------------------------------------------------------
 
   #if ESP32_TouchGUI1_Module_DBG >= 5
-  printf("\n|ESP32_TouchGUI1_Undefine, Name:%.*s>"
-	,ESP32_TouchGUI1_Definition->common.nameLen
-	,ESP32_TouchGUI1_Definition->common.name);
-
+  SCDEFn_at_ESP32_TouchGUI1_M->Log3Fn(p_Common_Definition->name,
+	p_Common_Definition->nameLen,
+	5,
+	"UndefineFn of Module '%.*s' is called to delete Definition '%.*s'.",
+	p_ESP32_TouchGUI1_Definition->common.module->provided->typeNameLen,
+	p_ESP32_TouchGUI1_Definition->common.module->provided->typeName,
+	p_ESP32_TouchGUI1_Definition->common.nameLen,
+	p_ESP32_TouchGUI1_Definition->common.name);
   #endif
 
+// ------------------------------------------------------------------------------------------------
 
-  // response with error text
-	// alloc mem for retMsg
-  retMsg = malloc(sizeof(strTextMultiple_t));
+  // get table of function callbacks provided & made accessible from stage 1 Module
+  ESP32_SPI_ProvidedByModule_t* p_ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
+	p_ESP32_TouchGUI1_Definition->p_ESP32_SPI_Definition->common.module->provided;
 
-  // response with error text
-  retMsg->strTextLen = asprintf(&retMsg->strText
-	,"ESP32_TouchGUI1_Undefine, Name:%.*s"
-	,ESP32_TouchGUI1_Definition->common.nameLen
-	,ESP32_TouchGUI1_Definition->common.name);
+  // Free this Definitions display (SPI device) from SPI bus host
+  p_retMsg = p_ESP32_SPI_provided_fn->ESP32_SPI_bus_remove_deviceFn(p_ESP32_TouchGUI1_Definition->p_disp_handle);
 
-  return retMsg;
+  // could not remove device from spi bus
+  if (p_retMsg) goto error_cancel_undefine_1;
 
+  // the ESP32_SPI_device_interface_config_t is allocated here
+  free(p_ESP32_TouchGUI1_Definition->p_disp_interface_config);
+
+  // the TFTGlobals_t is allocated here
+  free(p_ESP32_TouchGUI1_Definition->p_TFT_globals);
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+// alternative end in case of veto - stop undefine with error msg
+
+error_cancel_undefine_1:
+
+  return p_retMsg;
 }
 
 
@@ -3795,7 +3886,7 @@ disp_select(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 {
   // get table of function callbacks provided & made accessible from stage 1 Module
   ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
-	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
+	ESP32_TouchGUI1_Definition->p_ESP32_SPI_Definition->common.module->provided;
 /*
   wait_trans_finish(ESP32_TouchGUI1_Definition, 1);
   return ESP32_SPI_provided_fn->ESP32_SPI_spi_device_selectFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition, ESP32_TouchGUI1_Definition->disp_handle, 0);*/
@@ -3810,7 +3901,7 @@ disp_deselect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 {
   // get table of function callbacks provided & made accessible from stage 1 Module
   ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
-	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
+	ESP32_TouchGUI1_Definition->p_ESP32_SPI_Definition->common.module->provided;
 
 //  wait_trans_finish(ESP32_TouchGUI1_Definition, 1);
 
@@ -3926,9 +4017,7 @@ disp_spi_transfer_addrwin(ESP32_SPI_device_handle_t spi_device_handle,
   xwd |= (uint32_t) (x2 & 0xff) << 24;
 
   ESP32_SPI_polling_transmit_cmd_and_data(spi_device_handle,
-	TFT_CASET,
-	&xwd,
-	4);
+	TFT_CASET, &xwd, 4);
 
  // width y data temp
   uint32_t ywd;
@@ -3940,9 +4029,7 @@ disp_spi_transfer_addrwin(ESP32_SPI_device_handle_t spi_device_handle,
   ywd |= (uint32_t) (y2 & 0xff) << 24;
 
   ESP32_SPI_polling_transmit_cmd_and_data(spi_device_handle,
-	TFT_PASET,
-	&ywd,
-	4);
+	TFT_PASET, &ywd, 4);
 }
 
 
@@ -4798,9 +4885,7 @@ _tft_setRotation(ESP32_SPI_device_handle_t disp_handle,
   if (send) {
 
 	ESP32_SPI_polling_transmit_cmd_and_data(disp_handle,
-		TFT_MADCTL,
-		&madctl,
-		1);
+		TFT_MADCTL, &madctl, 1);
   }
 }
 
@@ -4824,12 +4909,12 @@ _tft_setRotation(ESP32_SPI_device_handle_t disp_handle,
 // Initialize the display
 // ====================
 strTextMultiple_t*
-TFT_display_init(ESP32_SPI_device_handle_t disp_handle,
-	TFTGlobals_t* TFT_globals,
-	DisplayConfig_t* display_config)
+TFT_display_init(ESP32_SPI_device_handle_t p_disp_handle,
+	TFTGlobals_t* p_TFT_globals,
+	DisplayConfig_t* p_display_config)
 {
   // for Fn response msg
-  strTextMultiple_t* retMsg = SCDE_OK;
+  strTextMultiple_t* p_retMsg = SCDE_OK;
 
   // display needs D/C -> setup
   gpio_pad_select_gpio(PIN_NUM_DC);
@@ -4868,72 +4953,66 @@ TFT_display_init(ESP32_SPI_device_handle_t disp_handle,
   #endif
 
   // get the display type
-  uint8_t tft_disp_type = display_config->tft_disp_type;
+  uint8_t tft_disp_type = p_display_config->tft_disp_type;
 
 
 
   // Send the initialization commands
   if (tft_disp_type == DISP_TYPE_ILI9341) {
 
-	ESP32_SPI_write_cmd_list(disp_handle, ILI9341_init);
+	ESP32_SPI_write_cmd_list(p_disp_handle, ILI9341_init);
   }
 
   else if (tft_disp_type == DISP_TYPE_ILI9488) {
 
-	ESP32_SPI_write_cmd_list(disp_handle, ILI9488_init);
+	ESP32_SPI_write_cmd_list(p_disp_handle, ILI9488_init);
   }
 
   else if (tft_disp_type == DISP_TYPE_ST7789V) {
 
-	ESP32_SPI_write_cmd_list(disp_handle, ST7789V_init);
+	ESP32_SPI_write_cmd_list(p_disp_handle, ST7789V_init);
   }
 
   else if (tft_disp_type == DISP_TYPE_ST7735) {
 
-	ESP32_SPI_write_cmd_list(disp_handle, STP7735_init);
+	ESP32_SPI_write_cmd_list(p_disp_handle, STP7735_init);
   }
 
   else if (tft_disp_type == DISP_TYPE_ST7735R) {
 
-	ESP32_SPI_write_cmd_list(disp_handle, STP7735R_init);
-	ESP32_SPI_write_cmd_list(disp_handle, Rcmd2green);
-	ESP32_SPI_write_cmd_list(disp_handle, Rcmd3);
+	ESP32_SPI_write_cmd_list(p_disp_handle, STP7735R_init);
+	ESP32_SPI_write_cmd_list(p_disp_handle, Rcmd2green);
+	ESP32_SPI_write_cmd_list(p_disp_handle, Rcmd3);
   }
 
   else if (tft_disp_type == DISP_TYPE_ST7735B) {
 
-	ESP32_SPI_write_cmd_list(disp_handle, STP7735R_init);
-	ESP32_SPI_write_cmd_list(disp_handle, Rcmd2red);
-	ESP32_SPI_write_cmd_list(disp_handle, Rcmd3);
+	ESP32_SPI_write_cmd_list(p_disp_handle, STP7735R_init);
+	ESP32_SPI_write_cmd_list(p_disp_handle, Rcmd2red);
+	ESP32_SPI_write_cmd_list(p_disp_handle, Rcmd3);
 
 	uint8_t dt = 0xC0;
 
-	ESP32_SPI_polling_transmit_cmd_and_data(disp_handle,
-		TFT_MADCTL,
-		&dt,
-		1);
+	ESP32_SPI_polling_transmit_cmd_and_data(p_disp_handle,
+		TFT_MADCTL, &dt, 1);
   }
 
   else assert(0);
 
   // set rotation, clear screen
 
-  _tft_setRotation(disp_handle, TFT_globals, PORTRAIT);
+  _tft_setRotation(p_disp_handle, p_TFT_globals, PORTRAIT);
 
-  TFT_pushColorRep(disp_handle, TFT_globals,
-	0,
-	0,
-	TFT_globals->_width - 1,
-	TFT_globals->_height - 1,
-	(color_t){0,0,0},
-	(uint32_t)(TFT_globals->_height * TFT_globals->_width) );
+  TFT_pushColorRep(p_disp_handle, p_TFT_globals, 0, 0,
+	p_TFT_globals->_width - 1, p_TFT_globals->_height - 1,
+	(color_t) {0,0,0}, (uint32_t) (p_TFT_globals->_height * p_TFT_globals->_width) );
 
   // enable backlight
   #if PIN_NUM_BCKL
   gpio_set_level(PIN_NUM_BCKL, PIN_BCKL_ON);
   #endif
 
-  return retMsg;
+  return p_retMsg;
 }
 
 
@@ -5112,7 +5191,7 @@ TFT_display_init(ESP32_SPI_device_handle_t disp_handle,
 void
 ESP32_SPI_polling_transmit_cmd_and_data(ESP32_SPI_device_handle_t spi_device_handle,
 	int8_t cmd,
-	const uint8_t* data,
+	const uint8_t* p_data,
 	uint32_t len)
 {
   esp_err_t ret;
@@ -5134,7 +5213,7 @@ ESP32_SPI_polling_transmit_cmd_and_data(ESP32_SPI_device_handle_t spi_device_han
 
   memset(&t, 0, sizeof(t));	// zero struct
   t.length = len * 8;		// len is in bytes, transaction length is in bits
-  t.tx_buffer = data;		// the data is the cmd itself
+  t.tx_buffer = p_data;		// the data is the cmd itself
   t.user = (void*) 1;		// D/C needs to be set to 1 for TX data
 
   ret = ESP32_SPI_device_polling_transmit(spi_device_handle, &t);
@@ -5150,28 +5229,28 @@ ESP32_SPI_polling_transmit_cmd_and_data(ESP32_SPI_device_handle_t spi_device_han
  *  Desc: Reads and sends (polling!) a series of SPI commands/data stored in byte array, incl. delays.
  *  Info: 
  *  Para: ESP32_SPI_Module_spi_device_handle_t spi_device_handle, -> the destination spi device
- *	  const uint8_t *addr -> the Command List Table, including delays
+ *	  const uint8_t *p_addr -> the Command List Table, including delays
  *  Rets: -/-
  * --------------------------------------------------------------------------------------------------
  */
 void 
-ESP32_SPI_write_cmd_list(ESP32_SPI_device_handle_t spi_device_handle,
-	const uint8_t* addr)
+ESP32_SPI_write_cmd_list(ESP32_SPI_device_handle_t p_spi_device_handle,
+	const uint8_t* p_addr)
 {
   uint8_t numCommands, numArgs, cmd;
   uint16_t ms;
 
   // read number of commands to follow
-  numCommands = *addr++;
+  numCommands = *p_addr++;
 
   // for each command...
   while ( numCommands-- ) {
 
 	// read command
-	cmd = *addr++;
+	cmd = *p_addr++;
 
 	// read number of args to follow
-	numArgs  = *addr++;
+	numArgs  = *p_addr++;
 
 	// If high bit set in numArgs, delay time (ms) follows the args
 	ms = numArgs & TFT_CMD_DELAY;
@@ -5180,19 +5259,16 @@ ESP32_SPI_write_cmd_list(ESP32_SPI_device_handle_t spi_device_handle,
 	numArgs &= ~TFT_CMD_DELAY;
 
 	// transfer to spi
-	ESP32_SPI_polling_transmit_cmd_and_data(spi_device_handle,
-		cmd,
-		(uint8_t *)addr,
-		numArgs);
+	ESP32_SPI_polling_transmit_cmd_and_data(p_spi_device_handle,
+		cmd, (uint8_t *) p_addr, numArgs);
 
-	addr += numArgs;
-
+	p_addr += numArgs;
 
 	// delay requested ?
 	if (ms) {
 
 		// Read post-command data (-> delay time in ms )
-		ms = *addr++;
+		ms = *p_addr++;
 
 		// 255 -> override / special
 		if (ms == 255) ms = 500;    // If 255, delay for 500 ms

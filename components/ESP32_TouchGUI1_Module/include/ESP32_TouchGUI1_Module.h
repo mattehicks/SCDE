@@ -816,7 +816,7 @@ uint32_t stmpe610_getID(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition
 void ESP32_SPI_write_cmd_list(ESP32_SPI_device_handle_t spi_device_handle, const uint8_t* addr);
 
 // transmits cmd and data via polling 
-void ESP32_SPI_polling_transmit_cmd_and_data(ESP32_SPI_device_handle_t spi_device_handle, int8_t cmd, const uint8_t* data, uint32_t len);
+void ESP32_SPI_polling_transmit_cmd_and_data(ESP32_SPI_device_handle_t spi_device_handle, int8_t cmd, const uint8_t* p_data, uint32_t len);
 
 
 

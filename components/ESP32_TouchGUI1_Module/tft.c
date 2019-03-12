@@ -95,18 +95,15 @@ const color_t TFT_PINK        = { 252, 192, 202 };
 // ==== Set default values of global variables ================== -> tft globals !!!
 //uint8_t orientation = LANDSCAPE;	// screen orientation
 //uint16_t font_rotate = 0;		// font rotation
-//uint8_t	font_transparent = 0;
-//uint8_t	font_forceFixed = 0;
-//uint8_t	text_wrap = 0;			// character wrapping to new line
-//color_t	_fg = {  0, 255,   0};
+//uint8_t font_transparent = 0;
+//uint8_t font_forceFixed = 0;
+//uint8_t text_wrap = 0;			// character wrapping to new line
+//color_t _fg = {  0, 255,   0};
 //color_t _bg = {  0,   0,   0};
 //uint8_t image_debug = 0;
-
 //float _angleOffset = DEFAULT_ANGLE_OFFSET;
-
 //int	TFT_X = 0;
 //int	TFT_Y = 0;
-
 //uint32_t tp_calx = 7472920;
 //uint32_t tp_caly = 122224794;
 
@@ -117,6 +114,10 @@ const color_t TFT_PINK        = { 252, 192, 202 };
 //  .y2 = DEFAULT_TFT_DISPLAY_HEIGHT,
 //};
 
+//uint8_t font_buffered_char = 1;
+//uint8_t font_line_space = 0;
+
+
 Font cfont = {
 	.font = tft_DefaultFont,
 	.x_size = 0,
@@ -126,8 +127,6 @@ Font cfont = {
 	.bitmap = 1,
 };
 
-//uint8_t font_buffered_char = 1;
-//uint8_t font_line_space = 0;
 // ==============================================================
 
 
@@ -147,6 +146,7 @@ typedef struct {
 //static int TFT_OFFSET = 0;
 static propFont	fontChar;
 //static float _arcAngleMax = DEFAULT_ARC_ANGLE_MAX;
+
 
 
 
@@ -292,7 +292,7 @@ _drawFastHLine(ESP32_SPI_device_handle_t disp_handle,
 	if ( ( x + w ) > ( TFT_globals->dispWin.x2 + 1 ) ) w = TFT_globals->dispWin.x2 - x + 1;
 	if ( w == 0 ) w = 1;
 
-	TFT_pushColorRep(disp_handle, x, y, x + w - 1, y, color, (uint32_t) w);
+	TFT_pushColorRep(disp_handle, TFT_globals, x, y, x + w - 1, y, color, (uint32_t) w);
 }
 
 
@@ -450,7 +450,7 @@ TFT_drawLine(ESP32_SPI_device_handle_t disp_handle,
 	int16_t y1,
 	color_t color)
 {
-	_drawLine(ESP32_TouchGUI1_Definition, TFT_globals, x0 + TFT_globals->dispWin.x1,
+	_drawLine(disp_handle, TFT_globals, x0 + TFT_globals->dispWin.x1,
 		 y0 + TFT_globals->dispWin.y1, x1 + TFT_globals->dispWin.x1,
 		 y1 + TFT_globals->dispWin.y1, color);
 }
@@ -494,7 +494,7 @@ _fillRect(ESP32_SPI_device_handle_t disp_handle,
 	if ( w == 0 ) w = 1;
 	if ( h == 0 ) h = 1;
 
-	TFT_pushColorRep(disp_handle, x, y, x + w - 1,
+	TFT_pushColorRep(disp_handle, TFT_globals, x, y, x + w - 1,
 		 y + h - 1, color, (uint32_t) (h * w) );
 }
 
@@ -538,7 +538,7 @@ TFT_fillScreen(ESP32_SPI_device_handle_t disp_handle,
 	TFTGlobals_t* TFT_globals,
 	color_t color)
 {
-  TFT_pushColorRep(disp_handle, 0, 0, TFT_globals->_width-1, TFT_globals->_height-1,
+  TFT_pushColorRep(disp_handle, TFT_globals, 0, 0, TFT_globals->_width-1, TFT_globals->_height-1,
 	color, (uint32_t) (TFT_globals->_height * TFT_globals->_width) );
 }
 
@@ -558,7 +558,7 @@ TFT_fillWindow(ESP32_SPI_device_handle_t disp_handle,
 	TFTGlobals_t* TFT_globals,
 	color_t color) 
 {
-	TFT_pushColorRep(disp_handle, TFT_globals->dispWin.x1,
+	TFT_pushColorRep(disp_handle, TFT_globals, TFT_globals->dispWin.x1,
 		TFT_globals->dispWin.y1, TFT_globals->dispWin.x2, TFT_globals->dispWin.y2,
 		color, (uint32_t) ( (TFT_globals->dispWin.x2 - TFT_globals->dispWin.x1 + 1) *
 		 (TFT_globals->dispWin.y2 - TFT_globals->dispWin.y1 + 1) ) );
@@ -2496,7 +2496,7 @@ printProportionalChar(ESP32_SPI_device_handle_t disp_handle,
 				}
 			}
 
-			send_data(disp_handle, x, y, x + char_width - 1, y + cfont.y_size - 1, len, color_line);
+			send_data(disp_handle, TFT_globals , x, y, x + char_width - 1, y + cfont.y_size - 1, len, color_line);
 
 			free(color_line);
 
@@ -2592,7 +2592,7 @@ printChar(ESP32_SPI_device_handle_t disp_handle,
 
 			// send to display in one transaction
 
-			send_data(disp_handle, x, y, x+cfont.x_size-1, y+cfont.y_size-1, len, color_line);
+			send_data(disp_handle, TFT_globals, x, y, x+cfont.x_size-1, y+cfont.y_size-1, len, color_line);
 
 			free(color_line);
 
@@ -3414,10 +3414,10 @@ TFT_setclipwin(TFTGlobals_t* TFT_globals,
  */
 void TFT_resetclipwin(TFTGlobals_t* TFT_globals)
 {
-  TFT_globals->dispWin.x2 = TFT_globals->_width-1;
-  TFT_globals->dispWin.y2 = TFT_globals->_height-1;
-  TFT_globals->dispWin.x1 = 0;
-  TFT_globals->dispWin.y1 = 0;
+	TFT_globals->dispWin.x2 = TFT_globals->_width-1;
+	TFT_globals->dispWin.y2 = TFT_globals->_height-1;
+	TFT_globals->dispWin.x1 = 0;
+	TFT_globals->dispWin.y1 = 0;
 }
 
 
@@ -3685,7 +3685,7 @@ tjd_output(ESP32_SPI_device_handle_t disp_handle,
 			}
 		}
 
-		send_data(disp_handle, dleft, dtop, dright, dbottom, len, dev->linbuf[dev->linbuf_idx]);
+		send_data(disp_handle, TFT_globals, dleft, dtop, dright, dbottom, len, dev->linbuf[dev->linbuf_idx]);
 
 		dev->linbuf_idx = ((dev->linbuf_idx + 1) & 1);
 	}
@@ -4174,7 +4174,7 @@ TFT_bmp_image(ESP32_SPI_device_handle_t disp_handle,
 			}
 		}
 
-		send_data(disp_handle, disp_xstart, disp_yend, disp_xend, disp_yend, img_xlen, (color_t *)line_buf[lb_idx]);
+		send_data(disp_handle, TFT_globals, disp_xstart, disp_yend, disp_xend, disp_yend, img_xlen, (color_t *)line_buf[lb_idx]);
 
 		lb_idx = (lb_idx + 1) & 1;  // change buffer
 
@@ -4300,7 +4300,7 @@ int TFT_read_touch(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int
 {
     *x = 0;
     *y = 0;
-	if (ESP32_TouchGUI1_Definition->ts_handle == NULL) return 0;
+	if (ESP32_TouchGUI1_Definition->p_ts_handle == NULL) return 0;
     #if USE_TOUCH == TOUCH_TYPE_NONE
 	return 0;
     #else

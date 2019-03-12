@@ -155,11 +155,9 @@ tft.o: /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/tft.c \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/lldesc.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/queue.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/ringbuf.h \
- /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module.h \
- /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/stmpe610.h \
  /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/tft.h \
- /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module_s.h \
- /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module.h
+ /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module.h \
+ /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/stmpe610.h
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/stdio.h:
 
@@ -473,13 +471,9 @@ tft.o: /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/tft.c \
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/ringbuf.h:
 
+/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/tft.h:
+
 /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module.h:
 
 /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/stmpe610.h:
-
-/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/tft.h:
-
-/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module_s.h:
-
-/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module.h:
 /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/./tft.c:

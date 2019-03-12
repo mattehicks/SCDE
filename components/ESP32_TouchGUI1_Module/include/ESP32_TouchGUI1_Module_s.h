@@ -74,49 +74,36 @@ typedef struct ESP32_TouchGUI1_ProvidedByModule_s {
 // -------------------------------------------------------------------------------------------------
 
 
-
+typedef struct TFTGlobals_s TFTGlobals_t;
 /** 
  * ESP32_TouchGUI1_Definition stores values for operation valid only for the defined instance of an
  * loaded module. Values are initialized by HCTRLD an the loaded module itself.
  */
 typedef struct ESP32_TouchGUI1_Definition_s {
-  Common_Definition_t common;			/*!< ... the common part of the definition */
-  WebIf_Provided_t WebIf_Provided;		/*!< provided data for WebIf */
+  Common_Definition_t common;				/*!< ... the common part of the definition */
+  WebIf_Provided_t WebIf_Provided;			/*!< provided data for WebIf */
 
+  // the link to 1. stage
+  size_t stage1definitionNameLen;			// Stange 1 name assigned by def
+  uint8_t *stage1definitionName;			// Stange 1 nameLen assigned by def
+  ESP32_SPI_Definition_t* p_ESP32_SPI_Definition; 	// stage 1 link -> wirklich speichern?
 
-  size_t stage1definitionNameLen;	// Stange 1 name assigned by def
-  uint8_t *stage1definitionName;	// Stange 1 nameLen assigned by def
-
-  ESP32_SPI_Definition_t* ESP32_SPI_Definition; // stage 1 link -> wirklich speichern?
-
- time_t time_last;
-
-
-  // Display dimensions
-//  int _width;
-//  int _height;
-
-  // Converts colors to grayscale if set to 1
-//  uint8_t gray_scale;
+  time_t time_last;
 
   // the display configuration
-  DisplayConfig_t* display_config;
+  DisplayConfig_t display_config;
 
   // globals for tft painting?
-  TFTGlobals_t* TFT_globals;
+  TFTGlobals_t* p_TFT_globals; //DrawingGlobals_t
 
   // Spi device configuration + handle - for display
-  ESP32_SPI_device_interface_config_t disp_interface_config;
-  ESP32_SPI_device_handle_t disp_handle;
+  ESP32_SPI_device_interface_config_t* p_disp_interface_config;	// ESP32_SPI_DeviceInterfaceConfig_t
+  ESP32_SPI_device_handle_t p_disp_handle;			// ESP32_SPI_DeviceHandle_t
 
   // Spi device configuration + handle - for touch screen
-  ESP32_SPI_device_interface_config_t ts_interface_config;
-  ESP32_SPI_device_handle_t ts_handle;
+  ESP32_SPI_device_interface_config_t p_ts_interface_config;
+  ESP32_SPI_device_handle_t p_ts_handle;
 
-//  uint8_t i2c_num;				/*!< the I2C hardware that should be used */
-//  i2c_config_t i2c_config;			/*!< i2c configuration */
-//  i2c_obj_t *i2c_obj;				/*!< the current i2c job */
- // ESP32_TouchGUI1_Fn_t* ESP32_TouchGUI1_Fn;	/*!< ESP32_I2C_MasterFn (Functions / callbacks) accessible for client modules */
 } ESP32_TouchGUI1_Definition_t;
 
 

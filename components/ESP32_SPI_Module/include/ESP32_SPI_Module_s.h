@@ -368,8 +368,8 @@ struct ESP32_SPI_device_t {
 typedef struct ESP32_SPI_Definition_s {
   Common_Definition_t common;		/*!< ... the common part of the definition */
   WebIf_Provided_t WebIf_Provided;	/*!< provided data for WebIf */
-  ESP32_SPI_host_t host;                /*!< the spi bus pheripheral this definition is using */
-  ESP32_SPI_bus_config_t bus_config;	/*!< this definitions spi bus configuration (4 all devices??) */
+  ESP32_SPI_host_t* p_host;             /*!< the spi bus pheripheral this definition is using */
+  ESP32_SPI_bus_config_t* p_bus_config;	/*!< this definitions spi bus configuration (4 all devices??) */
 } ESP32_SPI_Definition_t;
 
 
@@ -684,7 +684,7 @@ void ESP32_SPI_common_dmaworkaround_transfer_active(int dmachan);
  *         - ESP_OK                on success
 
  */
-strTextMultiple_t* ESP32_SPI_bus_initialize(ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_host_device_t host_device, const ESP32_SPI_bus_config_t *bus_config, int dma_chan);
+strTextMultiple_t* ESP32_SPI_bus_initialize(ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_host_device_t host_device, const ESP32_SPI_bus_config_t* bus_config, int dma_chan);
 
 /**
  * @brief Free a SPI bus
@@ -731,7 +731,7 @@ strTextMultiple_t*  ESP32_SPI_bus_add_device(ESP32_SPI_Definition_t* ESP32_SPI_D
  *         - ESP_ERR_INVALID_STATE if device already is freed
  *         - ESP_OK                on success
  */
-esp_err_t ESP32_SPI_bus_remove_device(ESP32_SPI_device_handle_t handle);
+strTextMultiple_t* ESP32_SPI_bus_remove_device(ESP32_SPI_device_handle_t handle);
 
 
 /**
@@ -940,7 +940,7 @@ int ESP32_SPI_get_freq_limit(bool gpio_is_used, int input_delay_ns);
 typedef strTextMultiple_t*  (*ESP32_SPI_bus_add_deviceFn_t) (ESP32_SPI_Definition_t* ESP32_SPI_Definition, const ESP32_SPI_device_interface_config_t *dev_config, ESP32_SPI_device_handle_t *handle);
 
 // typedef for ESP32_SPI_spi_bus_remove_deviceFn - removes an device from the definitions host
-typedef esp_err_t (*ESP32_SPI_bus_remove_deviceFn_t) (ESP32_SPI_device_handle_t handle);
+typedef strTextMultiple_t*  (*ESP32_SPI_bus_remove_deviceFn_t) (ESP32_SPI_device_handle_t handle);
 
 // typedef for ESP32_SPI_device_queue_transFn - to queue an interrupt driven transaction
 typedef esp_err_t (*ESP32_SPI_device_queue_transFn_t) (ESP32_SPI_device_handle_t handle, ESP32_SPI_transaction_t *trans_desc, TickType_t ticks_to_wait);

@@ -84,6 +84,117 @@ static const char* I2S_TAG = "I2S";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// macro to CHECK, if FALSE -> load error msg in strTextMultiple_t and return
+#define SCDE_CHECK_LOAD_ERROR_TEXT_GOTO(a, str, dest) do {			\
+  if (!(a)) {									\
+	/* alloc mem for retMsg */						\
+	p_retMsg = malloc(sizeof(strTextMultiple_t));				\
+										\
+	/* response with error text */						\
+	p_retMsg->strTextLen = asprintf(&p_retMsg->strText			\
+		,"Parsing Error! %s(%d): %s!",					\
+		__FUNCTION__, __LINE__, str);					\
+	goto dest;								\
+  }										\
+} while(0)
+
+
+
+
+
+
+// macro to CHECK, if FALSE -> load error msg in strTextMultiple_t and return
+#define SCDE_CHECK_LOADERRORTXT_RET(a, str) do {				\
+  if (!(a)) {									\
+	/* alloc mem for retMsg */						\
+	retMsg = malloc(sizeof(strTextMultiple_t));				\
+										\
+	/* response with error text */						\
+	retMsg->strTextLen = asprintf(&retMsg->strText				\
+		,"Parsing Error! %s(%d): %s!",					\
+		__FUNCTION__, __LINE__, str);					\
+	return retMsg;								\
+  }										\
+} while(0)
+
+// macro to CHECK, if FALSE -> load error msg in strTextMultiple_t and return
+#define SCDE_CHECK_LOADERRORTXT_RET2(a, str, ...) do {				\
+  if (!(a)) {									\
+	/* alloc mem for retMsg */						\
+	retMsg = malloc(sizeof(strTextMultiple_t));				\
+										\
+	/* response with error text */						\
+	retMsg->strTextLen = asprintf(&retMsg->strText				\
+		,"Parsing Error! %s(%d): "str,					\
+		 __FUNCTION__, __LINE__, ##__VA_ARGS__);			\
+	return retMsg;								\
+  }										\
+} while(0)
+
+// macro to CHECK, if FALSE -> only load error msg in strTextMultiple_t and NO! return
+#define SCDE_CHECK_LOADERRORTXT(a, str) do {					\
+  if (!(a)) {									\
+	/* alloc mem for retMsg	 */						\
+	retMsg = malloc(sizeof(strTextMultiple_t));				\
+										\
+	/* response with error text */						\
+	retMsg->strTextLen = asprintf(&retMsg->strText				\
+		,"Parsing Error! %s(%d): %s!",					\
+		__FUNCTION__, __LINE__, str);					\
+  }										\
+} while(0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // -------------------------------------------------------------------------------------------------
 
 // set default build verbose - if no external override
@@ -498,73 +609,73 @@ static const char* I2C_TAG = "i2c";
 
 
 
-/**
+/** public function
  * -------------------------------------------------------------------------------------------------
  *  FName: ESP32_SPI_Define
- *  Desc: Finalizes the defines a new "device" of 'ESP32_S0' type. Contains devicespecific init code.
- *  Info: 
- *  Para: Common_Definition_t *Common_Definition -> prefilled ESP32Control Definition
- *        char *Definition -> the last part of the CommandDefine arg* 
- *  Rets: strTextMultiple_t* -> response text NULL=no text
+ *  Desc: Finalizes the creation of the requested Definition of this Module. Includes executing type
+ *        specific inits.
+ *  Info: Invoked by cmd-line 'Define custom_definition_name module_name'
+ *  Para: Common_Definition_t* p_Common_Definition -> prefilled 'This'_Module Definition (should be casted)
+ *  Rets: strTextMultiple_t* p_retMsg (error text) -> forces VETO! ; NULL = SCDE_OK
  * -------------------------------------------------------------------------------------------------
  */
 strTextMultiple_t*
-ESP32_SPI_Define(Common_Definition_t *Common_Definition)
+ESP32_SPI_Define(Common_Definition_t* p_Common_Definition)
 {
 
   // make common ptr to modul specific ptr
-  ESP32_SPI_Definition_t* ESP32_SPI_Definition =
-		  (ESP32_SPI_Definition_t*) Common_Definition;
+  ESP32_SPI_Definition_t* p_ESP32_SPI_Definition =
+		  (ESP32_SPI_Definition_t*) p_Common_Definition;
 
   // for Fn response msg
-  strTextMultiple_t *retMsg = SCDE_OK;
+  strTextMultiple_t* p_retMsg = SCDE_OK;
 
 // -------------------------------------------------------------------------------------------------
 
   #if ESP32_SPI_Module_DBG >= 5
-  SCDEFn_at_ESP32_SPI_M->Log3Fn(Common_Definition->name
-	,Common_Definition->nameLen
-	,5
-	,"DefineFn of Module '%.*s' is called to continue creation of Definition '%.*s' with args '%.*s'."
-	,ESP32_SPI_Definition->common.module->provided->typeNameLen
-	,ESP32_SPI_Definition->common.module->provided->typeName
-	,ESP32_SPI_Definition->common.nameLen
-	,ESP32_SPI_Definition->common.name
-	,ESP32_SPI_Definition->common.definitionLen
-	,ESP32_SPI_Definition->common.definition);
+  SCDEFn_at_ESP32_SPI_M->Log3Fn(p_Common_Definition->name,
+	p_Common_Definition->nameLen,
+	5,
+	"DefineFn of Module '%.*s' is called to continue creation of Definition '%.*s' with args '%.*s'.",
+	p_ESP32_SPI_Definition->common.module->provided->typeNameLen,
+	p_ESP32_SPI_Definition->common.module->provided->typeName,
+	p_ESP32_SPI_Definition->common.nameLen,
+	p_ESP32_SPI_Definition->common.name,
+	p_ESP32_SPI_Definition->common.definitionLen,
+	p_ESP32_SPI_Definition->common.definition);
   #endif
 
 // ------------------------------------------------------------------------------------------------
 
   // new conversation
-  uint8_t *defArgsText = Common_Definition->definition;
-  size_t defArgsTextLen = Common_Definition->definitionLen;
+  uint8_t* p_defArgsText = p_Common_Definition->definition;
+  size_t defArgsTextLen = p_Common_Definition->definitionLen;
 
   // Check for args. This type requires args...
   if (!defArgsTextLen) {
 
 	// alloc mem for retMsg
-	retMsg = malloc(sizeof(strTextMultiple_t));
+	p_retMsg = malloc(sizeof(strTextMultiple_t));
 
 	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
+	p_retMsg->strTextLen = asprintf(&p_retMsg->strText
 		,"Parsing Error! Expected Args!");
 
-	return retMsg;
+	return p_retMsg;
   }
 
 // ------------------------------------------------------------------------------------------------
 
-//  xSemaphoreTake(ESP32_SPI_Definition->def_mux
+//  xSemaphoreTake(p_ESP32_SPI_Definition->def_mux
 //    ,portMAX_DELAY);
 
 // ------------------------------------------------------------------------------------------------
 
   // store FD to Definition. Will than be processed in global loop ... -> THIS MODULE USES NO FD
-  ESP32_SPI_Definition->common.fd = -1;
+  p_ESP32_SPI_Definition->common.fd = -1;
 
   // store table of function callbacks provided & made accessible for client modules
-//  ESP32_SPI_Definition->ESP32_SPI_Fn = &ESP32_SPI_Fn;
+//  p_ESP32_SPI_Definition->ESP32_SPI_Fn = &ESP32_SPI_Fn;
 
 // ------------------------------------------------------------------------------------------------
 
@@ -573,58 +684,58 @@ ESP32_SPI_Define(Common_Definition_t *Common_Definition)
 //	&ESP32Control_Definition->WebIf_Provided;
 
   // check for loaded Module 'WebIf' -> get provided Fn
-  ESP32_SPI_Definition->WebIf_Provided.WebIf_FnProvided =
+  p_ESP32_SPI_Definition->WebIf_Provided.WebIf_FnProvided =
 	NULL;//(WebIf_FnProvided_t *) SCDEFn_at_ESP32_SPI_M->GetFnProvidedByModule("WebIf");
 
  // Providing data for WebIf? Initialise data provided for WebIf
-  if (ESP32_SPI_Definition->WebIf_Provided.WebIf_FnProvided) {
+  if (p_ESP32_SPI_Definition->WebIf_Provided.WebIf_FnProvided) {
 
-	ESP32_SPI_Definition->WebIf_Provided.ActiveResourcesDataA =
+	p_ESP32_SPI_Definition->WebIf_Provided.ActiveResourcesDataA =
 		(WebIf_ActiveResourcesDataA_t *) &ESP32_SPI_ActiveResourcesDataA_forWebIf;
 
-	ESP32_SPI_Definition->WebIf_Provided.ActiveResourcesDataB =
+	p_ESP32_SPI_Definition->WebIf_Provided.ActiveResourcesDataB =
 		(WebIf_ActiveResourcesDataB_t *) &ESP32_SPI_ActiveResourcesDataB_forWebIf;
   }
 
   else	{
 
-	SCDEFn_at_ESP32_SPI_M->Log3Fn(Common_Definition->name
-		,Common_Definition->nameLen
+	SCDEFn_at_ESP32_SPI_M->Log3Fn(p_Common_Definition->name
+		,p_Common_Definition->nameLen
 		,1
 		,"Could not enable WebIf support for '%.*s'. Type '%.*s' detects Type 'WebIf' is NOT loaded!"
-		,ESP32_SPI_Definition->common.nameLen
-		,ESP32_SPI_Definition->common.name
-		,ESP32_SPI_Definition->common.module->provided->typeNameLen
-		,ESP32_SPI_Definition->common.module->provided->typeName);
+		,p_ESP32_SPI_Definition->common.nameLen
+		,p_ESP32_SPI_Definition->common.name
+		,p_ESP32_SPI_Definition->common.module->provided->typeNameLen
+		,p_ESP32_SPI_Definition->common.module->provided->typeName);
   }
 
 // ------------------------------------------------------------------------------------------------
 
   // Parse define-args (KEY=VALUE) protocol -> gets parsedKVInput in allocated mem, NULL = ERROR
-  parsedKVInputArgs_t *parsedKVInput = 
-	SCDEFn_at_ESP32_SPI_M->ParseKVInputArgsFn(ESP32_SPI_SET_NUMBER_OF_IK		// Num Implementated KEYs MAX
-	,ESP32_SPI_Set_ImplementedKeys					// Implementated Keys
-	,defArgsText								// our args text
+  parsedKVInputArgs_t* p_parsedKVInput = 
+	SCDEFn_at_ESP32_SPI_M->ParseKVInputArgsFn(ESP32_SPI_SET_NUMBER_OF_IK	// Num Implementated KEYs MAX
+	,ESP32_SPI_Set_ImplementedKeys						// Implementated Keys
+	,p_defArgsText								// our args text
 	,defArgsTextLen);							// our args text len
 
   // parsing may report an problem. args contain: unknown keys, double keys, ...?
-  if (!parsedKVInput) {
+  if (!p_parsedKVInput) {
 
 	// alloc mem for retMsg
-	retMsg = malloc(sizeof(strTextMultiple_t));
+	p_retMsg = malloc(sizeof(strTextMultiple_t));
 
 	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
-		,"Parsing Error! Args '%.*s' not taken! Check the KEYs!"
-		,defArgsTextLen
-		,defArgsText);
+	p_retMsg->strTextLen = asprintf(&p_retMsg->strText,
+		"Parsing Error! Args '%.*s' not taken! Check the KEYs!",
+		defArgsTextLen,
+		p_defArgsText);
 
-	if (parsedKVInput) {
+	if (p_parsedKVInput) {
 
-		free(parsedKVInput);
+		free(p_parsedKVInput);
 	}
 
-	return retMsg;
+	return p_retMsg;
   }
 
 // ------------------------------------------------------------------------------------------------
@@ -632,7 +743,7 @@ ESP32_SPI_Define(Common_Definition_t *Common_Definition)
   // try 1 - arguments for configuration as i2c master ?
 
   // set required Keys -> Keys that should be there in this request
-  parsedKVInput->requiredKVBF = 	( (1 << ESP32_SPI_SET_I2C_NUM)
+  p_parsedKVInput->requiredKVBF = 	( (1 << ESP32_SPI_SET_I2C_NUM)
 					| (1 << ESP32_SPI_SET_I2C_MODE)
 					| (1 << ESP32_SPI_SET_SDA_IO)
 					| (1 << ESP32_SPI_SET_SDA_IO_PULLUP)
@@ -642,23 +753,23 @@ ESP32_SPI_Define(Common_Definition_t *Common_Definition)
 					);
 
   // set forbidden Keys -> Keys that are not allowed in this request
-  parsedKVInput->forbiddenKVBF = 	( (1 << ESP32_SPI_SET_SLAVE_10BIT_ENA)
+  p_parsedKVInput->forbiddenKVBF = 	( (1 << ESP32_SPI_SET_SLAVE_10BIT_ENA)
 					| (1 << ESP32_SPI_SET_SLAVE_ADRESS)
  					);
 /*
   // process the set-args (key=value@) protocol
-  retMsg = ESP32_SPI_ProcessKVInputArgs(ESP32_SPI_Definition,
-		parsedKVInput,		// KVInput parsed
-		defArgsText,		// our args text
+  p_retMsg = ESP32_SPI_ProcessKVInputArgs(p_ESP32_SPI_Definition,
+		p_parsedKVInput,	// KVInput parsed
+		p_defArgsText,		// our args text
 		defArgsTextLen);	// our args text len*/
 
   // processing reports an problem. Args not taken. Return with MSG
-  if (retMsg != SCDE_OK) {
+  if (p_retMsg) {
 
 	// free allocated memory for query result key-field
-	free(parsedKVInput);
+	free(p_parsedKVInput);
 
-	return retMsg;
+	return p_retMsg;
   }
 
 // ------------------------------------------------------------------------------------------------
@@ -687,30 +798,68 @@ IRQ_FLAGS ?
 #define PIN_NUM_CLK  18		// SPI CLOCK pin
 
 
-  // test fill cfg
-  ESP32_SPI_Definition->bus_config.miso_io_num = PIN_NUM_MISO,		// set SPI MISO pin
-  ESP32_SPI_Definition->bus_config.mosi_io_num = PIN_NUM_MOSI,		// set SPI MOSI pin
-  ESP32_SPI_Definition->bus_config.sclk_io_num = PIN_NUM_CLK,		// set SPI CLK pin
-  ESP32_SPI_Definition->bus_config.quadwp_io_num = -1,
-  ESP32_SPI_Definition->bus_config.quadhd_io_num = -1,
-  ESP32_SPI_Definition->bus_config.max_transfer_sz = 6 * 1024,		// PARALLEL_LINES*320*2+8
+
+// ------------------------------------------------------------------------------------------------
+
+  // alloc mem for the bus configuration (ESP32_SPI_bus_config_t)
+  ESP32_SPI_bus_config_t* p_bus_config =
+	malloc(sizeof(ESP32_SPI_bus_config_t));
+
+  // check if we got memory? Else load retMsg an goto NOMEMORY
+  SCDE_CHECK_LOAD_ERROR_TEXT_GOTO(p_bus_config,
+		"Could not allocate ESP32_SPI_bus_config_t", error_cleanup_1);
+
+  // store the bus config configuration
+  p_ESP32_SPI_Definition->p_bus_config = p_bus_config;
+
+  // zero / start clean ESP32_SPI_bus_config_t
+  memset(p_bus_config, 0, sizeof(ESP32_SPI_bus_config_t));
+
+  // initial fill ...
+
+  p_bus_config = &(ESP32_SPI_bus_config_t) {
+	.miso_io_num = PIN_NUM_MISO,		// set SPI MISO pin
+	.mosi_io_num = PIN_NUM_MOSI,		// set SPI MOSI pin
+	.sclk_io_num = PIN_NUM_CLK,		// set SPI CLK pin
+	.quadwp_io_num = -1,
+	.quadhd_io_num = -1,
+	.max_transfer_sz = 6 * 1024,		// PARALLEL_LINES*320*2+8
+};
+
+// ------------------------------------------------------------------------------------------------
 
   // Initialize this Definitions SPI bus
-  retMsg = ESP32_SPI_bus_initialize(ESP32_SPI_Definition,	// the Definition which wants a spi host
+  p_retMsg = ESP32_SPI_bus_initialize(p_ESP32_SPI_Definition,	// the Definition which wants a spi host
 	SPI_BUS_PHERIPERAL,					// the SPI pheriperal the host uses
-	&ESP32_SPI_Definition->bus_config,			// the bus configuration of the pheriperal
+	p_bus_config,						// the bus configuration of the pheriperal
 	1);
 
   // an error occured, deinit, free mem
-  if (retMsg) goto error;
+  if (p_retMsg) goto error_cleanup_2;
 
-
+  #if ESP32_SPI_Module_DBG >= 5
+  SCDEFn_at_ESP32_SPI_M->Log3Fn(p_Common_Definition->name,
+	p_Common_Definition->nameLen,
+	5,
+	"Definition '%.*s' (Module '%.*s') initializes SPI bus host. (MISO:%d, MOSI:%d, SCLK:%d, "
+	"QUADWP:%d, QUADHD:%d, max.tx-size:%d.",
+	p_ESP32_SPI_Definition->common.nameLen,
+	p_ESP32_SPI_Definition->common.name,
+	p_ESP32_SPI_Definition->common.module->provided->typeNameLen,
+	p_ESP32_SPI_Definition->common.module->provided->typeName,
+	p_bus_config->miso_io_num,
+	p_bus_config->mosi_io_num,
+	p_bus_config->sclk_io_num,
+	p_bus_config->quadwp_io_num,
+	p_bus_config->quadhd_io_num,
+	p_bus_config->max_transfer_sz);
+  #endif
 
 /*
 // ------------------------------------------------------------------------------------------------
 
   // set required Keys -> Keys that should be there in this request
-  parsedKVInput->requiredKVBF = ( (1 << ESP32_SPI_SET_I2C_NUM)
+  p_parsedKVInput->requiredKVBF = ( (1 << ESP32_SPI_SET_I2C_NUM)
 			        | (1 << ESP32_SPI_SET_I2C_MODE)
 			        | (1 << ESP32_SPI_SET_SDA_IO)
 			        | (1 << ESP32_SPI_SET_SDA_IO_PULLUP)
@@ -718,65 +867,70 @@ IRQ_FLAGS ?
 			        | (1 << ESP32_SPI_SET_SCL_IO_PULLUP) );
 
   // set forbidden Keys -> Keys that are not allowed in this request
-  parsedKVInput->forbiddenKVBF = 0;
+  p_parsedKVInput->forbiddenKVBF = 0;
 
   // process the set-args (key=value@) protocol
-  if (ESP32_SPI_ProcessKVInputArgs(ESP32_SPI_Definition
-    ,parsedKVInput				// KVInput parsed
-    ,defArgsText				// our args text
+  if (ESP32_SPI_ProcessKVInputArgs(p_ESP32_SPI_Definition
+    ,p_parsedKVInput				// KVInput parsed
+    ,p_defArgsText				// our args text
     ,defArgsTextLen) ) {			// our args text len
 
     // Processing reports an problem. Args not taken. Response with error text.
 
     // alloc mem for retMsg
-    retMsg = malloc(sizeof(strTextMultiple_t));
+    p_retMsg = malloc(sizeof(strTextMultiple_t));
 
     // response with error text
-    retMsg->strTextLen = asprintf(&retMsg->strText
+    p_retMsg->strTextLen = asprintf(&retMsg->strText
       ,"Processing Error! Args '%.*s' not taken! Check the VALUEs!"
       ,defArgsTextLen
-      ,defArgsText);
+      ,p_defArgsText);
 
     // free allocated memory for query result key-field
-    free(parsedKVInput);
+    free(p_parsedKVInput);
 
-    return retMsg;
+    return p_retMsg;
   }
 
 // ------------------------------------------------------------------------------------------------
 */
   // set affected readings
- // ESP32_SPI_SetAffectedReadings(ESP32_SPI_Definition
-  //  ,parsedKVInput->affectedReadingsBF);
+ // ESP32_SPI_SetAffectedReadings(p_ESP32_SPI_Definition
+  //  ,p_parsedKVInput->affectedReadingsBF);
 
 // ------------------------------------------------------------------------------------------------
 
   // free allocated memory for query result key-field
-  //free(parsedKVInput);
+  //free(p_parsedKVInput);
 
 
 // ------------------------------------------------------------------------------------------------
 
   // set up 1st idle Callback
-  ESP32_SPI_Definition->common.Common_CtrlRegA |= F_WANTS_IDLE_TASK;
+  p_ESP32_SPI_Definition->common.Common_CtrlRegA |= F_WANTS_IDLE_TASK;
 
-  return retMsg;
+  return p_retMsg;
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+// alternative end in case of errors - free all allocated things and return with retMsg as veto.
 
-// alternative end in case of errors - free/destroy all allocated things and return SCDE_FAIL.
-error:
+error_cleanup_2:
+
+  // the ESP32_SPI_bus_config_t is allocated here
+  free(p_ESP32_SPI_Definition->p_bus_config);
+
+error_cleanup_1:
 /*
-  if (parsedKVInput) {
+  if (p_parsedKVInput) {
 
-    free(parsedKVInput);
+    free(p_parsedKVInput);
 
   }
 
 */
-  return retMsg;
-
+  return p_retMsg;
 }
+
 
 
 
@@ -1076,48 +1230,54 @@ ESP32_SPI_Shutdown(Common_Definition_t *Common_Definition)
 /**
  * --------------------------------------------------------------------------------------------------
  *  FName: ESP32_SPI_Undefine
- *  Desc: Removes the define of an "device" of 'WebIF' type. Contains devicespecific init code.
- *  Info: Invoked by cmd-line 'Undefine ESP32Control_Definition.common.Name'
- *  Para: ESP32Control_Definition_t *ESP32Control_Definition -> WebIF Definition that should be removed
- *  Rets: strTextMultiple_t* -> response text NULL=no text
+ *  Desc: Removes the requested Definition of this Module. Includes executing type specific cleanup.
+ *  Info: Invoked by cmd-line 'Undefine custom_definition_name'
+ *  Para: Common_Definition_t* p_Common_Definition -> An Definition of this Module to remove (should be casted)
+ *  Rets: strTextMultiple_t* -> p_retMsg (error text) -> forces VETO! ; NULL=SCDE_OK
  * --------------------------------------------------------------------------------------------------
  */
 strTextMultiple_t* ICACHE_FLASH_ATTR
-ESP32_SPI_Undefine(Common_Definition_t *Common_Definition)
+ESP32_SPI_Undefine(Common_Definition_t* p_Common_Definition)
 {
+  // make common ptr to modul specific ptr
+  ESP32_SPI_Definition_t* p_ESP32_SPI_Definition =
+	(ESP32_SPI_Definition_t*) p_Common_Definition;
 
   // for Fn response msg
-  strTextMultiple_t *retMsg = NULL;
-
-  // make common ptr to modul specific ptr
-  ESP32_SPI_Definition_t* ESP32_SPI_Definition =
-	(ESP32_SPI_Definition_t*) Common_Definition;
-
-  #if ESP32_SPI_Module_DBG >= 5
-  printf("\n|ESP32_SPI_Undefine, Name:%.*s>"
-	,ESP32_SPI_Definition->common.nameLen
-	,ESP32_SPI_Definition->common.name);
-
-  #endif
+  strTextMultiple_t* p_retMsg = SCDE_OK;
 
 // -------------------------------------------------------------------------------------------------
 
-  // Free this Definitions SPI bus
-  retMsg = ESP32_SPI_bus_free(ESP32_SPI_Definition);	// the Definition that wants to free the spi host
+  #if ESP32_SPI_Module_DBG >= 5
+  SCDEFn_at_ESP32_SPI_M->Log3Fn(p_Common_Definition->name,
+	p_Common_Definition->nameLen,
+	5,
+	"UndefineFn of Module '%.*s' is called to delete Definition '%.*s'.",
+	p_ESP32_SPI_Definition->common.module->provided->typeNameLen,
+	p_ESP32_SPI_Definition->common.module->provided->typeName,
+	p_ESP32_SPI_Definition->common.nameLen,
+	p_ESP32_SPI_Definition->common.name);
+  #endif
 
-  // an error occured, VETO, skip undefine
-  if (retMsg) goto veto;
+// ------------------------------------------------------------------------------------------------
 
+  // Free this Definitions SPI bus / host
+  if (p_ESP32_SPI_Definition) { 
+	p_retMsg = ESP32_SPI_bus_free(p_ESP32_SPI_Definition);
 
+	// an error occured, VETO, skip undefine
+	if (p_retMsg) goto error_cancel_undefine_1;
+  }
 
-   return retMsg;
+  // the ESP32_SPI_bus_config_t is allocated here
+  free(p_ESP32_SPI_Definition->p_bus_config);
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 // alternative end in case of veto - stop undefine with error msg
-veto:
+error_cancel_undefine_1:
 
-  return retMsg;
+  return p_retMsg;
 }
 
 
@@ -3124,46 +3284,7 @@ ESP32_SPI_SetAffectedReadings(ESP32_SPI_Definition_t* ESP32_SPI_Definition
 
 
 
-// macro to CHECK, if FALSE -> load error msg in strTextMultiple_t and return
-#define SCDE_CHECK_LOADERRORTXT_RET(a, str) do {				\
-  if (!(a)) {									\
-	/* alloc mem for retMsg */						\
-	retMsg = malloc(sizeof(strTextMultiple_t));				\
-										\
-	/* response with error text */						\
-	retMsg->strTextLen = asprintf(&retMsg->strText				\
-		,"Parsing Error! %s(%d): %s!",					\
-		__FUNCTION__, __LINE__, str);					\
-	return retMsg;								\
-  }										\
-} while(0)
 
-// macro to CHECK, if FALSE -> load error msg in strTextMultiple_t and return
-#define SCDE_CHECK_LOADERRORTXT_RET2(a, str, ...) do {				\
-  if (!(a)) {									\
-	/* alloc mem for retMsg */						\
-	retMsg = malloc(sizeof(strTextMultiple_t));				\
-										\
-	/* response with error text */						\
-	retMsg->strTextLen = asprintf(&retMsg->strText				\
-		,"Parsing Error! %s(%d): "str,					\
-		 __FUNCTION__, __LINE__, ##__VA_ARGS__);			\
-	return retMsg;								\
-  }										\
-} while(0)
-
-// macro to CHECK, if FALSE -> only load error msg in strTextMultiple_t and NO! return
-#define SCDE_CHECK_LOADERRORTXT(a, str) do {					\
-  if (!(a)) {									\
-	/* alloc mem for retMsg	 */						\
-	retMsg = malloc(sizeof(strTextMultiple_t));				\
-										\
-	/* response with error text */						\
-	retMsg->strTextLen = asprintf(&retMsg->strText				\
-		,"Parsing Error! %s(%d): %s!",					\
-		__FUNCTION__, __LINE__, str);					\
-  }										\
-} while(0)
 
 
 
@@ -4101,7 +4222,7 @@ static void spi_intr(void *arg);
 strTextMultiple_t*
 ESP32_SPI_bus_initialize(ESP32_SPI_Definition_t* ESP32_SPI_Definition,
 	ESP32_SPI_host_device_t host_device,
-	const ESP32_SPI_bus_config_t *bus_config,
+	const ESP32_SPI_bus_config_t* bus_config,
 	int dma_chan)
 {
   // for Fn response msg
@@ -4142,8 +4263,19 @@ ESP32_SPI_bus_initialize(ESP32_SPI_Definition_t* ESP32_SPI_Definition,
 	}
   }
 
-  // get ptr to ESP32_SPI_host_t in this Definitions ESP32_SPI_Definition_t
-  ESP32_SPI_host_t* host = &ESP32_SPI_Definition->host;
+  // alloc ESP32_SPI_host_t
+  ESP32_SPI_host_t* host = malloc(sizeof(ESP32_SPI_host_t));
+
+  // we got the mem?
+  if ( host == NULL ) {
+
+ 	SCDE_CHECK_LOADERRORTXT(false, "Could not alloc 'ESP32_SPI_host_t'");
+
+        goto cleanup;
+  }
+
+  // store ptr in this Definitions ESP32_SPI_Definition_t
+  ESP32_SPI_Definition->p_host = host;
 
   // zero the memory
   memset(host, 0, sizeof(ESP32_SPI_host_t));
@@ -4285,7 +4417,7 @@ ESP32_SPI_bus_free(ESP32_SPI_Definition_t* ESP32_SPI_Definition)
   int x;
 
   // get ptr to ESP32_SPI_host_t in this Definitions ESP32_SPI_Definition_t
-  ESP32_SPI_host_t* host = &ESP32_SPI_Definition->host;
+  ESP32_SPI_host_t* host = ESP32_SPI_Definition->p_host;
 
   ESP32_SPI_host_device_t host_device = host->host_device;
 
@@ -4322,6 +4454,10 @@ ESP32_SPI_bus_free(ESP32_SPI_Definition_t* ESP32_SPI_Definition)
   free(host->dmadesc_tx);
 
   free(host->dmadesc_rx);
+
+  free(host);
+
+  host = NULL;
 
   return retMsg;
 }
@@ -4402,7 +4538,7 @@ ESP32_SPI_bus_add_device(ESP32_SPI_Definition_t* ESP32_SPI_Definition,
   strTextMultiple_t *retMsg = SCDE_OK;
 
   // create adressing-ptr to this Definitions Host
-  ESP32_SPI_host_t* host = &ESP32_SPI_Definition->host;
+  ESP32_SPI_host_t* host = ESP32_SPI_Definition->p_host;
 
   // assigned spi-pheriperal
   ESP32_SPI_host_device_t host_device = host->host_device;
@@ -4569,34 +4705,53 @@ nomem:
 
 
 
-esp_err_t ESP32_SPI_bus_remove_device(ESP32_SPI_device_handle_t handle)
+strTextMultiple_t* 
+ESP32_SPI_bus_remove_device(ESP32_SPI_device_handle_t handle)
 {
-    int x;
-    SPI_CHECK(handle!=NULL, "invalid handle", ESP_ERR_INVALID_ARG);
-    //These checks aren't exhaustive; another thread could sneak in a transaction inbetween. These are only here to
-    //catch design errors and aren't meant to be triggered during normal operation.
-    SPI_CHECK(uxQueueMessagesWaiting(handle->trans_queue)==0, "Have unfinished transactions", ESP_ERR_INVALID_STATE);
-    SPI_CHECK(handle->host->cur_cs == NO_CS || atomic_load(&handle->host->device[handle->host->cur_cs])!=handle, "Have unfinished transactions", ESP_ERR_INVALID_STATE);
-    SPI_CHECK(uxQueueMessagesWaiting(handle->ret_queue)==0, "Have unfinished transactions", ESP_ERR_INVALID_STATE);
+  // for Fn response msg
+  strTextMultiple_t *retMsg = SCDE_OK;
 
-    //return
-    int spics_io_num = handle->cfg.spics_io_num;
-    if (spics_io_num >= 0) ESP32_SPI_common_cs_free_io(spics_io_num);
+  int x;
 
-    //Kill queues
-    vQueueDelete(handle->trans_queue);
-    vQueueDelete(handle->ret_queue);
-    vSemaphoreDelete(handle->semphr_polling);
-    //Remove device from list of csses and free memory
-    for (x=0; x<NO_CS; x++) {
-        if (atomic_load(&handle->host->device[x]) == handle){
-            atomic_store(&handle->host->device[x], NULL);
-            if (x == handle->host->prev_cs) handle->host->prev_cs = NO_CS;
-        }
-    }
-    free(handle);
-    return ESP_OK;
+  SCDE_CHECK_LOADERRORTXT_RET(handle != NULL,
+	"Device handle is invalid");
+
+  SCDE_CHECK_LOADERRORTXT_RET(uxQueueMessagesWaiting(handle->trans_queue) == 0,
+	"Invalid State. Unfinished transactions");
+
+  SCDE_CHECK_LOADERRORTXT_RET(handle->host->cur_cs == NO_CS || atomic_load(&handle->host->device[handle->host->cur_cs]) != handle,
+	"Invalid State. Unfinished transactions");
+
+  SCDE_CHECK_LOADERRORTXT_RET(uxQueueMessagesWaiting(handle->ret_queue) ==0,
+	"Invalid State. Unfinished transactions");
+
+  // return
+  int spics_io_num = handle->cfg.spics_io_num;
+
+  if ( spics_io_num >= 0 ) ESP32_SPI_common_cs_free_io(spics_io_num);
+
+  // Kill queues
+  vQueueDelete(handle->trans_queue);
+  vQueueDelete(handle->ret_queue);
+  vSemaphoreDelete(handle->semphr_polling);
+
+  // Remove device from list of csses and free memory
+  for ( x = 0 ; x < NO_CS ; x++ ) {
+
+	if ( atomic_load(&handle->host->device[x] ) == handle ) {
+
+		atomic_store(&handle->host->device[x], NULL);
+
+		if ( x == handle->host->prev_cs ) handle->host->prev_cs = NO_CS;
+	}
+  }
+
+  free(handle);
+
+  return retMsg;
 }
+
+
 
 static int ESP32_SPI_freq_for_pre_n(int fapb, int pre, int n)
 {
