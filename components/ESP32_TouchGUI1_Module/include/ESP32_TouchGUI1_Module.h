@@ -129,7 +129,7 @@ SCDEFn_t* SCDEFn_at_ESP32_TouchGUI1_M;
 // ** Set the correct configuration for ESP32-WROVER-KIT v3
 // --------------------------------------------------------
 #define DEFAULT_DISP_TYPE           DISP_TYPE_ST7789V
-#define DEFAULT_TFT_DISPLAY_WIDTH   240
+#define DEFAULT_TFT_DISPLAY_WIDTH   240F_tft
 #define DEFAULT_TFT_DISPLAY_HEIGHT  320
 #define DISP_COLOR_BITS_24          0x66
 #define DEFAULT_GAMMA_CURVE         0
@@ -305,13 +305,7 @@ extern uint32_t max_rdclock;
 
 
 
-// 24-bit color type structure
-typedef struct __attribute__((__packed__)) {
-//typedef struct {
-	uint8_t r;
-	uint8_t g;
-	uint8_t b;
-} color_t ;
+
 
 // ==== Display commands constants ====
 #define TFT_INVOFF    		0x20
@@ -754,19 +748,19 @@ void ESP32_SPI_transfer_only_cmd(ESP32_SPI_device_handle_t spi_device_handle, in
 void ESP32_SPI_transfer_cmd_and_data(ESP32_SPI_device_handle_t spi_device_handle, int8_t cmd, uint8_t *data, uint32_t len);
 
 //
-void drawPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, color_t color, uint8_t sel);
+void drawPixel(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int16_t x, int16_t y, color_t color, uint8_t sel);
 
 //
 void send_data(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int x1, int y1, int x2, int y2, uint32_t len, color_t *buf);
 
 //
-void TFT_pushColorRep(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals,, int x1, int y1, int x2, int y2, color_t data, uint32_t len);
+void TFT_pushColorRep(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int x1, int y1, int x2, int y2, color_t data, uint32_t len);
 
 //
-int read_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x1, int y1, int x2, int y2, int len, uint8_t *buf, uint8_t set_sp);
+int read_data(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int x1, int y1, int x2, int y2, int len, uint8_t *buf, uint8_t set_sp);
 
 //
-color_t readPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y);
+color_t readPixel(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, int16_t x, int16_t y);
 
 //
 int touch_get_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint8_t type);
@@ -803,7 +797,7 @@ void _tft_setRotation(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_g
 // * SPI interface must already be setup
 // * 'tft_disp_type', 'COLOR_BITS', '_width', '_height' variables must be set
 //======================
-strTextMultiple_t* TFT_display_init(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, ESP32_SPI_device_handle_t disp_handle, DisplayConfig_t display_config);
+strTextMultiple_t* TFT_display_init(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, DisplayConfig_t* display_config);
 
 //===================
 void stmpe610_Init(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition);

@@ -35,8 +35,11 @@
 
 // this Modules structures & types ...
 #include "ESP32_TouchGUI1_Module_s.h"
-#include "ESP32_TouchGUI1_Module.h"
+#include "ESP32_SPI_Module_s.h"
 #include "tft.h"
+#include "ESP32_TouchGUI1_Module.h"
+
+
 
 
 
@@ -89,30 +92,30 @@ const color_t TFT_PINK        = { 252, 192, 202 };
 // ===============================================
 
 // ==============================================================
-// ==== Set default values of global variables ==================
-uint8_t orientation = LANDSCAPE;	// screen orientation
-uint16_t font_rotate = 0;		// font rotation
-uint8_t	font_transparent = 0;
-uint8_t	font_forceFixed = 0;
-uint8_t	text_wrap = 0;			// character wrapping to new line
-color_t	_fg = {  0, 255,   0};
-color_t _bg = {  0,   0,   0};
-uint8_t image_debug = 0;
+// ==== Set default values of global variables ================== -> tft globals !!!
+//uint8_t orientation = LANDSCAPE;	// screen orientation
+//uint16_t font_rotate = 0;		// font rotation
+//uint8_t	font_transparent = 0;
+//uint8_t	font_forceFixed = 0;
+//uint8_t	text_wrap = 0;			// character wrapping to new line
+//color_t	_fg = {  0, 255,   0};
+//color_t _bg = {  0,   0,   0};
+//uint8_t image_debug = 0;
 
-float _angleOffset = DEFAULT_ANGLE_OFFSET;
+//float _angleOffset = DEFAULT_ANGLE_OFFSET;
 
-int	TFT_X = 0;
-int	TFT_Y = 0;
+//int	TFT_X = 0;
+//int	TFT_Y = 0;
 
-uint32_t tp_calx = 7472920;
-uint32_t tp_caly = 122224794;
+//uint32_t tp_calx = 7472920;
+//uint32_t tp_caly = 122224794;
 
-dispWin_t dispWin = {
-  .x1 = 0,
-  .y1 = 0,
-  .x2 = DEFAULT_TFT_DISPLAY_WIDTH,
-  .y2 = DEFAULT_TFT_DISPLAY_HEIGHT,
-};
+//dispWin_t dispWin = {
+//  .x1 = 0,
+//  .y1 = 0,
+//  .x2 = DEFAULT_TFT_DISPLAY_WIDTH,
+//  .y2 = DEFAULT_TFT_DISPLAY_HEIGHT,
+//};
 
 Font cfont = {
 	.font = tft_DefaultFont,
@@ -123,8 +126,8 @@ Font cfont = {
 	.bitmap = 1,
 };
 
-uint8_t font_buffered_char = 1;
-uint8_t font_line_space = 0;
+//uint8_t font_buffered_char = 1;
+//uint8_t font_line_space = 0;
 // ==============================================================
 
 
@@ -138,12 +141,13 @@ typedef struct {
       uint16_t dataPtr;
 } propFont;
 
-static dispWin_t dispWinTemp;
+//static dispWin_t dispWinTemp;
 
-static uint8_t *userfont = NULL;
-static int TFT_OFFSET = 0;
+//static uint8_t *userfont = NULL;
+//static int TFT_OFFSET = 0;
 static propFont	fontChar;
-static float _arcAngleMax = DEFAULT_ARC_ANGLE_MAX;
+//static float _arcAngleMax = DEFAULT_ARC_ANGLE_MAX;
+
 
 
 // =========================================================================
@@ -154,6 +158,8 @@ static float _arcAngleMax = DEFAULT_ARC_ANGLE_MAX;
 // =========================================================================
 
 
+
+// Public function
 // Compare two colors; return 0 if equal
 //============================================
 int TFT_compare_colors(color_t c1, color_t c2)
@@ -165,121 +171,214 @@ int TFT_compare_colors(color_t c1, color_t c2)
 	return 0;
 }
 
+
+
+// Local function
 // draw color pixel on screen
 //------------------------------------------------------------------------
 static void 
-_drawPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+_drawPixel(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
  	int16_t x,
  	int16_t y,
  	color_t color,
- 	uint8_t sel) {
+ 	uint8_t sel)
+{
+  if ( (x < TFT_globals->dispWin.x1) || (y < TFT_globals->dispWin.y1) ||
+	 (x > TFT_globals->dispWin.x2) || (y > TFT_globals->dispWin.y2) ) return;
 
-  if ((x < dispWin.x1) || (y < dispWin.y1) || (x > dispWin.x2) || (y > dispWin.y2)) return;
-
-  drawPixel(ESP32_TouchGUI1_Definition, x, y, color, sel);
+  drawPixel(disp_handle, TFT_globals, x, y, color, sel);
 }
 
 
 
-//====================================================================
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw Pixel
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
 void 
-TFT_drawPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+TFT_drawPixel(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
  	int16_t x,
  	int16_t y,
  	color_t color,
- 	uint8_t sel) {
-
-	_drawPixel(ESP32_TouchGUI1_Definition, x+dispWin.x1, y+dispWin.y1, color, sel);
+ 	uint8_t sel) 
+{
+	_drawPixel(disp_handle, TFT_globals, x + TFT_globals->dispWin.x1,
+		y + TFT_globals->dispWin.y1, color, sel);
 }
 
-//===========================================
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Read Pixel
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
 color_t 
-TFT_readPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+TFT_readPixel(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
 	int16_t x,
-	int16_t y) {
+	int16_t y) 
+{
+  if ( (x < TFT_globals->dispWin.x1) || (y < TFT_globals->dispWin.y1) ||
+	(x > TFT_globals->dispWin.x2) || (y > TFT_globals->dispWin.y2) ) return TFT_BLACK;
 
-  if ((x < dispWin.x1) || (y < dispWin.y1) || (x > dispWin.x2) || (y > dispWin.y2)) return TFT_BLACK;
-
-  return readPixel(ESP32_TouchGUI1_Definition, x, y);
+  return readPixel(disp_handle, TFT_globals, x, y);
 }
 
+
+
+// Local function
 //--------------------------------------------------------------------------
-static void _drawFastVLine(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+static void 
+_drawFastVLine(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
 	int16_t x,
 	int16_t y,
 	int16_t h,
-	color_t color) {
+	color_t color)
+{
   // clipping
-  if ((x < dispWin.x1) || (x > dispWin.x2) || (y > dispWin.y2)) return;
+  if ( ( x < TFT_globals->dispWin.x1 ) || ( x > TFT_globals->dispWin.x2 ) ||
+	( y > TFT_globals->dispWin.y2 ) ) return;
 
-  if (y < dispWin.y1) {
+  if ( y < TFT_globals->dispWin.y1 ) {
 
-	h -= (dispWin.y1 - y);
-	y = dispWin.y1;
+	h -= (TFT_globals->dispWin.y1 - y);
+	y = TFT_globals->dispWin.y1;
   }
 
-  if (h < 0) h = 0;
+  if ( h < 0 ) h = 0;
 
-  if ((y + h) > (dispWin.y2+1)) h = dispWin.y2 - y + 1;
+  if ( ( y + h ) > (TFT_globals->dispWin.y2 + 1) ) h = TFT_globals->dispWin.y2 - y + 1;
 
-  if (h == 0) h = 1;
+  if ( h == 0 ) h = 1;
 
-  TFT_pushColorRep(ESP32_TouchGUI1_Definition, x, y, x, y+h-1, color, (uint32_t)h);
+  TFT_pushColorRep(disp_handle, TFT_globals, x, y, x, y + h - 1, color, (uint32_t) h);
 }
 
+
+
+// Local function
 //--------------------------------------------------------------------------
-static void _drawFastHLine(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+static void 
+_drawFastHLine(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
 	int16_t x,
 	int16_t y,
 	int16_t w,
 	color_t color)
 {
 	// clipping
-	if ((y < dispWin.y1) || (x > dispWin.x2) || (y > dispWin.y2)) return;
-	if (x < dispWin.x1) {
-		w -= (dispWin.x1 - x);
-		x = dispWin.x1;
+	if ( (y < TFT_globals->dispWin.y1) || (x > TFT_globals->dispWin.x2) ||
+		(y > TFT_globals->dispWin.y2) ) return;
+
+	if ( x < TFT_globals->dispWin.x1 ) {
+		w -= (TFT_globals->dispWin.x1 - x);
+		x = TFT_globals->dispWin.x1;
 	}
+
 	if (w < 0) w = 0;
-	if ((x + w) > (dispWin.x2+1)) w = dispWin.x2 - x + 1;
-	if (w == 0) w = 1;
+	if ( ( x + w ) > ( TFT_globals->dispWin.x2 + 1 ) ) w = TFT_globals->dispWin.x2 - x + 1;
+	if ( w == 0 ) w = 1;
 
-	TFT_pushColorRep(ESP32_TouchGUI1_Definition, x, y, x+w-1, y, color, (uint32_t)w);
+	TFT_pushColorRep(disp_handle, x, y, x + w - 1, y, color, (uint32_t) w);
 }
 
-//======================================================================
-void TFT_drawFastVLine(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int16_t h, color_t color) {
-	_drawFastVLine(ESP32_TouchGUI1_Definition, x+dispWin.x1, y+dispWin.y1, h, color);
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw Fast Vertical Line
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_drawFastVLine(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x,
+	int16_t y,
+	int16_t h,
+	color_t color)
+{
+	_drawFastVLine(disp_handle, TFT_globals, x + TFT_globals->dispWin.x1,
+		y + TFT_globals->dispWin.y1, h, color);
 }
 
-//======================================================================
-void TFT_drawFastHLine(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int16_t w, color_t color) {
-	_drawFastHLine(ESP32_TouchGUI1_Definition, x+dispWin.x1, y+dispWin.y1, w, color);
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw Fast Horizontal Line
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_drawFastHLine(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x,
+	int16_t y,
+	int16_t w,
+	color_t color) 
+{
+	_drawFastHLine(disp_handle, TFT_globals, x + TFT_globals->dispWin.x1,
+		y + TFT_globals->dispWin.y1, w, color);
 }
 
+
+
+// Local function
 // Bresenham's algorithm - thx wikipedia - speed enhanced by Bodmer this uses
 // the eficient FastH/V Line draw routine for segments of 2 pixels or more
 //----------------------------------------------------------------------------------
-static void _drawLine(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x0, int16_t y0, int16_t x1, int16_t y1, color_t color)
+static void 
+_drawLine(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x0,
+	int16_t y0,
+	int16_t x1,
+	int16_t y1,
+	color_t color)
 {
-  if (x0 == x1) {
-	  if (y0 <= y1) _drawFastVLine(ESP32_TouchGUI1_Definition, x0, y0, y1-y0, color);
-	  else _drawFastVLine(ESP32_TouchGUI1_Definition, x0, y1, y0-y1, color);
+  if ( x0 == x1 ) {
+
+	  if ( y0 <= y1 ) _drawFastVLine(disp_handle, TFT_globals, x0, y0, y1 - y0, color);
+	  else _drawFastVLine(disp_handle, TFT_globals, x0, y1, y0 - y1, color);
 	  return;
   }
-  if (y0 == y1) {
-	  if (x0 <= x1) _drawFastHLine(ESP32_TouchGUI1_Definition, x0, y0, x1-x0, color);
-	  else _drawFastHLine(ESP32_TouchGUI1_Definition, x1, y0, x0-x1, color);
+  if ( y0 == y1 ) {
+	  if ( x0 <= x1 ) _drawFastHLine(disp_handle, TFT_globals, x0, y0, x1 - x0, color);
+	  else _drawFastHLine(disp_handle, TFT_globals, x1, y0, x0 - x1, color);
 	  return;
   }
 
   int steep = 0;
-  if (abs(y1 - y0) > abs(x1 - x0)) steep = 1;
+  if ( abs ( y1 - y0 ) > abs ( x1 - x0 ) ) steep = 1;
+
   if (steep) {
+
     swap(x0, y0);
     swap(x1, y1);
   }
-  if (x0 > x1) {
+
+  if ( x0 > x1 ) {
+
     swap(x0, x1);
     swap(y0, y1);
   }
@@ -287,115 +386,246 @@ static void _drawLine(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, 
   int16_t dx = x1 - x0, dy = abs(y1 - y0);
   int16_t err = dx >> 1, ystep = -1, xs = x0, dlen = 0;
 
-  if (y0 < y1) ystep = 1;
+  if ( y0 < y1 ) ystep = 1;
 
   // Split into steep and not steep for FastH/V separation
   if (steep) {
-    for (; x0 <= x1; x0++) {
-      dlen++;
-      err -= dy;
-      if (err < 0) {
-        err += dx;
-        if (dlen == 1) _drawPixel(ESP32_TouchGUI1_Definition, y0, xs, color, 1);
-        else _drawFastVLine(ESP32_TouchGUI1_Definition, y0, xs, dlen, color);
-        dlen = 0; y0 += ystep; xs = x0 + 1;
-      }
-    }
-    if (dlen) _drawFastVLine(ESP32_TouchGUI1_Definition, y0, xs, dlen, color);
+
+	for (; x0 <= x1; x0++) {
+
+		dlen++;
+		err -= dy;
+
+		if (err < 0) {
+
+			err += dx;
+
+			if (dlen == 1) _drawPixel(disp_handle, TFT_globals, y0, xs, color, 1);
+
+			else _drawFastVLine(disp_handle, TFT_globals, y0, xs, dlen, color);
+
+			dlen = 0; y0 += ystep; xs = x0 + 1;
+		}
+	}
+
+	if (dlen) _drawFastVLine(disp_handle,TFT_globals, y0, xs, dlen, color);
   }
-  else
-  {
-    for (; x0 <= x1; x0++) {
-      dlen++;
-      err -= dy;
-      if (err < 0) {
-        err += dx;
-        if (dlen == 1) _drawPixel(ESP32_TouchGUI1_Definition, xs, y0, color, 1);
-        else _drawFastHLine(ESP32_TouchGUI1_Definition, xs, y0, dlen, color);
-        dlen = 0; y0 += ystep; xs = x0 + 1;
-      }
-    }
-    if (dlen) _drawFastHLine(ESP32_TouchGUI1_Definition, xs, y0, dlen, color);
+
+  else {
+
+	for (; x0 <= x1; x0++) {
+
+		dlen++;
+		err -= dy;
+
+		if (err < 0) {
+			err += dx;
+			if (dlen == 1) _drawPixel(disp_handle, TFT_globals, xs, y0, color, 1);
+			else _drawFastHLine(disp_handle,TFT_globals, xs, y0, dlen, color);
+			dlen = 0; y0 += ystep; xs = x0 + 1;
+		}
+	}
+
+	if (dlen) _drawFastHLine(disp_handle, TFT_globals, xs, y0, dlen, color);
   }
 }
 
-//==============================================================================
-void TFT_drawLine(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x0, int16_t y0, int16_t x1, int16_t y1, color_t color)
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw Line
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_drawLine(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x0,
+	int16_t y0,
+	int16_t x1,
+	int16_t y1,
+	color_t color)
 {
-	_drawLine(ESP32_TouchGUI1_Definition, x0+dispWin.x1, y0+dispWin.y1, x1+dispWin.x1, y1+dispWin.y1, color);
+	_drawLine(ESP32_TouchGUI1_Definition, TFT_globals, x0 + TFT_globals->dispWin.x1,
+		 y0 + TFT_globals->dispWin.y1, x1 + TFT_globals->dispWin.x1,
+		 y1 + TFT_globals->dispWin.y1, color);
 }
 
+
+
+// Local function
 // fill a rectangle
 //--------------------------------------------------------------------------------
-static void _fillRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int16_t w, int16_t h, color_t color) {
-	// clipping
-	if ((x >= dispWin.x2) || (y > dispWin.y2)) return;
-
-	if (x < dispWin.x1) {
-		w -= (dispWin.x1 - x);
-		x = dispWin.x1;
-	}
-	if (y < dispWin.y1) {
-		h -= (dispWin.y1 - y);
-		y = dispWin.y1;
-	}
-	if (w < 0) w = 0;
-	if (h < 0) h = 0;
-
-	if ((x + w) > (dispWin.x2+1)) w = dispWin.x2 - x + 1;
-	if ((y + h) > (dispWin.y2+1)) h = dispWin.y2 - y + 1;
-	if (w == 0) w = 1;
-	if (h == 0) h = 1;
-	TFT_pushColorRep(ESP32_TouchGUI1_Definition, x, y, x+w-1, y+h-1, color, (uint32_t)(h*w));
-}
-
-//============================================================================
-void TFT_fillRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int16_t w, int16_t h, color_t color) {
-	_fillRect(ESP32_TouchGUI1_Definition, x+dispWin.x1, y+dispWin.y1, w, h, color);
-}
-
-
-
-//==================================
-void TFT_fillScreen(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, color_t color)
+static void 
+_fillRect(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x,
+	int16_t y,
+	int16_t w,
+	int16_t h,
+	color_t color)
 {
-  TFT_pushColorRep(ESP32_TouchGUI1_Definition,
-	0,
-	0,
-	ESP32_TouchGUI1_Definition->_width-1,
-	ESP32_TouchGUI1_Definition->_height-1,
-	color,
-	(uint32_t)(ESP32_TouchGUI1_Definition->_height*ESP32_TouchGUI1_Definition->_width) );
+	// clipping
+	if ( ( x >= TFT_globals->dispWin.x2 ) || ( y > TFT_globals->dispWin.y2 ) ) return;
+
+	if ( x < TFT_globals->dispWin.x1 ) {
+		w -= ( TFT_globals->dispWin.x1 - x );
+		x = TFT_globals->dispWin.x1;
+	}
+
+	if ( y < TFT_globals->dispWin.y1) {
+		h -= ( TFT_globals->dispWin.y1 - y );
+		y = TFT_globals->dispWin.y1;
+	}
+
+	if ( w < 0 ) w = 0;
+	if ( h < 0 ) h = 0;
+
+	if ( ( x + w ) > ( TFT_globals->dispWin.x2 + 1 ) )
+		 w = TFT_globals->dispWin.x2 - x + 1;
+
+	if ( ( y + h ) > ( TFT_globals->dispWin.y2 + 1) )
+		 h = TFT_globals->dispWin.y2 - y + 1;
+
+	if ( w == 0 ) w = 1;
+	if ( h == 0 ) h = 1;
+
+	TFT_pushColorRep(disp_handle, x, y, x + w - 1,
+		 y + h - 1, color, (uint32_t) (h * w) );
 }
 
 
 
-//==================================
-void TFT_fillWindow(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, color_t color) {
-	TFT_pushColorRep(ESP32_TouchGUI1_Definition, dispWin.x1, dispWin.y1, dispWin.x2, dispWin.y2,
-			color, (uint32_t)((dispWin.x2-dispWin.x1+1) * (dispWin.y2-dispWin.y1+1)));
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Filled Rectangle
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_fillRect(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x,
+	int16_t y,
+	int16_t w,
+	int16_t h,
+	color_t color) 
+{
+	_fillRect(disp_handle, TFT_globals, x + TFT_globals->dispWin.x1,
+		 y + TFT_globals->dispWin.y1, w, h, color);
 }
+
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Fill Screen
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_fillScreen(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	color_t color)
+{
+  TFT_pushColorRep(disp_handle, 0, 0, TFT_globals->_width-1, TFT_globals->_height-1,
+	color, (uint32_t) (TFT_globals->_height * TFT_globals->_width) );
+}
+
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Fill Window
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_fillWindow(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	color_t color) 
+{
+	TFT_pushColorRep(disp_handle, TFT_globals->dispWin.x1,
+		TFT_globals->dispWin.y1, TFT_globals->dispWin.x2, TFT_globals->dispWin.y2,
+		color, (uint32_t) ( (TFT_globals->dispWin.x2 - TFT_globals->dispWin.x1 + 1) *
+		 (TFT_globals->dispWin.y2 - TFT_globals->dispWin.y1 + 1) ) );
+}
+
+
 
 // ^^^============= Basics drawing functions ================================^^^
 
 
+
 // ================ Graphics drawing functions ==================================
 
+
+// Local function
 //-----------------------------------------------------------------------------------
-static void _drawRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x1,uint16_t y1,uint16_t w,uint16_t h, color_t color) {
-  _drawFastHLine(ESP32_TouchGUI1_Definition, x1,y1,w, color);
-  _drawFastVLine(ESP32_TouchGUI1_Definition, x1+w-1,y1,h, color);
-  _drawFastHLine(ESP32_TouchGUI1_Definition, x1,y1+h-1,w, color);
-  _drawFastVLine(ESP32_TouchGUI1_Definition, x1,y1,h, color);
+static void 
+_drawRect(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint16_t x1,
+	uint16_t y1,
+	uint16_t w,
+	uint16_t h,
+	color_t color)
+{
+  _drawFastHLine(disp_handle, TFT_globals, x1, y1, w, color);
+  _drawFastVLine(disp_handle, TFT_globals,  x1 + w - 1, y1, h, color);
+  _drawFastHLine(disp_handle, TFT_globals,  x1, y1 + h - 1, w, color);
+  _drawFastVLine(disp_handle, TFT_globals,  x1, y1 , h, color);
 }
 
-//===============================================================================
-void TFT_drawRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x1,uint16_t y1,uint16_t w,uint16_t h, color_t color) {
-	_drawRect(ESP32_TouchGUI1_Definition, x1+dispWin.x1, y1+dispWin.y1, w, h, color);
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw Rectangle
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_drawRect(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint16_t x1,
+	uint16_t y1,
+	uint16_t w,
+	uint16_t h,
+	color_t color)
+{
+	_drawRect(disp_handle, TFT_globals, x1 + TFT_globals->dispWin.x1,
+		y1 + TFT_globals->dispWin.y1, w, h, color);
 }
 
+
+
+// Local function
 //-------------------------------------------------------------------------------------------------
-static void drawCircleHelper(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x0, int16_t y0, int16_t r, uint8_t cornername, color_t color)
+static void 
+drawCircleHelper(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x0,
+	int16_t y0,
+	int16_t r,
+	uint8_t cornername,
+	color_t color)
 {
 	int16_t f = 1 - r;
 	int16_t ddF_x = 1;
@@ -403,39 +633,58 @@ static void drawCircleHelper(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Defin
 	int16_t x = 0;
 	int16_t y = r;
 
-	disp_select(ESP32_TouchGUI1_Definition);
 	while (x < y) {
+
 		if (f >= 0) {
+
 			y--;
 			ddF_y += 2;
 			f += ddF_y;
 		}
+
 		x++;
 		ddF_x += 2;
 		f += ddF_x;
+
 		if (cornername & 0x4) {
-			_drawPixel(ESP32_TouchGUI1_Definition, x0 + x, y0 + y, color, 0);
-			_drawPixel(ESP32_TouchGUI1_Definition, x0 + y, y0 + x, color, 0);
+
+			_drawPixel(disp_handle, TFT_globals, x0 + x, y0 + y, color, 0);
+			_drawPixel(disp_handle, TFT_globals, x0 + y, y0 + x, color, 0);
 		}
+
 		if (cornername & 0x2) {
-			_drawPixel(ESP32_TouchGUI1_Definition, x0 + x, y0 - y, color, 0);
-			_drawPixel(ESP32_TouchGUI1_Definition, x0 + y, y0 - x, color, 0);
+
+			_drawPixel(disp_handle, TFT_globals, x0 + x, y0 - y, color, 0);
+			_drawPixel(disp_handle, TFT_globals, x0 + y, y0 - x, color, 0);
 		}
 		if (cornername & 0x8) {
-			_drawPixel(ESP32_TouchGUI1_Definition, x0 - y, y0 + x, color, 0);
-			_drawPixel(ESP32_TouchGUI1_Definition, x0 - x, y0 + y, color, 0);
+
+			_drawPixel(disp_handle, TFT_globals, x0 - y, y0 + x, color, 0);
+			_drawPixel(disp_handle, TFT_globals, x0 - x, y0 + y, color, 0);
 		}
+
 		if (cornername & 0x1) {
-			_drawPixel(ESP32_TouchGUI1_Definition, x0 - y, y0 - x, color, 0);
-			_drawPixel(ESP32_TouchGUI1_Definition, x0 - x, y0 - y, color, 0);
+
+			_drawPixel(disp_handle, TFT_globals, x0 - y, y0 - x, color, 0);
+			_drawPixel(disp_handle, TFT_globals, x0 - x, y0 - y, color, 0);
 		}
 	}
-	disp_deselect(ESP32_TouchGUI1_Definition);
 }
 
+
+
+// Local function
 // Used to do circles and roundrects
 //----------------------------------------------------------------------------------------------------------------
-static void fillCircleHelper(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x0, int16_t y0, int16_t r,	uint8_t cornername, int16_t delta, color_t color)
+static void 
+fillCircleHelper(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x0,
+	int16_t y0,
+	int16_t r,
+	uint8_t cornername,
+	int16_t delta,
+	color_t color)
 {
 	int16_t f = 1 - r;
 	int16_t ddF_x = 1;
@@ -445,155 +694,283 @@ static void fillCircleHelper(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Defin
 	int16_t ylm = x0 - r;
 
 	while (x < y) {
+
 		if (f >= 0) {
-			if (cornername & 0x1) _drawFastVLine(ESP32_TouchGUI1_Definition, x0 + y, y0 - x, 2 * x + 1 + delta, color);
-			if (cornername & 0x2) _drawFastVLine(ESP32_TouchGUI1_Definition, x0 - y, y0 - x, 2 * x + 1 + delta, color);
+
+			if (cornername & 0x1) _drawFastVLine(disp_handle, TFT_globals,
+				 x0 + y, y0 - x, 2 * x + 1 + delta, color);
+
+			if (cornername & 0x2) _drawFastVLine(disp_handle, TFT_globals,
+				 x0 - y, y0 - x, 2 * x + 1 + delta, color);
+
 			ylm = x0 - y;
 			y--;
 			ddF_y += 2;
 			f += ddF_y;
 		}
+
 		x++;
 		ddF_x += 2;
 		f += ddF_x;
 
 		if ((x0 - x) > ylm) {
-			if (cornername & 0x1) _drawFastVLine(ESP32_TouchGUI1_Definition, x0 + x, y0 - y, 2 * y + 1 + delta, color);
-			if (cornername & 0x2) _drawFastVLine(ESP32_TouchGUI1_Definition, x0 - x, y0 - y, 2 * y + 1 + delta, color);
+
+			if (cornername & 0x1) _drawFastVLine(disp_handle, TFT_globals,
+				 x0 + x, y0 - y, 2 * y + 1 + delta, color);
+
+			if (cornername & 0x2) _drawFastVLine(disp_handle, TFT_globals,
+				 x0 - x, y0 - y, 2 * y + 1 + delta, color);
 		}
 	}
 }
 
-// Draw a rounded rectangle
-//=============================================================================================
-void TFT_drawRoundRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t r, color_t color)
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw Rounded Rectangle
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_drawRoundRect(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x,
+	int16_t y,
+	uint16_t w,
+	uint16_t h,
+	uint16_t r,
+	color_t color)
 {
-	x += dispWin.x1;
-	y += dispWin.y1;
+	x += TFT_globals->dispWin.x1;
+	y += TFT_globals->dispWin.y1;
 
 	// smarter version
-	_drawFastHLine(ESP32_TouchGUI1_Definition, x + r, y, w - 2 * r, color);			// Top
-	_drawFastHLine(ESP32_TouchGUI1_Definition, x + r, y + h - 1, w - 2 * r, color);	// Bottom
-	_drawFastVLine(ESP32_TouchGUI1_Definition, x, y + r, h - 2 * r, color);			// Left
-	_drawFastVLine(ESP32_TouchGUI1_Definition, x + w - 1, y + r, h - 2 * r, color);	// Right
+	_drawFastHLine(disp_handle, TFT_globals, x + r, y, w - 2 * r, color);		// Top
+	_drawFastHLine(disp_handle, TFT_globals, x + r, y + h - 1, w - 2 * r, color);	// Bottom
+	_drawFastVLine(disp_handle, TFT_globals, x, y + r, h - 2 * r, color);		// Left
+	_drawFastVLine(disp_handle, TFT_globals, x + w - 1, y + r, h - 2 * r, color);	// Right
 
 	// draw four corners
-	drawCircleHelper(ESP32_TouchGUI1_Definition, x + r, y + r, r, 1, color);
-	drawCircleHelper(ESP32_TouchGUI1_Definition, x + w - r - 1, y + r, r, 2, color);
-	drawCircleHelper(ESP32_TouchGUI1_Definition, x + w - r - 1, y + h - r - 1, r, 4, color);
-	drawCircleHelper(ESP32_TouchGUI1_Definition, x + r, y + h - r - 1, r, 8, color);
+	drawCircleHelper(disp_handle, TFT_globals, x + r, y + r, r, 1, color);
+	drawCircleHelper(disp_handle, TFT_globals, x + w - r - 1, y + r, r, 2, color);
+	drawCircleHelper(disp_handle, TFT_globals, x + w - r - 1, y + h - r - 1, r, 4, color);
+	drawCircleHelper(disp_handle, TFT_globals, x + r, y + h - r - 1, r, 8, color);
 }
 
-// Fill a rounded rectangle
-//=============================================================================================
-void TFT_fillRoundRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t r, color_t color)
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw a Filled Rounded Rectangle
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void TFT_fillRoundRect(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x,
+	int16_t y,
+	uint16_t w,
+	uint16_t h,
+	uint16_t r,
+	color_t color)
 {
-	x += dispWin.x1;
-	y += dispWin.y1;
+	x += TFT_globals->dispWin.x1;
+	y += TFT_globals->dispWin.y1;
 
 	// smarter version
-	_fillRect(ESP32_TouchGUI1_Definition, x + r, y, w - 2 * r, h, color);
+	_fillRect(disp_handle, TFT_globals, x + r, y, w - 2 * r, h, color);
 
 	// draw four corners
-	fillCircleHelper(ESP32_TouchGUI1_Definition, x + w - r - 1, y + r, r, 1, h - 2 * r - 1, color);
-	fillCircleHelper(ESP32_TouchGUI1_Definition, x + r, y + r, r, 2, h - 2 * r - 1, color);
+	fillCircleHelper(disp_handle, TFT_globals, x + w - r - 1, y + r, r, 1, h - 2 * r - 1, color);
+	fillCircleHelper(disp_handle, TFT_globals, x + r, y + r, r, 2, h - 2 * r - 1, color);
 }
 
 
 
-
+// Local function
 //-----------------------------------------------------------------------------------------------
-static void _drawLineByAngle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int16_t angle, uint16_t length, color_t color)
+static void 
+_drawLineByAngle(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x,
+	int16_t y,
+	int16_t angle,
+	uint16_t length,
+	color_t color)
 {
-	_drawLine(ESP32_TouchGUI1_Definition, 
-		x,
-		y,
-		x + length * cos((angle + _angleOffset) * DEG_TO_RAD),
-		y + length * sin((angle + _angleOffset) * DEG_TO_RAD), color);
+	_drawLine(disp_handle, TFT_globals, x, y,
+		x + length * cos((angle + TFT_globals->_angleOffset) * DEG_TO_RAD),
+		y + length * sin((angle + TFT_globals->_angleOffset) * DEG_TO_RAD), color);
 }
 
+
+
+// Local function
 //---------------------------------------------------------------------------------------------------------------
-static void _DrawLineByAngle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int16_t angle, uint16_t start, uint16_t length, color_t color)
+static void 
+_DrawLineByAngle(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x,
+	int16_t y,
+	int16_t angle,
+	uint16_t start,
+	uint16_t length,
+	color_t color)
 {
-	_drawLine(ESP32_TouchGUI1_Definition, 
-		x + start * cos((angle + _angleOffset) * DEG_TO_RAD),
-		y + start * sin((angle + _angleOffset) * DEG_TO_RAD),
-		x + (start + length) * cos((angle + _angleOffset) * DEG_TO_RAD),
-		y + (start + length) * sin((angle + _angleOffset) * DEG_TO_RAD), color);
+	_drawLine(disp_handle, TFT_globals, 
+		x + start * cos( (angle + TFT_globals->_angleOffset) * DEG_TO_RAD),
+		y + start * sin( (angle + TFT_globals->_angleOffset) * DEG_TO_RAD),
+		x + (start + length) * cos( (angle + TFT_globals->_angleOffset) * DEG_TO_RAD),
+		y + (start + length) * sin( (angle + TFT_globals->_angleOffset) * DEG_TO_RAD), color);
 }
 
-//===========================================================================================================
-void TFT_drawLineByAngle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x, uint16_t y, uint16_t start, uint16_t len, uint16_t angle, color_t color)
-{
-	x += dispWin.x1;
-	y += dispWin.y1;
 
-	if (start == 0) _drawLineByAngle(ESP32_TouchGUI1_Definition, x, y, angle, len, color);
-	else _DrawLineByAngle(ESP32_TouchGUI1_Definition, x, y, angle, start, len, color);
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw a Line by Angle
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_drawLineByAngle(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint16_t x,
+	uint16_t y,
+	uint16_t start,
+	uint16_t len,
+	uint16_t angle,
+	color_t color)
+{
+	x += TFT_globals->dispWin.x1;
+	y += TFT_globals->dispWin.y1;
+
+	if (start == 0) _drawLineByAngle(disp_handle, TFT_globals, x, y, angle, len, color);
+
+	else _DrawLineByAngle(disp_handle, TFT_globals, x, y, angle, start, len, color);
 }
 
 
+
+// Local function
 // Draw a triangle
 //--------------------------------------------------------------------------------------------------------------------
-static void _drawTriangle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, color_t color)
+static void 
+_drawTriangle(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint16_t x0,
+	uint16_t y0,
+	uint16_t x1,
+	uint16_t y1,
+	uint16_t x2,
+	uint16_t y2, 
+	color_t color)
 {
-	_drawLine(ESP32_TouchGUI1_Definition, x0, y0, x1, y1, color);
-	_drawLine(ESP32_TouchGUI1_Definition, x1, y1, x2, y2, color);
-	_drawLine(ESP32_TouchGUI1_Definition, x2, y2, x0, y0, color);
+	_drawLine(disp_handle, TFT_globals, x0, y0, x1, y1, color);
+	_drawLine(disp_handle, TFT_globals, x1, y1, x2, y2, color);
+	_drawLine(disp_handle, TFT_globals, x2, y2, x0, y0, color);
 }
 
-//================================================================================================================
-void TFT_drawTriangle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, color_t color)
-{
-	x0 += dispWin.x1;
-	y0 += dispWin.y1;
-	x1 += dispWin.x1;
-	y1 += dispWin.y1;
-	x2 += dispWin.x1;
-	y2 += dispWin.y1;
 
-	_drawLine(ESP32_TouchGUI1_Definition, x0, y0, x1, y1, color);
-	_drawLine(ESP32_TouchGUI1_Definition, x1, y1, x2, y2, color);
-	_drawLine(ESP32_TouchGUI1_Definition, x2, y2, x0, y0, color);
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw a Triangle
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void TFT_drawTriangle(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint16_t x0,
+	uint16_t y0,
+	uint16_t x1,
+	uint16_t y1,
+	uint16_t x2,
+	uint16_t y2,
+	color_t color)
+{
+	x0 += TFT_globals->dispWin.x1;
+	y0 += TFT_globals->dispWin.y1;
+	x1 += TFT_globals->dispWin.x1;
+	y1 += TFT_globals->dispWin.y1;
+	x2 += TFT_globals->dispWin.x1;
+	y2 += TFT_globals->dispWin.y1;
+
+	_drawLine(disp_handle, TFT_globals, x0, y0, x1, y1, color);
+	_drawLine(disp_handle, TFT_globals, x1, y1, x2, y2, color);
+	_drawLine(disp_handle, TFT_globals, x2, y2, x0, y0, color);
 }
 
+
+
+// Local function
 // Fill a triangle
 //--------------------------------------------------------------------------------------------------------------------
-static void _fillTriangle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, color_t color)
+static void 
+_fillTriangle(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint16_t x0,
+	uint16_t y0,
+	uint16_t x1,
+	uint16_t y1,
+	uint16_t x2,
+	uint16_t y2,
+	color_t color)
 {
   int16_t a, b, y, last;
 
   // Sort coordinates by Y order (y2 >= y1 >= y0)
   if (y0 > y1) {
-    swap(y0, y1); swap(x0, x1);
+
+	swap(y0, y1); swap(x0, x1);
   }
+
   if (y1 > y2) {
-    swap(y2, y1); swap(x2, x1);
+
+	swap(y2, y1); swap(x2, x1);
   }
+
   if (y0 > y1) {
-    swap(y0, y1); swap(x0, x1);
+
+	swap(y0, y1); swap(x0, x1);
   }
 
   if(y0 == y2) { // Handle awkward all-on-same-line case as its own thing
-    a = b = x0;
-    if(x1 < a)      a = x1;
-    else if(x1 > b) b = x1;
-    if(x2 < a)      a = x2;
-    else if(x2 > b) b = x2;
-    _drawFastHLine(ESP32_TouchGUI1_Definition, a, y0, b-a+1, color);
-    return;
+
+	a = b = x0;
+	if (x1 < a)      a = x1;
+	else if(x1 > b) b = x1;
+	if (x2 < a)      a = x2;
+	else if(x2 > b) b = x2;
+
+	_drawFastHLine(disp_handle, TFT_globals, a, y0, b-a+1, color);
+
+	return;
   }
 
   int16_t
-    dx01 = x1 - x0,
-    dy01 = y1 - y0,
-    dx02 = x2 - x0,
-    dy02 = y2 - y0,
-    dx12 = x2 - x1,
-    dy12 = y2 - y1;
+  dx01 = x1 - x0,
+  dy01 = y1 - y0,
+  dx02 = x2 - x0,
+  dy02 = y2 - y0,
+  dx12 = x2 - x1,
+  dy12 = y2 - y1;
   int32_t
-    sa   = 0,
-    sb   = 0;
+  sa   = 0,
+  sb   = 0;
 
   // For upper part of triangle, find scanline crossings for segments
   // 0-1 and 0-2.  If y1=y2 (flat-bottomed triangle), the scanline y1
@@ -601,20 +978,25 @@ static void _fillTriangle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definiti
   // error there), otherwise scanline y1 is skipped here and handled
   // in the second loop...which also avoids a /0 error here if y0=y1
   // (flat-topped triangle).
-  if(y1 == y2) last = y1;   // Include y1 scanline
-  else         last = y1-1; // Skip it
+  if (y1 == y2) last = y1;   // Include y1 scanline
+  else last = y1-1; // Skip it
 
-  for(y=y0; y<=last; y++) {
-    a   = x0 + sa / dy01;
-    b   = x0 + sb / dy02;
-    sa += dx01;
-    sb += dx02;
-    /* longhand:
-    a = x0 + (x1 - x0) * (y - y0) / (y1 - y0);
-    b = x0 + (x2 - x0) * (y - y0) / (y2 - y0);
-    */
-    if(a > b) swap(a,b);
-    _drawFastHLine(ESP32_TouchGUI1_Definition, a, y, b-a+1, color);
+  for ( y =y0 ; y <= last ; y++ ) {
+
+	a   = x0 + sa / dy01;
+	b   = x0 + sb / dy02;
+
+	sa += dx01;
+	sb += dx02;
+
+	/* longhand:
+	a = x0 + (x1 - x0) * (y - y0) / (y1 - y0);
+	b = x0 + (x2 - x0) * (y - y0) / (y2 - y0);
+	*/
+
+	if(a > b) swap(a,b);
+
+	_drawFastHLine(disp_handle, TFT_globals, a, y, b-a+1, color);
   }
 
   // For lower part of triangle, find scanline crossings for segments
@@ -622,94 +1004,191 @@ static void _fillTriangle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definiti
   sa = dx12 * (y - y1);
   sb = dx02 * (y - y0);
   for(; y<=y2; y++) {
-    a   = x1 + sa / dy12;
-    b   = x0 + sb / dy02;
-    sa += dx12;
-    sb += dx02;
-    /* longhand:
-    a = x1 + (x2 - x1) * (y - y1) / (y2 - y1);
-    b = x0 + (x2 - x0) * (y - y0) / (y2 - y0);
-    */
-    if(a > b) swap(a,b);
-    _drawFastHLine(ESP32_TouchGUI1_Definition, a, y, b-a+1, color);
+
+	a   = x1 + sa / dy12;
+	b   = x0 + sb / dy02;
+
+	sa += dx12;
+	sb += dx02;
+
+	/* longhand:
+	a = x1 + (x2 - x1) * (y - y1) / (y2 - y1);
+	b = x0 + (x2 - x0) * (y - y0) / (y2 - y0);
+	*/
+
+	if(a > b) swap(a,b);
+
+	_drawFastHLine(disp_handle, TFT_globals, a, y, b-a+1, color);
   }
 }
 
-//================================================================================================================
-void TFT_fillTriangle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, color_t color)
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw a Filled Triangle
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_fillTriangle(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint16_t x0,
+	uint16_t y0,
+	uint16_t x1,
+	uint16_t y1,
+	uint16_t x2,
+	uint16_t y2,
+	color_t color)
 {
-	_fillTriangle(ESP32_TouchGUI1_Definition, 
-			x0 + dispWin.x1, y0 + dispWin.y1,
-			x1 + dispWin.x1, y1 + dispWin.y1,
-			x2 + dispWin.x1, y2 + dispWin.y1,
+	_fillTriangle(disp_handle, TFT_globals, 
+			x0 + TFT_globals->dispWin.x1, y0 + TFT_globals->dispWin.y1,
+			x1 + TFT_globals->dispWin.x1, y1 + TFT_globals->dispWin.y1,
+			x2 + TFT_globals->dispWin.x1, y2 + TFT_globals->dispWin.y1,
 			color);
 }
 
-//====================================================================
-void TFT_drawCircle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int radius, color_t color) {
-	x += dispWin.x1;
-	y += dispWin.y1;
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw a Circle
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_drawCircle(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x,
+	int16_t y,
+	int radius,
+	color_t color)
+{
+	x += TFT_globals->dispWin.x1;
+	y += TFT_globals->dispWin.y1;
+
 	int f = 1 - radius;
 	int ddF_x = 1;
 	int ddF_y = -2 * radius;
 	int x1 = 0;
 	int y1 = radius;
 
-	disp_select(ESP32_TouchGUI1_Definition);
-	_drawPixel(ESP32_TouchGUI1_Definition, x, y + radius, color, 0);
-	_drawPixel(ESP32_TouchGUI1_Definition, x, y - radius, color, 0);
-	_drawPixel(ESP32_TouchGUI1_Definition, x + radius, y, color, 0);
-	_drawPixel(ESP32_TouchGUI1_Definition, x - radius, y, color, 0);
+	_drawPixel(disp_handle, TFT_globals, x, y + radius, color, 0);
+	_drawPixel(disp_handle, TFT_globals, x, y - radius, color, 0);
+	_drawPixel(disp_handle, TFT_globals, x + radius, y, color, 0);
+	_drawPixel(disp_handle, TFT_globals, x - radius, y, color, 0);
+
 	while(x1 < y1) {
+
 		if (f >= 0) {
+
 			y1--;
 			ddF_y += 2;
 			f += ddF_y;
 		}
+
 		x1++;
 		ddF_x += 2;
 		f += ddF_x;
-		_drawPixel(ESP32_TouchGUI1_Definition, x + x1, y + y1, color, 0);
-		_drawPixel(ESP32_TouchGUI1_Definition, x - x1, y + y1, color, 0);
-		_drawPixel(ESP32_TouchGUI1_Definition, x + x1, y - y1, color, 0);
-		_drawPixel(ESP32_TouchGUI1_Definition, x - x1, y - y1, color, 0);
-		_drawPixel(ESP32_TouchGUI1_Definition, x + y1, y + x1, color, 0);
-		_drawPixel(ESP32_TouchGUI1_Definition, x - y1, y + x1, color, 0);
-		_drawPixel(ESP32_TouchGUI1_Definition, x + y1, y - x1, color, 0);
-		_drawPixel(ESP32_TouchGUI1_Definition, x - y1, y - x1, color, 0);
+
+		_drawPixel(disp_handle, TFT_globals, x + x1, y + y1, color, 0);
+		_drawPixel(disp_handle, TFT_globals, x - x1, y + y1, color, 0);
+		_drawPixel(disp_handle, TFT_globals, x + x1, y - y1, color, 0);
+		_drawPixel(disp_handle, TFT_globals, x - x1, y - y1, color, 0);
+		_drawPixel(disp_handle, TFT_globals, x + y1, y + x1, color, 0);
+		_drawPixel(disp_handle, TFT_globals, x - y1, y + x1, color, 0);
+		_drawPixel(disp_handle, TFT_globals, x + y1, y - x1, color, 0);
+		_drawPixel(disp_handle, TFT_globals, x - y1, y - x1, color, 0);
 	}
-  disp_deselect(ESP32_TouchGUI1_Definition);
 }
 
-//====================================================================
-void TFT_fillCircle(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int radius, color_t color) {
-	x += dispWin.x1;
-	y += dispWin.y1;
 
-	_drawFastVLine(ESP32_TouchGUI1_Definition, x, y-radius, 2*radius+1, color);
-	fillCircleHelper(ESP32_TouchGUI1_Definition, x, y, radius, 3, 0, color);
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw a Filled Circle
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_fillCircle(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x,
+	int16_t y,
+	int radius,
+	color_t color) 
+{
+	x += TFT_globals->dispWin.x1;
+	y += TFT_globals->dispWin.y1;
+
+	_drawFastVLine(disp_handle, TFT_globals, x, y-radius, 2*radius+1, color);
+
+	fillCircleHelper(disp_handle, TFT_globals, x, y, radius, 3, 0, color);
 }
 
+
+
+// Local function
 //----------------------------------------------------------------------------------------------------------------
-static void _draw_ellipse_section(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x, uint16_t y, uint16_t x0, uint16_t y0, color_t color, uint8_t option)
+static void 
+_draw_ellipse_section(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint16_t x,
+	uint16_t y,
+	uint16_t x0,
+	uint16_t y0,
+	color_t color,
+	uint8_t option)
 {
-	disp_select(ESP32_TouchGUI1_Definition);
     // upper right
-    if ( option & TFT_ELLIPSE_UPPER_RIGHT ) _drawPixel(ESP32_TouchGUI1_Definition, x0 + x, y0 - y, color, 0);
+    if ( option & TFT_ELLIPSE_UPPER_RIGHT ) 
+	_drawPixel(disp_handle, TFT_globals, x0 + x, y0 - y, color, 0);
+
     // upper left
-    if ( option & TFT_ELLIPSE_UPPER_LEFT ) _drawPixel(ESP32_TouchGUI1_Definition, x0 - x, y0 - y, color, 0);
+    if ( option & TFT_ELLIPSE_UPPER_LEFT ) 
+	_drawPixel(disp_handle, TFT_globals, x0 - x, y0 - y, color, 0);
+
     // lower right
-    if ( option & TFT_ELLIPSE_LOWER_RIGHT ) _drawPixel(ESP32_TouchGUI1_Definition, x0 + x, y0 + y, color, 0);
+    if ( option & TFT_ELLIPSE_LOWER_RIGHT ) 
+	_drawPixel(disp_handle, TFT_globals, x0 + x, y0 + y, color, 0);
+
     // lower left
-    if ( option & TFT_ELLIPSE_LOWER_LEFT ) _drawPixel(ESP32_TouchGUI1_Definition, x0 - x, y0 + y, color, 0);
-	disp_deselect(ESP32_TouchGUI1_Definition);
+    if ( option & TFT_ELLIPSE_LOWER_LEFT ) 
+	_drawPixel(disp_handle, TFT_globals, x0 - x, y0 + y, color, 0);
 }
 
-//=====================================================================================================
-void TFT_drawEllipse(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x0, uint16_t y0, uint16_t rx, uint16_t ry, color_t color, uint8_t option)
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw an Ellipse
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_drawEllipse(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint16_t x0,
+	uint16_t y0,
+	uint16_t rx,
+	uint16_t ry,
+	color_t color,
+	uint8_t option)
 {
-	x0 += dispWin.x1;
-	y0 += dispWin.y1;
+	x0 += TFT_globals->dispWin.x1;
+	y0 += TFT_globals->dispWin.y1;
 
 	uint16_t x, y;
 	int32_t xchg, ychg;
@@ -745,12 +1224,17 @@ void TFT_drawEllipse(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, u
 	stopy = 0;
 
 	while( stopx >= stopy ) {
-		_draw_ellipse_section(ESP32_TouchGUI1_Definition, x, y, x0, y0, color, option);
+
+		_draw_ellipse_section(disp_handle, TFT_globals,
+			 x, y, x0, y0, color, option);
+
 		y++;
 		stopy += rxrx2;
 		err += ychg;
 		ychg += rxrx2;
+
 		if ( 2*err+xchg > 0 ) {
+
 			x--;
 			stopx -= ryry2;
 			err += xchg;
@@ -778,12 +1262,17 @@ void TFT_drawEllipse(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, u
 	stopy *= ry;
 
 	while( stopx <= stopy ) {
-		_draw_ellipse_section(ESP32_TouchGUI1_Definition, x, y, x0, y0, color, option);
+
+		_draw_ellipse_section(disp_handle, TFT_globals,
+			 x, y, x0, y0, color, option);
+
 		x++;
 		stopx += ryry2;
 		err += xchg;
 		xchg += ryry2;
+
 		if ( 2*err+ychg > 0 ) {
+
 			y--;
 			stopy -= rxrx2;
 			err += ychg;
@@ -792,24 +1281,59 @@ void TFT_drawEllipse(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, u
 	}
 }
 
+
+
+// Local function
 //-----------------------------------------------------------------------------------------------------------------------
-static void _draw_filled_ellipse_section(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x, uint16_t y, uint16_t x0, uint16_t y0, color_t color, uint8_t option)
+static void _draw_filled_ellipse_section(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint16_t x,
+	uint16_t y,
+	uint16_t x0,
+	uint16_t y0,
+	color_t color,
+	uint8_t option)
 {
     // upper right
-    if ( option & TFT_ELLIPSE_UPPER_RIGHT ) _drawFastVLine(ESP32_TouchGUI1_Definition, x0+x, y0-y, y+1, color);
+    if ( option & TFT_ELLIPSE_UPPER_RIGHT ) 
+	_drawFastVLine(disp_handle, TFT_globals, x0+x, y0-y, y+1, color);
+
     // upper left
-    if ( option & TFT_ELLIPSE_UPPER_LEFT ) _drawFastVLine(ESP32_TouchGUI1_Definition, x0-x, y0-y, y+1, color);
+    if ( option & TFT_ELLIPSE_UPPER_LEFT ) 
+	_drawFastVLine(disp_handle, TFT_globals, x0-x, y0-y, y+1, color);
+
     // lower right
-    if ( option & TFT_ELLIPSE_LOWER_RIGHT ) _drawFastVLine(ESP32_TouchGUI1_Definition, x0+x, y0, y+1, color);
+    if ( option & TFT_ELLIPSE_LOWER_RIGHT ) 
+	_drawFastVLine(disp_handle, TFT_globals, x0+x, y0, y+1, color);
+
     // lower left
-    if ( option & TFT_ELLIPSE_LOWER_LEFT ) _drawFastVLine(ESP32_TouchGUI1_Definition, x0-x, y0, y+1, color);
+    if ( option & TFT_ELLIPSE_LOWER_LEFT ) 
+	_drawFastVLine(disp_handle, TFT_globals, x0-x, y0, y+1, color);
 }
 
-//=====================================================================================================
-void TFT_fillEllipse(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x0, uint16_t y0, uint16_t rx, uint16_t ry, color_t color, uint8_t option)
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw an Filled Ellipse
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_fillEllipse(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint16_t x0,
+	uint16_t y0,
+	uint16_t rx,
+	uint16_t ry,
+	color_t color,
+	uint8_t option)
 {
-	x0 += dispWin.x1;
-	y0 += dispWin.y1;
+	x0 += TFT_globals->dispWin.x1;
+	y0 += TFT_globals->dispWin.y1;
 
 	uint16_t x, y;
 	int32_t xchg, ychg;
@@ -845,12 +1369,17 @@ void TFT_fillEllipse(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, u
 	stopy = 0;
 
 	while( stopx >= stopy ) {
-		_draw_filled_ellipse_section(ESP32_TouchGUI1_Definition, x, y, x0, y0, color, option);
+
+		_draw_filled_ellipse_section(disp_handle, TFT_globals,
+			 x, y, x0, y0, color, option);
+
 		y++;
 		stopy += rxrx2;
 		err += ychg;
 		ychg += rxrx2;
+
 		if ( 2*err+xchg > 0 ) {
+
 			x--;
 			stopx -= ryry2;
 			err += xchg;
@@ -878,12 +1407,17 @@ void TFT_fillEllipse(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, u
 	stopy *= ry;
 
 	while( stopx <= stopy ) {
-		_draw_filled_ellipse_section(ESP32_TouchGUI1_Definition, x, y, x0, y0, color, option);
+
+		_draw_filled_ellipse_section(disp_handle, TFT_globals,
+			 x, y, x0, y0, color, option);
+
 		x++;
 		stopx += ryry2;
 		err += xchg;
 		xchg += ryry2;
+
 		if ( 2*err+ychg > 0 ) {
+
 			y--;
 			stopy -= rxrx2;
 			err += ychg;
@@ -891,26 +1425,44 @@ void TFT_fillEllipse(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, u
 		}
 	}
 }
+
 
 
 // ==== ARC DRAWING ===================================================================
 
+
+
+// Local function
 //---------------------------------------------------------------------------------------------------------------------------------
-static void _fillArcOffsetted(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t cx, uint16_t cy, uint16_t radius, uint16_t thickness, float start, float end, color_t color)
+static void 
+_fillArcOffsetted(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint16_t cx,
+	uint16_t cy,
+	uint16_t radius,
+	uint16_t thickness,
+	float start,
+	float end, 
+	color_t color)
 {
 	//float sslope = (float)cos_lookup(start) / (float)sin_lookup(start);
 	//float eslope = (float)cos_lookup(end) / (float)sin_lookup(end);
-	float sslope = (cos(start/_arcAngleMax * 2 * PI) * _arcAngleMax) / (sin(start/_arcAngleMax * 2 * PI) * _arcAngleMax) ;
-	float eslope = (cos(end/_arcAngleMax * 2 * PI) * _arcAngleMax) / (sin(end/_arcAngleMax * 2 * PI) * _arcAngleMax);
+	float sslope = (cos(start / TFT_globals->_arcAngleMax * 2 * PI) *
+		TFT_globals->_arcAngleMax) / (sin(start / TFT_globals->_arcAngleMax * 2 * PI) *
+		TFT_globals->_arcAngleMax) ;
+
+	float eslope = (cos(end/TFT_globals->_arcAngleMax * 2 * PI) *
+		TFT_globals->_arcAngleMax) / (sin(end/TFT_globals->_arcAngleMax * 2 * PI) * TFT_globals->_arcAngleMax);
 
 	if (end == 360) eslope = -1000000;
 
 	int ir2 = (radius - thickness) * (radius - thickness);
 	int or2 = radius * radius;
 
-	disp_select(ESP32_TouchGUI1_Definition);
 	for (int x = -radius; x <= radius; x++) {
+
 		for (int y = -radius; y <= radius; y++) {
+
 			int x2 = x * x;
 			int y2 = y * y;
 
@@ -931,29 +1483,47 @@ static void _fillArcOffsetted(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Defi
 				(y == 0 && start == 0 && x > 0)
 				)
 				)
-				_drawPixel(ESP32_TouchGUI1_Definition, cx+x, cy+y, color, 0);
+				_drawPixel(disp_handle, TFT_globals, cx+x, cy+y, color, 0);
 		}
 	}
-	disp_deselect(ESP32_TouchGUI1_Definition);
 }
 
 
-//===========================================================================================================================
-void TFT_drawArc(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t cx, uint16_t cy, uint16_t r, uint16_t th, float start, float end, color_t color, color_t fillcolor)
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw an Arc
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_drawArc(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint16_t cx,
+	uint16_t cy,
+	uint16_t r,
+	uint16_t th,
+	float start,
+	float end,
+	color_t color,
+	color_t fillcolor)
 {
-	cx += dispWin.x1;
-	cy += dispWin.y1;
+	cx += TFT_globals->dispWin.x1;
+	cy += TFT_globals->dispWin.y1;
 
 	if (th < 1) th = 1;
 	if (th > r) th = r;
 
 	int f = TFT_compare_colors(fillcolor, color);
 
-	float astart = fmodf(start, _arcAngleMax);
-	float aend = fmodf(end, _arcAngleMax);
+	float astart = fmodf(start, TFT_globals->_arcAngleMax);
+	float aend = fmodf(end, TFT_globals->_arcAngleMax);
 
-	astart += _angleOffset;
-	aend += _angleOffset;
+	astart += TFT_globals->_angleOffset;
+	aend += TFT_globals->_angleOffset;
 
 	if (astart < 0) astart += (float)360;
 	if (aend < 0) aend += (float)360;
@@ -961,37 +1531,82 @@ void TFT_drawArc(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint1
 	if (aend == 0) aend = (float)360;
 
 	if (astart > aend) {
-		_fillArcOffsetted(ESP32_TouchGUI1_Definition, cx, cy, r, th, astart, _arcAngleMax, fillcolor);
-		_fillArcOffsetted(ESP32_TouchGUI1_Definition, cx, cy, r, th, 0, aend, fillcolor);
+
+		_fillArcOffsetted(disp_handle, TFT_globals,
+				cx, cy, r, th, astart, TFT_globals->_arcAngleMax, fillcolor);
+
+		_fillArcOffsetted(disp_handle, TFT_globals,
+				cx, cy, r, th, 0, aend, fillcolor);
+
 		if (f) {
-			_fillArcOffsetted(ESP32_TouchGUI1_Definition, cx, cy, r, 1, astart, _arcAngleMax, color);
-			_fillArcOffsetted(ESP32_TouchGUI1_Definition, cx, cy, r, 1, 0, aend, color);
-			_fillArcOffsetted(ESP32_TouchGUI1_Definition, cx, cy, r-th, 1, astart, _arcAngleMax, color);
-			_fillArcOffsetted(ESP32_TouchGUI1_Definition, cx, cy, r-th, 1, 0, aend, color);
+			_fillArcOffsetted(disp_handle, TFT_globals,
+				cx, cy, r, 1, astart, TFT_globals->_arcAngleMax, color);
+
+			_fillArcOffsetted(disp_handle, TFT_globals,
+				cx, cy, r, 1, 0, aend, color);
+
+			_fillArcOffsetted(disp_handle, TFT_globals,
+				cx, cy, r-th, 1, astart, TFT_globals->_arcAngleMax, color);
+
+			_fillArcOffsetted(disp_handle, TFT_globals,
+				cx, cy, r-th, 1, 0, aend, color);
 		}
 	}
+
 	else {
-		_fillArcOffsetted(ESP32_TouchGUI1_Definition, cx, cy, r, th, astart, aend, fillcolor);
+		_fillArcOffsetted(disp_handle, TFT_globals,
+			cx, cy, r, th, astart, aend, fillcolor);
+
 		if (f) {
-			_fillArcOffsetted(ESP32_TouchGUI1_Definition, cx, cy, r, 1, astart, aend, color);
-			_fillArcOffsetted(ESP32_TouchGUI1_Definition, cx, cy, r-th, 1, astart, aend, color);
+			_fillArcOffsetted(disp_handle, TFT_globals,
+				cx, cy, r, 1, astart, aend, color);
+
+			_fillArcOffsetted(disp_handle, TFT_globals,
+				cx, cy, r-th, 1, astart, aend, color);
 		}
 	}
+
 	if (f) {
-		_drawLine(ESP32_TouchGUI1_Definition, cx + (r-th) * cos(astart * DEG_TO_RAD), cy + (r-th) * sin(astart * DEG_TO_RAD),
-			cx + (r-1) * cos(astart * DEG_TO_RAD), cy + (r-1) * sin(astart * DEG_TO_RAD), color);
-		_drawLine(ESP32_TouchGUI1_Definition, cx + (r-th) * cos(aend * DEG_TO_RAD), cy + (r-th) * sin(aend * DEG_TO_RAD),
-			cx + (r-1) * cos(aend * DEG_TO_RAD), cy + (r-1) * sin(aend * DEG_TO_RAD), color);
+		_drawLine(disp_handle, TFT_globals,
+			cx + (r-th) * cos(astart * DEG_TO_RAD),
+			cy + (r-th) * sin(astart * DEG_TO_RAD),
+			cx + (r-1) * cos(astart * DEG_TO_RAD),
+			cy + (r-1) * sin(astart * DEG_TO_RAD), color);
+
+		_drawLine(disp_handle, TFT_globals,
+			cx + (r-th) * cos(aend * DEG_TO_RAD),
+			cy + (r-th) * sin(aend * DEG_TO_RAD),
+			cx + (r-1) * cos(aend * DEG_TO_RAD),
+			cy + (r-1) * sin(aend * DEG_TO_RAD), color);
 	}
 }
 
-//=============================================================================================================
-void TFT_drawPolygon(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int cx, int cy, int sides, int diameter, color_t color, color_t fill, int rot, uint8_t th)
-{
-	cx += dispWin.x1;
-	cy += dispWin.y1;
 
-	int deg = rot - _angleOffset;
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw an Polygon
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void TFT_drawPolygon(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int cx,
+	int cy,
+	int sides,
+	int diameter,
+	color_t color,
+	color_t fill,
+	int rot,
+	uint8_t th)
+{
+	cx += TFT_globals->dispWin.x1;
+	cy += TFT_globals->dispWin.y1;
+
+	int deg = rot - TFT_globals->_angleOffset;
 	int f = TFT_compare_colors(fill, color);
 
 	if (sides < MIN_POLIGON_SIDES) sides = MIN_POLIGON_SIDES;	// This ensures the minimum side number
@@ -1001,43 +1616,76 @@ void TFT_drawPolygon(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, i
 	int rads = 360 / sides;										// This equally spaces the points.
 
 	for (int idx = 0; idx < sides; idx++) {
+
 		Xpoints[idx] = cx + sin((float)(idx*rads + deg) * deg_to_rad) * diameter;
 		Ypoints[idx] = cy + cos((float)(idx*rads + deg) * deg_to_rad) * diameter;
 	}
 
 	// Draw the polygon on the screen.
 	if (f) {
+
 		for(int idx = 0; idx < sides; idx++) {
-			if((idx+1) < sides) _fillTriangle(ESP32_TouchGUI1_Definition, cx,cy,Xpoints[idx],Ypoints[idx],Xpoints[idx+1],Ypoints[idx+1], fill);
-			else _fillTriangle(ESP32_TouchGUI1_Definition, cx,cy,Xpoints[idx],Ypoints[idx],Xpoints[0],Ypoints[0], fill);
+
+			if((idx+1) < sides) _fillTriangle(disp_handle, TFT_globals,
+				cx, cy, Xpoints[idx], Ypoints[idx], Xpoints[idx+1], Ypoints[idx+1], fill);
+
+			else _fillTriangle(disp_handle, TFT_globals,
+				cx, cy, Xpoints[idx], Ypoints[idx], Xpoints[0], Ypoints[0], fill);
 		}
 	}
 
 	if (th) {
+
 		for (int n=0; n<th; n++) {
+
 			if (n > 0) {
+
 				for (int idx = 0; idx < sides; idx++) {
+
 					Xpoints[idx] = cx + sin((float)(idx*rads + deg) * deg_to_rad) * (diameter-n);
 					Ypoints[idx] = cy + cos((float)(idx*rads + deg) * deg_to_rad) * (diameter-n);
 				}
 			}
+
 			for(int idx = 0; idx < sides; idx++) {
+
 				if( (idx+1) < sides)
-					_drawLine(ESP32_TouchGUI1_Definition, Xpoints[idx],Ypoints[idx],Xpoints[idx+1],Ypoints[idx+1], color); // draw the lines
+					_drawLine(disp_handle, TFT_globals,
+						Xpoints[idx], Ypoints[idx],
+						Xpoints[idx+1], Ypoints[idx+1], color); // draw the lines
+
 				else
-					_drawLine(ESP32_TouchGUI1_Definition, Xpoints[idx],Ypoints[idx],Xpoints[0],Ypoints[0], color); // finishes the last line to close up the polygon.
+					_drawLine(disp_handle, TFT_globals,
+						Xpoints[idx],Ypoints[idx],
+						Xpoints[0], Ypoints[0], color); // finishes the last line to close up the polygon.
 			}
 		}
 	}
 }
 
-/*
-// Similar to the Polygon function.
-//=====================================================================================
-void TFT_drawStar(int cx, int cy, int diameter, color_t color, bool fill, float factor)
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Draw an Star
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_drawStar(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int cx,
+	int cy,
+	int diameter,
+	color_t color,
+	bool fill,
+	float factor)
 {
-	cx += dispWin.x1;
-	cy += dispWin.y1;
+	cx += TFT_globals->dispWin.x1;
+	cy += TFT_globals->dispWin.y1;
 
 	factor = constrain(factor, 1.0, 4.0);
 	uint8_t sides = 5;
@@ -1046,58 +1694,91 @@ void TFT_drawStar(int cx, int cy, int diameter, color_t color, bool fill, float 
 	int Xpoints_O[sides], Ypoints_O[sides], Xpoints_I[sides], Ypoints_I[sides];//Xpoints_T[5], Ypoints_T[5];
 
 	for(int idx = 0; idx < sides; idx++) {
+
 		// makes the outer points
 		Xpoints_O[idx] = cx + sin((float)(idx*rads + 72) * deg_to_rad) * diameter;
 		Ypoints_O[idx] = cy + cos((float)(idx*rads + 72) * deg_to_rad) * diameter;
+
 		// makes the inner points
 		Xpoints_I[idx] = cx + sin((float)(idx*rads + 36) * deg_to_rad) * ((float)(diameter)/factor);
+
 		// 36 is half of 72, and this will allow the inner and outer points to line up like a triangle.
 		Ypoints_I[idx] = cy + cos((float)(idx*rads + 36) * deg_to_rad) * ((float)(diameter)/factor);
 	}
 
 	for(int idx = 0; idx < sides; idx++) {
+
 		if((idx+1) < sides) {
+
 			if(fill) {// this part below should be self explanatory. It fills in the star.
-				_fillTriangle(cx,cy,Xpoints_I[idx],Ypoints_I[idx],Xpoints_O[idx],Ypoints_O[idx], color);
-				_fillTriangle(cx,cy,Xpoints_O[idx],Ypoints_O[idx],Xpoints_I[idx+1],Ypoints_I[idx+1], color);
+
+				_fillTriangle(disp_handle, TFT_globals, cx ,cy,
+					Xpoints_I[idx], Ypoints_I[idx], Xpoints_O[idx], Ypoints_O[idx], color);
+
+				_fillTriangle(disp_handle, TFT_globals, cx ,cy,
+					Xpoints_O[idx], Ypoints_O[idx], Xpoints_I[idx+1], Ypoints_I[idx+1], color);
 			}
+
 			else {
-				_drawLine(Xpoints_O[idx],Ypoints_O[idx],Xpoints_I[idx+1],Ypoints_I[idx+1], color);
-				_drawLine(Xpoints_I[idx],Ypoints_I[idx],Xpoints_O[idx],Ypoints_O[idx], color);
+
+				_drawLine(disp_handle, TFT_globals, Xpoints_O[idx], Ypoints_O[idx],
+					 Xpoints_I[idx+1], Ypoints_I[idx+1], color);
+
+				_drawLine(disp_handle, TFT_globals, Xpoints_I[idx], Ypoints_I[idx],
+					Xpoints_O[idx], Ypoints_O[idx], color);
 			}
 		}
+
 		else {
+
 			if(fill) {
-				_fillTriangle(cx,cy,Xpoints_I[0],Ypoints_I[0],Xpoints_O[idx],Ypoints_O[idx], color);
-				_fillTriangle(cx,cy,Xpoints_O[idx],Ypoints_O[idx],Xpoints_I[idx],Ypoints_I[idx], color);
+
+				_fillTriangle(disp_handle, TFT_globals, cx, cy, Xpoints_I[0], Ypoints_I[0],
+					 Xpoints_O[idx], Ypoints_O[idx], color);
+				_fillTriangle(disp_handle, TFT_globals, cx, cy, Xpoints_O[idx], Ypoints_O[idx],
+					 Xpoints_I[idx], Ypoints_I[idx], color);
 			}
+
 			else {
-				_drawLine(Xpoints_O[idx],Ypoints_O[idx],Xpoints_I[idx],Ypoints_I[idx], color);
-				_drawLine(Xpoints_I[0],Ypoints_I[0],Xpoints_O[idx],Ypoints_O[idx], color);
+				_drawLine(disp_handle, TFT_globals, Xpoints_O[idx], Ypoints_O[idx],
+					Xpoints_I[idx], Ypoints_I[idx], color);
+
+				_drawLine(disp_handle, TFT_globals, Xpoints_I[0], Ypoints_I[0],
+					Xpoints_O[idx], Ypoints_O[idx], color);
 			}
 		}
 	}
 }
-*/
+
+
 
 // ================ Font and string functions ==================================
 
+
+
+// Local function
 //--------------------------------------------------------
-static int load_file_font(const char * fontfile, int info)
+static int 
+load_file_font(TFTGlobals_t* TFT_globals,
+	const char* fontfile,
+	int info)
 {
 	int err = 0;
 	char err_msg[256] = {'\0'};
 
-	if (userfont != NULL) {
-		free(userfont);
-		userfont = NULL;
+	if (TFT_globals->userfont != NULL) {
+
+		free(TFT_globals->userfont);
+		TFT_globals->userfont = NULL;
 	}
 
     struct stat sb;
 
     // Open the file
     FILE *fhndl = fopen(fontfile, "r");
+
     if (!fhndl) {
+
     	sprintf(err_msg, "Error opening font file '%s'", fontfile);
 		err = 1;
 		goto exit;
@@ -1105,37 +1786,46 @@ static int load_file_font(const char * fontfile, int info)
 
 	// Get file size
     if (stat(fontfile, &sb) != 0) {
+
     	sprintf(err_msg, "Error getting font file size");
 		err = 2;
 		goto exit;
     }
+
 	int fsize = sb.st_size;
+
 	if (fsize < 30) {
+
 		sprintf(err_msg, "Error getting font file size");
 		err = 3;
 		goto exit;
 	}
 
-	userfont = malloc(fsize+4);
-	if (userfont == NULL) {
+	TFT_globals->userfont = malloc(fsize+4);
+
+	if (TFT_globals->userfont == NULL) {
+
 		sprintf(err_msg, "Font memory allocation error");
 		fclose(fhndl);
 		err = 4;
 		goto exit;
 	}
 
-	int read = fread(userfont, 1, fsize, fhndl);
+	int read = fread(TFT_globals->userfont, 1, fsize, fhndl);
 
 	fclose(fhndl);
 
 	if (read != fsize) {
+
 		sprintf(err_msg, "Font read error");
 		err = 5;
 		goto exit;
 	}
 
-	userfont[read] = 0;
-	if (strstr((char *)(userfont+read-8), "RPH_font") == NULL) {
+	TFT_globals->userfont[read] = 0;
+
+	if (strstr((char *)(TFT_globals->userfont+read-8), "RPH_font") == NULL) {
+
 		sprintf(err_msg, "Font ID not found");
 		err = 6;
 		goto exit;
@@ -1144,8 +1834,8 @@ static int load_file_font(const char * fontfile, int info)
 	// Check size
 	int size = 0;
 	int numchar = 0;
-	int width = userfont[0];
-	int height = userfont[1];
+	int width = TFT_globals->userfont[0];
+	int height = TFT_globals->userfont[1];
 	uint8_t first = 255;
 	uint8_t last = 0;
 	//int offst = 0;
@@ -1153,12 +1843,14 @@ static int load_file_font(const char * fontfile, int info)
 	int pmaxwidth = 0;
 
 	if (width != 0) {
+
 		// Fixed font
-		numchar = userfont[3];
-		first = userfont[2];
+		numchar = TFT_globals->userfont[3];
+		first = TFT_globals->userfont[2];
 		last = first + numchar - 1;
 		size = ((width * height * numchar) / 8) + 4;
 	}
+
 	else {
 		// Proportional font
 		size = 4; // point at first char data
@@ -1166,37 +1858,48 @@ static int load_file_font(const char * fontfile, int info)
 		int charwidth;
 
 		do {
-		    charCode = userfont[size];
-		    charwidth = userfont[size+2];
+
+		    charCode = TFT_globals->userfont[size];
+		    charwidth = TFT_globals->userfont[size+2];
 
 		    if (charCode != 0xFF) {
+
 		    	numchar++;
-		    	if (charwidth != 0) size += ((((charwidth * userfont[size+3])-1) / 8) + 7);
+		    	if (charwidth != 0) size += ((((charwidth * TFT_globals->userfont[size+3])-1) / 8) + 7);
 		    	else size += 6;
 
 		    	if (info) {
+
 	    			if (charwidth > pmaxwidth) pmaxwidth = charwidth;
 	    			if (charwidth < pminwidth) pminwidth = charwidth;
 	    			if (charCode < first) first = charCode;
 	    			if (charCode > last) last = charCode;
 	    		}
 		    }
+
 		    else size++;
+
 		  } while ((size < (read-8)) && (charCode != 0xFF));
 	}
 
 	if (size != (read-8)) {
+
 		sprintf(err_msg, "Font size error: found %d expected %d)", size, (read-8));
+
 		err = 7;
 		goto exit;
 	}
 
 	if (info) {
+
 		if (width != 0) {
+
 			printf("Fixed width font:\r\n  size: %d  width: %d  height: %d  characters: %d (%d~%d)\n",
 					size, width, height, numchar, first, last);
 		}
+
 		else {
+
 			printf("Proportional font:\r\n  size: %d  width: %d~%d  height: %d  characters: %d (%d~%d)\n",
 					size, pminwidth, pmaxwidth, height, numchar, first, last);
 		}
@@ -1204,31 +1907,42 @@ static int load_file_font(const char * fontfile, int info)
 
 exit:
 	if (err) {
-		if (userfont) {
-			free(userfont);
-			userfont = NULL;
+
+		if (TFT_globals->userfont) {
+
+			free(TFT_globals->userfont);
+			TFT_globals->userfont = NULL;
 		}
+
 		if (info) printf("Error: %d [%s]\r\n", err, err_msg);
 	}
+
 	return err;
 }
 
+
+
+// Local function
 //------------------------------------------------
-int compile_font_file(char *fontfile, uint8_t dbg)
+int compile_font_file(TFTGlobals_t* TFT_globals,
+	char *fontfile,
+	uint8_t dbg)
 {
 	int err = 0;
 	char err_msg[128] = {'\0'};
 	char outfile[128] = {'\0'};
 	size_t len;
-    struct stat sb;
-    FILE *ffd = NULL;
-    FILE *ffd_out = NULL;
-    char *sourcebuf = NULL;
 
-    len = strlen(fontfile);
+	struct stat sb;
+	FILE *ffd = NULL;
+	FILE *ffd_out = NULL;
+	char *sourcebuf = NULL;
+
+	len = strlen(fontfile);
 
 	// check here that filename end with ".c".
 	if ((len < 3) || (len > 125) || (strcmp(fontfile + len - 2, ".c") != 0)) {
+
 		sprintf(err_msg, "not a .c file");
 		err = 1;
 		goto exit;
@@ -1238,22 +1952,29 @@ int compile_font_file(char *fontfile, uint8_t dbg)
 	sprintf(outfile+strlen(outfile)-1, "fon");
 
 	// Open the source file
-    if (stat(fontfile, &sb) != 0) {
+	if (stat(fontfile, &sb) != 0) {
+
     	sprintf(err_msg, "Error opening source file '%s'", fontfile);
+
     	err = 2;
 		goto exit;
-    }
-    // Open the file
-    ffd = fopen(fontfile, "rb");
-    if (!ffd) {
-    	sprintf(err_msg, "Error opening source file '%s'", fontfile);
-    	err = 3;
+	}
+
+	// Open the file
+	ffd = fopen(fontfile, "rb");
+
+	if (!ffd) {
+
+    		sprintf(err_msg, "Error opening source file '%s'", fontfile);
+    		err = 3;
 		goto exit;
-    }
+	}
 
 	// Open the font file
-    ffd_out= fopen(outfile, "wb");
+	ffd_out = fopen(outfile, "wb");
+
 	if (!ffd_out) {
+
 		sprintf(err_msg, "error opening destination file");
 		err = 4;
 		goto exit;
@@ -1261,18 +1982,23 @@ int compile_font_file(char *fontfile, uint8_t dbg)
 
 	// Get file size
 	int fsize = sb.st_size;
+
 	if (fsize <= 0) {
+
 		sprintf(err_msg, "source file size error");
 		err = 5;
 		goto exit;
 	}
 
 	sourcebuf = malloc(fsize+4);
+
 	if (sourcebuf == NULL) {
+
 		sprintf(err_msg, "memory allocation error");
 		err = 6;
 		goto exit;
 	}
+
 	char *fbuf = sourcebuf;
 
 	int rdsize = fread(fbuf, 1, fsize, ffd);
@@ -1280,6 +2006,7 @@ int compile_font_file(char *fontfile, uint8_t dbg)
 	ffd = NULL;
 
 	if (rdsize != fsize) {
+
 		sprintf(err_msg, "error reading from source file");
 		err = 7;
 		goto exit;
@@ -1287,10 +2014,11 @@ int compile_font_file(char *fontfile, uint8_t dbg)
 
 	*(fbuf+rdsize) = '\0';
 
-	fbuf = strchr(fbuf, '{');			// beginning of font data
+	fbuf = strchr(fbuf, '{');		// beginning of font data
 	char *fend = strstr(fbuf, "};");	// end of font data
 
 	if ((fbuf == NULL) || (fend == NULL) || ((fend-fbuf) < 22)) {
+
 		sprintf(err_msg, "wrong source file format");
 		err = 8;
 		goto exit;
@@ -1308,62 +2036,84 @@ int compile_font_file(char *fontfile, uint8_t dbg)
 
 	int bptr = 0;
 
-	while ((fbuf != NULL) && (fbuf < fend) && (lastline == 0)) {
+	while ( (fbuf != NULL) && (fbuf < fend) && (lastline == 0) ) {
+
 		nextline = strchr(fbuf, '\n'); // beginning of the next line
+
 		if (nextline == NULL) {
 			nextline = fend-1;
 			lastline++;
 		}
+
 		else nextline++;
 
 		while (fbuf < nextline) {
+
 			numptr = strstr(fbuf, "0x");
+
 			if ((numptr == NULL) || ((fbuf+4) > nextline)) numptr = strstr(fbuf, "0X");
+
 			if ((numptr != NULL) && ((numptr+4) <= nextline)) {
+
 				fbuf = numptr;
+
 				if (bptr >= 128) {
+
 					// buffer full, write to file
-                    if (fwrite(outfile, 1, 128, ffd_out) != 128) goto error;
+                   			 if (fwrite(outfile, 1, 128, ffd_out) != 128) goto error;
+
 					bptr = 0;
 					size += 128;
 				}
+
 				memcpy(hexstr, fbuf, 4);
 				hexstr[4] = 0;
 				outfile[bptr++] = (uint8_t)strtol(hexstr, NULL, 0);
 				fbuf += 4;
 			}
+
 			else fbuf = nextline;
 		}
+
 		fbuf = nextline;
 	}
 
 	if (bptr > 0) {
+
 		size += bptr;
+
         if (fwrite(outfile, 1, bptr, ffd_out) != bptr) goto error;
+
 	}
 
 	// write font ID
 	sprintf(outfile, "RPH_font");
-    if (fwrite(outfile, 1, 8, ffd_out) != 8) goto error;
 
-    fclose(ffd_out);
-    ffd_out = NULL;
+	if (fwrite(outfile, 1, 8, ffd_out) != 8) goto error;
+
+	fclose(ffd_out);
+	ffd_out = NULL;
 
 	// === Test compiled font ===
 	sprintf(outfile, "%s", fontfile);
 	sprintf(outfile+strlen(outfile)-1, "fon");
 
-	uint8_t *uf = userfont; // save userfont pointer
-	userfont = NULL;
-	if (load_file_font(outfile, 1) != 0) {
+	uint8_t *uf = TFT_globals->userfont; // save userfont pointer
+	TFT_globals->userfont = NULL;
+
+	if (load_file_font(TFT_globals, outfile, 1) != 0) {
+
 		sprintf(err_msg, "Error compiling file!");
 		err = 10;
 	}
+
 	else {
-		free(userfont);
+
+		free(TFT_globals->userfont);
 		sprintf(err_msg, "File compiled successfully.");
 	}
-	userfont = uf; // restore userfont
+
+	TFT_globals->userfont = uf; // restore userfont
 
 	goto exit;
 
@@ -1380,6 +2130,7 @@ exit:
 
 	return err;
 }
+
 
 
 // -----------------------------------------------------------------------------------------
@@ -1399,25 +2150,36 @@ exit:
 // Character visible pixels rectangle is (xOffset, yOffset) (xOffset+Width-1, yOffset+Height-1)
 //---------------------------------------------------------------------------------------------
 
+
+
+// Local function
 //----------------------------------
 void getFontCharacters(uint8_t *buf)
 {
     if (cfont.bitmap == 2) {
-    	//For 7 segment font only characters 0,1,2,3,4,5,6,7,8,9, . , - , : , / are available.
+
+    	// For 7 segment font only characters 0,1,2,3,4,5,6,7,8,9, . , - , : , / are available.
+
 		for (uint8_t n=0; n < 11; n++) {
+
 			buf[n] = n + 0x30;
 		}
+
 		buf[11] = '.';
 		buf[12] = '-';
 		buf[13] = '/';
 		buf[14] = '\0';
-    	return;
+
+		return;
     }
 
     if (cfont.x_size > 0) {
+
 		for (uint8_t n=0; n < cfont.numchars; n++) {
+
 			buf[n] = cfont.offset + n;
 		}
+
 		buf[cfont.numchars] = '\0';
 		return;
 	}
@@ -1426,27 +2188,38 @@ void getFontCharacters(uint8_t *buf)
 	uint8_t cc, cw, ch, n;
 
 	n = 0;
-    cc = cfont.font[tempPtr++];
-    while (cc != 0xFF)  {
-    	cfont.numchars++;
-        tempPtr++;
-        cw = cfont.font[tempPtr++];
-        ch = cfont.font[tempPtr++];
-        tempPtr++;
-        tempPtr++;
+	cc = cfont.font[tempPtr++];
+
+	while (cc != 0xFF)  {
+
+    		cfont.numchars++;
+       		tempPtr++;
+
+       		cw = cfont.font[tempPtr++];
+       		ch = cfont.font[tempPtr++];
+
+        	tempPtr++;
+        	tempPtr++;
+
 		if (cw != 0) {
+
 			// packed bits
 			tempPtr += (((cw * ch)-1) / 8) + 1;
 		}
+
 		buf[n++] = cc;
-	    cc = cfont.font[tempPtr++];
+		cc = cfont.font[tempPtr++];
 	}
+
 	buf[n] = '\0';
 }
 
+
+// Local function
 // Set max width & height of the proportional font
 //-----------------------------
-static void getMaxWidthHeight()
+static void 
+getMaxWidthHeight()
 {
 	uint16_t tempPtr = 4; // point at first char data
 	uint8_t cc, cw, ch, cd, cy;
@@ -1454,64 +2227,90 @@ static void getMaxWidthHeight()
 	cfont.numchars = 0;
 	cfont.max_x_size = 0;
 
-    cc = cfont.font[tempPtr++];
-    while (cc != 0xFF)  {
-    	cfont.numchars++;
-        cy = cfont.font[tempPtr++];
-        cw = cfont.font[tempPtr++];
-        ch = cfont.font[tempPtr++];
-        tempPtr++;
-        cd = cfont.font[tempPtr++];
-        cy += ch;
+	cc = cfont.font[tempPtr++];
+
+	while (cc != 0xFF)  {
+
+		cfont.numchars++;
+
+ 		cy = cfont.font[tempPtr++];
+ 		cw = cfont.font[tempPtr++];
+		ch = cfont.font[tempPtr++];
+
+       		tempPtr++;
+
+       		cd = cfont.font[tempPtr++];
+
+		cy += ch;
+
 		if (cw > cfont.max_x_size) cfont.max_x_size = cw;
 		if (cd > cfont.max_x_size) cfont.max_x_size = cd;
+
 		if (ch > cfont.y_size) cfont.y_size = ch;
 		if (cy > cfont.y_size) cfont.y_size = cy;
+
 		if (cw != 0) {
+
 			// packed bits
 			tempPtr += (((cw * ch)-1) / 8) + 1;
 		}
-	    cc = cfont.font[tempPtr++];
+
+		cc = cfont.font[tempPtr++];
 	}
-    cfont.size = tempPtr;
+
+	cfont.size = tempPtr;
 }
 
+
+// Local function
 // Return the Glyph data for an individual character in the proportional font
 //------------------------------------
-static uint8_t getCharPtr(uint8_t c) {
+static uint8_t 
+getCharPtr(TFTGlobals_t* TFT_globals, uint8_t c)
+{
   uint16_t tempPtr = 4; // point at first char data
 
   do {
 	fontChar.charCode = cfont.font[tempPtr++];
-    if (fontChar.charCode == 0xFF) return 0;
 
-    fontChar.adjYOffset = cfont.font[tempPtr++];
-    fontChar.width = cfont.font[tempPtr++];
-    fontChar.height = cfont.font[tempPtr++];
-    fontChar.xOffset = cfont.font[tempPtr++];
-    fontChar.xOffset = fontChar.xOffset < 0x80 ? fontChar.xOffset : -(0xFF - fontChar.xOffset);
-    fontChar.xDelta = cfont.font[tempPtr++];
+	if (fontChar.charCode == 0xFF) return 0;
 
-    if (c != fontChar.charCode && fontChar.charCode != 0xFF) {
-      if (fontChar.width != 0) {
-        // packed bits
-        tempPtr += (((fontChar.width * fontChar.height)-1) / 8) + 1;
-      }
-    }
+	fontChar.adjYOffset = cfont.font[tempPtr++];
+	fontChar.width = cfont.font[tempPtr++];
+	fontChar.height = cfont.font[tempPtr++];
+	fontChar.xOffset = cfont.font[tempPtr++];
+	fontChar.xOffset = fontChar.xOffset < 0x80 ? fontChar.xOffset : -(0xFF - fontChar.xOffset);
+	fontChar.xDelta = cfont.font[tempPtr++];
+
+	if (c != fontChar.charCode && fontChar.charCode != 0xFF) {
+
+		if (fontChar.width != 0) {
+
+		// packed bits
+		tempPtr += (((fontChar.width * fontChar.height)-1) / 8) + 1;
+		}
+	}
+
   } while ((c != fontChar.charCode) && (fontChar.charCode != 0xFF));
 
   fontChar.dataPtr = tempPtr;
+
   if (c == fontChar.charCode) {
-    if (font_forceFixed > 0) {
-      // fix width & offset for forced fixed width
-      fontChar.xDelta = cfont.max_x_size;
-      fontChar.xOffset = (fontChar.xDelta - fontChar.width) / 2;
-    }
+
+	if (TFT_globals->font_forceFixed > 0) {
+
+		// fix width & offset for forced fixed width
+		fontChar.xDelta = cfont.max_x_size;
+		fontChar.xOffset = (fontChar.xDelta - fontChar.width) / 2;
+	}
   }
+
   else return 0;
 
   return 1;
 }
+
+
 
 /*
 //-----------------------
@@ -1548,23 +2347,40 @@ static void _testFont() {
 }
 */
 
-//===================================================
-void TFT_setFont(uint8_t font, const char *font_file)
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Set Font
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void TFT_setFont(TFTGlobals_t* TFT_globals,
+	uint8_t font,
+	const char *font_file)
 {
   cfont.font = NULL;
 
   if (font == FONT_7SEG) {
-    cfont.bitmap = 2;
-    cfont.x_size = 24;
-    cfont.y_size = 6;
-    cfont.offset = 0;
-    cfont.color  = _fg;
+
+	cfont.bitmap = 2;
+	cfont.x_size = 24;
+	cfont.y_size = 6;
+	cfont.offset = 0;
+	cfont.color  = TFT_globals->_fg;
   }
+
   else {
+
 	  if (font == USER_FONT) {
-		  if (load_file_font(font_file, 0) != 0) cfont.font = tft_DefaultFont;
-		  else cfont.font = userfont;
+
+		  if (load_file_font(TFT_globals, font_file, 0) != 0) cfont.font = tft_DefaultFont;
+		  else cfont.font = TFT_globals->userfont;
 	  }
+
 	  else if (font == DEJAVU18_FONT) cfont.font = tft_Dejavu18;
 	  else if (font == DEJAVU24_FONT) cfont.font = tft_Dejavu24;
 	  else if (font == UBUNTU16_FONT) cfont.font = tft_Ubuntu16;
@@ -1578,11 +2394,14 @@ void TFT_setFont(uint8_t font, const char *font_file)
 	  cfont.bitmap = 1;
 	  cfont.x_size = cfont.font[0];
 	  cfont.y_size = cfont.font[1];
+
 	  if (cfont.x_size > 0) {
+
 		  cfont.offset = cfont.font[2];
 		  cfont.numchars = cfont.font[3];
 		  cfont.size = cfont.x_size * cfont.y_size * cfont.numchars;
 	  }
+
 	  else {
 		  cfont.offset = 4;
 		  getMaxWidthHeight();
@@ -1590,6 +2409,8 @@ void TFT_setFont(uint8_t font, const char *font_file)
 	  //_testFont();
   }
 }
+
+
 
 // -----------------------------------------------------------------------------------------
 // Individual Proportional Font Character Format:
@@ -1602,6 +2423,9 @@ void TFT_setFont(uint8_t font, const char *font_file)
 // xDelta				(the distance to move the cursor. Effective width of the character.)
 // Data[n]
 // -----------------------------------------------------------------------------------------
+
+
+
 //---------------------------------------------------------------------------------------------
 // Character drawing rectangle is (0, 0) (xDelta-1, cfont.y_size-1)
 // Character visible pixels rectangle is (xOffset, yOffset) (xOffset+Width-1, yOffset+Height-1)
@@ -1610,35 +2434,51 @@ void TFT_setFont(uint8_t font, const char *font_file)
 // print non-rotated proportional character
 // character is already in fontChar
 //----------------------------------------------
-static int printProportionalChar(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x, int y) {
+static int 
+printProportionalChar(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int x,
+	int y)
+{
 	uint8_t ch = 0;
 	int i, j, char_width;
 
 	char_width = ((fontChar.width > fontChar.xDelta) ? fontChar.width : fontChar.xDelta);
 
-	if ((font_buffered_char) && (!font_transparent)) {
+	if ( (TFT_globals->font_buffered_char) && (!TFT_globals->font_transparent) ) {
+
 		int len, bufPos;
 
 		// === buffer Glyph data for faster sending ===
 		len = char_width * cfont.y_size;
+
 		color_t *color_line = heap_caps_malloc(len*3, MALLOC_CAP_DMA);
+
 		if (color_line) {
+
 			// fill with background color
 			for (int n = 0; n < len; n++) {
-				color_line[n] = _bg;
+
+				color_line[n] = TFT_globals->_bg;
 			}
+
 			// set character pixels to foreground color
 			uint8_t mask = 0x80;
+
 			for (j=0; j < fontChar.height; j++) {
+
 				for (i=0; i < fontChar.width; i++) {
+
 					if (((i + (j*fontChar.width)) % 8) == 0) {
 						mask = 0x80;
 						ch = cfont.font[fontChar.dataPtr++];
 					}
+
 					if ((ch & mask) != 0) {
+
 						// visible pixel
 						bufPos = ((j + fontChar.adjYOffset) * char_width) + (fontChar.xOffset + i);  // bufY + bufX
-						color_line[bufPos] = _fg;
+						color_line[bufPos] = TFT_globals->_fg;
 						/*
 						bufY = (j + fontChar.adjYOffset) * char_width;
 						bufX = fontChar.xOffset + i;
@@ -1651,13 +2491,13 @@ static int printProportionalChar(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_D
 								fontChar.charCode, bufPos, len, char_width, cfont.y_size, bufX, bufY, fontChar.xOffset + i, j + fontChar.adjYOffset);
 						*/
 					}
+
 					mask >>= 1;
 				}
 			}
-			// send to display in one transaction
-			disp_select(ESP32_TouchGUI1_Definition);
-			send_data(ESP32_TouchGUI1_Definition, x, y, x+char_width-1, y+cfont.y_size-1, len, color_line);
-			disp_deselect(ESP32_TouchGUI1_Definition);
+
+			send_data(disp_handle, x, y, x + char_width - 1, y + cfont.y_size - 1, len, color_line);
+
 			free(color_line);
 
 			return char_width;
@@ -1666,34 +2506,47 @@ static int printProportionalChar(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_D
 
 	int cx, cy;
 
-	if (!font_transparent) _fillRect(ESP32_TouchGUI1_Definition, x, y, char_width+1, cfont.y_size, _bg);
+	if (!TFT_globals->font_transparent) _fillRect(disp_handle, TFT_globals, x, y, char_width+1, cfont.y_size, TFT_globals->_bg);
 
 	// draw Glyph
 	uint8_t mask = 0x80;
-	disp_select(ESP32_TouchGUI1_Definition);
+
 	for (j=0; j < fontChar.height; j++) {
+
 		for (i=0; i < fontChar.width; i++) {
+
 			if (((i + (j*fontChar.width)) % 8) == 0) {
+
 				mask = 0x80;
 				ch = cfont.font[fontChar.dataPtr++];
 			}
 
 			if ((ch & mask) !=0) {
+
 				cx = (uint16_t)(x+fontChar.xOffset+i);
 				cy = (uint16_t)(y+j+fontChar.adjYOffset);
-				_drawPixel(ESP32_TouchGUI1_Definition, cx, cy, _fg, 0);
+
+				_drawPixel(disp_handle, TFT_globals, cx, cy, TFT_globals->_fg, 0);
 			}
+
 			mask >>= 1;
 		}
 	}
-	disp_deselect(ESP32_TouchGUI1_Definition);
 
 	return char_width;
 }
 
+
+
 // non-rotated fixed width character
 //----------------------------------------------
-static void printChar(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint8_t c, int x, int y) {
+static void 
+printChar(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint8_t c,
+	int x,
+	int y)
+{
 	uint8_t i, j, ch, fz, mask;
 	uint16_t k, temp, cx, cy, len;
 
@@ -1704,168 +2557,242 @@ static void printChar(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, 
 	// get character position in buffer
 	temp = ((c-cfont.offset)*((fz)*cfont.y_size))+4;
 
-	if ((font_buffered_char) && (!font_transparent)) {
+	if ((TFT_globals->font_buffered_char) && (!TFT_globals->font_transparent)) {
+
 		// === buffer Glyph data for faster sending ===
 		len = cfont.x_size * cfont.y_size;
+
 		color_t *color_line = heap_caps_malloc(len*3, MALLOC_CAP_DMA);
+
 		if (color_line) {
+
 			// fill with background color
 			for (int n = 0; n < len; n++) {
-				color_line[n] = _bg;
+
+				color_line[n] = TFT_globals->_bg;
 			}
+
 			// set character pixels to foreground color
 			for (j=0; j<cfont.y_size; j++) {
+
 				for (k=0; k < fz; k++) {
+
 					ch = cfont.font[temp+k];
 					mask=0x80;
+
 					for (i=0; i<8; i++) {
-						if ((ch & mask) !=0) color_line[(j*cfont.x_size) + (i+(k*8))] = _fg;
+
+						if ((ch & mask) !=0) color_line[(j*cfont.x_size) + (i+(k*8))] = TFT_globals->_fg;
 						mask >>= 1;
 					}
 				}
+
 				temp += (fz);
 			}
+
 			// send to display in one transaction
-			disp_select(ESP32_TouchGUI1_Definition);
-			send_data(ESP32_TouchGUI1_Definition, x, y, x+cfont.x_size-1, y+cfont.y_size-1, len, color_line);
-			disp_deselect(ESP32_TouchGUI1_Definition);
+
+			send_data(disp_handle, x, y, x+cfont.x_size-1, y+cfont.y_size-1, len, color_line);
+
 			free(color_line);
 
 			return;
 		}
 	}
 
-	if (!font_transparent) _fillRect(ESP32_TouchGUI1_Definition, x, y, cfont.x_size, cfont.y_size, _bg);
+	if (!TFT_globals->font_transparent) _fillRect(disp_handle, TFT_globals, x, y, cfont.x_size, cfont.y_size, TFT_globals->_bg);
 
-	disp_select(ESP32_TouchGUI1_Definition);
 	for (j=0; j<cfont.y_size; j++) {
+
 		for (k=0; k < fz; k++) {
+
 			ch = cfont.font[temp+k];
 			mask=0x80;
+
 			for (i=0; i<8; i++) {
+
 				if ((ch & mask) !=0) {
+
 					cx = (uint16_t)(x+i+(k*8));
 					cy = (uint16_t)(y+j);
-					_drawPixel(ESP32_TouchGUI1_Definition, cx, cy, _fg, 0);
+
+					_drawPixel(disp_handle, TFT_globals, cx, cy, TFT_globals->_fg, 0);
 				}
+
 				mask >>= 1;
 			}
 		}
+
 		temp += (fz);
 	}
-	disp_deselect(ESP32_TouchGUI1_Definition);
 }
+
+
 
 // print rotated proportional character
 // character is already in fontChar
 //---------------------------------------------------
-static int rotatePropChar(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x, int y, int offset) {
-  uint8_t ch = 0;
-  double radian = font_rotate * DEG_TO_RAD;
-  float cos_radian = cos(radian);
-  float sin_radian = sin(radian);
+static int 
+rotatePropChar(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int x,
+	int y, 
+	int offset) 
+{
+	uint8_t ch = 0;
 
-  uint8_t mask = 0x80;
-  disp_select(ESP32_TouchGUI1_Definition);
-  for (int j=0; j < fontChar.height; j++) {
-    for (int i=0; i < fontChar.width; i++) {
-      if (((i + (j*fontChar.width)) % 8) == 0) {
-        mask = 0x80;
-        ch = cfont.font[fontChar.dataPtr++];
-      }
+	double radian = TFT_globals->font_rotate * DEG_TO_RAD;
 
-      int newX = (int)(x + (((offset + i) * cos_radian) - ((j+fontChar.adjYOffset)*sin_radian)));
-      int newY = (int)(y + (((j+fontChar.adjYOffset) * cos_radian) + ((offset + i) * sin_radian)));
+	float cos_radian = cos(radian);
+	float sin_radian = sin(radian);
 
-      if ((ch & mask) != 0) _drawPixel(ESP32_TouchGUI1_Definition, newX,newY,_fg, 0);
-      else if (!font_transparent) _drawPixel(ESP32_TouchGUI1_Definition, newX,newY,_bg, 0);
+	uint8_t mask = 0x80;
 
-      mask >>= 1;
-    }
-  }
-  disp_deselect(ESP32_TouchGUI1_Definition);
+	for (int j=0; j < fontChar.height; j++) {
 
+		for (int i=0; i < fontChar.width; i++) {
+
+			if (((i + (j*fontChar.width)) % 8) == 0) {
+
+			mask = 0x80;
+			ch = cfont.font[fontChar.dataPtr++];
+			}
+
+		int newX = (int)(x + (((offset + i) * cos_radian) - ((j+fontChar.adjYOffset)*sin_radian)));
+		int newY = (int)(y + (((j+fontChar.adjYOffset) * cos_radian) + ((offset + i) * sin_radian)));
+
+		if ((ch & mask) != 0) _drawPixel(disp_handle, TFT_globals, newX,newY, TFT_globals->_fg, 0);
+		else if (!TFT_globals->font_transparent) _drawPixel(disp_handle, TFT_globals, newX, newY, TFT_globals->_bg, 0);
+
+		mask >>= 1;
+		}
+	}
   return fontChar.xDelta+1;
 }
 
+
+
 // rotated fixed width character
 //--------------------------------------------------------
-static void rotateChar(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint8_t c, int x, int y, int pos) {
-  uint8_t i,j,ch,fz,mask;
-  uint16_t temp;
-  int newx,newy;
-  double radian = font_rotate*0.0175;
-  float cos_radian = cos(radian);
-  float sin_radian = sin(radian);
-  int zz;
+static void 
+rotateChar(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	uint8_t c,
+	int x,
+	int y,
+	int pos) 
+{
+	uint8_t i,j,ch,fz,mask;
+	uint16_t temp;
+	int newx,newy;
+	double radian = TFT_globals->font_rotate * 0.0175;
+	float cos_radian = cos(radian);
+	float sin_radian = sin(radian);
+	int zz;
 
-  if( cfont.x_size < 8 ) fz = cfont.x_size;
-  else fz = cfont.x_size/8;
-  temp=((c-cfont.offset)*((fz)*cfont.y_size))+4;
+	if( cfont.x_size < 8 ) fz = cfont.x_size;
+	else fz = cfont.x_size / 8;
 
-  disp_select(ESP32_TouchGUI1_Definition);
-  for (j=0; j<cfont.y_size; j++) {
-    for (zz=0; zz<(fz); zz++) {
-      ch = cfont.font[temp+zz];
-      mask = 0x80;
-      for (i=0; i<8; i++) {
-        newx=(int)(x+(((i+(zz*8)+(pos*cfont.x_size))*cos_radian)-((j)*sin_radian)));
-        newy=(int)(y+(((j)*cos_radian)+((i+(zz*8)+(pos*cfont.x_size))*sin_radian)));
+	temp = ( (c-cfont.offset) * ((fz)*cfont.y_size) ) + 4;
 
-        if ((ch & mask) != 0) _drawPixel(ESP32_TouchGUI1_Definition, newx,newy,_fg, 0);
-        else if (!font_transparent) _drawPixel(ESP32_TouchGUI1_Definition, newx,newy,_bg, 0);
-        mask >>= 1;
-      }
-    }
-    temp+=(fz);
-  }
-  disp_deselect(ESP32_TouchGUI1_Definition);
-  // calculate x,y for the next char
-  TFT_X = (int)(x + ((pos+1) * cfont.x_size * cos_radian));
-  TFT_Y = (int)(y + ((pos+1) * cfont.x_size * sin_radian));
+	for ( j = 0; j < cfont.y_size ; j++ ) {
+
+		for ( zz = 0 ; zz < (fz) ; zz++ ) {
+
+			ch = cfont.font[temp+zz];
+			mask = 0x80;
+
+			for ( i = 0 ; i < 8 ; i++ ) {
+
+				newx = (int) (x + (((i+(zz*8)+(pos*cfont.x_size))*cos_radian)-((j)*sin_radian)));
+				newy = (int) (y + (((j)*cos_radian)+((i+(zz*8)+(pos*cfont.x_size))*sin_radian)));
+
+				if ( (ch & mask) != 0 ) _drawPixel(disp_handle, TFT_globals,
+					newx,newy,TFT_globals->_fg, 0);
+
+				else if (!TFT_globals->font_transparent) _drawPixel(disp_handle, TFT_globals,
+					newx, newy, TFT_globals->_bg, 0);
+
+				mask >>= 1;
+			}
+		}
+
+		temp+=(fz);
+	}
+
+	// calculate x,y for the next char
+	TFT_globals->TFT_X = (int) (x + ( (pos+1) * cfont.x_size * cos_radian) );
+	TFT_globals->TFT_Y = (int) (y + ( (pos+1) * cfont.x_size * sin_radian) );
 }
+
+
 
 //----------------------
-static int _7seg_width()
+static int 
+_7seg_width()
 {
-	return (2 * (2 * cfont.y_size + 1)) + cfont.x_size;
+	return (2 * (2 * cfont.y_size + 1) ) + cfont.x_size;
 }
 
+
+
 //-----------------------
-static int _7seg_height()
+static int 
+_7seg_height()
 {
 	return (3 * (2 * cfont.y_size + 1)) + (2 * cfont.x_size);
 }
 
+
+
 // Returns the string width in pixels.
 // Useful for positions strings on the screen.
 //===============================
-int TFT_getStringWidth(char* str)
+int 
+TFT_getStringWidth(TFTGlobals_t* TFT_globals, char* str)
 {
-    int strWidth = 0;
+	int strWidth = 0;
 
 	if (cfont.bitmap == 2) strWidth = ((_7seg_width()+2) * strlen(str)) - 2;	// 7-segment font
-	else if (cfont.x_size != 0) strWidth = strlen(str) * cfont.x_size;			// fixed width font
+
+	else if (cfont.x_size != 0) strWidth = strlen(str) * cfont.x_size;		// fixed width font
+
 	else {
 		// calculate the width of the string of proportional characters
 		char* tempStrptr = str;
+
 		while (*tempStrptr != 0) {
-			if (getCharPtr(*tempStrptr++)) {
+
+			if (getCharPtr(TFT_globals, *tempStrptr++)) {
+
 				strWidth += (((fontChar.width > fontChar.xDelta) ? fontChar.width : fontChar.xDelta) + 1);
 			}
 		}
+
 		strWidth--;
 	}
+
 	return strWidth;
 }
 
+
+
 //===============================================
-void TFT_clearStringRect(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x, int y, char *str)
+void TFT_clearStringRect(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int x,
+	int y,
+	char *str)
 {
-	int w = TFT_getStringWidth(str);
+	int w = TFT_getStringWidth(TFT_globals, str);
+
 	int h = TFT_getfontheight();
-	TFT_fillRect(ESP32_TouchGUI1_Definition, x+dispWin.x1, y+dispWin.y1, w, h, _bg);
+
+	TFT_fillRect(disp_handle, TFT_globals, x + TFT_globals->dispWin.x1,
+		y + TFT_globals->dispWin.y1, w, h, TFT_globals->_bg);
 }
+
+
 
 //==============================================================================
 /**
@@ -1896,104 +2823,187 @@ static const uint16_t font_bcd[] = {
   0x900  // 1001 0000 0000  // :
 };
 
+
+
 //-----------------------------------------------------------------------------------------------
-static void barVert(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int16_t w, int16_t l, color_t color, color_t outline) {
-  _fillTriangle(ESP32_TouchGUI1_Definition, x+1, y+2*w, x+w, y+w+1, x+2*w-1, y+2*w, color);
-  _fillTriangle(ESP32_TouchGUI1_Definition, x+1, y+2*w+l+1, x+w, y+3*w+l, x+2*w-1, y+2*w+l+1, color);
-  _fillRect(ESP32_TouchGUI1_Definition, x, y+2*w+1, 2*w+1, l, color);
-  if (cfont.offset) {
-    _drawTriangle(ESP32_TouchGUI1_Definition, x+1, y+2*w, x+w, y+w+1, x+2*w-1, y+2*w, outline);
-    _drawTriangle(ESP32_TouchGUI1_Definition, x+1, y+2*w+l+1, x+w, y+3*w+l, x+2*w-1, y+2*w+l+1, outline);
-    _drawRect(ESP32_TouchGUI1_Definition, x, y+2*w+1, 2*w+1, l, outline);
-  }
+static void 
+barVert(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x,
+	int16_t y,
+	int16_t w,
+	int16_t l,
+	color_t color,
+	color_t outline)
+{
+	_fillTriangle(disp_handle, TFT_globals, x+1, y+2*w, x+w, y+w+1, x+2*w-1, y+2*w, color);
+	_fillTriangle(disp_handle, TFT_globals, x+1, y+2*w+l+1, x+w, y+3*w+l, x+2*w-1, y+2*w+l+1, color);
+	_fillRect(disp_handle, TFT_globals, x, y+2*w+1, 2*w+1, l, color);
+
+	if (cfont.offset) {
+
+	_drawTriangle(disp_handle, TFT_globals, x+1, y+2*w, x+w, y+w+1, x+2*w-1, y+2*w, outline);
+	_drawTriangle(disp_handle, TFT_globals, x+1, y+2*w+l+1, x+w, y+3*w+l, x+2*w-1, y+2*w+l+1, outline);
+	_drawRect(disp_handle, TFT_globals, x, y+2*w+1, 2*w+1, l, outline);
+	}
 }
+
+
 
 //----------------------------------------------------------------------------------------------
-static void barHor(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int16_t w, int16_t l, color_t color, color_t outline) {
-  _fillTriangle(ESP32_TouchGUI1_Definition, x+2*w, y+2*w-1, x+w+1, y+w, x+2*w, y+1, color);
-  _fillTriangle(ESP32_TouchGUI1_Definition, x+2*w+l+1, y+2*w-1, x+3*w+l, y+w, x+2*w+l+1, y+1, color);
-  _fillRect(ESP32_TouchGUI1_Definition, x+2*w+1, y, l, 2*w+1, color);
-  if (cfont.offset) {
-    _drawTriangle(ESP32_TouchGUI1_Definition, x+2*w, y+2*w-1, x+w+1, y+w, x+2*w, y+1, outline);
-    _drawTriangle(ESP32_TouchGUI1_Definition, x+2*w+l+1, y+2*w-1, x+3*w+l, y+w, x+2*w+l+1, y+1, outline);
-    _drawRect(ESP32_TouchGUI1_Definition, x+2*w+1, y, l, 2*w+1, outline);
-  }
+static void
+barHor(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x,
+	int16_t y,
+	int16_t w,
+	int16_t l,
+	color_t color,
+	color_t outline) 
+{
+	_fillTriangle(disp_handle, TFT_globals, x+2*w, y+2*w-1, x+w+1, y+w, x+2*w, y+1, color);
+	_fillTriangle(disp_handle, TFT_globals, x+2*w+l+1, y+2*w-1, x+3*w+l, y+w, x+2*w+l+1, y+1, color);
+	_fillRect(disp_handle, TFT_globals, x+2*w+1, y, l, 2*w+1, color);
+
+	if (cfont.offset) {
+
+		_drawTriangle(disp_handle, TFT_globals, x+2*w, y+2*w-1, x+w+1, y+w, x+2*w, y+1, outline);
+		_drawTriangle(disp_handle, TFT_globals, x+2*w+l+1, y+2*w-1, x+3*w+l, y+w, x+2*w+l+1, y+1, outline);
+		_drawRect(disp_handle, TFT_globals, x+2*w+1, y, l, 2*w+1, outline);
+	}
 }
 
+
+
 //--------------------------------------------------------------------------------------------
-static void _draw7seg(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int16_t x, int16_t y, int8_t num, int16_t w, int16_t l, color_t color) {
+static void 
+_draw7seg(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int16_t x,
+	int16_t y,
+	int8_t num,
+	int16_t w,
+	int16_t l,
+	color_t color)
+{
   /* TODO: clipping */
   if (num < 0x2D || num > 0x3A) return;
 
   int16_t c = font_bcd[num-0x2D];
-  int16_t d = 2*w+l+1;
+  int16_t d = 2 * w + l + 1;
 
   // === Clear unused segments ===
-  if (!(c & 0x001)) barVert(ESP32_TouchGUI1_Definition, x+d, y+d, w, l, _bg, _bg);
-  if (!(c & 0x002)) barVert(ESP32_TouchGUI1_Definition, x,   y+d, w, l, _bg, _bg);
-  if (!(c & 0x004)) barVert(ESP32_TouchGUI1_Definition, x+d, y, w, l, _bg, _bg);
-  if (!(c & 0x008)) barVert(ESP32_TouchGUI1_Definition, x,   y, w, l, _bg, _bg);
-  if (!(c & 0x010)) barHor(ESP32_TouchGUI1_Definition, x, y+2*d, w, l, _bg, _bg);
-  if (!(c & 0x020)) barHor(ESP32_TouchGUI1_Definition, x, y+d, w, l, _bg, _bg);
-  if (!(c & 0x040)) barHor(ESP32_TouchGUI1_Definition, x, y, w, l, _bg, _bg);
+  if (!(c & 0x001)) barVert(disp_handle, TFT_globals, x+d, y+d, w, l, TFT_globals->_bg, TFT_globals->_bg);
+  if (!(c & 0x002)) barVert(disp_handle, TFT_globals, x,   y+d, w, l, TFT_globals->_bg, TFT_globals->_bg);
+  if (!(c & 0x004)) barVert(disp_handle, TFT_globals, x+d, y, w, l, TFT_globals->_bg, TFT_globals->_bg);
+  if (!(c & 0x008)) barVert(disp_handle, TFT_globals, x,   y, w, l, TFT_globals->_bg, TFT_globals->_bg);
+  if (!(c & 0x010)) barHor(disp_handle, TFT_globals, x, y+2*d, w, l, TFT_globals->_bg, TFT_globals->_bg);
+  if (!(c & 0x020)) barHor(disp_handle, TFT_globals, x, y+d, w, l, TFT_globals->_bg, TFT_globals->_bg);
+  if (!(c & 0x040)) barHor(disp_handle, TFT_globals, x, y, w, l, TFT_globals->_bg, TFT_globals->_bg);
 
   if (!(c & 0x080)) {
-    // low point
-    _fillRect(ESP32_TouchGUI1_Definition, x+(d/2), y+2*d, 2*w+1, 2*w+1, _bg);
-    if (cfont.offset) _drawRect(ESP32_TouchGUI1_Definition, x+(d/2), y+2*d, 2*w+1, 2*w+1, _bg);
+
+	// low point
+	_fillRect(disp_handle, TFT_globals,
+		x+(d/2), y+2*d, 2*w+1, 2*w+1, TFT_globals->_bg);
+
+	if (cfont.offset) _drawRect(disp_handle, TFT_globals,
+		x+(d/2), y+2*d, 2*w+1, 2*w+1, TFT_globals->_bg);
   }
+
   if (!(c & 0x100)) {
-    // down middle point
-    _fillRect(ESP32_TouchGUI1_Definition, x+(d/2), y+d+2*w+1, 2*w+1, l/2, _bg);
-    if (cfont.offset) _drawRect(ESP32_TouchGUI1_Definition, x+(d/2), y+d+2*w+1, 2*w+1, l/2, _bg);
+
+	// down middle point
+	_fillRect(disp_handle, TFT_globals, x+(d/2),
+		y+d+2*w+1, 2*w+1, l/2, TFT_globals->_bg);
+
+	if (cfont.offset) _drawRect(disp_handle, TFT_globals,
+		x+(d/2), y+d+2*w+1, 2*w+1, l/2, TFT_globals->_bg);
   }
+
   if (!(c & 0x800)) {
+
 	// up middle point
-    _fillRect(ESP32_TouchGUI1_Definition, x+(d/2), y+(2*w)+1+(l/2), 2*w+1, l/2, _bg);
-    if (cfont.offset) _drawRect(ESP32_TouchGUI1_Definition, x+(d/2), y+(2*w)+1+(l/2), 2*w+1, l/2, _bg);
+	_fillRect(disp_handle, TFT_globals,
+		x+(d/2), y+(2*w)+1+(l/2), 2*w+1, l/2, TFT_globals->_bg);
+
+	if (cfont.offset) _drawRect(disp_handle, TFT_globals,
+		x+(d/2), y+(2*w)+1+(l/2), 2*w+1, l/2, TFT_globals->_bg);
   }
+
   if (!(c & 0x200)) {
-    // middle, minus
-    _fillRect(ESP32_TouchGUI1_Definition, x+2*w+1, y+d, l, 2*w+1, _bg);
-    if (cfont.offset) _drawRect(ESP32_TouchGUI1_Definition, x+2*w+1, y+d, l, 2*w+1, _bg);
+
+	// middle, minus
+	_fillRect(disp_handle, TFT_globals,
+		x+2*w+1, y+d, l, 2*w+1, TFT_globals->_bg);
+
+	if (cfont.offset) _drawRect(disp_handle, TFT_globals,
+		x+2*w+1, y+d, l, 2*w+1, TFT_globals->_bg);
   }
 
   // === Draw used segments ===
-  if (c & 0x001) barVert(ESP32_TouchGUI1_Definition, x+d, y+d, w, l, color, cfont.color);	// down right
-  if (c & 0x002) barVert(ESP32_TouchGUI1_Definition, x,   y+d, w, l, color, cfont.color);	// down left
-  if (c & 0x004) barVert(ESP32_TouchGUI1_Definition, x+d, y, w, l, color, cfont.color);		// up right
-  if (c & 0x008) barVert(ESP32_TouchGUI1_Definition, x,   y, w, l, color, cfont.color);		// up left
-  if (c & 0x010) barHor(ESP32_TouchGUI1_Definition, x, y+2*d, w, l, color, cfont.color);	// down
-  if (c & 0x020) barHor(ESP32_TouchGUI1_Definition, x, y+d, w, l, color, cfont.color);		// middle
-  if (c & 0x040) barHor(ESP32_TouchGUI1_Definition, x, y, w, l, color, cfont.color);		// up
+  if (c & 0x001) barVert(disp_handle, TFT_globals, x+d, y+d, w, l, color, cfont.color);	// down right
+  if (c & 0x002) barVert(disp_handle, TFT_globals, x,   y+d, w, l, color, cfont.color);	// down left
+  if (c & 0x004) barVert(disp_handle, TFT_globals, x+d, y, w, l, color, cfont.color);	// up right
+  if (c & 0x008) barVert(disp_handle, TFT_globals, x,   y, w, l, color, cfont.color);	// up left
+  if (c & 0x010) barHor(disp_handle, TFT_globals, x, y+2*d, w, l, color, cfont.color);	// down
+  if (c & 0x020) barHor(disp_handle, TFT_globals, x, y+d, w, l, color, cfont.color);	// middle
+  if (c & 0x040) barHor(disp_handle, TFT_globals, x, y, w, l, color, cfont.color);	// up
 
   if (c & 0x080) {
-    // low point
-    _fillRect(ESP32_TouchGUI1_Definition, x+(d/2), y+2*d, 2*w+1, 2*w+1, color);
-    if (cfont.offset) _drawRect(ESP32_TouchGUI1_Definition, x+(d/2), y+2*d, 2*w+1, 2*w+1, cfont.color);
+
+	// low point
+	_fillRect(disp_handle, TFT_globals,
+		x+(d/2), y+2*d, 2*w+1, 2*w+1, color);
+
+	if (cfont.offset) _drawRect(disp_handle, TFT_globals,
+		x+(d/2), y+2*d, 2*w+1, 2*w+1, cfont.color);
   }
+
   if (c & 0x100) {
-    // down middle point
-    _fillRect(ESP32_TouchGUI1_Definition, x+(d/2), y+d+2*w+1, 2*w+1, l/2, color);
-    if (cfont.offset) _drawRect(ESP32_TouchGUI1_Definition, x+(d/2), y+d+2*w+1, 2*w+1, l/2, cfont.color);
+
+	// down middle point
+	_fillRect(disp_handle, TFT_globals,
+		x+(d/2), y+d+2*w+1, 2*w+1, l/2, color);
+
+	if (cfont.offset) _drawRect(disp_handle, TFT_globals,
+		x+(d/2), y+d+2*w+1, 2*w+1, l/2, cfont.color);
   }
+
   if (c & 0x800) {
 	// up middle point
-    _fillRect(ESP32_TouchGUI1_Definition, x+(d/2), y+(2*w)+1+(l/2), 2*w+1, l/2, color);
-    if (cfont.offset) _drawRect(ESP32_TouchGUI1_Definition, x+(d/2), y+(2*w)+1+(l/2), 2*w+1, l/2, cfont.color);
+
+	_fillRect(disp_handle, TFT_globals,
+		x+(d/2), y+(2*w)+1+(l/2), 2*w+1, l/2, color);
+
+	if (cfont.offset) _drawRect(disp_handle, TFT_globals,
+		x+(d/2), y+(2*w)+1+(l/2), 2*w+1, l/2, cfont.color);
   }
+
   if (c & 0x200) {
-    // middle, minus
-    _fillRect(ESP32_TouchGUI1_Definition, x+2*w+1, y+d, l, 2*w+1, color);
-    if (cfont.offset) _drawRect(ESP32_TouchGUI1_Definition, x+2*w+1, y+d, l, 2*w+1, cfont.color);
+
+	// middle, minus
+	_fillRect(disp_handle, TFT_globals,
+		x+2*w+1, y+d, l, 2*w+1, color);
+
+	if (cfont.offset) _drawRect(disp_handle, TFT_globals,
+		x+2*w+1, y+d, l, 2*w+1, cfont.color);
   }
 }
-//==============================================================================
 
 
 
-
-void TFT_print(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Print
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void TFT_print(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
 	char *st,
 	int x,
 	int y)
@@ -2004,23 +3014,23 @@ void TFT_print(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
   if (cfont.bitmap == 0) return; // wrong font selected
 
   // ** Rotated strings cannot be aligned
-  if ( ( font_rotate != 0 ) && ( ( x <= CENTER ) || ( y <= CENTER ) ) ) return;
+  if ( ( TFT_globals->font_rotate != 0 ) && ( ( x <= CENTER ) || ( y <= CENTER ) ) ) return;
 
-  if ( ( x < LASTX ) || (font_rotate == 0) ) TFT_OFFSET = 0;
+  if ( ( x < LASTX ) || (TFT_globals->font_rotate == 0 ) ) TFT_globals->TFT_OFFSET = 0;
 
-  if ( ( x >= LASTX ) && ( x < LASTY ) ) x = TFT_X + ( x - LASTX );
+  if ( ( x >= LASTX ) && ( x < LASTY ) ) x = TFT_globals->TFT_X + ( x - LASTX );
 
-  else if (x > CENTER) x += dispWin.x1;
+  else if (x > CENTER) x += TFT_globals->dispWin.x1;
 
-  if ( y >= LASTY ) y = TFT_Y + ( y - LASTY );
+  if ( y >= LASTY ) y = TFT_globals->TFT_Y + ( y - LASTY );
 
-  else if ( y > CENTER ) y += dispWin.y1;
+  else if ( y > CENTER ) y += TFT_globals->dispWin.y1;
 
   // ** Get number of characters in string to print
   stl = strlen(st);
 
   // ** Calculate CENTER, RIGHT or BOTTOM position
-  tmpw = TFT_getStringWidth(st);	// string width in pixels
+  tmpw = TFT_getStringWidth(TFT_globals, st);	// string width in pixels
   fh = cfont.y_size;			// font height
 
   if ( ( cfont.x_size != 0 ) && ( cfont.bitmap == 2 ) ) {
@@ -2029,22 +3039,22 @@ void TFT_print(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
   	fh = (3 * (2 * cfont.y_size + 1)) + (2 * cfont.x_size);  // 7-seg character height
   }
 
-  if (x == RIGHT) x = dispWin.x2 - tmpw + dispWin.x1;
+  if (x == RIGHT) x = TFT_globals->dispWin.x2 - tmpw + TFT_globals->dispWin.x1;
 
-  else if (x == CENTER) x = (((dispWin.x2 - dispWin.x1 + 1) - tmpw) / 2) + dispWin.x1;
+  else if (x == CENTER) x = ( ( (TFT_globals->dispWin.x2 - TFT_globals->dispWin.x1 + 1) - tmpw) / 2) + TFT_globals->dispWin.x1;
 
-  if (y == BOTTOM) y = dispWin.y2 - fh + dispWin.y1;
+  if ( y == BOTTOM ) y = TFT_globals->dispWin.y2 - fh + TFT_globals->dispWin.y1;
 
-  else if (y==CENTER) y = (((dispWin.y2 - dispWin.y1 + 1) - (fh/2)) / 2) + dispWin.y1;
+  else if ( y == CENTER ) y = ( ( (TFT_globals->dispWin.y2 - TFT_globals->dispWin.y1 + 1) - (fh/2)) / 2) + TFT_globals->dispWin.y1;
 
-  if (x < dispWin.x1) x = dispWin.x1;
+  if ( x < TFT_globals->dispWin.x1 ) x = TFT_globals->dispWin.x1;
 
-  if (y < dispWin.y1) y = dispWin.y1;
+  if ( y < TFT_globals->dispWin.y1 ) y = TFT_globals->dispWin.y1;
 
-  if ((x > dispWin.x2) || (y > dispWin.y2)) return;
+  if ( ( x > TFT_globals->dispWin.x2 ) || ( y > TFT_globals->dispWin.y2 ) ) return;
 
-  TFT_X = x;
-  TFT_Y = y;
+  TFT_globals->TFT_X = x;
+  TFT_globals->TFT_Y = y;
 
   // ** Adjust y position
   tmph = cfont.y_size; // font height
@@ -2052,103 +3062,105 @@ void TFT_print(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
   // for non-proportional fonts, char width is the same for all chars
   tmpw = cfont.x_size;
 
-  if (cfont.x_size != 0) {
+  if ( cfont.x_size != 0 ) {
 
-	if (cfont.bitmap == 2) {	// 7-segment font
+	if ( cfont.bitmap == 2 ) {	// 7-segment font
 
 		tmpw = _7seg_width();	// character width
 		tmph = _7seg_height();	// character height
 	}
   }
 
-  else TFT_OFFSET = 0;	// fixed font; offset not needed
+  else TFT_globals->TFT_OFFSET = 0;	// fixed font; offset not needed
 
-  if ((TFT_Y + tmph - 1) > dispWin.y2) return;
+  if ( ( TFT_globals->TFT_Y + tmph - 1 ) > TFT_globals->dispWin.y2 ) return;
 
-  int offset = TFT_OFFSET;
+  int offset = TFT_globals->TFT_OFFSET;
 
-  for (i=0; i<stl; i++) {
+  for ( i = 0 ; i < stl ; i++ ) {
 
 	ch = st[i]; // get string character
 
-	if (ch == 0x0D) { // === '\r', erase to eol ====
+	if ( ch == 0x0D ) { // === '\r', erase to eol ====
 
-		if ((!font_transparent) && (font_rotate==0))
-			_fillRect(ESP32_TouchGUI1_Definition,
-			 TFT_X, TFT_Y,  dispWin.x2+1-TFT_X, tmph, _bg);
+		if ( ( !TFT_globals->font_transparent ) && ( TFT_globals->font_rotate == 0 ) )
+
+			_fillRect(disp_handle, TFT_globals,
+				TFT_globals->TFT_X, TFT_globals->TFT_Y,
+				TFT_globals->dispWin.x2 + 1 - TFT_globals->TFT_X, tmph, TFT_globals->_bg);
 		}
 
-	else if (ch == 0x0A) { // ==== '\n', new line ====
+	else if ( ch == 0x0A ) { // ==== '\n', new line ====
 
-		if (cfont.bitmap == 1) {
+		if ( cfont.bitmap == 1 ) {
 
-			TFT_Y += tmph + font_line_space;
+			TFT_globals->TFT_Y += tmph + TFT_globals->font_line_space;
 
-			if (TFT_Y > (dispWin.y2-tmph)) break;
+			if ( TFT_globals->TFT_Y > ( TFT_globals->dispWin.y2 - tmph ) ) break;
 
-			TFT_X = dispWin.x1;
+			TFT_globals->TFT_X = TFT_globals->dispWin.x1;
 		}
 	}
 
 	else { // ==== other characters ====
 
-		if (cfont.x_size == 0) {
+		if ( cfont.x_size == 0 ) {
 
 			// for proportional font get character data to 'fontChar'
-			if (getCharPtr(ch)) tmpw = fontChar.xDelta;
+			if ( getCharPtr(TFT_globals, ch) ) tmpw = fontChar.xDelta;
 
 			else continue;
 		}
 
 		// check if character can be displayed in the current line
-		if ((TFT_X+tmpw) > (dispWin.x2)) {
+		if ( ( TFT_globals->TFT_X + tmpw ) > ( TFT_globals->dispWin.x2 ) ) {
 
-			if (text_wrap == 0) break;
+			if ( TFT_globals->text_wrap == 0 ) break;
 
-			TFT_Y += tmph + font_line_space;
+			TFT_globals->TFT_Y += tmph + TFT_globals->font_line_space;
 
-			if (TFT_Y > (dispWin.y2-tmph)) break;
+			if ( TFT_globals->TFT_Y > (TFT_globals->dispWin.y2-tmph) ) break;
 
-			TFT_X = dispWin.x1;
+			TFT_globals->TFT_X = TFT_globals->dispWin.x1;
 		}
 
 		// Let's print the character
-		if (cfont.x_size == 0) {
+		if ( cfont.x_size == 0 ) {
 
 			// == proportional font
-			if (font_rotate == 0) TFT_X += 
-				printProportionalChar(ESP32_TouchGUI1_Definition, TFT_X, TFT_Y) + 1;
+			if ( TFT_globals->font_rotate == 0 ) TFT_globals->TFT_X += 
+				printProportionalChar(disp_handle, TFT_globals, TFT_globals->TFT_X, TFT_globals->TFT_Y) + 1;
 
 			else {
 				// rotated proportional font
-				offset += rotatePropChar(ESP32_TouchGUI1_Definition, x, y, offset);
-				TFT_OFFSET = offset;
+				offset += rotatePropChar(disp_handle, TFT_globals, x, y, offset);
+				TFT_globals->TFT_OFFSET = offset;
 			}
 		}
 
 		else {
-			if (cfont.bitmap == 1) {
+			if ( cfont.bitmap == 1 ) {
 
 				// == fixed font
-				if ((ch < cfont.offset) || ((ch-cfont.offset) > cfont.numchars)) ch = cfont.offset;
+				if ( ( ch < cfont.offset ) || ( ( ch-cfont.offset ) > cfont.numchars ) ) ch = cfont.offset;
 
-				if (font_rotate == 0) {
+				if ( TFT_globals->font_rotate == 0 ) {
 
-					printChar(ESP32_TouchGUI1_Definition, ch, TFT_X, TFT_Y);
+					printChar(disp_handle, TFT_globals, ch, TFT_globals->TFT_X, TFT_globals->TFT_Y);
 
-					TFT_X += tmpw;
+					TFT_globals->TFT_X += tmpw;
 				}
 
-				else rotateChar(ESP32_TouchGUI1_Definition, ch, x, y, i);
+				else rotateChar(disp_handle, TFT_globals, ch, x, y, i);
 			}
 
-			else if (cfont.bitmap == 2) {
+			else if ( cfont.bitmap == 2) {
 
 				// == 7-segment font ==
-				_draw7seg(ESP32_TouchGUI1_Definition,
-					TFT_X, TFT_Y, ch, cfont.y_size, cfont.x_size, _fg);
+				_draw7seg(disp_handle, TFT_globals,
+					TFT_globals->TFT_X, TFT_globals->TFT_Y, ch, cfont.y_size, cfont.x_size, TFT_globals->_fg);
 
-				TFT_X += (tmpw + 2);
+				TFT_globals->TFT_X += (tmpw + 2);
 			}
 		}
 	}
@@ -2161,9 +3173,15 @@ void TFT_print(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 
 
 
-// Change the screen rotation.
-// Input: m new rotation value (0 to 3)
-//=================================
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Set Rotation
+ *  Desc: Change the screen rotation. m new rotation value (0 to 3)
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
 void 
 TFT_setRotation(ESP32_SPI_device_handle_t disp_handle,
 	TFTGlobals_t* TFT_globals,
@@ -2182,7 +3200,7 @@ TFT_setRotation(ESP32_SPI_device_handle_t disp_handle,
 
 	TFT_globals->orientation = rot;
 
-        _tft_setRotation(disp_handle, rot);
+        _tft_setRotation(disp_handle, TFT_globals, rot);
   }
 
   TFT_globals->dispWin.x1 = 0;
@@ -2190,14 +3208,20 @@ TFT_setRotation(ESP32_SPI_device_handle_t disp_handle,
   TFT_globals->dispWin.x2 = TFT_globals->_width - 1;
   TFT_globals->dispWin.y2 = TFT_globals->_height - 1;
 
-  TFT_fillScreen(ESP32_TouchGUI1_Definition, TFT_globals->_bg);
+  TFT_fillScreen(disp_handle, TFT_globals, TFT_globals->_bg);
 }
 
 
 
-// Send the command to invert all of the colors.
-// Input: i 0 to disable inversion; non-zero to enable inversion
-//==========================================
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Invert Display
+ *  Desc: Send the command to invert all of the colors. i 0 to disable inversion; non-zero to enable inversion
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
 void TFT_invertDisplay(ESP32_SPI_device_handle_t spi_device_handle,
 	const uint8_t mode)
 {
@@ -2214,9 +3238,15 @@ void TFT_invertDisplay(ESP32_SPI_device_handle_t spi_device_handle,
 
 
 
-// Select gamma curve
-// Input: gamma = 0~3
-//==================================
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Set Gamma Curve
+ *  Desc: Input: gamma = 0~3
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
 void TFT_setGammaCurve(ESP32_SPI_device_handle_t disp_handle,
 	uint8_t gm)
 {
@@ -2230,224 +3260,362 @@ void TFT_setGammaCurve(ESP32_SPI_device_handle_t disp_handle,
 
 
 
-//===========================================================
-color_t HSBtoRGB(float _hue, float _sat, float _brightness) {
- float red = 0.0;
- float green = 0.0;
- float blue = 0.0;
-
- if (_sat == 0.0) {
-   red = _brightness;
-   green = _brightness;
-   blue = _brightness;
- } else {
-   if (_hue == 360.0) {
-     _hue = 0;
-   }
-
-   int slice = (int)(_hue / 60.0);
-   float hue_frac = (_hue / 60.0) - slice;
-
-   float aa = _brightness * (1.0 - _sat);
-   float bb = _brightness * (1.0 - _sat * hue_frac);
-   float cc = _brightness * (1.0 - _sat * (1.0 - hue_frac));
-
-   switch(slice) {
-     case 0:
-         red = _brightness;
-         green = cc;
-         blue = aa;
-         break;
-     case 1:
-         red = bb;
-         green = _brightness;
-         blue = aa;
-         break;
-     case 2:
-         red = aa;
-         green = _brightness;
-         blue = cc;
-         break;
-     case 3:
-         red = aa;
-         green = bb;
-         blue = _brightness;
-         break;
-     case 4:
-         red = cc;
-         green = aa;
-         blue = _brightness;
-         break;
-     case 5:
-         red = _brightness;
-         green = aa;
-         blue = bb;
-         break;
-     default:
-         red = 0.0;
-         green = 0.0;
-         blue = 0.0;
-         break;
-   }
- }
-
- color_t color;
- color.r = ((uint8_t)(red * 255.0)) & 0xFC;
- color.g = ((uint8_t)(green * 255.0)) & 0xFC;
- color.b = ((uint8_t)(blue * 255.0)) & 0xFC;
-
- return color;
-}
-//=====================================================================
-void TFT_setclipwin(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Convert HSB to RGB
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+color_t HSBtoRGB(float _hue,
+	float _sat,
+	float _brightness)
 {
-	dispWin.x1 = x1;
-	dispWin.y1 = y1;
-	dispWin.x2 = x2;
-	dispWin.y2 = y2;
+	float red = 0.0;
+	float green = 0.0;
+	float blue = 0.0;
 
-	if (dispWin.x2 >= ESP32_TouchGUI1_Definition->_width) dispWin.x2 = 
-		ESP32_TouchGUI1_Definition->_width-1;
-	if (dispWin.y2 >= ESP32_TouchGUI1_Definition->_height) dispWin.y2 =
-		ESP32_TouchGUI1_Definition->_height-1;
-	if (dispWin.x1 > dispWin.x2) dispWin.x1 = dispWin.x2;
-	if (dispWin.y1 > dispWin.y2) dispWin.y1 = dispWin.y2;
+	if (_sat == 0.0) {
+
+		red = _brightness;
+		green = _brightness;
+		blue = _brightness;
+
+	} else {
+
+		if (_hue == 360.0) {
+
+			_hue = 0;
+		}
+
+		int slice = (int)(_hue / 60.0);
+		float hue_frac = (_hue / 60.0) - slice;
+
+		float aa = _brightness * (1.0 - _sat);
+		float bb = _brightness * (1.0 - _sat * hue_frac);
+		float cc = _brightness * (1.0 - _sat * (1.0 - hue_frac));
+
+		switch (slice) {
+
+			case 0:
+
+        		red = _brightness;
+        		green = cc;
+        		blue = aa;
+
+         		break;
+
+		case 1:
+
+         		red = bb;
+        		green = _brightness;
+        		blue = aa;
+
+        		break;
+
+     		case 2:
+
+         		red = aa;
+         		green = _brightness;
+         		blue = cc;
+
+        		break;
+
+    		case 3:
+
+         		red = aa;
+         		green = bb;
+        		blue = _brightness;
+
+        		break;
+
+     		case 4:
+
+         		red = cc;
+         		green = aa;
+         		blue = _brightness;
+
+         		break;
+
+     		case 5:
+
+         		red = _brightness;
+         		green = aa;
+         		blue = bb;
+
+         		break;
+
+     		default:
+
+        		red = 0.0;
+        		green = 0.0;
+         		blue = 0.0;
+
+         		break;
+		}
+	}
+
+	color_t color;
+	color.r = ( (uint8_t) (red * 255.0) ) & 0xFC;
+	color.g = ( (uint8_t) (green * 255.0) ) & 0xFC;
+	color.b = ( (uint8_t) (blue * 255.0) ) & 0xFC;
+
+	return color;
 }
 
 
 
-//=====================
-void TFT_resetclipwin(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Set Clipping Window
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void 
+TFT_setclipwin(TFTGlobals_t* TFT_globals,
+	uint16_t x1,
+	uint16_t y1,
+	uint16_t x2,
+	uint16_t y2)
 {
-  dispWin.x2 = ESP32_TouchGUI1_Definition->_width-1;
-  dispWin.y2 = ESP32_TouchGUI1_Definition->_height-1;
-  dispWin.x1 = 0;
-  dispWin.y1 = 0;
+	TFT_globals->dispWin.x1 = x1;
+	TFT_globals->dispWin.y1 = y1;
+	TFT_globals->dispWin.x2 = x2;
+	TFT_globals->dispWin.y2 = y2;
+
+	if (TFT_globals->dispWin.x2 >= TFT_globals->_width) 
+		TFT_globals->dispWin.x2 = TFT_globals->_width-1;
+
+	if (TFT_globals->dispWin.y2 >= TFT_globals->_height) 
+		TFT_globals->dispWin.y2 = TFT_globals->_height-1;
+
+	if (TFT_globals->dispWin.x1 > TFT_globals->dispWin.x2) 
+		TFT_globals->dispWin.x1 = TFT_globals->dispWin.x2;
+
+	if (TFT_globals->dispWin.y1 > TFT_globals->dispWin.y2) 
+		TFT_globals->dispWin.y1 = TFT_globals->dispWin.y2;
 }
 
 
 
-//==========================================================================
-void set_7seg_font_atrib(uint8_t l, uint8_t w, int outline, color_t color) {
-	if (cfont.bitmap != 2) return;
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Reset Clipping Window
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void TFT_resetclipwin(TFTGlobals_t* TFT_globals)
+{
+  TFT_globals->dispWin.x2 = TFT_globals->_width-1;
+  TFT_globals->dispWin.y2 = TFT_globals->_height-1;
+  TFT_globals->dispWin.x1 = 0;
+  TFT_globals->dispWin.y1 = 0;
+}
 
-	if (l < 6) l = 6;
-    if (l > 40) l = 40;
-    if (w < 1) w = 1;
-    if (w > (l/2)) w = l/2;
-    if (w > 12) w = 12;
 
-    cfont.x_size = l;
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Set 7 Segment Attribute
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void set_7seg_font_atrib(uint8_t l,
+	uint8_t w,
+	int outline,
+	color_t color)
+{
+	if ( cfont.bitmap != 2 ) return;
+
+	if ( l < 6 ) l = 6;
+	if ( l > 40 ) l = 40;
+	if ( w < 1 ) w = 1;
+	if ( w > ( l/2 ) ) w = l/2;
+	if ( w > 12 ) w = 12;
+
+	cfont.x_size = l;
 	cfont.y_size = w;
 	cfont.offset = outline;
 	cfont.color  = color;
 }
 
-//==========================================
-int TFT_getfontsize(int *width, int* height)
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Get Font Size
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+int TFT_getfontsize(int *width,
+	int* height)
 {
-  if (cfont.bitmap == 1) {
-    if (cfont.x_size != 0) *width = cfont.x_size;	// fixed width font
-    else *width = cfont.max_x_size;					// proportional font
-    *height = cfont.y_size;
-  }
-  else if (cfont.bitmap == 2) {
-	// 7-segment font
-    *width = _7seg_width();
-    *height = _7seg_height();
-  }
-  else {
-    *width = 0;
-    *height = 0;
-    return 0;
-  }
+	if (cfont.bitmap == 1) {
+
+		if ( cfont.x_size != 0 ) *width = cfont.x_size;	// fixed width font
+
+		else *width = cfont.max_x_size;			// proportional font
+
+		*height = cfont.y_size;
+	}
+
+	else if ( cfont.bitmap == 2 ) {
+
+		// 7-segment font
+		*width = _7seg_width();
+		*height = _7seg_height();
+	}
+
+	else {
+
+		*width = 0;
+		*height = 0;
+
+		return 0;
+	}
   return 1;
 }
 
-//=====================
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Get Font Height
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
 int TFT_getfontheight()
 {
-  if (cfont.bitmap == 1) return cfont.y_size;			// Bitmap font
-  else if (cfont.bitmap == 2) return _7seg_height();	// 7-segment font
-  return 0;
+	if ( cfont.bitmap == 1 ) return cfont.y_size;		// Bitmap font
+
+	else if (cfont.bitmap == 2) return _7seg_height();	// 7-segment font
+
+	return 0;
 }
 
-//====================
-void TFT_saveClipWin()
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Save Clipping Window
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void TFT_saveClipWin(TFTGlobals_t* TFT_globals)
 {
-	dispWinTemp.x1 = dispWin.x1;
-	dispWinTemp.y1 = dispWin.y1;
-	dispWinTemp.x2 = dispWin.x2;
-	dispWinTemp.y2 = dispWin.y2;
+	TFT_globals->dispWinTemp.x1 = TFT_globals->dispWin.x1;
+	TFT_globals->dispWinTemp.y1 = TFT_globals->dispWin.y1;
+	TFT_globals->dispWinTemp.x2 = TFT_globals->dispWin.x2;
+	TFT_globals->dispWinTemp.y2 = TFT_globals->dispWin.y2;
 }
 
-//=======================
-void TFT_restoreClipWin()
+
+
+/** Public function
+ * -------------------------------------------------------------------------------------------------
+ *  FName: Restore Clipping Window
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
+void TFT_restoreClipWin(TFTGlobals_t* TFT_globals)
 {
-	dispWin.x1 = dispWinTemp.x1;
-	dispWin.y1 = dispWinTemp.y1;
-	dispWin.x2 = dispWinTemp.x2;
-	dispWin.y2 = dispWinTemp.y2;
+	TFT_globals->dispWin.x1 = TFT_globals->dispWinTemp.x1;
+	TFT_globals->dispWin.y1 = TFT_globals->dispWinTemp.y1;
+	TFT_globals->dispWin.x2 = TFT_globals->dispWinTemp.x2;
+	TFT_globals->dispWin.y2 = TFT_globals->dispWinTemp.y2;
 }
+
 
 
 // ================ JPG SUPPORT ================================================
 // User defined device identifier
 typedef struct {
-	FILE		*fhndl;			// File handler for input function
-    int			x;				// image top left point X position
-    int			y;				// image top left point Y position
-    uint8_t		*membuff;		// memory buffer containing the image
-    uint32_t	bufsize;		// size of the memory buffer
-    uint32_t	bufptr;			// memory buffer current position
-    color_t		*linbuf[2];		// memory buffer used for display output
-    uint8_t		linbuf_idx;
+	FILE* fhndl;		// File handler for input function
+	int x;			// image top left point X position
+	int y;			// image top left point Y position
+	uint8_t* membuff;	// memory buffer containing the image
+	uint32_t bufsize;	// size of the memory buffer
+	uint32_t bufptr;	// memory buffer current position
+	color_t* linbuf[2];	// memory buffer used for display output
+	uint8_t	linbuf_idx;
 } JPGIODEV;
+
 
 
 // User defined call-back function to input JPEG data from file
 //---------------------
-static UINT tjd_input (
-	JDEC* jd,		// Decompression object
+static UINT 
+tjd_input( JDEC* jd,		// Decompression object
 	BYTE* buff,		// Pointer to the read buffer (NULL:skip)
-	UINT nd			// Number of bytes to read/skip from input stream
-)
+	uint nd)		// Number of bytes to read/skip from input stream
 {
 	int rb = 0;
+
 	// Device identifier for the session (5th argument of jd_prepare function)
-	JPGIODEV *dev = (JPGIODEV*)jd->device;
+	JPGIODEV *dev = (JPGIODEV*) jd->device;
 
 	if (buff) {	// Read nd bytes from the input strem
+
 		rb = fread(buff, 1, nd, dev->fhndl);
 		return rb;	// Returns actual number of bytes read
 	}
+
 	else {	// Remove nd bytes from the input stream
+
 		if (fseek(dev->fhndl, nd, SEEK_CUR) >= 0) return nd;
 		else return 0;
 	}
 }
 
+
+
 // User defined call-back function to input JPEG data from memory buffer
 //-------------------------
-static UINT tjd_buf_input (
-	JDEC* jd,		// Decompression object
+static UINT 
+tjd_buf_input(JDEC* jd,		// Decompression object
 	BYTE* buff,		// Pointer to the read buffer (NULL:skip)
-	UINT nd			// Number of bytes to read/skip from input stream
-)
+	UINT nd)		// Number of bytes to read/skip from input stream
 {
 	// Device identifier for the session (5th argument of jd_prepare function)
 	JPGIODEV *dev = (JPGIODEV*)jd->device;
 	if (!dev->membuff) return 0;
+
 	if (dev->bufptr >= (dev->bufsize + 2)) return 0; // end of stream
 
 	if ((dev->bufptr + nd) > (dev->bufsize + 2)) nd = (dev->bufsize + 2) - dev->bufptr;
 
 	if (buff) {	// Read nd bytes from the input strem
+
 		memcpy(buff, dev->membuff + dev->bufptr, nd);
 		dev->bufptr += nd;
 		return nd;	// Returns number of bytes read
 	}
+
 	else {	// Remove nd bytes from the input stream
+
 		dev->bufptr += nd;
 		return nd;
 	}
@@ -2455,11 +3623,12 @@ static UINT tjd_buf_input (
 
 // User defined call-back function to output RGB bitmap to display device
 //----------------------
-static UINT tjd_output (ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, 
+static UINT 
+tjd_output(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
 	JDEC* jd,		// Decompression object of current session
-	void* bitmap,	// Bitmap data to be output
-	JRECT* rect		// Rectangular region to output
-)
+	void* bitmap,		// Bitmap data to be output
+	JRECT* rect)		// Rectangular region to output
 {
 	// Device identifier for the session (5th argument of jd_prepare function)
 	JPGIODEV *dev = (JPGIODEV*)jd->device;
@@ -2475,58 +3644,88 @@ static UINT tjd_output (ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition
 	int right = rect->right + dev->x;
 	int bottom = rect->bottom + dev->y;
 
-	if ((left > dispWin.x2) || (top > dispWin.y2)) return 1;	// out of screen area, return
-	if ((right < dispWin.x1) || (bottom < dispWin.y1)) return 1;// out of screen area, return
+	if ( (left > TFT_globals->dispWin.x2) || (top > TFT_globals->dispWin.y2) ) return 1;	// out of screen area, return
+	if ( (right < TFT_globals->dispWin.x1) || (bottom < TFT_globals->dispWin.y1) ) return 1;	// out of screen area, return
 
-	if (left < dispWin.x1) dleft = dispWin.x1;
+	if (left < TFT_globals->dispWin.x1) dleft = TFT_globals->dispWin.x1;
 	else dleft = left;
-	if (top < dispWin.y1) dtop = dispWin.y1;
+
+	if (top < TFT_globals->dispWin.y1) dtop = TFT_globals->dispWin.y1;
 	else dtop = top;
-	if (right > dispWin.x2) dright = dispWin.x2;
+
+	if (right > TFT_globals->dispWin.x2) dright = TFT_globals->dispWin.x2;
 	else dright = right;
-	if (bottom > dispWin.y2) dbottom = dispWin.y2;
+
+	if (bottom > TFT_globals->dispWin.y2) dbottom = TFT_globals->dispWin.y2;
 	else dbottom = bottom;
 
-	if ((dleft > dispWin.x2) || (dtop > dispWin.y2)) return 1;		// out of screen area, return
-	if ((dright < dispWin.x1) || (dbottom < dispWin.y1)) return 1;	// out of screen area, return
+	if ( (dleft > TFT_globals->dispWin.x2) || (dtop > TFT_globals->dispWin.y2) ) return 1;		// out of screen area, return
+	if ( (dright < TFT_globals->dispWin.x1) || (dbottom < TFT_globals->dispWin.y1) ) return 1;	// out of screen area, return
 
 	uint32_t len = ((dright-dleft+1) * (dbottom-dtop+1));	// calculate length of data
 
 
 	if ((len > 0) && (len <= JPG_IMAGE_LINE_BUF_SIZE)) {
+
 		uint8_t *dest = (uint8_t *)(dev->linbuf[dev->linbuf_idx]);
 
 		for (y = top; y <= bottom; y++) {
+
 			for (x = left; x <= right; x++) {
+
 				// Clip to display area
 				if ((x >= dleft) && (y >= dtop) && (x <= dright) && (y <= dbottom)) {
+
 					*dest++ = (*src++) & 0xFC;
 					*dest++ = (*src++) & 0xFC;
 					*dest++ = (*src++) & 0xFC;
 				}
+
 				else src += 3; // skip
 			}
 		}
-		wait_trans_finish(ESP32_TouchGUI1_Definition, 1);
-		send_data(ESP32_TouchGUI1_Definition, dleft, dtop, dright, dbottom, len, dev->linbuf[dev->linbuf_idx]);
+
+		send_data(disp_handle, dleft, dtop, dright, dbottom, len, dev->linbuf[dev->linbuf_idx]);
+
 		dev->linbuf_idx = ((dev->linbuf_idx + 1) & 1);
 	}
 	else {
-		wait_trans_finish(ESP32_TouchGUI1_Definition, 1);
-		printf("Data size error: %d jpg: (%d,%d,%d,%d) disp: (%d,%d,%d,%d)\r\n", len, left,top,right,bottom, dleft,dtop,dright,dbottom);
+//log3
+printf("Data size error: %d jpg: (%d,%d,%d,%d) disp: (%d,%d,%d,%d)\r\n", len, left,top,right,bottom, dleft,dtop,dright,dbottom);
+
 		return 0;  // stop decompression
 	}
 
 	return 1;	// Continue to decompression
 }
 
+
+
+/**
+ * -------------------------------------------------------------------------------------------------
+ *  FName: 
+ *  Desc: 
+ *  Info: 
+ *  Para:  ->  
+ 
+ *  Rets:  -> 
+ * -------------------------------------------------------------------------------------------------
+ */
 // tft.jpgimage(X, Y, scale, file_name, buf, size]
 // X & Y can be < 0 !
 //==================================================================================
-void TFT_jpg_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x, int y, uint8_t scale, char *fname, uint8_t *buf, int size)
+void 
+TFT_jpg_image(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int x,
+	int y,
+	uint8_t scale,
+	char *fname,
+	uint8_t *buf,
+	int size)
 {
 	JPGIODEV dev;
-    struct stat sb;
+    	struct stat sb;
 	char *work = NULL;		// Pointer to the working buffer (must be 4-byte aligned)
 	UINT sz_work = 3800;	// Size of the working buffer (must be power of 2)
 	JDEC jd;				// Decompression object (70 bytes)
@@ -2534,162 +3733,222 @@ void TFT_jpg_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int
 
 	dev.linbuf[0] = NULL;
 	dev.linbuf[1] = NULL;
-    dev.linbuf_idx = 0;
+    	dev.linbuf_idx = 0;
 
    	dev.fhndl = NULL;
-    if (fname == NULL) {
-    	// image from buffer
-        dev.membuff = buf;
-        dev.bufsize = size;
-        dev.bufptr = 0;
-    }
-    else {
-    	// image from file
-        dev.membuff = NULL;
-        dev.bufsize = 0;
-        dev.bufptr = 0;
 
-        if (stat(fname, &sb) != 0) {
-        	if (image_debug) printf("File error: %ss\r\n", strerror(errno));
-            goto exit;
-        }
+	if (fname == NULL) {
 
-        dev.fhndl = fopen(fname, "r");
-        if (!dev.fhndl) {
-        	if (image_debug) printf("Error opening file: %s\r\n", strerror(errno));
-            goto exit;
-        }
-    }
+    		// image from buffer
+       		dev.membuff = buf;
+       		dev.bufsize = size;
+       		dev.bufptr = 0;
+	}
+
+	else {
+
+		// image from file
+        	dev.membuff = NULL;
+        	dev.bufsize = 0;
+       		dev.bufptr = 0;
+
+        	if (stat(fname, &sb) != 0) {
+
+			if (TFT_globals->image_debug) 
+				printf("File error: %ss\r\n", strerror(errno));
+
+			goto exit;
+		}
+
+		dev.fhndl = fopen(fname, "r");
+
+		if (!dev.fhndl) {
+
+			if (TFT_globals->image_debug) printf("Error opening file: %s\r\n", strerror(errno));
+
+			goto exit;
+        	}
+    	}
 
 	if (scale > 3) scale = 3;
 
 	work = malloc(sz_work);
+
 	if (work) {
+
 		if (dev.membuff) rc = jd_prepare(&jd, tjd_buf_input, (void *)work, sz_work, &dev);
+
 		else rc = jd_prepare(&jd, tjd_input, (void *)work, sz_work, &dev);
+
 		if (rc == JDR_OK) {
-			if (x == CENTER) x = ((dispWin.x2 - dispWin.x1 + 1 - (int)(jd.width >> scale)) / 2) + dispWin.x1;
-			else if (x == RIGHT) x = dispWin.x2 + 1 - (int)(jd.width >> scale);
 
-			if (y == CENTER) y = ((dispWin.y2 - dispWin.y1 + 1 - (int)(jd.height >> scale)) / 2) + dispWin.y1;
-			else if (y == BOTTOM) y = dispWin.y2 + 1 - (int)(jd.height >> scale);
+			if (x == CENTER) x = ((TFT_globals->dispWin.x2 - TFT_globals->dispWin.x1 + 1 - (int)(jd.width >> scale)) / 2) + TFT_globals->dispWin.x1;
+			else if (x == RIGHT) x = TFT_globals->dispWin.x2 + 1 - (int)(jd.width >> scale);
 
-			if (x < ((dispWin.x2-1) * -1)) x = (dispWin.x2-1) * -1;
-			if (y < ((dispWin.y2-1)) * -1) y = (dispWin.y2-1) * -1;
-			if (x > (dispWin.x2-1)) x = dispWin.x2 - 1;
-			if (y > (dispWin.y2-1)) y = dispWin.y2-1;
+			if (y == CENTER) y = ((TFT_globals->dispWin.y2 - TFT_globals->dispWin.y1 + 1 - (int)(jd.height >> scale)) / 2) + TFT_globals->dispWin.y1;
+			else if (y == BOTTOM) y = TFT_globals->dispWin.y2 + 1 - (int)(jd.height >> scale);
+
+			if (x < ((TFT_globals->dispWin.x2-1) * -1)) x = (TFT_globals->dispWin.x2-1) * -1;
+			if (y < ((TFT_globals->dispWin.y2-1)) * -1) y = (TFT_globals->dispWin.y2-1) * -1;
+			if (x > (TFT_globals->dispWin.x2-1)) x = TFT_globals->dispWin.x2 - 1;
+			if (y > (TFT_globals->dispWin.y2-1)) y = TFT_globals->dispWin.y2-1;
 
 			dev.x = x;
 			dev.y = y;
 
 			dev.linbuf[0] = heap_caps_malloc(JPG_IMAGE_LINE_BUF_SIZE*3, MALLOC_CAP_DMA);
+
 			if (dev.linbuf[0] == NULL) {
-				if (image_debug) printf("Error allocating line buffer #0\r\n");
+				if (TFT_globals->image_debug) printf("Error allocating line buffer #0\r\n");
 				goto exit;
 			}
+
 			dev.linbuf[1] = heap_caps_malloc(JPG_IMAGE_LINE_BUF_SIZE*3, MALLOC_CAP_DMA);
+
 			if (dev.linbuf[1] == NULL) {
-				if (image_debug) printf("Error allocating line buffer #1\r\n");
+				if (TFT_globals->image_debug) printf("Error allocating line buffer #1\r\n");
 				goto exit;
 			}
 
 			// Start to decode the JPEG file
-			disp_select(ESP32_TouchGUI1_Definition);
 			rc = jd_decomp(&jd, tjd_output, scale);
-			disp_deselect(ESP32_TouchGUI1_Definition);
 
 			if (rc != JDR_OK) {
-				if (image_debug) printf("jpg decompression error %d\r\n", rc);
+
+				if (TFT_globals->image_debug) printf("jpg decompression error %d\r\n", rc);
 			}
-			if (image_debug) printf("Jpg size: %dx%d, position; %d,%d, scale: %d, bytes used: %d\r\n", jd.width, jd.height, x, y, scale, jd.sz_pool);
+
+			if (TFT_globals->image_debug) printf("Jpg size: %dx%d, position; %d,%d, scale: %d, bytes used: %d\r\n", jd.width, jd.height, x, y, scale, jd.sz_pool);
 		}
+
 		else {
-			if (image_debug) printf("jpg prepare error %d\r\n", rc);
+
+			if (TFT_globals->image_debug) printf("jpg prepare error %d\r\n", rc);
 		}
 	}
+
 	else {
-		if (image_debug) printf("work buffer allocation error\r\n");
+
+		if (TFT_globals->image_debug) printf("work buffer allocation error\r\n");
 	}
 
 exit:
 	if (work) free(work);  // free work buffer
+
 	if (dev.linbuf[0]) free(dev.linbuf[0]);
+
 	if (dev.linbuf[1]) free(dev.linbuf[1]);
-    if (dev.fhndl) fclose(dev.fhndl);  // close input file
+
+	if (dev.fhndl) fclose(dev.fhndl);  // close input file
 }
 
 
+
 //====================================================================================
-int TFT_bmp_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int x, int y, uint8_t scale, char *fname, uint8_t *imgbuf, int size)
+int 
+TFT_bmp_image(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	int x,
+	int y,
+	uint8_t scale,
+	char *fname,
+	uint8_t *imgbuf,
+	int size)
 {
 	FILE *fhndl = NULL;
+
 	struct stat sb;
+
 	int i, err=0;
+
 	int img_xsize, img_ysize, img_xstart, img_xlen, img_ystart, img_ylen;
 	int img_pos, img_pix_pos, scan_lines, rd_len;
+
 	uint8_t tmpc;
 	uint16_t wtemp;
 	uint32_t temp;
+
 	int disp_xstart, disp_xend, disp_ystart, disp_yend;
+
 	uint8_t buf[56];
+
 	char err_buf[64];
+
 	uint8_t *line_buf[2] = {NULL,NULL};
+
 	uint8_t lb_idx = 0;
+
 	uint8_t *scale_buf = NULL;
+
 	uint8_t scale_pix;
+
 	uint16_t co[3] = {0,0,0};			// RGB sum
+
 	uint8_t npix;
 
 	if (scale > 7) scale = 7;
+
 	scale_pix = scale+1;	// scale factor ( 1~8 )
 
-    if (fname) {
-    	// * File name is given, reading image from file
-    	if (stat(fname, &sb) != 0) {
+    	if (fname) {
+
+		// * File name is given, reading image from file
+    		if (stat(fname, &sb) != 0) {
+
 			sprintf(err_buf, "opening file");
-    		err = -1;
-    		goto exit;
-    	}
-    	size = sb.st_size;
+    			err = -1;
+
+    			goto exit;
+    		}
+
+		size = sb.st_size;
+
 		fhndl = fopen(fname, "r");
+
 		if (!fhndl) {
+
 			sprintf(err_buf, "opening file");
 			err = -2;
 			goto exit;
 		}
 
 		i = fread(buf, 1, 54, fhndl);  // read header
-    }
-    else {
-    	// * Reading image from buffer
-    	if ((imgbuf) && (size > 54)) {
-    		memcpy(buf, imgbuf, 54);
-    		i = 54;
-    	}
-    	else i = 0;
-    }
+	}
 
-    sprintf(err_buf, "reading header");
+	else {
+
+    		// * Reading image from buffer
+    		if ((imgbuf) && (size > 54)) {
+
+    			memcpy(buf, imgbuf, 54);
+    			i = 54;
+    		}
+
+    		else i = 0;
+	}
+
+	sprintf(err_buf, "reading header");
+
 	if (i != 54) {err = -3;	goto exit;}
 
 	// ** Check image header and get image properties
 	if ((buf[0] != 'B') || (buf[1] != 'M')) {err=-4; goto exit;} // accept only images with 'BM' id
 
-	memcpy(&temp, buf+2, 4);				// file size
+	memcpy(&temp, buf+2, 4);			// file size
 	if (temp != size) {err=-5; goto exit;}
 
 	memcpy(&img_pos, buf+10, 4);			// start of pixel data
 
-	memcpy(&temp, buf+14, 4);				// BMP header size
+	memcpy(&temp, buf+14, 4);			// BMP header size
 	if (temp != 40) {err=-6; goto exit;}
 
-	memcpy(&wtemp, buf+26, 2);				// the number of color planes
+	memcpy(&wtemp, buf+26, 2);			// the number of color planes
 	if (wtemp != 1) {err=-7; goto exit;}
 
-	memcpy(&wtemp, buf+28, 2);				// the number of bits per pixel
+	memcpy(&wtemp, buf+28, 2);			// the number of bits per pixel
 	if (wtemp != 24) {err=-8; goto exit;}
 
-	memcpy(&temp, buf+30, 4);				// the compression method being used
+	memcpy(&temp, buf+30, 4);			// the compression method being used
 	if (temp != 0) {err=-9; goto exit;}
 
 	memcpy(&img_xsize, buf+18, 4);			// the bitmap width in pixels
@@ -2701,49 +3960,58 @@ int TFT_bmp_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int 
 	img_xlen = img_xsize / scale_pix;		// image display horizontal size
 	img_ylen = img_ysize / scale_pix;		// image display vertical size
 
-	if (x == CENTER) x = ((dispWin.x2 - dispWin.x1 + 1 - img_xlen) / 2) + dispWin.x1;
-	else if (x == RIGHT) x = dispWin.x2 + 1 - img_xlen;
+	if (x == CENTER) x = ((TFT_globals->dispWin.x2 - TFT_globals->dispWin.x1 + 1 - img_xlen) / 2) + TFT_globals->dispWin.x1;
+	else if (x == RIGHT) x = TFT_globals->dispWin.x2 + 1 - img_xlen;
 
-	if (y == CENTER) y = ((dispWin.y2 - dispWin.y1 + 1 - img_ylen) / 2) + dispWin.y1;
-	else if (y == BOTTOM) y = dispWin.y2 + 1 - img_ylen;
+	if (y == CENTER) y = ((TFT_globals->dispWin.y2 - TFT_globals->dispWin.y1 + 1 - img_ylen) / 2) + TFT_globals->dispWin.y1;
+	else if (y == BOTTOM) y = TFT_globals->dispWin.y2 + 1 - img_ylen;
 
-	if ((x < ((dispWin.x2 + 1) * -1)) || (x > (dispWin.x2 + 1)) || (y < ((dispWin.y2 + 1) * -1)) || (y > (dispWin.y2 + 1))) {
+	if ((x < ((TFT_globals->dispWin.x2 + 1) * -1)) || (x > (TFT_globals->dispWin.x2 + 1)) || (y < ((TFT_globals->dispWin.y2 + 1) * -1)) || (y > (TFT_globals->dispWin.y2 + 1))) {
 		sprintf(err_buf, "out of display area (%d,%d", x, y);
 		err = -10;
 		goto exit;
 	}
 
 	// ** set display and image areas
-	if (x < dispWin.x1) {
-		disp_xstart = dispWin.x1;
+	if (x < TFT_globals->dispWin.x1) {
+		disp_xstart = TFT_globals->dispWin.x1;
 		img_xstart = -x;	// image pixel line X offset
 		img_xlen += x;
 	}
+
 	else {
 		disp_xstart = x;
 		img_xstart = 0;
 	}
-	if (y < dispWin.y1) {
-		disp_ystart = dispWin.y1;
+
+	if (y < TFT_globals->dispWin.y1) {
+		disp_ystart = TFT_globals->dispWin.y1;
 		img_ystart = -y;	// image pixel line Y offset
 		img_ylen += y;
 	}
+
 	else {
 		disp_ystart = y;
 		img_ystart = 0;
 	}
+
 	disp_xend = disp_xstart + img_xlen - 1;
 	disp_yend = disp_ystart + img_ylen - 1;
-	if (disp_xend > dispWin.x2) {
-		disp_xend = dispWin.x2;
+
+	if (disp_xend > TFT_globals->dispWin.x2) {
+
+		disp_xend = TFT_globals->dispWin.x2;
 		img_xlen = disp_xend - disp_xstart + 1;
 	}
-	if (disp_yend > dispWin.y2) {
-		disp_yend = dispWin.y2;
+
+	if (disp_yend > TFT_globals->dispWin.y2) {
+
+		disp_yend = TFT_globals->dispWin.y2;
 		img_ylen = disp_yend - disp_ystart + 1;
 	}
 
 	if ((img_xlen < 8) || (img_ylen < 8) || (img_xstart >= (img_xsize-2)) || ((img_ysize - img_ystart) < 2)) {
+
 		sprintf(err_buf, "image too small");
 		err = -11;
 		goto exit;
@@ -2751,29 +4019,37 @@ int TFT_bmp_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int 
 
 	// ** Allocate memory for 2 lines of image pixels
 	line_buf[0] = heap_caps_malloc(img_xsize*3, MALLOC_CAP_DMA);
+
 	if (line_buf[0] == NULL) {
+
 	    sprintf(err_buf, "allocating line buffer #1");
 		err=-12;
 		goto exit;
 	}
 
 	line_buf[1] = heap_caps_malloc(img_xsize*3, MALLOC_CAP_DMA);
+
 	if (line_buf[1] == NULL) {
+
 	    sprintf(err_buf, "allocating line buffer #2");
 		err=-13;
 		goto exit;
 	}
 
 	if (scale) {
+
 		// Allocate memory for scale buffer
 		rd_len = img_xlen * 3 * scale_pix;
+
 		scale_buf = malloc(rd_len*scale_pix);
+
 		if (scale_buf == NULL) {
 			sprintf(err_buf, "allocating scale buffer");
 			err=-14;
 			goto exit;
 		}
 	}
+
 	else rd_len = img_xlen * 3;
 
 	// ** ***************************************************** **
@@ -2794,27 +4070,30 @@ int TFT_bmp_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int 
 
 	// Set position in image to the first color data (beginning of the LAST line)
 	img_pos += (img_ystart * (img_xsize*3));
+
 	if (fhndl) {
+
 		if (fseek(fhndl, img_pos, SEEK_SET) != 0) {
+
 			sprintf(err_buf, "file seek at %d", img_pos);
 			err = -15;
 			goto exit;
 		}
 	}
 
-	if (image_debug) printf("BMP: image size: (%d,%d) scale: %d disp size: (%d,%d) img xofs: %d img yofs: %d at: %d,%d; line buf: 2* %d scale buf: %d\r\n",
+	if (TFT_globals->image_debug) printf("BMP: image size: (%d,%d) scale: %d disp size: (%d,%d) img xofs: %d img yofs: %d at: %d,%d; line buf: 2* %d scale buf: %d\r\n",
 			img_xsize, img_ysize, scale_pix, img_xlen, img_ylen, img_xstart, img_ystart, disp_xstart, disp_ystart, img_xsize*3, ((scale) ? (rd_len*scale_pix) : 0));
 
-	// * Select the display
-	disp_select(ESP32_TouchGUI1_Definition);
-
 	while ((disp_yend >= disp_ystart) && ((img_pos + (img_xsize*3)) <= size)) {
+
 		if (img_pos > size) {
 			sprintf(err_buf, "EOF reached: %d > %d", img_pos, size);
 			err = -16;
 			goto exit1;
 		}
+
 		if (scale == 0) {
+
 			// Read the line of color data into color buffer
 			if (fhndl) {
 				i = fread(line_buf[lb_idx], 1, img_xsize*3, fhndl);  // read line from file
@@ -2824,9 +4103,11 @@ int TFT_bmp_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int 
 					goto exit1;
 				}
 			}
+
 			else memcpy(line_buf[lb_idx], imgbuf+img_pos, img_xsize*3);
 
-			if (img_xstart > 0)	memmove(line_buf[lb_idx], line_buf[lb_idx]+(img_xstart*3), rd_len);
+			if (img_xstart > 0) memmove(line_buf[lb_idx], line_buf[lb_idx]+(img_xstart*3), rd_len);
+
 			// Convert colors BGR-888 (BMP) -> RGB-888 (DISPLAY) ===
 			for (i=0; i < rd_len; i += 3) {
 				tmpc = line_buf[lb_idx][i+2] & 0xfc;				// save R
@@ -2834,21 +4115,29 @@ int TFT_bmp_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int 
 				line_buf[lb_idx][i] = tmpc;							// R -> B
 				line_buf[lb_idx][i+1] &= 0xfc;						// G
 			}
+
 			img_pos += (img_xsize*3);
 		}
+
 		else {
 			// scale image, read 'scale_pix' lines and find the average color
 			for (scan_lines=0; scan_lines<scale_pix; scan_lines++) {
+
 				if (img_pos > size) break;
+
 				if (fhndl) {
+
 					i = fread(line_buf[lb_idx], 1, img_xsize*3, fhndl);  // read line from file
+
 					if (i != (img_xsize*3)) {
 						sprintf(err_buf, "file read at %d (%d<>%d)", img_pos, i, img_xsize*3);
 						err = -17;
 						goto exit1;
 					}
 				}
+
 				else memcpy(line_buf[lb_idx], imgbuf+img_pos, img_xsize*3);
+
 				img_pos += (img_xsize*3);
 
 				// copy only data which are displayed to scale buffer
@@ -2857,21 +4146,27 @@ int TFT_bmp_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int 
 
 			// Populate display line buffer
 			for (int n=0;n<(img_xlen*3);n += 3) {
+
 				memset(co, 0, sizeof(co));	// initialize color sum
-				npix = 0;					// initialize number of pixels in scale rectangle
+
+				npix = 0;			// initialize number of pixels in scale rectangle
 
 				// sum all pixels in scale rectangle
 				for (int sc_line=0; sc_line<scan_lines; sc_line++) {
+
 					// Get colors position in scale buffer
 					img_pix_pos = (rd_len * sc_line) + (n * scale_pix);
 
 					for (int sc_col=0; sc_col<scale_pix; sc_col++) {
+
 						co[0] += scale_buf[img_pix_pos];
 						co[1] += scale_buf[img_pix_pos + 1];
 						co[2] += scale_buf[img_pix_pos + 2];
+
 						npix++;
 					}
 				}
+
 				// Place the average in display buffer, convert BGR-888 (BMP) -> RGB-888 (DISPLAY)
 				line_buf[lb_idx][n+2] = (uint8_t)(co[0] / npix);	// B
 				line_buf[lb_idx][n+1] = (uint8_t)(co[1] / npix);	// G
@@ -2879,24 +4174,35 @@ int TFT_bmp_image(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, int 
 			}
 		}
 
-		wait_trans_finish(ESP32_TouchGUI1_Definition, 1);
-		send_data(ESP32_TouchGUI1_Definition, disp_xstart, disp_yend, disp_xend, disp_yend, img_xlen, (color_t *)line_buf[lb_idx]);
+		send_data(disp_handle, disp_xstart, disp_yend, disp_xend, disp_yend, img_xlen, (color_t *)line_buf[lb_idx]);
+
 		lb_idx = (lb_idx + 1) & 1;  // change buffer
 
 		disp_yend--;
 	}
+
 	err = 0;
 exit1:
-	disp_deselect(ESP32_TouchGUI1_Definition);
+	
 exit:
 	if (scale_buf) free(scale_buf);
+
 	if (line_buf[0]) free(line_buf[0]);
+
 	if (line_buf[1]) free(line_buf[1]);
+
 	if (fhndl) fclose(fhndl);
-	if ((err) && (image_debug)) printf("Error: %d [%s]\r\n", err, err_buf);
+
+	if ((err) && (TFT_globals->image_debug)) printf("Error: %d [%s]\r\n", err, err_buf);
 
 	return err;
 }
+
+
+
+// -------------------------------------------------------------------------------------------------
+
+
 
 
 // ============= Touch panel functions =========================================

@@ -1,8 +1,3 @@
-/*
- * High level TFT functions
- * Author:  LoBo 04/2017, https://github/loboris
- * 
- */
 
 #ifndef _TFT_H_
 #define _TFT_H_
@@ -10,7 +5,17 @@
 #include <stdlib.h>
 //#include "tftspi.h"
 //#include "ESP32_TouchGUI1_Module_s.h"
-#include "ESP32_TouchGUI1_Module.h"
+//#include "ESP32_TouchGUI1_Module.h"
+
+
+
+// 24-bit color type structure
+typedef struct __attribute__((__packed__)) {
+//typedef struct {
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+} color_t ;
 
 
 
@@ -20,6 +25,8 @@ typedef struct {
   uint16_t x2;
   uint16_t y2;
 } dispWin_t;
+
+
 
 typedef struct {
   uint8_t *font;
@@ -31,7 +38,9 @@ typedef struct {
   uint8_t max_x_size;
   uint8_t bitmap;
   color_t color;
-} Font; //font_t
+} Font; //Font_t
+
+
 
 // tft globals
 typedef struct TFTGlobals_s {
@@ -58,6 +67,14 @@ typedef struct TFTGlobals_s {
 
   // Converts colors to grayscale if set to 1
   uint8_t gray_scale;
+
+  // temporary 
+  dispWin_t dispWinTemp;
+
+  uint8_t* userfont;
+  int TFT_OFFSET;
+//  propFont fontChar;
+  float _arcAngleMax;
 } TFTGlobals_t;
 
 
@@ -65,26 +82,26 @@ typedef struct TFTGlobals_s {
 //==========================================================================================
 // ==== Global variables ===================================================================
 //==========================================================================================
-extern uint8_t   orientation;		// current screen orientation
-extern uint16_t  font_rotate;   	// current font font_rotate angle (0~395)
-extern uint8_t   font_transparent;	// if not 0 draw fonts transparent
-extern uint8_t   font_forceFixed;  	// if not zero force drawing proportional fonts with fixed width
-extern uint8_t   font_buffered_char;
-extern uint8_t   font_line_space;	// additional spacing between text lines; added to font height
-extern uint8_t   text_wrap;        	// if not 0 wrap long text to the new line, else clip
-extern color_t   _fg;            	// current foreground color for fonts
-extern color_t   _bg;            	// current background for non transparent fonts
-extern dispWin_t dispWin;		// display clip window
-extern float	  _angleOffset;		// angle offset for arc, polygon and line by angle functions
-extern uint8_t	  image_debug;		// print debug messages during image decode if set to 1
+//extern uint8_t   orientation;		// current screen orientation
+//extern uint16_t  font_rotate;   	// current font font_rotate angle (0~395)
+//extern uint8_t   font_transparent;	// if not 0 draw fonts transparent
+//extern uint8_t   font_forceFixed;  	// if not zero force drawing proportional fonts with fixed width
+//extern uint8_t   font_buffered_char;
+//extern uint8_t   font_line_space;	// additional spacing between text lines; added to font height
+//extern uint8_t   text_wrap;        	// if not 0 wrap long text to the new line, else clip
+//extern color_t   _fg;            	// current foreground color for fonts
+//extern color_t   _bg;            	// current background for non transparent fonts
+//extern dispWin_t dispWin;		// display clip window
+//extern float	  _angleOffset;		// angle offset for arc, polygon and line by angle functions
+//extern uint8_t	  image_debug;		// print debug messages during image decode if set to 1
 
 extern Font cfont;			// Current font structure
 
-extern int	TFT_X;			// X position of the next character after TFT_print() function
-extern int	TFT_Y;			// Y position of the next character after TFT_print() function
+//extern int	TFT_X;			// X position of the next character after TFT_print() function
+//extern int	TFT_Y;			// Y position of the next character after TFT_print() function
 
-extern uint32_t tp_calx;		// touch screen X calibration constant
-extern uint32_t tp_caly;		// touch screen Y calibration constant
+//extern uint32_t tp_calx;		// touch screen X calibration constant
+//extern uint32_t tp_caly;		// touch screen Y calibration constant
 // =========================================================================================
 
 
@@ -487,7 +504,7 @@ void TFT_drawPolygon(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_gl
  *		font_file: pointer to font file name; NULL for embeded fonts
  */
 //----------------------------------------------------
-void TFT_setFont(uint8_t font, const char *font_file);
+void TFT_setFont(TFTGlobals_t* TFT_globals, uint8_t font, const char *font_file);
 
 /*
  * Returns current font height & width in pixels.
@@ -562,28 +579,28 @@ void set_7seg_font_atrib(uint8_t l, uint8_t w, int outline, color_t color);
  *
  */
 //----------------------------------------------------------------------
-void TFT_setclipwin(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
+void TFT_setclipwin(TFTGlobals_t* TFT_globals, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 
 /*
  * Resets the clipping area to full screen (0,0),(_wodth,_height)
  *
  */
 //----------------------
-void TFT_resetclipwin(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals);
+void TFT_resetclipwin(TFTGlobals_t* TFT_globals);
 
 /*
  * Save current clipping area to temporary variable
  *
  */
 //---------------------
-void TFT_saveClipWin(TFTGlobals_t* TFT_globals, );
+void TFT_saveClipWin(TFTGlobals_t* TFT_globals);
 
 /*
  * Restore current clipping area from temporary variable
  *
  */
 //------------------------
-void TFT_restoreClipWin(TFTGlobals_t* TFT_globals, );
+void TFT_restoreClipWin(TFTGlobals_t* TFT_globals);
 
 /*
  * Set the screen rotation
@@ -605,7 +622,7 @@ void TFT_setRotation(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_gl
  *
  */
 //-----------------------------------------
-void TFT_invertDisplay(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globals, const uint8_t mode);
+void TFT_invertDisplay(ESP32_SPI_device_handle_t disp_handle, const uint8_t mode);
 
 /*
  * Select gamma curve
@@ -630,7 +647,7 @@ int TFT_compare_colors(color_t c1, color_t c2);
  * Useful for positions strings on the screen.
  */
 //--------------------------------
-int TFT_getStringWidth(char* str);
+int TFT_getStringWidth(TFTGlobals_t* TFT_globals, char* str);
 
 
 /*
@@ -724,7 +741,7 @@ int TFT_bmp_image(ESP32_SPI_device_handle_t disp_handle, TFTGlobals_t* TFT_globa
  *
  */
 //------------------------------------------------
-int compile_font_file(char *fontfile, uint8_t dbg);
+int compile_font_file(TFTGlobals_t* TFT_globals, char *fontfile, uint8_t dbg);
 
 /*
  * Get all font's characters to buffer

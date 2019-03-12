@@ -31,6 +31,7 @@
 
 // provides WebIf, need the structures & types ...
 #include "WebIf_Module.h"
+#include "ESP32_SPI_Module_s.h"
 
 // this Modules structures & types ...
 #include "tft.h"
@@ -863,18 +864,11 @@ printf("post:%p.\r\n", ESP32_TouchGUI1_Definition->disp_interface_config.post_cb
 	ESP32_TouchGUI1_Definition->disp_handle);
 
 
-  // Init this Definitions display (SPI device). It is connected now.
-  retMsg = TFT_display_init(ESP32_TouchGUI1_Definition,
-	ESP32_TouchGUI1_Definition->disp_handle,
-	ESP32_TouchGUI1_Definition->display_config);
-  // error occured ? We have message -> deinit
-  if ( retMsg ) goto error;
-
-   printf("SPI: display init done.\r\n");
 
 
 
- 
+
+
   ESP32_TouchGUI1_Definition->TFT_globals = (TFTGlobals_t) {
   .orientation = LANDSCAPE,	// screen orientation
   .font_rotate = 0,		// font rotation
@@ -898,8 +892,33 @@ printf("post:%p.\r\n", ESP32_TouchGUI1_Definition->disp_interface_config.post_cb
   ._height = DEFAULT_TFT_DISPLAY_HEIGHT,
 
   // Converts colors to grayscale if set to 1
-  .gray_scale = 0;
+  .gray_scale = 0,
+
+
+  .userfont = NULL,
+  .TFT_OFFSET = 0,
+  ._arcAngleMax = DEFAULT_ARC_ANGLE_MAX,
 };
+
+
+
+
+
+
+
+  // Init this Definitions display (SPI device). It is connected now.
+  retMsg = TFT_display_init(ESP32_TouchGUI1_Definition->disp_handle,
+	&ESP32_TouchGUI1_Definition->TFT_globals,
+	&ESP32_TouchGUI1_Definition->display_config);
+  // error occured ? We have message -> deinit
+  if ( retMsg ) goto error;
+
+   printf("SPI: display init done.\r\n");
+
+
+
+ 
+
 
 
 
@@ -914,14 +933,14 @@ printf("post:%p.\r\n", ESP32_TouchGUI1_Definition->disp_interface_config.post_cb
 
   TFT_setGammaCurve(ESP32_TouchGUI1_Definition->disp_handle, DEFAULT_GAMMA_CURVE);
 
-  TFT_setRotation(ESP32_TouchGUI1_Definition, PORTRAIT);
+  TFT_setRotation(ESP32_TouchGUI1_Definition->disp_handle, &ESP32_TouchGUI1_Definition->TFT_globals, PORTRAIT);
 
 
-  TFT_setFont(DEFAULT_FONT, NULL);
+  TFT_setFont(&ESP32_TouchGUI1_Definition->TFT_globals, DEFAULT_FONT, NULL);
 
-  TFT_resetclipwin(ESP32_TouchGUI1_Definition);
+  TFT_resetclipwin(&ESP32_TouchGUI1_Definition->TFT_globals);
 
-  TFT_print(ESP32_TouchGUI1_Definition, "Time is not set yet", CENTER, CENTER);
+  TFT_print(ESP32_TouchGUI1_Definition->disp_handle, &ESP32_TouchGUI1_Definition->TFT_globals, "Time is not set yet", CENTER, CENTER);
 
 
 
@@ -1289,37 +1308,43 @@ Redraw_Time(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition)
 		tm_info->tm_min,
 		tm_info->tm_sec);
 
-	TFT_saveClipWin();
-	TFT_resetclipwin(ESP32_TouchGUI1_Definition);
+	// to work with display ..
+	ESP32_SPI_device_handle_t disp_handle = ESP32_TouchGUI1_Definition->disp_handle;
+	TFTGlobals_t* TFT_globals = &ESP32_TouchGUI1_Definition->TFT_globals;
+
+	TFT_saveClipWin(TFT_globals);
+	TFT_resetclipwin(TFT_globals);
 
 	Font curr_font = cfont;
 
-	last_bg = _bg;
-	last_fg = _fg;
+	last_bg = TFT_globals->_bg;
+	last_fg = TFT_globals->_fg;
 
-	_fg = TFT_YELLOW;
+	TFT_globals->_fg = TFT_YELLOW;
 
-	_bg = (color_t){ 64, 64, 64 };
+	TFT_globals->_bg = (color_t){ 64, 64, 64 };
 
-	TFT_setFont(DEFAULT_FONT, NULL);
+	TFT_setFont(&ESP32_TouchGUI1_Definition->TFT_globals, DEFAULT_FONT, NULL);
 
-	TFT_fillRect(ESP32_TouchGUI1_Definition,
+	TFT_fillRect(disp_handle,
+		TFT_globals,
 		1,
-		ESP32_TouchGUI1_Definition->_height-TFT_getfontheight()-8,
-		ESP32_TouchGUI1_Definition->_width-3,
-		TFT_getfontheight()+6,
-		_bg);
+		TFT_globals->_height - TFT_getfontheight() - 8,
+		TFT_globals->_width - 3,
+		TFT_getfontheight() + 6,
+		TFT_globals->_bg);
 
-	TFT_print(ESP32_TouchGUI1_Definition,
+	TFT_print(disp_handle,
+		TFT_globals,
 		tmp_buff,
 		RIGHT,//CENTER,
-		ESP32_TouchGUI1_Definition->_height-TFT_getfontheight()-5);
+		TFT_globals->_height - TFT_getfontheight()-5);
 
 	cfont = curr_font;
-	_fg = last_fg;
-	_bg = last_bg;
+	TFT_globals->_fg = last_fg;
+	TFT_globals->_bg = last_bg;
 
-	TFT_restoreClipWin();
+	TFT_restoreClipWin(TFT_globals);
   }
 
   return;
@@ -3945,7 +3970,8 @@ color2gs(color_t color)
 // Set display pixel at given coordinates to given color
 //------------------------------------------------------------------------
 void IRAM_ATTR 
-drawPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+drawPixel(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
 	int16_t x,
 	int16_t y,
 	color_t color,
@@ -4286,14 +4312,15 @@ send_data(ESP32_SPI_device_handle_t disp_handle,
 
 
 
-/*
+
 
 // Reads 'len' pixels/colors from the TFT's GRAM 'window'
 // 'buf' is an array of bytes with 1st byte reserved for reading 1 dummy byte
 // and the rest is actually an array of color_t values
 //--------------------------------------------------------------------------------------------
 int IRAM_ATTR 
-read_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+read_data(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
 	int x1,
 	int y1,
 	int x2,
@@ -4302,6 +4329,7 @@ read_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	uint8_t *buf,
 	uint8_t set_sp)
 {
+/*
   // get table of function callbacks provided & made accessible from stage 1 Module
   ESP32_SPI_ProvidedByModule_t* ESP32_SPI_provided_fn = (ESP32_SPI_ProvidedByModule_t*)
 	ESP32_TouchGUI1_Definition->ESP32_SPI_Definition->common.module->provided;
@@ -4342,7 +4370,8 @@ read_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 		// Restore spi clock if needed
 		if (max_rdclock < current_clock) ESP32_SPI_provided_fn->ESP32_SPI_spi_set_speedFn(ESP32_TouchGUI1_Definition->ESP32_SPI_Definition,  ESP32_TouchGUI1_Definition->disp_handle, current_clock);
 	}
-
+*/
+esp_err_t res = 0;
     return res;
 }
 
@@ -4352,13 +4381,15 @@ read_data(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 //-----------------------------------------------
 color_t 
 IRAM_ATTR 
-readPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
+readPixel(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
 	int16_t x,
 	int16_t y)
 {
+
     uint8_t color_buf[sizeof(color_t)+1] = {0};
 
-    read_data(ESP32_TouchGUI1_Definition, x, y, x+1, y+1, 1, color_buf, 1);
+//    read_data(ESP32_TouchGUI1_Definition, x, y, x+1, y+1, 1, color_buf, 1);
 
     color_t color;
 	color.r = color_buf[1];
@@ -4366,7 +4397,7 @@ readPixel(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 	color.b = color_buf[3];
 	return color;
 }
-
+/*
 
 
 // get 16-bit data from touch controller for specified type
@@ -4793,9 +4824,9 @@ _tft_setRotation(ESP32_SPI_device_handle_t disp_handle,
 // Initialize the display
 // ====================
 strTextMultiple_t*
-TFT_display_init(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
-	ESP32_SPI_device_handle_t disp_handle,
-	DisplayConfig_t display_config)
+TFT_display_init(ESP32_SPI_device_handle_t disp_handle,
+	TFTGlobals_t* TFT_globals,
+	DisplayConfig_t* display_config)
 {
   // for Fn response msg
   strTextMultiple_t* retMsg = SCDE_OK;
@@ -4837,7 +4868,7 @@ TFT_display_init(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
   #endif
 
   // get the display type
-  uint8_t tft_disp_type = ESP32_TouchGUI1_Definition->display_config.tft_disp_type;
+  uint8_t tft_disp_type = display_config->tft_disp_type;
 
 
 
@@ -4887,15 +4918,15 @@ TFT_display_init(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition,
 
   // set rotation, clear screen
 
-  _tft_setRotation(disp_handle, &ESP32_TouchGUI1_Definition->TFT_globals, PORTRAIT);
+  _tft_setRotation(disp_handle, TFT_globals, PORTRAIT);
 
-  TFT_pushColorRep(disp_handle, &ESP32_TouchGUI1_Definition->TFT_globals,
+  TFT_pushColorRep(disp_handle, TFT_globals,
 	0,
 	0,
-	ESP32_TouchGUI1_Definition->_width - 1,
-	ESP32_TouchGUI1_Definition->_height - 1,
+	TFT_globals->_width - 1,
+	TFT_globals->_height - 1,
 	(color_t){0,0,0},
-	(uint32_t)(ESP32_TouchGUI1_Definition->TFT_globals._height * ESP32_TouchGUI1_Definition->TFT_globals._width) );
+	(uint32_t)(TFT_globals->_height * TFT_globals->_width) );
 
   // enable backlight
   #if PIN_NUM_BCKL

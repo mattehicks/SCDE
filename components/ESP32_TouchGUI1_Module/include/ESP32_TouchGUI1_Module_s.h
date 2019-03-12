@@ -100,10 +100,10 @@ typedef struct ESP32_TouchGUI1_Definition_s {
 //  uint8_t gray_scale;
 
   // the display configuration
-  DisplayConfig_t display_config;
+  DisplayConfig_t* display_config;
 
   // globals for tft painting?
-  TFTGlobals_t TFT_globals;
+  TFTGlobals_t* TFT_globals;
 
   // Spi device configuration + handle - for display
   ESP32_SPI_device_interface_config_t disp_interface_config;

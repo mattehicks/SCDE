@@ -147,18 +147,16 @@ ESP32_TouchGUI1_Module.o: \
  /home/maikschulze/esp/SCDE/main/include/SCDE_s.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
- /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module_s.h \
- /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h \
  /home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/include/ESP32_SPI_Module_s.h \
+ /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/spi_struct.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/lldesc.h \
  /home/maikschulze/esp/esp-idf/components/esp32/include/rom/queue.h \
  /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/ringbuf.h \
- /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module.h \
- /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/stmpe610.h \
  /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/tft.h \
  /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module_s.h \
  /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module.h \
+ /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/stmpe610.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h \
  /home/maikschulze/esp/SCDE/components/WebIf_Module/include/Espfs.h \
@@ -462,11 +460,9 @@ ESP32_TouchGUI1_Module.o: \
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module.h:
 
-/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module_s.h:
+/home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/include/ESP32_SPI_Module_s.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_Module\ global\ types.h:
-
-/home/maikschulze/esp/SCDE/components/ESP32_SPI_Module/include/ESP32_SPI_Module_s.h:
 
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/spi_struct.h:
 
@@ -476,15 +472,13 @@ ESP32_TouchGUI1_Module.o: \
 
 /home/maikschulze/esp/esp-idf/components/freertos/include/freertos/ringbuf.h:
 
-/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module.h:
-
-/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/stmpe610.h:
-
 /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/tft.h:
 
 /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module_s.h:
 
 /home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/ESP32_TouchGUI1_Module.h:
+
+/home/maikschulze/esp/SCDE/components/ESP32_TouchGUI1_Module/include/stmpe610.h:
 
 /home/maikschulze/esp/SCDE/components/WebIf_Module/include/WebIf_EspFSStdFileTX.h:
 
