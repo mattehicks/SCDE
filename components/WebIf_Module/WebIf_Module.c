@@ -10460,7 +10460,7 @@ WebIf_DirectRead(Common_Definition_t* Common_Definition)
 		,NewWebIf_Definition->proto.tcp->remote_port);
 
   // assign an unique number
-  NewWebIf_Definition->common.nr = SCDERoot_at_WebIf_M->DevCount++;
+  NewWebIf_Definition->common.nr = SCDERoot_at_WebIf_M->device_count++;
 
   // make this definition temporary
 	NewWebIf_Definition->common.defCtrlRegA |= F_TEMPORARY;

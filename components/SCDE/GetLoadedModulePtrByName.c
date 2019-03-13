@@ -15,16 +15,16 @@
  * --------------------------------------------------------------------------------------------------
  */
 Module_t*
-GetLoadedModulePtrByName(const uint8_t *typeName
-		, const size_t typeNameLen)
+GetLoadedModulePtrByName(const uint8_t* p_type_name
+		, const size_t type_name_len)
 {
-  Module_t *Module;
+  Module_t* p_module;
 
-  STAILQ_FOREACH(Module, &SCDERoot.HeadModules, entries) {
+  STAILQ_FOREACH(p_module, &SCDERoot.HeadModules, entries) {
 
-	if ( (Module->provided->typeNameLen == typeNameLen) &&
-             (!strncasecmp((const char*) Module->provided->typeName,
-		 (const char*) typeName, typeNameLen)) ) {
+	if ( (p_module->provided->typeNameLen == type_name_len) &&
+             (!strncasecmp((const char*) p_module->provided->typeName,
+		 (const char*) p_type_name, type_name_len)) ) {
 /*
  		#if CORE_SCDE_DBG >= 7
   		LOGD("GetLoadedModulePtrByNameFn(%.*s), got loaded Module ptr.\n"
@@ -32,7 +32,7 @@ GetLoadedModulePtrByName(const uint8_t *typeName
 		  	,typeName);
  		#endif
 */
-		return Module;
+		return p_module;
 	}
   }
 /*
@@ -42,6 +42,7 @@ GetLoadedModulePtrByName(const uint8_t *typeName
 	,typeName);
   #endif
 */
+  // pointer for given Module (Type-Name) not found!
   return NULL;
 }
 

@@ -869,7 +869,7 @@ if (stateMimeString.characters)
 			if (stateValueString.length) {
 
 				// do not overwrite some states like -"opened", -"initialized"
-				if ( ( SCDERoot->globalCtrlRegA | F_INIT_DONE ) || 
+				if ( ( SCDERoot->global_control_register_a | F_INIT_DONE ) || 
 				     ( ( Common_Definition->stateLen == 3 ) && 
 				       ( strncmp((char*)Common_Definition->state, "???", 3 ) ) ) ) {
 

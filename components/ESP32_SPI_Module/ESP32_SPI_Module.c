@@ -636,11 +636,9 @@ ESP32_SPI_Define(Common_Definition_t* p_Common_Definition)
   SCDEFn_at_ESP32_SPI_M->Log3Fn(p_Common_Definition->name,
 	p_Common_Definition->nameLen,
 	5,
-	"DefineFn of Module '%.*s' is called to continue creation of Definition '%.*s' with args '%.*s'.",
+	"DefineFn is called (Module '%.*s'). Creating this Definition with args '%.*s'.",
 	p_ESP32_SPI_Definition->common.module->provided->typeNameLen,
 	p_ESP32_SPI_Definition->common.module->provided->typeName,
-	p_ESP32_SPI_Definition->common.nameLen,
-	p_ESP32_SPI_Definition->common.name,
 	p_ESP32_SPI_Definition->common.definitionLen,
 	p_ESP32_SPI_Definition->common.definition);
   #endif
@@ -994,26 +992,33 @@ ESP32_SPI_DirectWrite(
  * ------------------------------------------------------------------------------------------------
  */
 int //feedModuleTask
-ESP32_SPI_IdleCb(Common_Definition_t *Common_Definition)
+ESP32_SPI_IdleCb(Common_Definition_t* p_Common_Definition)
 {
 
   // make common ptr to modul specific ptr
-  ESP32_SPI_Definition_t* ESP32_SPI_Definition =
-		  (ESP32_SPI_Definition_t*) Common_Definition;
+  ESP32_SPI_Definition_t* p_ESP32_SPI_Definition =
+		  (ESP32_SPI_Definition_t*) p_Common_Definition;
 
-  #if ESP32_SPI_Module_DBG >= 5
-  printf("\n|ESP32_SPI_IdleCb, Def:%.*s>"
-	,ESP32_SPI_Definition->common.nameLen
-	,ESP32_SPI_Definition->common.name);
+  // for Fn response msg
+ // strTextMultiple_t* p_retMsg = SCDE_OK;
+
+// -------------------------------------------------------------------------------------------------
+
+  #if ESP32_TouchGUI1_Module_DBG >= 9
+  SCDEFn_at_ESP32_SPI_M->Log3Fn(p_Common_Definition->name,
+	p_Common_Definition->nameLen,
+	9,
+	"IdleCbFn is called (Module '%.*s').",
+	p_ESP32_SPI_Definition->common.module->provided->typeNameLen,
+	p_ESP32_SPI_Definition->common.module->provided->typeName);
   #endif
 
-// -------------------------------------------------------------------------------------------
-
+// ------------------------------------------------------------------------------------------------
 
 
 
   // set up next idle Callback
-  ESP32_SPI_Definition->common.Common_CtrlRegA |= F_WANTS_IDLE_TASK;
+  p_ESP32_SPI_Definition->common.Common_CtrlRegA |= F_WANTS_IDLE_TASK;
 
   return 0;
 
@@ -1252,11 +1257,9 @@ ESP32_SPI_Undefine(Common_Definition_t* p_Common_Definition)
   SCDEFn_at_ESP32_SPI_M->Log3Fn(p_Common_Definition->name,
 	p_Common_Definition->nameLen,
 	5,
-	"UndefineFn of Module '%.*s' is called to delete Definition '%.*s'.",
+	"UndefineFn is called (Module '%.*s'). Deleting this Definition.",
 	p_ESP32_SPI_Definition->common.module->provided->typeNameLen,
-	p_ESP32_SPI_Definition->common.module->provided->typeName,
-	p_ESP32_SPI_Definition->common.nameLen,
-	p_ESP32_SPI_Definition->common.name);
+	p_ESP32_SPI_Definition->common.module->provided->typeName);
   #endif
 
 // ------------------------------------------------------------------------------------------------

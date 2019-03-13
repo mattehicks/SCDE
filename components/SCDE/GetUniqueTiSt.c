@@ -26,11 +26,11 @@ GetUniqueTiSt(void)
   time(&nowTiSt);
 
   // if lastTiSt is smaller than nowTiSt -> lastTiSt is unique !
-  if (SCDERoot.lastTiSt < nowTiSt)
-	 SCDERoot.lastTiSt = nowTiSt;
+  if (SCDERoot.last_timestamp < nowTiSt)
+	 SCDERoot.last_timestamp = nowTiSt;
 
   // else lets make it unique by adding +1
-  else SCDERoot.lastTiSt++;
+  else SCDERoot.last_timestamp++;
 
-  return SCDERoot.lastTiSt;
+  return SCDERoot.last_timestamp;
 }

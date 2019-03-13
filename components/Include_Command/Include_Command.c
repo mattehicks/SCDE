@@ -264,14 +264,14 @@ Include_CommandFn (const uint8_t *argsText
   char delimiter[] = "\r\n";
  
   // backup old configuration file, for reconstruction
-  strText_t oldCfgFile = SCDERoot->currCfgFile;
+  strText_t oldCfgFile = SCDERoot->current_config_file;
 
   // set temporary to filename from include arg
-  SCDERoot->currCfgFile.strText = fileNameText;
-  SCDERoot->currCfgFile.strTextLen = fileNameTextLen;
+  SCDERoot->current_config_file.strText = fileNameText;
+  SCDERoot->current_config_file.strTextLen = fileNameTextLen;
 
   // clear, reset the global quit-flag
-  SCDERoot->globalCtrlRegA &= ~(F_RECEIVED_QUIT);
+  SCDERoot->global_control_register_a &= ~(F_RECEIVED_QUIT);
 
   // to build one complete command row, start empty
   strTextMultiple_t rebuiltCmdRow;
@@ -365,7 +365,7 @@ Include_CommandFn (const uint8_t *argsText
 					rebuiltCmdRow.strText = NULL;
 
 					// break, if the global quit-flag is set
-					if (SCDERoot->globalCtrlRegA & F_RECEIVED_QUIT) break;
+					if (SCDERoot->global_control_register_a & F_RECEIVED_QUIT) break;
 				}
 
 				// ending with //? -> more to come
@@ -384,7 +384,7 @@ Include_CommandFn (const uint8_t *argsText
   if (rebuiltCmdRow.strText) free(rebuiltCmdRow.strText);
 
   // rebuilt current cfg file
-  SCDERoot->currCfgFile = oldCfgFile;
+  SCDERoot->current_config_file = oldCfgFile;
 
   // close file
   fclose(f);

@@ -654,49 +654,48 @@ struct bulkUpdateReadings2_s {
  *   loaded module itself (defineFn).
  */
 struct Common_Definition_s {
+  STAILQ_ENTRY(Common_Definition_s) entries;			// Link to next Definition
  
-  STAILQ_HEAD (stailhead8, common_Attribute_s) headAttributes;	// Link to assigned Attributes
+  STAILQ_HEAD (stailhead8, common_Attribute_s) headAttributes; //head_attribute	// Link to assigned Attributes
 
-  uint32_t *link;		//link to next struct
+ //? uint32_t* link;						//link to next struct
 
-  STAILQ_ENTRY(Common_Definition_s) entries; // Link to next Definition
+  // strText_t name; NEU
+  uint8_t* name; //p_name;					// Ptr to the Name string (assigned by users declaration - in allocated mem)
+  size_t nameLen; //name_len
 
-// strText_t name; NEU
-  uint8_t *name;//nameText;	// Ptr to the Name string (assigned by users declaration - in allocated mem)
-  size_t nameLen;//nameTextLen
+  Module_t* module;						// Ptr to the Module_t (assigned when module is loaded)
 
-  Module_t *module;		// Ptr to the Module_t (assigned when module is loaded)
-
-// the 'STATE' reading		// the STATE reading is obligatory for every definition !
-// strText_t state; NEU
-  uint8_t *state;//stateValue	// Ptr to allocated memory filled with oneliner-text describing its STATE
-  size_t stateLen;//stateValueLen;// and the length of the oneliner-text
-  time_t stateTiSt;		// SCDE has also a time-stamp for STATE
+// the 'STATE' reading						// the STATE reading is obligatory for every definition !
+// strText_t reading_state_value; NEU
+  uint8_t* state; //p_reading_state_value				// Ptr to allocated memory filled with oneliner-text describing its STATE
+  size_t stateLen; //reading_state_value_len;			// and the length of the oneliner-text
+  time_t stateTiSt; //reading_state_timestamp			// SCDE has also a timestamp for STATE
 
 // strText_t definition; NEU
-  uint8_t *definition;//definitionText	// Ptr to allocated memory filled with users definition string
-  size_t definitionLen;//definitionTextLen
+  uint8_t* definition;// p_definition				// Ptr to allocated memory filled with users definition string
+  size_t definitionLen;// definition_len
 
-  uint32_t nr;			// unique sequential number assigned to definition
+  uint32_t nr;							// unique sequential number assigned to definition
 
-  int fd;			// FileDescriptor. Used by selectlist / readyfnlist (-1 = not assigned)
+  int fd;							// FileDescriptor. Used by selectlist / readyfnlist (-1 = not assigned)
 
-  int Common_CtrlRegA;		// Common Control Reg A (enum Common_CtrlRegA from WEBIF.h)
+  int Common_CtrlRegA; //common_control_register_a		// Common Control Reg A (enum Common_CtrlRegA from WEBIF.h)
 
-  int defCtrlRegA;		// Definition Control Reg A (enum Common_DefCtrlRegA)
+  int defCtrlRegA; //common_definition_control_register_a	// Definition Control Reg A (enum Common_DefCtrlRegA)
 
-  xSemaphoreHandle def_mux; // 
+  xSemaphoreHandle def_mux; //definition_mux 
 
   bulkUpdateReadings_t *bulkUpdateReadings;
-  STAILQ_HEAD (stailhead6, reading_s) headReadings;	// Link to assigned Attributes
+  STAILQ_HEAD (stailhead6, reading_s) headReadings;//head_readings	// Link to assigned Attributes
 
   bulkUpdateReadings2_t *bulkUpdateReadings2;
-  STAILQ_HEAD (stailhead7, reading2_s) headReadings2;	// Link to assigned Attributes
+  STAILQ_HEAD (stailhead7, reading2_s) headReadings2;//head_readings2	// Link to assigned Attributes
 
   // Pointer to ActiveResourcesDataA, set at init time.
-  void* ActiveResourcesDataA;
+  void* ActiveResourcesDataA; //active_resource_data_a
   // Pointer to ActiveResourcesDataB, set at init time.
-  void* ActiveResourcesDataB;
+  void* ActiveResourcesDataB; //active_resource_data_b
 
   /* todo
 #Special values in %defs:
@@ -709,7 +708,7 @@ struct Common_Definition_s {
 };
 
 // Information Flags, stored in Common_Definition_s - for Definition Control
-enum Common_DefCtrlRegA {
+enum Common_DefCtrlRegA { //common_definition_control_register_a
 //hinzu CDCRA_Flag
     F_TEMPORARY		= 1 << 0	// indicates:Definition is temporary e.g. WEBIf connection
   , F_VOLATILE		= 1 << 1	// indicates:Definition is volatile -> saved to statefile
@@ -717,7 +716,7 @@ enum Common_DefCtrlRegA {
 };
 
 // Information Flags, stored in Common_Definition_s - for Connection Control
-enum Common_CtrlRegA {
+enum Common_CtrlRegA {	//common_control_register_a
 //hinzu CCRA_Flag
     F_WANTS_WRITE		= 1 << 0	// indicates: define (FD) wants to write data (call DirectWriteFn), if ready
   , F_WANTS_IDLE_TASK		= 1 << 1	// indicates: define (FD) wants idle-task to be called (call IdleTaskFn)
@@ -782,14 +781,14 @@ typedef struct ProvidedByCommand_s ProvidedByCommand_t;
  */
 struct ProvidedByCommand_s {
 
-// strText_t nameString; NEU			// name text of command
-  uint8_t commandNameText[32];			// name text of command
-  size_t commandNameTextLen;
+// strText_t nameString; NEU name_string		// name text of command
+  uint8_t commandNameText[32];	//command_name_text		// name text of command
+  size_t commandNameTextLen; //command_name_text_len
 
   InitializeCommandFn_t InitializeCommandFn;	// returns module information (module_s)
   CommandFn_t CommandFn;			// the command Fn
-  const xString_t helpString;			// help text
-  const xString_t helpDetailString;		// detailed help text
+  const xString_t helpString; //help_string	// help text
+  const xString_t helpDetailString; //help_detail_string	// detailed help text
 };
 
 //--------------------------------------------------------------------------------------------------
@@ -801,7 +800,7 @@ struct ProvidedByCommand_s {
  */
 struct Command_s {
   STAILQ_ENTRY (Command_s) entries;		// link to next loaded command
-  ProvidedByCommand_t *provided;		// ptr to provided-by-command Info
+  ProvidedByCommand_t* provided; // p_provided		// ptr to provided-by-command Info
 };
 
 
@@ -822,16 +821,16 @@ struct attribute_s { //Attribute_s
 
   STAILQ_ENTRY(attribute_s) entries;	// link to next attribute
 
-//  Common_Definition_t *assignedDef; NEU	
-  Common_Definition_t *attrAssignedDef;	// ptr to the definition the attribute is assigned to
+//  Common_Definition_t* assignedDef; NEU definition	
+  Common_Definition_t* attrAssignedDef;	//p_definition // ptr to the definition the attribute is assigned to
 
-// strText_t name; NEU
-  uint8_t *attrNameText;		// ptr to the attribute name text (text in allocated mem!)
-  size_t   attrNameTextLen;
+// strText_t name; NEU name
+  uint8_t* attrNameText; //p_name_text		// ptr to the attribute name text (text in allocated mem!)
+  size_t   attrNameTextLen; //name_text_len
 
-// strText_t value; NEU
-  uint8_t *attrValText;			// ptr to the attribute value text (text in allocated mem!)
-  size_t   attrValTextLen;
+// strText_t value; NEU value
+  uint8_t* attrValText; //p_value_text		// ptr to the attribute value text (text in allocated mem!)
+  size_t   attrValTextLen; //value_len
 };
 
 
@@ -845,15 +844,15 @@ struct attribute_s { //Attribute_s
  * - Smart Connected Devices Engine - root data
  */
 struct SCDERoot_s {
-  SCDEFn_t* SCDEFn;					// SCDEFn (Functions / callbacks) for faster operation
+  SCDEFn_t* SCDEFn; //p_scde_fn		// SCDEFn (Functions / callbacks) for faster operation
 //use vars qw($auth_refresh);
 //use vars qw($cmdFromAnalyze);   # used by the warnings-sub
 //use vars qw($cvsid);            # used in 98_version.pm
-  strText_t currCfgFile;
-  uint32_t DevCount;		// used to generate unique sequential number in definition = highest
-  uint32_t FeatureLevel;				// for version management
-  uint32_t globalCtrlRegA;				// global flags A
-  time_t lastTiSt;		// to check if requested TiSt is unique (higher than last time)
+  strText_t current_config_file;	//current_config_file
+  uint32_t device_count;		// Is used to store Definitions in the right order. 1st=1
+  uint32_t feature_level;		// for version management
+  uint32_t global_control_register_a;	// -> 'enum global_control_register_a'
+  time_t last_timestamp;		// to check if requested TiSt is unique (higher than last time)
 //use vars qw($fhem_started);     # used for uptime calculation
 //use vars qw($init_done);        #
 //use vars qw($internal_data);    # FileLog/DbLog -> SVG data transport
@@ -863,15 +862,15 @@ struct SCDERoot_s {
 //use vars qw($reread_active);
 //use vars qw($selectTimestamp);  # used to check last select exit timestamp
 //use vars qw($winService);       # the Windows Service object
-  STAILQ_HEAD (stailhead3, attribute_s) headAttributes;	// Link to assigned attributes
-  STAILQ_HEAD (stailhead4, Command_s) headCommands;	// Link to available commands
+  STAILQ_HEAD (stailhead3, attribute_s) headAttributes;//head_attribute	// Link to assigned attributes
+  STAILQ_HEAD (stailhead4, Command_s) headCommands;//head_command	// Link to available commands
 //use vars qw(%data);             # Hash for user data
 //use vars qw(%defaultattr);      # Default attributes, used by FHEM2FHEM
-  STAILQ_HEAD (stailhead2, Common_Definition_s) HeadCommon_Definitions;// Link to Definitions (device, button, ...)
+  STAILQ_HEAD (stailhead2, Common_Definition_s) HeadCommon_Definitions;//head_common_definition// Link to Definitions (device, button, ...)
 //use vars qw(%inform);           # Used by telnet_ActivateInform
 //use vars qw(%intAt);            # Internal at timer hash, global for benchmark
 //use vars qw(%logInform);        # Used by FHEMWEB/Event-Monitor
-  STAILQ_HEAD (stailhead1, Module_s) HeadModules;	// Link to loaded Modules
+  STAILQ_HEAD (stailhead1, Module_s) HeadModules;//head_module	// Link to loaded Modules
 //use vars qw(%ntfyHash);         # hash of devices needed to be notified.
 //use vars qw(%oldvalue);         # Old values, see commandref.html
 //use vars qw(%readyfnlist);      # devices which want a "readyfn"
@@ -882,10 +881,10 @@ struct SCDERoot_s {
 //use vars qw(@structChangeHist); # Contains the last 10 structural changes
 };
 
-// global - information flags - for Connection Control
-enum Global_CtrlRegA
+// global control register - some global flags - e.g. for Connection Control
+enum global_control_register_a
 {
-// GCRA_Flag ändern
+//NEU: GCRA_F lag ändern
     F_RECEIVED_QUIT		= 1 << 0	// indicates: quit the include processing
   , F_INIT_DONE			= 1 << 1	// indicates: the SCDE has fiinished the init process
   , GCRA_F_weitere		= 1 << 2	//   

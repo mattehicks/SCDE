@@ -370,7 +370,7 @@ Save_CommandFn (const uint8_t *argsText
 
 
   // loop through definitions unique number to process them in order of creation
-  for (uint32_t i = 0 ; i < SCDERoot->DevCount ; i++) {
+  for (uint32_t i = 0 ; i < SCDERoot->device_count ; i++) {
 
 
 

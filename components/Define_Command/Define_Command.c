@@ -1,6 +1,6 @@
 ﻿/* #################################################################################################
  *
- *  Function: Define Command for SCDE (Smart Connected Device Engine)
+ *  Function: Define Command to create Definitions - for SCDE (Smart Connected Device Engine)
  *
  *  ESP 8266EX & ESP32 SOC Activities ...
  *  Copyright by EcSUHA
@@ -34,10 +34,10 @@
 // --------------------------------------------------------------------------------------------------
 
 // make data root locally available
-static SCDERoot_t* SCDERoot;
+static SCDERoot_t* p_SCDERoot;
 
 // make locally available from data-root: the SCDEFn (Functions / callbacks) for operation
-static SCDEFn_t* SCDEFn;
+static SCDEFn_t* p_SCDEFn;
 
 // --------------------------------------------------------------------------------------------------
 
@@ -72,29 +72,29 @@ ProvidedByCommand_t Define_ProvidedByCommand = {
 
 
 /* --------------------------------------------------------------------------------------------------
- *  FName: Define_Initialize
- *  Desc: Initializion of SCDE Function Callback of an new loaded command
- *  Info: Stores Command-Information (Function Callbacks) to SCDE-Root
- *  Para: SCDERoot_t* SCDERootptr -> ptr to SCDE Data Root
+ *  FName: Define - Initialize Command Funktion
+ *  Desc: Initializion of an (new loaded) SCDE-Command. Init p_SCDERoot and p_SCDE Function Callbacks.
+ *  Info: Called only once befor use!
+ *  Para: SCDERoot_t* p_SCDERoot -> ptr to SCDE Data Root
  *  Rets: ? unused
  *--------------------------------------------------------------------------------------------------
  */
-int 
-Define_InitializeCommandFn(SCDERoot_t* SCDERootptr)
+int ICACHE_FLASH_ATTR
+Define_InitializeCommandFn(SCDERoot_t* p_SCDERoot_from_core)
 {
   // make data root locally available
-  SCDERoot = SCDERootptr;
+  p_SCDERoot = p_SCDERoot_from_core;
 
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
-  SCDEFn = SCDERootptr->SCDEFn;
+  p_SCDEFn = p_SCDERoot->SCDEFn;
 
 // --------------------------------------------------------------------------------------------------
 
   #if Define_Command_DBG >= 3
-  SCDEFn->Log3Fn(Define_ProvidedByCommand.commandNameText
-	  ,Define_ProvidedByCommand.commandNameTextLen
-	  ,3
-	  ,"InitializeFn called. Now useable.");
+  p_SCDEFn->Log3Fn(Define_ProvidedByCommand.commandNameText,
+	  Define_ProvidedByCommand.commandNameTextLen,
+	  3,
+	  "InitializeFn called. Now useable.");
   #endif
 
 // --------------------------------------------------------------------------------------------------
@@ -104,31 +104,29 @@ Define_InitializeCommandFn(SCDERoot_t* SCDERootptr)
 
 
 
-
-
 /* --------------------------------------------------------------------------------------------------
- *  FName: CommandDefine
- *  Desc: Creates a new common Define with name "Name", and Module "Type-Name", prevills some common
- *        values and calls Modules DefFn with for further module-specific initialization.
- *  Info: 'Name' is custom definition name. Allowed: [azAZ09._], uint8_t[32]
- *        'Type-Name' is module name
- *        'Definition ...' is custom and passed to modules DefineFn, stored in Definition->Definition
- *  Para: const uint8_t *args  -> prt to space seperated Define text string "Name Type-Name Definition ..."
- *        const size_t argsLen -> length of args
+ *  FName: Define - The Command main Fn
+ *  Desc: Creates a new Definiton of Module "Type-Name" with custom Name "Name", prevills some common
+ *        values and calls Modules DefineFn, to continue further module-specific initialization.
+ *  Info: 'Name' is custom Definition name. Allowed: [azAZ09._], uint8_t[32]
+ *        'Type-Name' is Module name
+ *        'Definition' is custom, stored in Definition->Definition, and passed to modules DefineFn
+ *  Para: const uint8_t* p_args  -> space seperated Define text string "Name Type-Name Definition ..."
+ *        const size_t args_len -> length of args
  *  Rets: struct headRetMsgMultiple_s -> STAILQ head of multiple retMsg, if NULL -> no retMsg-entry
  * --------------------------------------------------------------------------------------------------
  */
 struct headRetMsgMultiple_s ICACHE_FLASH_ATTR
-Define_CommandFn (const uint8_t *args,
-		  const size_t argsLen)
+Define_CommandFn (const uint8_t* p_args,
+		  const size_t args_len)
 {
   #if Define_Command_DBG >= 7
-  SCDEFn->Log3Fn(Define_ProvidedByCommand.commandNameText
-	,Define_ProvidedByCommand.commandNameTextLen
-	,7
-	,"CommandFn called with args '%.*s'"
-	,argsLen
-	,args);
+  p_SCDEFn->Log3Fn(Define_ProvidedByCommand.commandNameText,
+	Define_ProvidedByCommand.commandNameTextLen,
+	7,
+	"CommandFn called with args '%.*s'",
+	args_len,
+	p_args);
   #endif
 
 // --------------------------------------------------------------------------------------------------
@@ -140,197 +138,271 @@ Define_CommandFn (const uint8_t *args,
   STAILQ_INIT(&headRetMsgMultiple);
 
   // set start of possible Name
-  const uint8_t *name = args;
+  const uint8_t* p_name = p_args;
 
   // set start of possible Type-Name
-  const uint8_t *typeName = args;
+  const uint8_t* p_type_name = p_args;
 
   // a seek-counter
   int i = 0;
 
   // seek to next space !'\32'
-  while( (i < argsLen) && (*typeName != ' ') ) {i++; typeName++;}
+  while( ( i < args_len ) && ( *p_type_name != ' ' ) ) { i++ ; p_type_name++ ; }
 
   // length of Name
-  size_t nameLen = i;
+  size_t name_len = i;
 
   // seek to start position of Type-Name '\32'
-  while( (i < argsLen) && (*typeName == ' ') ) {i++; typeName++;}
+  while( ( i < args_len ) && ( *p_type_name == ' ' ) ) { i++ ; p_type_name++ ; }
 
   // set start of possible Definition
-  const uint8_t *definition = typeName;
+  const uint8_t* p_definition = p_type_name;
 
   // a 2nd seek-counter
   int j = 0;
 
   // seek to next space !'\32'
-  while( (i < argsLen) && (*definition != ' ') ) {i++, j++; definition++;}
+  while( ( i < args_len ) && ( *p_definition != ' ' ) ) { i++ , j++ ; p_definition++ ; }
 
   // length of Type-Name
-  size_t typeNameLen = j;
+  size_t type_name_len = j;
 
   // start position of Definition
-  while( (i < argsLen) && (*definition == ' ') ) {i++; definition++;}
+  while( ( i < args_len ) && ( *p_definition == ' ' ) ) { i++ ; p_definition++ ; }
 
   // length of Type-Name
-  size_t definitionLen = argsLen - i;
+  size_t definition_len = args_len - i;
+
+// --------------------------------------------------------------------------------------------------
 
   // veryfy lengths > 0, definition 0 allowed
-  if ( (nameLen) == 0 || (typeNameLen == 0) ) {
+  if ( ( name_len == 0 ) || (type_name_len == 0) ) {
 
-    // alloc mem for retMsg
-    strTextMultiple_t *retMsg =
-      malloc(sizeof(strTextMultiple_t));
+	// alloc mem for retMsg
+	strTextMultiple_t* p_retMsg =
+		malloc(sizeof(strTextMultiple_t));
 
-    // response with error text
-    retMsg->strTextLen = asprintf(&retMsg->strText
-      ,"Could not interpret command '%.*s'! Usage: Define <name> <type-name> <type dependent arguments>"
-      ,argsLen
-      ,args);
+	// response with error text
+	p_retMsg->strTextLen = asprintf(&p_retMsg->strText,
+		"Could not interpret command '%.*s'! Usage: Define <Name> <Module> <type dependent arguments>",
+		args_len, p_args);
 
-    // insert retMsg in stail-queue
-    STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+	// insert retMsg in stail-queue
+	STAILQ_INSERT_TAIL(&headRetMsgMultiple, p_retMsg, entries);
 
-    // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-    return headRetMsgMultiple;
+	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+	return headRetMsgMultiple;
   }
+
+// --------------------------------------------------------------------------------------------------
 
  /*
    if(Defined($defs{$name}));
    asprintf(&RetMsg, "%s already Defined, Define it first\n", name);
    return RetMsg;
+*/
 
+// --------------------------------------------------------------------------------------------------
+/*
    if($name !~ m/^[a-z0-9.:_]*$/i);
    asprintf(&RetMsg, "Invalid characters in name (not A-Za-z0-9._): %s\n", name);
    return RetMsg;
   */
-
+// --------------------------------------------------------------------------------------------------
 
    // get the module ptr by name
-   Module_t* Module = SCDEFn->GetLoadedModulePtrByNameFn(typeName,
- 	typeNameLen);
+   Module_t* p_module = p_SCDEFn->GetLoadedModulePtrByNameFn(p_type_name,
+ 	type_name_len);
 
   // do we need to reload Module?
-  if (!Module) // NOT FUNCTIONAL!
-	Module = SCDEFn->CommandReloadModuleFn(typeName, typeNameLen);
+  if (!p_module)
+	p_module = p_SCDEFn->CommandReloadModuleFn(p_type_name, type_name_len);
+
+  // still no Module -> we don't have it, error!
+  if (!p_module) {
+
+	// alloc mem for retMsg
+	strTextMultiple_t* p_retMsg =
+		malloc(sizeof(strTextMultiple_t));
+
+	// response with error text
+	p_retMsg->strTextLen = asprintf(&p_retMsg->strText,
+		"Could not find a Module '%.*s'!",
+		type_name_len,
+		p_type_name);
+
+	// insert retMsg in stail-queue
+	STAILQ_INSERT_TAIL(&headRetMsgMultiple, p_retMsg, entries);
+
+	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+	return headRetMsgMultiple;
+  }
+
+// --------------------------------------------------------------------------------------------------
+
+  // can we get ptr to an Definition with requested Name? -> same Name is not allowed, error!
+  if (p_SCDEFn->GetDefinitionPtrByNameFn(name_len, p_name)) {
+
+	// alloc mem for retMsg
+	strTextMultiple_t* p_retMsg =
+		malloc(sizeof(strTextMultiple_t));
+
+	// response with error text
+	p_retMsg->strTextLen = asprintf(&p_retMsg->strText,
+		"An Definition called '%.*s' is already in use!",
+		name_len,
+		p_name);
+
+	// insert retMsg in stail-queue
+	STAILQ_INSERT_TAIL(&headRetMsgMultiple, p_retMsg, entries);
+
+	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
+	return headRetMsgMultiple;
+  }
+
+// --------------------------------------------------------------------------------------------------
 
   // alloc mem for modul specific definition structure (Common_Definition_t + X)
-  Common_Definition_t* NewCommon_Definition
-	= malloc(Module->provided->SizeOfDefinition);
+  Common_Definition_t* p_new_common_definition
+	= malloc(p_module->provided->SizeOfDefinition);
 
   // zero the struct
-  memset(NewCommon_Definition, 0, Module->provided->SizeOfDefinition);
+  memset(p_new_common_definition, 0, p_module->provided->SizeOfDefinition);
+
+// --------------------------------------------------------------------------------------------------
 
   // prepare default fields in definition
 
   // create semaphore for definition access
-  NewCommon_Definition->def_mux = xSemaphoreCreateMutex();
+  p_new_common_definition->def_mux = xSemaphoreCreateMutex();
 
   // copy ptr to associated module
-  NewCommon_Definition->module = Module;
+  p_new_common_definition->module = p_module;
 
-  // copy custom name
-  NewCommon_Definition->name = malloc(nameLen);
-  memcpy(NewCommon_Definition->name, name, nameLen);
-  NewCommon_Definition->nameLen = nameLen;
+  // copy custom name (NAME LENGTH IS > 0 !)
+  p_new_common_definition->name = malloc(name_len);
+  memcpy(p_new_common_definition->name, p_name, name_len);
+  p_new_common_definition->nameLen = name_len;
+
+  // store define_args string (the args) in Defp->Definition. ITS ALLOWED TO HAVE NO DEFINITION!!
+  if (definition_len) {
+	p_new_common_definition->definition = malloc(definition_len);
+	memcpy(p_new_common_definition->definition, p_definition, definition_len);
+	p_new_common_definition->definitionLen = definition_len;
+  }
+
+  // assign an Unique Number
+  p_new_common_definition->nr = p_SCDERoot->device_count++;
+
+  // init readings (stailq), now empty
+  STAILQ_INIT(&p_new_common_definition->headReadings);
+
+  // set initial state '???'
+  p_new_common_definition->stateLen =
+	asprintf((char**)&p_new_common_definition->state, "???");
+
+// --------------------------------------------------------------------------------------------------
+
+  // xx mark definition as under construction?
 
   // store new definition to SCDE-Root
-  STAILQ_INSERT_HEAD(&SCDERoot->HeadCommon_Definitions
-	,NewCommon_Definition
-	,entries);
+  STAILQ_INSERT_HEAD(&p_SCDERoot->HeadCommon_Definitions,
+	p_new_common_definition, entries);
 
-  printf("Defined Name:%.*s TypeName:%.*s\n"
-    ,NewCommon_Definition->nameLen
-    ,NewCommon_Definition->name
-    ,NewCommon_Definition->module->provided->typeNameLen
-    ,NewCommon_Definition->module->provided->typeName);
+// --------------------------------------------------------------------------------------------------
 
-  // store Definition string in Defp->Definition
-  NewCommon_Definition->definition = malloc(definitionLen);
-  memcpy(NewCommon_Definition->definition, definition, definitionLen);
-  NewCommon_Definition->definitionLen = definitionLen;
+  // DefineFn NOT assigned by module ? -> retMsg + VETO!
+  if (!p_module->provided->DefineFn) {
 
-  // assign an unique number
-  NewCommon_Definition->nr = SCDERoot->DevCount++;
+	// alloc mem for retMsg
+	strTextMultiple_t* p_retMsg =
+		 malloc(sizeof(strTextMultiple_t));
 
-  // do we need initial state? or NULL ? store initial state
-  NewCommon_Definition->stateLen =
-    asprintf((char**)&NewCommon_Definition->state, "???");
+	// response with error text
+	p_retMsg->strTextLen = asprintf(&p_retMsg->strText
+		,"DefineFn not implemented in Module of Type '%.*s'. Veto!"
+		,type_name_len
+		,p_type_name);
 
-  // init stailq readings
-  STAILQ_INIT(&NewCommon_Definition->headReadings);
+	// insert retMsg in stail-queue
+	STAILQ_INSERT_TAIL(&headRetMsgMultiple, p_retMsg, entries);
+  }
 
-  // DefineFn assigned by module ?
-  if (Module->provided->DefineFn) {
+  // DefineFn assigned by module.  -> retMsg forces VETO!
+  else {
 
 	#if Define_Command_DBG >= 7
-	SCDEFn->Log3Fn(Define_ProvidedByCommand.commandNameText,
+	p_SCDEFn->Log3Fn(Define_ProvidedByCommand.commandNameText,
 		Define_ProvidedByCommand.commandNameTextLen,
 		7,
 		"Calling DefineFn of Module '%.*s' for construction of new Definition '%.*s' "
 		"using arguments '%.*s'. (Nr.:%d, Initial State:%.*s)",
-		NewCommon_Definition->module->provided->typeNameLen,
-		NewCommon_Definition->module->provided->typeName,
-		NewCommon_Definition->nameLen,
-		NewCommon_Definition->name,
-		NewCommon_Definition->definitionLen,
-      		NewCommon_Definition->definition,
-    		NewCommon_Definition->nr,
-		NewCommon_Definition->stateLen,
-     		NewCommon_Definition->state);
+		p_new_common_definition->module->provided->typeNameLen,
+		p_new_common_definition->module->provided->typeName,
+		p_new_common_definition->nameLen,
+		p_new_common_definition->name,
+		p_new_common_definition->definitionLen,
+      		p_new_common_definition->definition,
+    		p_new_common_definition->nr,
+		p_new_common_definition->stateLen,
+     		p_new_common_definition->state);
 		#endif
 
-
 	// call Modules DefineFn. Interpret retMsgMultipleStringSLTQE != NULL as veto !
-	strTextMultiple_t *retMsg = 
-		Module->provided->DefineFn(NewCommon_Definition);
+	strTextMultiple_t* p_retMsg = 
+		p_module->provided->DefineFn(p_new_common_definition);
 
 	// got an error msg?
-	if (retMsg) {
+	if (p_retMsg) {
 
 		// insert retMsg in stail-queue
-		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+		STAILQ_INSERT_TAIL(&headRetMsgMultiple, p_retMsg, entries);
 	}
   }
-	
-/*
-  // DefineFn NOT assigned by module
-  else	{
 
-	// alloc mem for retMsg
-	strTextMultiple_t *retMsg =
-		 malloc(sizeof(strTextMultiple_t));
+// --------------------------------------------------------------------------------------------------
 
-	// response with error -> Type doesnt support DefineFn
-	retMsg->strTextLen = asprintf(&retMsg->strText
-		,"Error! Could not ADD Key=Value attributes '%.*s' to define '%.*s'! Type '%.*s' does not support it!"
-		,kvArgsLen
-		,kvArgs
-		,Common_Definition->nameLen
-		,Common_Definition->name
-		,Common_Definition->module->provided->typeNameLen
-		,Common_Definition->module->provided->typeName);
+  // no retMsg elements in the stailq? no veto!
+  if (STAILQ_EMPTY(&headRetMsgMultiple)) {
 
-		// insert retMsg in stail-queue
-		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-  }
-*/
-
-  // do we have an error msg? Interpret it as veto!
-  if (!STAILQ_EMPTY(&headRetMsgMultiple)) {
-
-//	printf("Got error from DefineFN %s \n"
-//			  ,retMsg.strText);
-
-    printf("Got error from DefineFN! deinit here!\n");
-
-	//Log 1, "Define $def: $ret";
-//	DefineDefinition(Name);	//Define $defs{$name};                            # Veto
-//	DefineAttribute(Name);	//Define $attr{$name};
-
+	// OK return STAILQ head, stores multiple retMsg
+	return headRetMsgMultiple;
   }
 
+// --------------------------------------------------------------------------------------------------
+
+  // An veto occured! Cancel the Definition-Creation! We have a ret Msg in the STAILQ
+
+  #if Define_Command_DBG >= 7
+  p_SCDEFn->Log3Fn(Define_ProvidedByCommand.commandNameText,
+	Define_ProvidedByCommand.commandNameTextLen,
+	7,
+	"An veto occured while creating an Definition with args '%.*s'. Check logged msg.",
+	args_len,
+	p_args);
+  #endif
+
+  // free the initial state '???' - may be NULL now!
+  if (p_new_common_definition->state) free(p_new_common_definition->state);
+
+  // check for Readings here, and free if any
+  // xxx
+
+  // Attributes ??
+
+  // free the Definition string - may be NULL now!
+  if (p_new_common_definition->definition) free(p_new_common_definition->definition);
+
+  // free the custom Name - can NOT be NULL now!
+  free(p_new_common_definition->name);
+
+  // delete the semaphore for definition access - is ALWAYS there !
+  vSemaphoreDelete(p_new_common_definition->def_mux);
+
+  // finally free the Definition
+  free(p_new_common_definition);
+
+// --------------------------------------------------------------------------------------------------
 
   // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
   return headRetMsgMultiple;

@@ -27,8 +27,8 @@ GetTiSt(void)
   time(&nowTiSt);
 
   // only return uniqueTiSt when it is ahead of nowTiSt
-  if (SCDERoot.lastTiSt > nowTiSt)
-	nowTiSt = SCDERoot.lastTiSt;
+  if (SCDERoot.last_timestamp > nowTiSt)
+	nowTiSt = SCDERoot.last_timestamp;
 
   return nowTiSt;
 }

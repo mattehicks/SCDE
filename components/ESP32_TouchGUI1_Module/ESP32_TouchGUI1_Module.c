@@ -520,7 +520,7 @@ static const char* I2C_TAG = "i2c";
 void 
 lcd_spi_pre_transfer_callback(ESP32_SPI_transaction_t* t)
 {
-  printf("pre........\r\n");
+//  printf("pre........\r\n");
   int dc = (int) t->user;
   gpio_set_level(PIN_NUM_DC, dc);
 }
@@ -528,7 +528,7 @@ lcd_spi_pre_transfer_callback(ESP32_SPI_transaction_t* t)
 void 
 lcd_spi_post_transfer_callback(ESP32_SPI_transaction_t* t)
 {
- printf("post.......\r\n");
+// printf("post.......\r\n");
 //    int dc = (int) t->user;
 //    gpio_set_level(PIN_NUM_DC, dc);
 }
@@ -583,11 +583,9 @@ ESP32_TouchGUI1_Define(Common_Definition_t* p_Common_Definition)
   SCDEFn_at_ESP32_TouchGUI1_M->Log3Fn(p_Common_Definition->name,
 	p_Common_Definition->nameLen,
 	5,
-	"DefineFn of Module '%.*s' is called to continue creation of Definition '%.*s' with args '%.*s'.",
+	"DefineFn is called (Module '%.*s'). Creating this Definition with args '%.*s'.",
 	p_ESP32_TouchGUI1_Definition->common.module->provided->typeNameLen,
 	p_ESP32_TouchGUI1_Definition->common.module->provided->typeName,
-	p_ESP32_TouchGUI1_Definition->common.nameLen,
-	p_ESP32_TouchGUI1_Definition->common.name,
 	p_ESP32_TouchGUI1_Definition->common.definitionLen,
 	p_ESP32_TouchGUI1_Definition->common.definition);
   #endif
@@ -857,45 +855,58 @@ GREY_SCALE
   memset(p_TFT_globals, 0, sizeof(TFTGlobals_t));
 
   // initial fill ...
+printf("maik1%p",p_TFT_globals);
 
-  p_TFT_globals = &(TFTGlobals_t) {
-	.orientation = LANDSCAPE,	// screen orientation
-	.font_rotate = 0,		// font rotation
-	.font_transparent = 0,
-	.font_forceFixed = 0,
-	.text_wrap = 0,			// character wrapping to new line
-	._fg = {  0, 255,   0},		// forderground color
-	._bg = {  0,   0,   0},		// backgroung color
-	.image_debug = 0,		// for debug output in image extraction 
-	._angleOffset = DEFAULT_ANGLE_OFFSET, 	// ?
-	.TFT_X = 0,
-	.TFT_Y = 0,
-	.tp_calx = 7472920,
-	.tp_caly = 122224794,
+ // p_TFT_globals = &(TFTGlobals_t) {
+ 	p_TFT_globals->orientation = LANDSCAPE;	// screen orientation
+	p_TFT_globals->font_rotate = 0;		// font rotation
+	p_TFT_globals->font_transparent = 0;
+	p_TFT_globals->font_forceFixed = 0;
+	p_TFT_globals->text_wrap = 0;			// character wrapping to new line
+//	p_TFT_globals->_fg = {  .r = 0, .g = 255,  .b =  0};		// forderground color
+	p_TFT_globals->_fg.r = 0;
+	p_TFT_globals->_fg.g = 255;
+	p_TFT_globals->_fg.b = 0;
 
-	.dispWin = {			// all drawings are clipped to 'dispWin'
+//	p_TFT_globals->_bg = {  0,   0,   0};		// backgroung color
+	p_TFT_globals->_bg.r = 0;
+	p_TFT_globals->_bg.g = 0;
+	p_TFT_globals->_bg.b = 0;
+
+	p_TFT_globals->image_debug = 0;	// for debug output in image extraction 
+	p_TFT_globals->_angleOffset = DEFAULT_ANGLE_OFFSET; 	// ?
+	p_TFT_globals->TFT_X = 0;
+	p_TFT_globals->TFT_Y = 0;
+	p_TFT_globals->tp_calx = 7472920;
+	p_TFT_globals->tp_caly = 122224794;
+
+	/*p_TFT_globals->dispWin = {			// all drawings are clipped to 'dispWin'
 		.x1 = 0,
 		.y1 = 0,
 		.x2 = DEFAULT_TFT_DISPLAY_WIDTH,
 		.y2 = DEFAULT_TFT_DISPLAY_HEIGHT
-	},
+	};*/
+	p_TFT_globals->dispWin.x1 = 0;
+	p_TFT_globals->dispWin.y1 = 0;
+	p_TFT_globals->dispWin.x2 = DEFAULT_TFT_DISPLAY_WIDTH;
+	p_TFT_globals->dispWin.y2 = DEFAULT_TFT_DISPLAY_HEIGHT;
 
-	.font_buffered_char = 1,
-	.font_line_space = 0,
+	p_TFT_globals->font_buffered_char = 1;
+	p_TFT_globals->font_line_space = 0;
 
 	// display dimension of hardware screen
-	._width = DEFAULT_TFT_DISPLAY_WIDTH,
-	._height = DEFAULT_TFT_DISPLAY_HEIGHT,
+	p_TFT_globals->_width = DEFAULT_TFT_DISPLAY_WIDTH;
+	p_TFT_globals->_height = DEFAULT_TFT_DISPLAY_HEIGHT;
 
 	// Converts colors to grayscale if set to 1
-	.gray_scale = 0,
+	p_TFT_globals->gray_scale = 0;
 
 	// stores the selected userfont
-	.userfont = NULL,
-	.TFT_OFFSET = 0,
-	._arcAngleMax = DEFAULT_ARC_ANGLE_MAX,
-};
-
+	p_TFT_globals->userfont = NULL;
+	p_TFT_globals->TFT_OFFSET = 0;
+	p_TFT_globals->_arcAngleMax = DEFAULT_ARC_ANGLE_MAX;
+//};
+printf("maik2%p",p_TFT_globals);
 // ------------------------------------------------------------------------------------------------
 
   // alloc mem for the SPI device interface config (ESP32_SPI_device_interface_config_t)
@@ -921,7 +932,7 @@ GREY_SCALE
 	.spics_io_num = PIN_NUM_CS,             	// CS pin
 	.queue_size = 7,                       		// We want to be able to queue 7 transactions at a time
 	.pre_cb = lcd_spi_pre_transfer_callback,	//Specify pre-transfer callback to handle D/C line
-	.post_cb = lcd_spi_post_transfer_callback,
+//	.post_cb = lcd_spi_post_transfer_callback,
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -972,7 +983,7 @@ GREY_SCALE
 
   TFT_setGammaCurve(p_disp_handle, DEFAULT_GAMMA_CURVE);
 
-  TFT_setRotation(p_disp_handle, p_ESP32_TouchGUI1_Definition->p_TFT_globals, PORTRAIT);
+  TFT_setRotation(p_disp_handle, p_TFT_globals, PORTRAIT);
 
   TFT_setFont(p_TFT_globals, DEFAULT_FONT, NULL);
 
@@ -1394,7 +1405,7 @@ Redraw_Time(ESP32_TouchGUI1_Definition_t* p_ESP32_TouchGUI1_Definition)
 
 	p_TFT_globals->_bg = (color_t){ 64, 64, 64 };
 
-	TFT_setFont(p_ESP32_TouchGUI1_Definition->p_TFT_globals, DEFAULT_FONT, NULL);
+	TFT_setFont(p_TFT_globals, DEFAULT_FONT, NULL);
 
 	TFT_fillRect(p_disp_handle,
 		p_TFT_globals,
@@ -1455,9 +1466,7 @@ ESP32_TouchGUI1_IdleCb(Common_Definition_t *p_Common_Definition)
   SCDEFn_at_ESP32_TouchGUI1_M->Log3Fn(p_Common_Definition->name,
 	p_Common_Definition->nameLen,
 	9,
-	"IdleCbFn for Definition '%.*s' (Module '%.*s') is called.",
-	p_ESP32_TouchGUI1_Definition->common.nameLen,
-	p_ESP32_TouchGUI1_Definition->common.name,
+	"IdleCbFn is called (Module '%.*s').",
 	p_ESP32_TouchGUI1_Definition->common.module->provided->typeNameLen,
 	p_ESP32_TouchGUI1_Definition->common.module->provided->typeName);
   #endif
@@ -1720,11 +1729,9 @@ ESP32_TouchGUI1_Undefine(Common_Definition_t* p_Common_Definition)
   SCDEFn_at_ESP32_TouchGUI1_M->Log3Fn(p_Common_Definition->name,
 	p_Common_Definition->nameLen,
 	5,
-	"UndefineFn of Module '%.*s' is called to delete Definition '%.*s'.",
+	"UndefineFn is called (Module '%.*s'). Deleting this Definition.",
 	p_ESP32_TouchGUI1_Definition->common.module->provided->typeNameLen,
-	p_ESP32_TouchGUI1_Definition->common.module->provided->typeName,
-	p_ESP32_TouchGUI1_Definition->common.nameLen,
-	p_ESP32_TouchGUI1_Definition->common.name);
+	p_ESP32_TouchGUI1_Definition->common.module->provided->typeName);
   #endif
 
 // ------------------------------------------------------------------------------------------------
@@ -4064,6 +4071,7 @@ drawPixel(ESP32_SPI_device_handle_t disp_handle,
 	color_t color,
 	uint8_t sel)
 {
+printf("drawpixel");
 /*
 	if (!(ESP32_TouchGUI1_Definition->disp_handle->cfg.flags & LB_SPI_DEVICE_HALFDUPLEX)) return;
 
@@ -4203,7 +4211,7 @@ _direct_send(ESP32_TouchGUI1_Definition_t* ESP32_TouchGUI1_Definition, color_t *
 static void IRAM_ATTR 
 _TFT_pushColorRep(ESP32_SPI_device_handle_t disp_handle,
 	TFTGlobals_t* TFT_globals,
-	color_t *color,
+	color_t* color,
 	uint32_t len, // len in pixel! (3 bytes?)
 	uint8_t rep,
 	uint8_t wait)
@@ -4218,6 +4226,10 @@ _TFT_pushColorRep(ESP32_SPI_device_handle_t disp_handle,
 
 	// ESP32_SPI_transfer_only_data(ESP32_TouchGUI1_Definition->disp_handle, int8_t TFT_RAMWR)
 	// _direct_send(ESP32_TouchGUI1_Definition, color, len, rep);
+//printf("short");
+	ESP32_SPI_transfer_only_data(disp_handle,
+		(uint8_t*) color,
+		len * 3);
   }
 
   // false: we send len color data
@@ -4231,7 +4243,7 @@ _TFT_pushColorRep(ESP32_SPI_device_handle_t disp_handle,
 			color[n] = color2gs(color[n]);
 		}
 	}
-
+//printf("long");
 	ESP32_SPI_transfer_only_data(disp_handle,
 		(uint8_t*) color,
 		len * 3);
@@ -4241,7 +4253,7 @@ _TFT_pushColorRep(ESP32_SPI_device_handle_t disp_handle,
 
   // Repeat color, more than 512 bits total
   else {
-
+printf("other");
 	color_t _color;
 	uint32_t buf_colors;
 	int buf_bytes, to_send;
