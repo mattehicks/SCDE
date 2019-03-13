@@ -501,7 +501,7 @@ bool ESP32_SPI_common_dma_chan_free(int dma_chan);
  *         - ESP_ERR_INVALID_ARG   if parameter is invalid
  *         - ESP_OK                on success
  */
-strTextMultiple_t* ESP32_SPI_common_bus_initialize_io(ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_host_device_t host, const ESP32_SPI_bus_config_t *bus_config, int dma_chan, uint32_t flags, uint32_t *flags_o);
+strTextMultiple_t* ESP32_SPI_common_bus_initialize_io(ESP32_SPI_Definition_t* ESP32_SPI_Definition, ESP32_SPI_host_device_t host, const ESP32_SPI_bus_config_t* bus_config, int dma_chan, uint32_t flags, uint32_t *flags_o);
 
 /**
  * @brief Free the IO used by a SPI peripheral
