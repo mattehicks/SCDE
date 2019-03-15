@@ -21,6 +21,9 @@ InitSCDERoot(void) {
 
   STAILQ_INIT(&SCDERoot.headAttributes);
 
+//new:
+  LIST_INIT(&SCDERoot.head_attr_name);
+
   STAILQ_INIT(&SCDERoot.headCommands);
 
   STAILQ_INIT(&SCDERoot.HeadCommon_Definitions);

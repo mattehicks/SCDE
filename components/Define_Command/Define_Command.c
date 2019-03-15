@@ -1,6 +1,7 @@
 ﻿/* #################################################################################################
  *
- *  Function: Define Command to create Definitions - for SCDE (Smart Connected Device Engine)
+ *  Function: Define Command - for SCDE (Smart Connected Device Engine)
+ *            Creates an Definition, which is then called Device
  *
  *  ESP 8266EX & ESP32 SOC Activities ...
  *  Copyright by EcSUHA
@@ -53,7 +54,7 @@ static SCDEFn_t* p_SCDEFn;
 
 // Command Help
 const uint8_t Define_helpText[] = 
-  "Usage: Define <name> <type> <type specific options>, to define a device";
+  "Usage: Define <definition-name> <module-name> <type dependent arguments>, to define a device";
 // CommandHelp (detailed)
 const uint8_t Define_helpDetailText[] = 
   "Usagebwrebwerb: Define <name> <type> <options>, to Define a device";
@@ -68,14 +69,13 @@ ProvidedByCommand_t Define_ProvidedByCommand = {
   { &Define_helpDetailText, sizeof(Define_helpDetailText) }
 };
 
-//(const uint8_t *) "Usage: Define <name> <type> <options>, to Define a device",57);	// CommandHelp, Len
 
 
 /* --------------------------------------------------------------------------------------------------
  *  FName: Define - Initialize Command Funktion
  *  Desc: Initializion of an (new loaded) SCDE-Command. Init p_SCDERoot and p_SCDE Function Callbacks.
  *  Info: Called only once befor use!
- *  Para: SCDERoot_t* p_SCDERoot -> ptr to SCDE Data Root
+ *  Para: SCDERoot_t* p_SCDERoot_from_core -> ptr to SCDE Data Root from SCDE-Core
  *  Rets: ? unused
  *--------------------------------------------------------------------------------------------------
  */
@@ -108,12 +108,12 @@ Define_InitializeCommandFn(SCDERoot_t* p_SCDERoot_from_core)
  *  FName: Define - The Command main Fn
  *  Desc: Creates a new Definiton of Module "Type-Name" with custom Name "Name", prevills some common
  *        values and calls Modules DefineFn, to continue further module-specific initialization.
- *  Info: 'Name' is custom Definition name. Allowed: [azAZ09._], uint8_t[32]
- *        'Type-Name' is Module name
- *        'Definition' is custom, stored in Definition->Definition, and passed to modules DefineFn
- *  Para: const uint8_t* p_args  -> space seperated Define text string "Name Type-Name Definition ..."
- *        const size_t args_len -> length of args
- *  Rets: struct headRetMsgMultiple_s -> STAILQ head of multiple retMsg, if NULL -> no retMsg-entry
+ *  Info: 'Definition-Name' is custom Definition name. Allowed: [azAZ09._], uint8_t[32]
+ *        'Module-Name' is Module name
+ *        'Definition-Args' is custom, stored in Definition->Definition, and passed to modules DefineFn
+ *  Para: const uint8_t* p_args  -> space seperated command args text string "definition_name module_name definition_args"
+ *        const size_t args_len -> command args text length
+ *  Rets: struct headRetMsgMultiple_s -> STAILQ head of multiple retMsg, if NULL -> no retMsg
  * --------------------------------------------------------------------------------------------------
  */
 struct headRetMsgMultiple_s ICACHE_FLASH_ATTR
@@ -137,46 +137,71 @@ Define_CommandFn (const uint8_t* p_args,
   // initialize the queue
   STAILQ_INIT(&headRetMsgMultiple);
 
-  // set start of possible Name
-  const uint8_t* p_name = p_args;
+// --------------------------------------------------------------------------------------------------
+	
+  // set * to start of possible definition-name text (seek-start-pos)
+  const uint8_t* p_definition_name = p_args;
 
-  // set start of possible Type-Name
-  const uint8_t* p_type_name = p_args;
-
-  // a seek-counter
+  // the total seek-counter
   int i = 0;
+	
+  // seek * to start of definition-name text ('\32' after space)
+  while( ( i < args_len ) && ( *p_definition_name == ' ' ) ) { i++ ; p_definition_name++ ; }
 
-  // seek to next space !'\32'
-  while( ( i < args_len ) && ( *p_type_name != ' ' ) ) { i++ ; p_type_name++ ; }
+  // @1
 
-  // length of Name
-  size_t name_len = i;
+  // set * to start of possible module-name text (seek-start-pos)
+  const uint8_t* p_module_name = p_definition_name;
 
-  // seek to start position of Type-Name '\32'
-  while( ( i < args_len ) && ( *p_type_name == ' ' ) ) { i++ ; p_type_name++ ; }
-
-  // set start of possible Definition
-  const uint8_t* p_definition = p_type_name;
-
-  // a 2nd seek-counter
+  // an element seek-counter
   int j = 0;
 
-  // seek to next space !'\32'
-  while( ( i < args_len ) && ( *p_definition != ' ' ) ) { i++ , j++ ; p_definition++ ; }
+  // seek to next space '\32'
+  while( ( i < args_len ) && ( *p_module_name != ' ' ) ) { i++, j++ ; p_module_name++ ; }
 
-  // length of Type-Name
-  size_t type_name_len = j;
+  // length of def-spec text determined
+  size_t definition_name_len = j;
 
-  // start position of Definition
-  while( ( i < args_len ) && ( *p_definition == ' ' ) ) { i++ ; p_definition++ ; }
+  // seek * to start of module-name text ('\32' after space)
+  while( ( i < args_len ) && ( *p_module_name == ' ' ) ) { i++ ; p_module_name++ ; }
 
-  // length of Type-Name
-  size_t definition_len = args_len - i;
+  // @2
 
-// --------------------------------------------------------------------------------------------------
+  // set * to start of possible definition-args text (seek-start-pos)
+  const uint8_t* p_definition_args = p_module_name;
+
+  // clear element seek-counter
+  j = 0;
+
+  // seek to next space '\32'
+  while( ( i < args_len ) && ( *p_definition_args != ' ' ) ) { i++ , j++ ; p_definition_args++ ; }
+
+  // length of attr-Name-Text determined
+  size_t module_name_len = j;
+
+  // seek * to start of definition-args text ('\32' after space)
+  while( ( i < args_len ) && ( *p_definition_args == ' ' ) ) { i++ ; p_definition_args++ ; }
+
+  // @3
+	
+  // set start * of possible 'end of text' seek-start-pos
+  const uint8_t* p_end_of_text = p_definition_args;
+	
+  // clear element seek-counter
+  j = 0;
+
+  // seek to next space '\32'
+  while( ( i < args_len ) && ( *p_end_of_text != ' ' ) ) { i++ , j++ ; p_end_of_text++ ; }
+
+  // length of definition-args text determined
+  size_t definition_args_len = j;
+
+  // @ 'p_end_of_text' ! No further processing ...
+
+// -------------------------------------------------------------------------------------------------
 
   // veryfy lengths > 0, definition 0 allowed
-  if ( ( name_len == 0 ) || (type_name_len == 0) ) {
+  if ( ( definition_name_len == 0 ) || ( module_name_len == 0) ) {
 
 	// alloc mem for retMsg
 	strTextMultiple_t* p_retMsg =
@@ -184,7 +209,7 @@ Define_CommandFn (const uint8_t* p_args,
 
 	// response with error text
 	p_retMsg->strTextLen = asprintf(&p_retMsg->strText,
-		"Could not interpret command '%.*s'! Usage: Define <Name> <Module> <type dependent arguments>",
+		"Could not interpret command '%.*s'! Usage: Define <definition-name> <module-name> <type dependent arguments>",
 		args_len, p_args);
 
 	// insert retMsg in stail-queue
@@ -211,12 +236,12 @@ Define_CommandFn (const uint8_t* p_args,
 // --------------------------------------------------------------------------------------------------
 
    // get the module ptr by name
-   Module_t* p_module = p_SCDEFn->GetLoadedModulePtrByNameFn(p_type_name,
- 	type_name_len);
+   Module_t* p_module = p_SCDEFn->GetLoadedModulePtrByNameFn(p_module_name,
+ 	module_name_len);
 
   // do we need to reload Module?
   if (!p_module)
-	p_module = p_SCDEFn->CommandReloadModuleFn(p_type_name, type_name_len);
+	p_module = p_SCDEFn->CommandReloadModuleFn(p_module_name, module_name_len);
 
   // still no Module -> we don't have it, error!
   if (!p_module) {
@@ -228,8 +253,8 @@ Define_CommandFn (const uint8_t* p_args,
 	// response with error text
 	p_retMsg->strTextLen = asprintf(&p_retMsg->strText,
 		"Could not find a Module '%.*s'!",
-		type_name_len,
-		p_type_name);
+		module_name_len,
+		p_module_name);
 
 	// insert retMsg in stail-queue
 	STAILQ_INSERT_TAIL(&headRetMsgMultiple, p_retMsg, entries);
@@ -241,7 +266,7 @@ Define_CommandFn (const uint8_t* p_args,
 // --------------------------------------------------------------------------------------------------
 
   // can we get ptr to an Definition with requested Name? -> same Name is not allowed, error!
-  if (p_SCDEFn->GetDefinitionPtrByNameFn(name_len, p_name)) {
+  if (p_SCDEFn->GetDefinitionPtrByNameFn(definition_name_len, p_definition_name)) {
 
 	// alloc mem for retMsg
 	strTextMultiple_t* p_retMsg =
@@ -250,8 +275,8 @@ Define_CommandFn (const uint8_t* p_args,
 	// response with error text
 	p_retMsg->strTextLen = asprintf(&p_retMsg->strText,
 		"An Definition called '%.*s' is already in use!",
-		name_len,
-		p_name);
+		definition_name_len,
+		p_definition_name);
 
 	// insert retMsg in stail-queue
 	STAILQ_INSERT_TAIL(&headRetMsgMultiple, p_retMsg, entries);
@@ -279,16 +304,19 @@ Define_CommandFn (const uint8_t* p_args,
   // copy ptr to associated module
   p_new_common_definition->module = p_module;
 
+  // init the list for 'attr_value's
+  LIST_INIT(&p_new_common_definition->head_attr_value);
+
   // copy custom name (NAME LENGTH IS > 0 !)
-  p_new_common_definition->name = malloc(name_len);
-  memcpy(p_new_common_definition->name, p_name, name_len);
-  p_new_common_definition->nameLen = name_len;
+  p_new_common_definition->name = malloc(definition_name_len);
+  memcpy(p_new_common_definition->name, p_definition_name, definition_name_len);
+  p_new_common_definition->nameLen = definition_name_len;
 
   // store define_args string (the args) in Defp->Definition. ITS ALLOWED TO HAVE NO DEFINITION!!
-  if (definition_len) {
-	p_new_common_definition->definition = malloc(definition_len);
-	memcpy(p_new_common_definition->definition, p_definition, definition_len);
-	p_new_common_definition->definitionLen = definition_len;
+  if (definition_args_len) {
+	p_new_common_definition->definition = malloc(definition_args_len);
+	memcpy(p_new_common_definition->definition, p_definition_args, definition_args_len);
+	p_new_common_definition->definitionLen = definition_args_len;
   }
 
   // assign an Unique Number
@@ -321,8 +349,8 @@ Define_CommandFn (const uint8_t* p_args,
 	// response with error text
 	p_retMsg->strTextLen = asprintf(&p_retMsg->strText
 		,"DefineFn not implemented in Module of Type '%.*s'. Veto!"
-		,type_name_len
-		,p_type_name);
+		,module_name_len
+		,p_module_name);
 
 	// insert retMsg in stail-queue
 	STAILQ_INSERT_TAIL(&headRetMsgMultiple, p_retMsg, entries);

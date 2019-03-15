@@ -57,9 +57,47 @@ typedef struct Common_StageXCHG_s Common_StageXCHG_t;
  * typedefs for string storage and processing
  */
 
+
 // -------------------------------------------------------------------------------------------------
 
-// xString_t holds one string. Length information is included (because the string is not zero terminated)
+
+// String_t holds one string. Characters are at ptr in allocated memory. Length information is included
+//  (! the characters are not zero terminated !)
+typedef struct String_s String_t;
+
+/*
+ * String_s (struct)
+ * Holds one string (ptr to characters-array (not zero terminated) and the length of this array)
+ */
+struct String_s {
+  uint8_t* p_char;		// typically ptr to allocated memory filled with an character-array
+  size_t len;			// length of the not zero terminated character-array
+};
+
+
+// -------------------------------------------------------------------------------------------------
+
+
+// Entry_String_t to hold multiple xString_t strings (in an singly linked tail queue)
+typedef struct Entry_String_s Entry_String_t;
+
+/*
+ * Entry_String_s (struct) 
+ * is an singly linked tail queue entry. It stores one String_t string
+ * it is used when storing multiple string elements in an singly tail linked queue.
+ */
+struct Entry_String_s {
+  STAILQ_ENTRY(Entry_String_s) entries;		// link to next element of the singly linked tail queue
+  String_t string;				// the string of this element
+};
+
+// Constructor for the singly linked tail queue (head), which can hold linked string entries
+STAILQ_HEAD(Head_String_s, Entry_String_s);
+
+
+// -------------------------------------------------------------------------------------------------
+
+// OBSOLETE: use String_t
 typedef struct xString_s xString_t;
 
 /*
@@ -89,7 +127,7 @@ struct strText_s {
 
 // -------------------------------------------------------------------------------------------------
 
-// xMultipleString_t to hold multiple xString_t strings (in an singly linked tail queue)
+// OBSOLETE: use  Entry_String_t
 typedef struct xMultipleStringSLTQE_s xMultipleStringSLTQE_t;
 
 /*
@@ -237,6 +275,9 @@ typedef struct headRetMsgMultiple_s (*GetDefAndAttrFn_t) (Common_Definition_t *C
 //
 typedef Common_Definition_t* (*GetDefinitionPtrByNameFn_t) (const size_t definitionNameLen, const uint8_t *definitionName);
 
+// Returns a STAILQ head that stores entries of all 'dev_spec' matching definitions
+typedef struct Head_Definitions_s (*Get_Definitions_That_Match_DefSpec_String_Fn_t) (const String_t dev_spec);
+
 //
 typedef Module_t* (*GetLoadedModulePtrByNameFn_t)(const uint8_t *typeName, const size_t typeNameLen);
 
@@ -311,6 +352,7 @@ typedef struct SCDEFn_s {
   GetAllReadingsFn_t GetAllReadingsFn;                     // returns all readings of an definition
   GetDefAndAttrFn_t GetDefAndAttrFn;                       //
   GetDefinitionPtrByNameFn_t GetDefinitionPtrByNameFn;     //
+  Get_Definitions_That_Match_DefSpec_String_Fn_t Get_Definitions_That_Match_DefSpec_String_Fn;
   GetLoadedModulePtrByNameFn_t GetLoadedModulePtrByNameFn; //
   GetTiStFn_t GetTiStFn;                                   // returns current SCDE Time Stamp
   GetUniqueTiStFn_t GetUniqueTiStFn;			   // returns an UNIQUE SCDE Time Stamp
@@ -656,7 +698,10 @@ struct bulkUpdateReadings2_s {
 struct Common_Definition_s {
   STAILQ_ENTRY(Common_Definition_s) entries;			// Link to next Definition
  
-  STAILQ_HEAD (stailhead8, common_Attribute_s) headAttributes; //head_attribute	// Link to assigned Attributes
+  STAILQ_HEAD (stailhead8, common_Attribute_s) headAttributes;	//p_head_attribute	// Link to assigned Attributes
+
+//neu:
+  LIST_HEAD (Head_Attr_Value_s, Entry_Attr_Value_s) head_attr_value;	// List of assigned / in use attr_names
 
  //? uint32_t* link;						//link to next struct
 
@@ -676,9 +721,11 @@ struct Common_Definition_s {
   uint8_t* definition;// p_definition				// Ptr to allocated memory filled with users definition string
   size_t definitionLen;// definition_len
 
-  uint32_t nr;							// unique sequential number assigned to definition
+  uint32_t nr;							// An unique sequential number assigned to definition
+								// to rebuild /save in the order of definition-creation
 
-  int fd;							// FileDescriptor. Used by selectlist / readyfnlist (-1 = not assigned)
+  int fd;							// FileDescriptor. Used by selectlist / readyfnlist 
+								// (-1 = not assigned)
 
   int Common_CtrlRegA; //common_control_register_a		// Common Control Reg A (enum Common_CtrlRegA from WEBIF.h)
 
@@ -839,6 +886,81 @@ struct attribute_s { //Attribute_s
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// -------------------------------------------------------------------------------------------------
+
+// Entry_Definitions_s to hold the result of ...multiple xString_t strings (in an singly linked tail queue)
+typedef struct Entry_Definitions_s Entry_Definitions_t;
+
+/*
+ * Entry_Definitions_s (struct) 
+ * - is an singly linked tail queue entry and stores the link to one Common_Definition_t
+ * it is used when storing multiple strings (in an singly tail linked queue)
+ */
+struct Entry_Definitions_s {
+  STAILQ_ENTRY(Entry_Definitions_s) entries;	// link to next element of the singly linked tail queue
+  Common_Definition_t* p_entry_definition;	// the definition of this element
+};
+
+/*
+ * Constructor for the singly linked tail queue (head), which can hold multiple linked strings
+ * SLTQ can be used for an FIFO queue by adding entries at the tail and fetching entries from the head
+ * SLTQ is inefficient when removing arbitrary elements
+ */
+STAILQ_HEAD(Head_Definitions_s, Entry_Definitions_s);
+
+
+// -------------------------------------------------------------------------------------------------
+
+
+// Entry_Attr_Name_t holds the name of an assigned attribute (attr_name). (linked list from queue.h)
+typedef struct Entry_Attr_Name_s Entry_Attr_Name_t;
+
+/*
+ * Entry_Attr_Name_s (struct)
+ * - holds the name of an assigned attribute (attr_name). (linked list from queue.h)
+ */
+struct Entry_Attr_Name_s {
+  LIST_ENTRY(Entry_Attr_Name_s) entries;		// links to next list entries
+  String_t attr_name;					// an assigned Attribute Name
+};
+
+
+// -------------------------------------------------------------------------------------------------
+
+
+// Entry_Attr_Value_t holds assigned attribute-values. (linked list from queue.h)
+typedef struct Entry_Attr_Value_s Entry_Attr_Value_t;
+
+/*
+ * Entry_Attr_Value_s (struct)
+ * - holds assigned attribute-values. (linked list from queue.h)
+ */
+struct Entry_Attr_Value_s {
+  LIST_ENTRY(Entry_Attr_Value_s) entries;	// links to next list entries
+  Common_Definition_t* p_entry_definition;	// ptr to the definition-entry the attribute is assigned to
+  Entry_Attr_Name_t* p_entry_attr_name;		// ptr to the attribute-name-entry the attribute is assigned to
+  String_t attr_value;				// the assigned value MAY BE NULL IF NO VALUE!
+};
+
+
+// -------------------------------------------------------------------------------------------------
+
+
 /* 
  * SCDERoot (struct)
  * - Smart Connected Devices Engine - root data
@@ -879,6 +1001,8 @@ struct SCDERoot_s {
 //use vars qw(@authenticate);     # List of authentication devices
 //use vars qw(@authorize);        # List of authorization devices
 //use vars qw(@structChangeHist); # Contains the last 10 structural changes
+
+  LIST_HEAD (Head_Attr_Name_s, Entry_Attr_Name_s) head_attr_name;	// List of assigned attr_names
 };
 
 // global control register - some global flags - e.g. for Connection Control

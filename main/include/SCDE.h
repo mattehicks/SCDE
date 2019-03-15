@@ -69,6 +69,9 @@ struct headRetMsgMultiple_s GetDefAndAttr(Common_Definition_t *Common_Definition
 //
 Common_Definition_t* GetDefinitionPtrByName(const size_t definitionNameLen, const uint8_t *definitionName);
 
+// Returns a STAILQ head that stores entries of all 'dev_spec' matching definitions
+struct Head_Definitions_s Get_Definitions_That_Match_DefSpec_String(const String_t dev_spec);
+
 //
 Module_t* GetLoadedModulePtrByName(const uint8_t *typeName, const size_t typeNameLen);
 

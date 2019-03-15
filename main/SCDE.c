@@ -171,6 +171,7 @@ SCDEFn_t SCDEFn = {
   ,GetAllReadings
   ,GetDefAndAttr
   ,GetDefinitionPtrByName
+  ,Get_Definitions_That_Match_DefSpec_String
   ,GetLoadedModulePtrByName
   ,GetTiSt
   ,GetUniqueTiSt

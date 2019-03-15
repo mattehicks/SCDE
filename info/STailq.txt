@@ -1,0 +1,104 @@
+    Singly-linked tail queues
+     A singly-linked tail queue is headed by a structure defined by the
+     STAILQ_HEAD macro.  This structure contains a pair of pointers, one to
+     the first element in the tail queue and the other to the last element
+     in the tail queue.  The elements are singly linked for minimum space
+     and pointer manipulation overhead at the expense of O(n) removal for
+     arbitrary elements.  New elements can be added to the tail queue after
+     an existing element, at the head of the tail queue, or at the end of
+     the tail queue.  A STAILQ_HEAD structure is declared as follows:
+
+           STAILQ_HEAD(HEADNAME, TYPE) head;
+
+     where HEADNAME is the name of the structure to be defined, and TYPE is
+     the type of the elements to be linked into the tail queue.  A pointer
+     to the head of the tail queue can later be declared as:
+
+           struct HEADNAME *headp;
+
+     (The names head and headp are user selectable.)
+
+     The macro STAILQ_HEAD_INITIALIZER evaluates to an initializer for the
+     tail queue head.
+
+     The macro STAILQ_CONCAT concatenates the tail queue headed by head2
+     onto the end of the one headed by head1 removing all entries from the
+     former.
+
+     The macro STAILQ_EMPTY evaluates to true if there are no items on the
+     tail queue.
+
+     The macro STAILQ_ENTRY declares a structure that connects the elements
+     in the tail queue.
+
+     The macro STAILQ_FIRST returns the first item on the tail queue or NULL
+     if the tail queue is empty.
+
+     The macro STAILQ_FOREACH traverses the tail queue referenced by head in
+     the forward direction, assigning each element in turn to var.
+
+     The macro STAILQ_INIT initializes the tail queue referenced by head.
+
+     The macro STAILQ_INSERT_HEAD inserts the new element elm at the head of
+     the tail queue.
+
+     The macro STAILQ_INSERT_TAIL inserts the new element elm at the end of
+     the tail queue.
+
+     The macro STAILQ_INSERT_AFTER inserts the new element elm after the
+     element listelm.
+
+     The macro STAILQ_NEXT returns the next item on the tail queue, or NULL
+     this item is the last.
+
+     The macro STAILQ_REMOVE_HEAD removes the element at the head of the
+     tail queue.  For optimum efficiency, elements being removed from the
+     head of the tail queue should use this macro explicitly rather than the
+     generic STAILQ_REMOVE macro.
+
+     The macro STAILQ_REMOVE removes the element elm from the tail queue.
+
+   Singly-linked tail queue example
+     STAILQ_HEAD(stailhead, entry) head =
+         STAILQ_HEAD_INITIALIZER(head);
+     struct stailhead *headp;                /* Singly-linked tail queue head. */
+     struct entry {
+             ...
+             STAILQ_ENTRY(entry) entries;    /* Tail queue. */
+             ...
+     } *n1, *n2, *n3, *np;
+
+     STAILQ_INIT(&head);                     /* Initialize the queue. */
+
+     n1 = malloc(sizeof(struct entry));      /* Insert at the head. */
+     STAILQ_INSERT_HEAD(&head, n1, entries);
+
+     n1 = malloc(sizeof(struct entry));      /* Insert at the tail. */
+     STAILQ_INSERT_TAIL(&head, n1, entries);
+
+     n2 = malloc(sizeof(struct entry));      /* Insert after. */
+     STAILQ_INSERT_AFTER(&head, n1, n2, entries);
+                                             /* Deletion. */
+     STAILQ_REMOVE(&head, n2, entry, entries);
+     free(n2);
+                                             /* Deletion from the head. */
+     n3 = STAILQ_FIRST(&head);
+     STAILQ_REMOVE_HEAD(&head, entries);
+     free(n3);
+                                             /* Forward traversal. */
+     STAILQ_FOREACH(np, &head, entries)
+             np-> ...
+                                             /* TailQ Deletion. */
+     while (!STAILQ_EMPTY(&head)) {
+             n1 = STAILQ_FIRST(&head);
+             STAILQ_REMOVE_HEAD(&head, entries);
+             free(n1);
+     }
+                                             /* Faster TailQ Deletion. */
+     n1 = STAILQ_FIRST(&head);
+     while (n1 != NULL) {
+             n2 = STAILQ_NEXT(n1, entries);
+             free(n1);
+             n1 = n2;
+     }
+     STAILQ_INIT(&head);

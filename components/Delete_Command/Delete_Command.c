@@ -1,6 +1,7 @@
 ﻿/* #################################################################################################
  *
- *  Function: Delete Command to destroy Definitions - for SCDE (Smart Connected Device Engine)
+ *  Function: Delete Command - for SCDE (Smart Connected Device Engine)
+ *            To delete Definitions
  *
  *  ESP 8266EX & ESP32 SOC Activities ...
  *  Copyright by EcSUHA
@@ -53,7 +54,7 @@ static SCDEFn_t* p_SCDEFn;
 
 // Command Help
 const uint8_t Delete_helpText[] = 
-  "Usage: delete <name>, to delete a device";
+  "Usage: Delete <definition-name> [<type dependent arguments>], to delete a device";
 // CommandHelp (detailed)
 const uint8_t Delete_helpDetailText[] = 
   "Usagebwrebwerb: define <name> <type> <options>, to define a device";
@@ -73,7 +74,7 @@ ProvidedByCommand_t Delete_ProvidedByCommand = {
  *  FName: Delete - Initialize Command Funktion
  *  Desc: Initializion of an (new loaded) SCDE-Command. Init p_SCDERoot and p_SCDE Function Callbacks.
  *  Info: Called only once befor use!
- *  Para: SCDERoot_t* p_SCDERoot -> ptr to SCDE Data Root
+ *  Para: SCDERoot_t* p_SCDERoot_from_core -> ptr to SCDE Data Root from SCDE-Core
  *  Rets: ? unused
  *--------------------------------------------------------------------------------------------------
  */
@@ -107,9 +108,9 @@ Delete_InitializeCommandFn(SCDERoot_t* p_SCDERoot_from_core)
  *  Desc: Deletes (undefines) a Definition by calling Modules UndefineFn to do further module-specific
  *        deinitialization. Finally cleans up common values, including the definition.
  *  Info: ret Msg from UndefineFn results in Veto (keep Definition)
- *  Para: const uint8_t* p_args  -> prt to space seperated delete text string "Name optional-arguments"
- *        const size_t args_len -> length of args
- *  Rets: struct headRetMsgMultiple_s -> STAILQ head of multiple retMsg, if NULL -> no retMsg-entry
+ *  Para: const uint8_t* p_args  -> space seperated command args text string "definition_name delete_args"
+ *        const size_t args_len -> command args text length
+ *  Rets: struct headRetMsgMultiple_s -> STAILQ head of multiple retMsg, if NULL -> no retMsg
  * --------------------------------------------------------------------------------------------------
  */
 struct headRetMsgMultiple_s ICACHE_FLASH_ATTR
@@ -133,31 +134,54 @@ Delete_CommandFn (const uint8_t* p_args
   // initialize the queue
   STAILQ_INIT(&headRetMsgMultiple);
 
-  // set start of possible Name
-  const uint8_t* p_name = p_args;
+// --------------------------------------------------------------------------------------------------
+	
+  // set * to start of possible definition-name text (seek-start-pos)
+  const uint8_t* p_definition_name = p_args;
 
-  // set start of possible Delete-Arguments
-  const uint8_t* p_delete_args = p_args;
-
-  // a seek-counter
+  // the total seek-counter
   int i = 0;
+	
+  // seek * to start of  definition-name text ('\32' after space)
+  while( ( i < args_len ) && ( *p_definition_name == ' ' ) ) { i++ ; p_definition_name++ ; }
 
-  // seek to next space !'\32'
-  while( ( i < args_len ) && ( *p_delete_args != ' ' ) ) { i++ ; p_delete_args++ ; }
+  // @1
 
-  // length of Name
-  size_t name_len = i;
+  // set * to start of possible delete-args text (seek-start-pos)
+  const uint8_t* p_delete_args = p_definition_name;
 
-  // seek to start position of Delete-Arguments '\32'
-  while( ( i < args_len ) && ( *p_delete_args == ' ' ) ) {i++ ; p_delete_args++ ; }
+  // an element seek-counter
+  int j = 0;
 
-   // length of Delete-Arguments
-  size_t delete_args_len = args_len - i;
+  // seek to next space '\32'
+  while( ( i < args_len ) && ( *p_delete_args != ' ' ) ) { i++, j++ ; p_delete_args++ ; }
+
+  // length of definition-name text determined
+  size_t definition_name_len = j;
+
+  // seek * to start of delete-args text ('\32' after space)
+  while( ( i < args_len ) && ( *p_delete_args == ' ' ) ) { i++ ; p_delete_args++ ; }
+
+  // @2
+	
+  // set start * of possible 'end of text' seek-start-pos
+  const uint8_t* p_end_of_text = p_delete_args;
+	
+  // clear element seek-counter
+  j = 0;
+
+  // seek to next space '\32'
+  while( ( i < args_len ) && ( *p_end_of_text != ' ' ) ) { i++ , j++ ; p_end_of_text++ ; }
+
+  // length of attr-Val text determined
+  size_t delete_args_len = j;
+
+  // @ 'p_end_of_text' ! No further processing ...
 
 // --------------------------------------------------------------------------------------------------
 
   // veryfy lengths > 0
-  if ( name_len == 0 ) {
+  if ( definition_name_len == 0 ) {
 
 	// alloc mem for retMsg
 	strTextMultiple_t *p_retMsg =
@@ -165,7 +189,7 @@ Delete_CommandFn (const uint8_t* p_args
 
 	// response with error text
 	p_retMsg->strTextLen = asprintf(&p_retMsg->strText
-		,"Error! Could not interpret delete command arguments '%.*s'! Usage: delete <name> <optional_arguments>"
+		,"Error! Could not interpret delete command arguments '%.*s'! Usage: delete <definition-name> [<type dependent arguments>]"
 		,args_len
 		,p_args);
 
@@ -217,7 +241,7 @@ Delete_CommandFn (const uint8_t* p_args
 		// response with error text
 		p_retMsg->strTextLen = asprintf(&p_retMsg->strText,
 			"Error! Could not find '%.*s' for command execution!",
-			name_len, p_name);
+			definition_name_len, p_definition_name);
 
 		// insert retMsg in stail-queue
 		STAILQ_INSERT_TAIL(&headRetMsgMultiple, p_retMsg, entries);
@@ -227,8 +251,8 @@ Delete_CommandFn (const uint8_t* p_args
 	}
 
 	// matching Definition Name ? -> break loop
-	if ( (p_common_definition->nameLen == name_len)
-		&& (!strncasecmp((const char*) p_common_definition->name, (const char*) p_name, name_len)) ) {
+	if ( (p_common_definition->nameLen == definition_name_len)
+		&& (!strncasecmp((const char*) p_common_definition->name, (const char*) p_definition_name, definition_name_len)) ) {
 
 		// found, break and keep prt
 		break;

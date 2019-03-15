@@ -1,0 +1,78 @@
+DESCRIPTION         top
+
+     These macros define and operate on four types of data structures:
+     singly-linked lists, singly-linked tail queues, lists, and tail queues.
+     All four structures support the following functionality:
+
+           1.   Insertion of a new entry at the head of the list.
+           2.   Insertion of a new entry after any element in the list.
+           3.   O(1) removal of an entry from the head of the list.
+           4.   Forward traversal through the list.
+           5.   Swapping the contents of two lists.
+
+     Singly-linked lists are the simplest of the four data structures and
+     support only the above functionality.  Singly-linked lists are ideal
+     for applications with large datasets and few or no removals, or for
+     implementing a LIFO queue.  Singly-linked lists add the following func-
+     tionality:
+
+           1.   O(n) removal of any entry in the list.
+
+     Singly-linked tail queues add the following functionality:
+
+           1.   Entries can be added at the end of a list.
+           2.   O(n) removal of any entry in the list.
+           3.   They may be concatenated.
+
+     However:
+
+           1.   All list insertions must specify the head of the list.
+           2.   Each head entry requires two pointers rather than one.
+           3.   Code size is about 15% greater and operations run about 20%
+                slower than singly-linked lists.
+
+     Singly-linked tail queues are ideal for applications with large
+     datasets and few or no removals, or for implementing a FIFO queue.
+
+     All doubly linked types of data structures (lists and tail queues)
+     additionally allow:
+
+           1.   Insertion of a new entry before any element in the list.
+           2.   O(1) removal of any entry in the list.
+
+     However:
+
+           1.   Each element requires two pointers rather than one.
+           2.   Code size and execution time of operations (except for
+                removal) is about twice that of the singly-linked data-
+                structures.
+
+     Linked lists are the simplest of the doubly linked data structures.
+     They add the following functionality over the above:
+
+           1.   They may be traversed backwards.
+
+     However:
+
+           1.   To traverse backwards, an entry to begin the traversal and
+                the list in which it is contained must be specified.
+
+     Tail queues add the following functionality:
+           1.   Entries can be added at the end of a list.
+           2.   They may be traversed backwards, from tail to head.
+           3.   They may be concatenated.
+
+     However:
+
+           1.   All list insertions and removals must specify the head of
+                the list.
+           2.   Each head entry requires two pointers rather than one.
+           3.   Code size is about 15% greater and operations run about 20%
+                slower than singly-linked lists.
+
+     In the macro definitions, TYPE is the name of a user defined structure,
+     that must contain a field of type SLIST_ENTRY, STAILQ_ENTRY,
+     LIST_ENTRY, or TAILQ_ENTRY, named NAME.  The argument HEADNAME is the
+     name of a user defined structure that must be declared using the macros
+     SLIST_HEAD, STAILQ_HEAD, LIST_HEAD, or TAILQ_HEAD.  See the examples
+     below for further explanation of how these macros are used.
