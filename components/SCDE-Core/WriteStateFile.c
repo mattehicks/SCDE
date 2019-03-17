@@ -25,13 +25,15 @@ WriteStatefile()
   STAILQ_INIT(&headRetMsgMultiple);
 
   // get attribute "global->statefile" value
-  strText_t attrStateFNDefName = {(char*) "global", 6};
-  strText_t attrStateFNAttrName = {(char*) "statefile", 9};
-  strText_t *attrStateFNValueName =
-		Get_attrVal_by_defName_and_attrName(&attrStateFNDefName, &attrStateFNAttrName);
+  String_t state_filename_attr_definition = {(uint8_t*) "global", 6};
+  String_t state_filename_attr_name = {(uint8_t*) "statefile", 9};
+ 
+  String_t* p_state_filename_attr_value =
+		Get_Attr_Val_By_Def_Name_And_Attr_Name(&state_filename_attr_definition,
+			 &state_filename_attr_name);
 
 	// attribute not found
-	if (!attrStateFNValueName) {
+	if (!p_state_filename_attr_value) {
 
 		// alloc mem for retMsg
 		strTextMultiple_t *retMsg =
@@ -40,10 +42,10 @@ WriteStatefile()
 		// response with error text
 		retMsg->strTextLen = asprintf(&retMsg->strText
 			,"Error, Arribute %.*s not found in Definition %.*s !\r\n"
-			,attrStateFNAttrName.strTextLen
-			,attrStateFNAttrName.strText
-			,attrStateFNDefName.strTextLen
-			,attrStateFNDefName.strText);
+			,state_filename_attr_name.len
+			,state_filename_attr_name.p_char
+			,state_filename_attr_definition.len
+			,state_filename_attr_definition.p_char);
 
 		// insert retMsg in stail-queue
 		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
@@ -53,10 +55,10 @@ WriteStatefile()
 	}
 
 	// attribute found, but value not assigned
-	if (!attrStateFNValueName->strText) {
+	if (!p_state_filename_attr_value->p_char) {
 		
-		// dealloc from FN GetAttrValTextByDefTextAttrText
-		free(attrStateFNValueName);
+//		// dealloc from FN GetAttrValTextByDefTextAttrText
+//		free(attrStateFNValueName);
 
 		// alloc mem for retMsg
 		strTextMultiple_t *retMsg =
@@ -65,10 +67,10 @@ WriteStatefile()
 		// response with error text
 		retMsg->strTextLen = asprintf(&retMsg->strText
 			,"Error, arribute %.*s found in Definition %.*s, but no value is assigned !\r\n"
-			,attrStateFNAttrName.strTextLen
-			,attrStateFNAttrName.strText
-			,attrStateFNDefName.strTextLen
-			,attrStateFNDefName.strText);
+			,state_filename_attr_name.len
+			,state_filename_attr_name.p_char
+			,state_filename_attr_definition.len
+			,state_filename_attr_definition.p_char);
 
 		// insert retMsg in stail-queue
 		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
@@ -88,12 +90,12 @@ WriteStatefile()
 	char *stateFile;
 	asprintf(&stateFile
 			,"/spiffs/%.*s.cfg"
-			,attrStateFNValueName->strTextLen
-			,attrStateFNValueName->strText);
+			,p_state_filename_attr_value->len
+			,p_state_filename_attr_value->p_char);
 	 
-	// free attribute statefile value
-	free (attrStateFNValueName->strText);	 
-	free (attrStateFNValueName);
+//	// free attribute statefile value
+//	free (attrStateFNValueName->strText);	 
+//	free (attrStateFNValueName);
 		
 	// open statefile
 	FILE* sFH = fopen(stateFile, "w");

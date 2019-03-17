@@ -165,8 +165,7 @@ bool                        DeleteAttribute(char* Definition, char* AttributeNam
 void doGlobalDef(const uint8_t *cfgFileName, const size_t cfgFileNameLen);
 
 //
-strText_t* Get_attrVal_by_defName_and_attrName(const strText_t *defName
-	,const strText_t *attrName);
+String_t* Get_Attr_Val_By_Def_Name_And_Attr_Name(const String_t* p_def_name, const String_t* p_attr_name);
 
 
 

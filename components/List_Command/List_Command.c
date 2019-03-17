@@ -449,6 +449,34 @@ List_CommandFn (const uint8_t *args
 				,strBufferLen
 				,"Attributes:\r\n");
 			
+//neu
+
+			// list attributes stored for definition after processing
+
+			// get first entry from our 'attr_value' list
+  			Entry_Attr_Value_t* p_entry_attr_value = 
+				LIST_FIRST(&Common_Definition->head_attr_value);
+
+  			// search the lists 'attr_value' entries for the requested 'attr_name'
+ 			while ( p_entry_attr_value != NULL ) {
+
+				strBufferOffset += snprintf(wBufStart + strBufferOffset
+						,strBufferLen
+						,"  %.*s = %.*s\r\n"
+						,p_entry_attr_value->p_entry_attr_name->attr_name.len
+						,p_entry_attr_value->p_entry_attr_name->attr_name.p_char
+						,p_entry_attr_value->attr_value.len
+						,p_entry_attr_value->attr_value.p_char);
+
+				// load next 'attr_value' entry to process it
+				p_entry_attr_value = LIST_NEXT(p_entry_attr_value, entries);
+			}
+
+
+
+
+
+/*alt
 			// list attributes stored for definition after processing
 			attribute_t *attribute;
 			STAILQ_FOREACH(attribute, &SCDERoot->headAttributes, entries) {
@@ -466,7 +494,7 @@ List_CommandFn (const uint8_t *args
 				}
 
 			}
-
+*/
 
 
 

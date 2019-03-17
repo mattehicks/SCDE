@@ -1,0 +1,20 @@
+Get_Definitions_That_Match_Def_Spec_String
+
+
+
+
+tuw anfangen
+wenn p_ gesuch (entry/ oder ptr) dann objektname
+
+sonst + String
+
+
+reserved names in the world of SCDE:
+'p_definition'
+'definition_name'
+'dev_spec'
+'p_attr_name'
+'attr_name'
+'p_attr_value'
+'attr_value'
+'attr_timestamp'

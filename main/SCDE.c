@@ -191,7 +191,7 @@ SCDEFn_t SCDEFn = {
   ,WriteStatefile
 
 // added Fn (Perl -> C)
-  ,Get_attrVal_by_defName_and_attrName
+  ,Get_Attr_Val_By_Def_Name_And_Attr_Name
 
 // not final
   ,CommandUndefine
@@ -709,18 +709,17 @@ InitA()
 {
 
 // Zeile 570 , Initialisierung ...
-	
-	
+
   // for building the summary of ret-msg from cfg + state file including (starts empty)
-  strText_t cfgRet = {NULL, 0};
+  strText_t cfgRet= {NULL, 0};
 
 // -------------------------------------------------------------------------------------------------
 
   // get attribute configfile value (global->configfile)
-  strText_t attrCfgFNDefName = {(char*) "global", 6};
-  strText_t attrCfgFNAttrName = {(char*) "configfile", 10};
-  strText_t *attrCfgFNValueName =
-		Get_attrVal_by_defName_and_attrName(&attrCfgFNDefName, &attrCfgFNAttrName);
+  String_t attrCfgFNDefName = {(uint8_t*) "global", 6};
+  String_t attrCfgFNAttrName = {(uint8_t*) "configfile", 10};
+  String_t* attrCfgFNValueName  =
+	Get_Attr_Val_By_Def_Name_And_Attr_Name(&attrCfgFNDefName, &attrCfgFNAttrName);
 
 // -------------------------------------------------------------------------------------------------
 
@@ -730,22 +729,22 @@ InitA()
   incCFIncludeCommandArgs.strTextLen =
 	asprintf((char**) &incCFIncludeCommandArgs.strText
 		,"include %.*s"
-		,(int) attrCfgFNValueName->strTextLen
-		,(char*) attrCfgFNValueName->strText);
+		,(int) attrCfgFNValueName->len
+		,(char*) attrCfgFNValueName->p_char);
 
   // call command include to process the initial config-file
   struct headRetMsgMultiple_s incCFHeadRetMsgMultipleFromFn =
 		AnalyzeCommandChain((uint8_t*)incCFIncludeCommandArgs.strText,
 		(const size_t) incCFIncludeCommandArgs.strTextLen);
 
-  // free value from Fn GetAttrValTextByDefTextAttrText
+ /* // free value from Fn GetAttrValTextByDefTextAttrText
   if (attrCfgFNValueName) {
 	  
 		if (attrCfgFNValueName->strText) free(attrCfgFNValueName->strText);
 
 		free(attrCfgFNValueName);
 
-	}
+	}*/
 
   free(incCFIncludeCommandArgs.strText);
 
@@ -809,10 +808,10 @@ InitA()
 // -------------------------------------------------------------------------------------------------
 
 	// get attribute 'statefile' value (from global->statefile)
-  strText_t attrStateFNDefName = {(char*) "global", 6};
-  strText_t attrStateFNAttrName = {(char*) "statefile", 9};
-  strText_t *attrStateFNValueName =
-		Get_attrVal_by_defName_and_attrName(&attrStateFNDefName, &attrStateFNAttrName);
+  String_t attrStateFNDefName = {(uint8_t*) "global", 6};
+  String_t attrStateFNAttrName = {(uint8_t*) "statefile", 9};
+  String_t *attrStateFNValueName =
+		Get_Attr_Val_By_Def_Name_And_Attr_Name(&attrStateFNDefName, &attrStateFNAttrName);
 
 // -------------------------------------------------------------------------------------------------
 
@@ -823,7 +822,7 @@ InitA()
   if (attrStateFNValueName) {
 
 		// +value found ? 
-		if (attrStateFNValueName->strText) {
+		if (attrStateFNValueName->len) {
 
 			// build strText_t for cmd args
 			incSFIncludeCommandArgs =
@@ -833,13 +832,13 @@ InitA()
 			incSFIncludeCommandArgs->strTextLen =
 				asprintf((char**) &incSFIncludeCommandArgs->strText
 					,"include %.*s"
-					,(int) attrStateFNValueName->strTextLen
-					,(char*) attrStateFNValueName->strText);
+					,(int) attrStateFNValueName->len
+					,(char*) attrStateFNValueName->p_char);
 
-			free(attrStateFNValueName->strText);
+			//free(attrStateFNValueName->strText);
 		}
 
-  free(attrStateFNValueName);
+ // free(attrStateFNValueName);
 	}
 
   // seems that attribute "statefile" is not set, use default to build args

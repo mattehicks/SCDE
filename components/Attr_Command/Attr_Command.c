@@ -272,81 +272,134 @@ x.stqh_last =  head_ret_msg.stqh_last;
 
 // -------------------------------------------------------------------------------------------------
 
-  // get all Definitions that match def-spec. Result as SLTQ Head.
+  // get all 'definition' that match 'def_spec'. Result returned as SLTQ head.
   struct Head_Definitions_s head_dev_spec_matching_definitions =
 	p_SCDEFn->Get_Definitions_That_Match_DefSpec_String_Fn(def_spec);
-printf("maik1");
+
 // -------------------------------------------------------------------------------------------------
 
-  // start processing the returned SLTQ elements, filled with entrys (definitions)
+  // start processing, load first returned entry 'definition'
   Entry_Definitions_t* p_entry_dev_spec_matching_definitions = 
 	STAILQ_FIRST(&head_dev_spec_matching_definitions);
 
-  // loop through the found Definitions - till the queue has no more entrys
+  // no entry for definitions that match requested 'def_spec' ? We should throw out an error!
+  if ( p_entry_dev_spec_matching_definitions == NULL ) {
+
+	// alloc mem for retMsg
+	Entry_String_t* p_entry_ret_msg =
+		 malloc(sizeof(Entry_String_t));
+
+	// response with error text
+	p_entry_ret_msg->string.len = asprintf(&p_entry_ret_msg->string.p_char,
+		"Could not find an <def-spec> matching definition! Check '%.*s'!",
+		def_spec.len,
+		def_spec.p_char);
+
+	// insert ret_msg as entry in stail-queue
+	STAILQ_INSERT_TAIL(&head_ret_msg, p_entry_ret_msg, entries);
+ 
+  // temporary conversion to make ready ->  head_ret_msg
+struct headRetMsgMultiple_s x;
+STAILQ_INIT(&x);
+x.stqh_first =  head_ret_msg.stqh_first;
+x.stqh_last =  head_ret_msg.stqh_last;
+  	return x; // head_ret_msg;
+  }
+
+// -------------------------------------------------------------------------------------------------
+
+  // loop through the found 'definition' entrys - till the queue has no more entrys
   while ( p_entry_dev_spec_matching_definitions != NULL ) {
 
 // -------------------------------------------------------------------------------------------------
-printf("maik2");
-	// get the ptr to the current definition
-	Common_Definition_t* p_definition = 
+
+	// get the ptr to the current 'definition'
+	Common_Definition_t* p_entry_definition = 
 		p_entry_dev_spec_matching_definitions->p_entry_definition;
 
 	// to store the ret_msg from AttributeFn
 	Entry_String_t* p_entry_ret_msg = NULL;
 
-	// call Modules Attribute Fn for this definition to notify about upcoming changes - if provided by Type
-	if (p_definition->module->provided->AttributeFn) {
-printf("maik3");
+	// call 'module' 'Attribute_Fn' for this 'definition' to notify - if provided by Type
+	if (p_entry_definition->module->provided->Attribute_Fn) {
+
 		// build 'attr_command'
 		String_t attr_command;
 		attr_command.len = asprintf((char **) &attr_command.p_char
 			,"add");
 
-		printf("Calling AttributeFN of typeName:%.*s for defName:%.*s -> attrCmd:%.*s attrName:%.*s attrVal:%.*s\n"
-			,p_definition->module->provided->typeNameLen
-			,p_definition->module->provided->typeName
-			,p_definition->nameLen
-			,p_definition->name
-			,attr_command.len
-			,attr_command.p_char
-  			,attr_name.len
-			,attr_name.p_char
-			,attr_value.len
-			,attr_value.p_char);
-
-		// call modules AttributeFn, if retMsg != NULL -> interpret as veto
-		p_entry_ret_msg =  (Entry_String_t*) //tEMPORARY casting!!!!!!!!!!!!!!!!!!!!1
-			p_definition->module->provided->AttributeFn(p_definition,
-			attr_command.p_char,
+		#if Attr_Command_DBG >= 7
+		p_SCDEFn->Log3Fn(Attr_ProvidedByCommand.commandNameText,
+			Attr_ProvidedByCommand.commandNameTextLen,
+			7,
+			"Calling AttributeFN for definition '%.*s' (modul '%.*s') with args "
+			"attr_command '%.*s' attr_name '%.*s' attr_value '%.*s'",
+			p_entry_definition->nameLen,
+			p_entry_definition->name,
+			p_entry_definition->module->provided->typeNameLen,
+			p_entry_definition->module->provided->typeName,
 			attr_command.len,
+			attr_command.p_char,
+  			attr_name.len,
 			attr_name.p_char,
-			attr_name.len,
-			attr_value.p_char,
-			attr_value.len);
+			attr_value.len,
+			attr_value.p_char);
+		#endif
+
+		// call 'module' 'Attribute_Fn', if ret_msg != NULL -> an entry, interpret as veto
+		p_entry_ret_msg =
+			p_entry_definition->module->provided->Attribute_Fn(p_entry_definition,
+			attr_command,
+			attr_name,
+			attr_value);
 
 		// free 'attr_command'
 		free(attr_command.p_char);
 	}
 
+	else {
+		#if Attr_Command_DBG >= 7
+		p_SCDEFn->Log3Fn(Attr_ProvidedByCommand.commandNameText,
+			Attr_ProvidedByCommand.commandNameTextLen,
+			7,
+			"No AttributeFN available for definition '%.*s' (modul '%.*s') "
+			" attr_name '%.*s' with attr_value '%.*s' will be assigned without check.",
+			p_entry_definition->nameLen,
+			p_entry_definition->name,
+			p_entry_definition->module->provided->typeNameLen,
+			p_entry_definition->module->provided->typeName,
+  			attr_name.len,
+			attr_name.p_char,
+			attr_value.len,
+			attr_value.p_char);
+		#endif
+	}
+
 // -------------------------------------------------------------------------------------------------
 
-	// ret_msg = veto from attributeFn? Store as entry in queue + do NOT add attribute !
+	// 'ret_msg' as entry ? => veto from attributeFn! Add 'ret_msg' entry to queue, do NOT delete attribute !
 	if (p_entry_ret_msg) {
-printf("maik4");
+
 		// insert ret_msg as entry in stail-queue
 		STAILQ_INSERT_TAIL(&head_ret_msg, p_entry_ret_msg, entries);
 
- 		printf("veto attr AttributeFN of typeName:%.*s for defName:%.*s -> attrName:%.*s attrVal:%.*s\n"
-			,p_definition->module->provided->typeNameLen
-			,p_definition->module->provided->typeName
-			,p_definition->nameLen
-			,p_definition->name
-  			,attr_name.len
-			,attr_name.p_char
-			,attr_value.len
-			,attr_value.p_char);
+ 		#if Attr_Command_DBG >= 7
+		p_SCDEFn->Log3Fn(Attr_ProvidedByCommand.commandNameText,
+			Attr_ProvidedByCommand.commandNameTextLen,
+			7,
+			"Got an veto msg from AttributeFN for definition '%.*s' (modul '%.*s'). "
+			"Attribute attr_name '%.*s' with attr_value '%.*s' NOT created!",
+			p_entry_definition->nameLen,
+			p_entry_definition->name,
+			p_entry_definition->module->provided->typeNameLen,
+			p_entry_definition->module->provided->typeName,
+  			attr_name.len,
+			attr_name.p_char,
+			attr_value.len,
+			attr_value.p_char);
+		#endif
 
-		// get next entry of def_spec matching definitions
+		// load next entry of 'def_spec' matching definitions
 		p_entry_dev_spec_matching_definitions = 
 			STAILQ_NEXT(p_entry_dev_spec_matching_definitions, entries);
 
@@ -362,121 +415,131 @@ printf("maik4");
 
 	// get first entry from our 'attr_value' list
   	Entry_Attr_Value_t* p_entry_attr_value = 
-		LIST_FIRST(&p_definition->head_attr_value);
-printf("maik5");
-  	// search the list filled with 'attr_name' entries if the requested 'attr_name' already exists
+		LIST_FIRST(&p_entry_definition->head_attr_value);
+
+  	// search the lists 'attr_name' entries for the requested 'attr_name'
  	while ( p_entry_attr_name != NULL ) {
-printf("maik6");
-		// compare 'attr_name' character length & characters. Match ?
+
+		// compare no + length of characters. Matching list entry with requested 'attr_name' ?
 		if ( ( p_entry_attr_name->attr_name.len == attr_name.len )
 			&& ( !strncasecmp((const char*) p_entry_attr_name->attr_name.p_char,
 				(const char*) attr_name.p_char,
 				attr_name.len) ) ) {
 
-			// found matching 'attr_name', break loop and keep current
+			// load next 'attr_name' entry to process it
 			break;
 		}
 
-		// get next 'attr_name' entry to process it
+		// load next 'attr_name' entry to process it
 		p_entry_attr_name = LIST_NEXT(p_entry_attr_name, entries);
  	 }
-printf("maik7");
+
 // -------------------------------------------------------------------------------------------------
 
-	// 'attr_name' currently not assigned ?
+	// no entry for requested 'attr_name' ?
   	if ( p_entry_attr_name == NULL ) {
-printf("maik8");
-		// alloc mem for 'attr_name' storage (Entry_Attr_Name_s)
+
+		// alloc mem for new 'attr_name' entry (Entry_Attr_Name_s)
 		p_entry_attr_name
 			= malloc(sizeof(Entry_Attr_Name_t));
 
-		// store the 'attr_name'
+		// store 'attr_name'.len to entry
 		p_entry_attr_name->attr_name.len = attr_name.len;
+
+		// store 'attr_name' to entry
 		p_entry_attr_name->attr_name.p_char = malloc(attr_name.len);
 		memcpy(p_entry_attr_name->attr_name.p_char, attr_name.p_char, attr_name.len);
 	
-		// add new 'attr_name' entry to the attr_name list
+		// insert new 'attr_name' entry to the attr_name list
 		LIST_INSERT_HEAD(&p_SCDERoot->head_attr_name, p_entry_attr_name, entries);
-printf("maik9");
-		// debug msg created
+
 	}
 
 // -------------------------------------------------------------------------------------------------
 
 	else {
-printf("maik10");
-  		// search the list filled with 'attr_value' entries if the requested 'attr_value' already exists
+
+  		// search this 'definition' list of assigned 'attr_value' entries
  		while ( p_entry_attr_value != NULL ) {
 
-			// 1 st. check if 'attr_value' entry is for this matching definition + this entrys 'attr_name'
-			if ( ( p_definition == p_entry_attr_value->p_entry_definition ) &&
-				( p_entry_attr_name == p_entry_attr_value->p_entry_attr_name ) ) {
+			// check, if this entry 'attr_value' is for requested entry 'attr_name'
+			if ( p_entry_attr_name == p_entry_attr_value->p_entry_attr_name ) {
 
-				// found assigned 'attr_name', break loop and keep current
+				// found assigned 'attr_value', keep, break loop!
 				break;
 			}
 		}
-printf("maik11");
-		// get next 'attr_value' entry to process it
+
+		// load next 'attr_value' entry to process it
 		p_entry_attr_value = LIST_NEXT(p_entry_attr_value, entries);
  	 }
 
 // -------------------------------------------------------------------------------------------------
-printf("maik12");
-	// 'attr_value' currently not assigned ?
+
+	// no entry for requested 'attr_value' ?
   	if ( p_entry_attr_value == NULL ) {
 
-		// alloc mem for 'attr_value' storage (Entry_Attr_Value_s)
+		// alloc mem for new 'attr_value' entry (Entry_Attr_Value_s)
 		p_entry_attr_value
 			= malloc(sizeof(Entry_Attr_Value_t));
 
-
-		// store the 'attr_value'
-		p_entry_attr_value->attr_value.len = attr_value.len;
-
-		// may be without value ! Length 0!
-		if (attr_value.len) {
-
-			p_entry_attr_value->attr_value.p_char = malloc(attr_value.len);
-			memcpy(p_entry_attr_value->attr_value.p_char, attr_value.p_char, attr_value.len);
-		}
-printf("maik13");
-		// add new 'attr_value' entry to the attr_value list
-		LIST_INSERT_HEAD(&p_definition->head_attr_value, p_entry_attr_value, entries);
-printf("maik14");
-		// debug msg created
 	}
 
 // -------------------------------------------------------------------------------------------------
 
 	else {
+		// temporary remove 'attr_value' entry from the attr_value list
+		LIST_REMOVE(p_entry_attr_value, entries);
 
-		// free old value
+		// free old value from entry
 		if (p_entry_attr_value->attr_value.p_char) 
 			free(p_entry_attr_value->attr_value.p_char);
-
-		// store the 'attr_value'
-		p_entry_attr_value->attr_value.len = attr_value.len;
-
-		// may be without value ! Length 0!
-		if (attr_value.len) {
-
-			p_entry_attr_value->attr_value.p_char = malloc(attr_value.len);
-			memcpy(p_entry_attr_value->attr_value.p_char, attr_value.p_char, attr_value.len);
-		}
-
-
 	}
-printf("maik15");
-  // get next entry of def_spec matching definitions
-  p_entry_dev_spec_matching_definitions = 
-	STAILQ_NEXT(p_entry_dev_spec_matching_definitions, entries);
-  }
-
-
 
 // -------------------------------------------------------------------------------------------------
-printf("maik16");
+
+	// now p_entry_attr_value is ready for write / update
+
+	// store the assignment of the 'attr_name' to this  entry 'attr_value'
+	p_entry_attr_value->p_entry_attr_name = p_entry_attr_name;
+
+	// store the 'attr_value'.len
+	p_entry_attr_value->attr_value.len = attr_value.len;
+
+	// may be without value ! Length 0!
+	if (attr_value.len) {
+
+		p_entry_attr_value->attr_value.p_char = malloc(attr_value.len);
+		memcpy(p_entry_attr_value->attr_value.p_char, attr_value.p_char, attr_value.len);
+	}
+
+	// add the 'attr_value' entry to the attr_value list
+	LIST_INSERT_HEAD(&p_entry_definition->head_attr_value, p_entry_attr_value, entries);
+
+	#if Attr_Command_DBG >= 7
+	p_SCDEFn->Log3Fn(Attr_ProvidedByCommand.commandNameText,
+		Attr_ProvidedByCommand.commandNameTextLen,
+		7,
+		"attr_name '%.*s' with attr_value '%.*s' assigned to definition '%.*s' "
+		"(modul '%.*s').",
+		p_entry_attr_name->attr_name.len,
+		p_entry_attr_name->attr_name.p_char,
+		p_entry_attr_value->attr_value.len,
+		p_entry_attr_value->attr_value.p_char,
+		p_entry_definition->nameLen,
+		p_entry_definition->name,
+		p_entry_definition->module->provided->typeNameLen,
+		p_entry_definition->module->provided->typeName);
+	#endif
+
+// -------------------------------------------------------------------------------------------------
+
+	// get next entry of def_spec matching definitions
+	p_entry_dev_spec_matching_definitions = 
+		STAILQ_NEXT(p_entry_dev_spec_matching_definitions, entries);
+  }
+
+// -------------------------------------------------------------------------------------------------
 
 // temporary conversion to make ready ->  head_ret_msg
 struct headRetMsgMultiple_s x;

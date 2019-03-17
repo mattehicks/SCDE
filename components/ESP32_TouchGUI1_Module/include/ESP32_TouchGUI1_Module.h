@@ -834,7 +834,9 @@ void ESP32_SPI_polling_transmit_cmd_and_data(ESP32_SPI_device_handle_t spi_devic
 /*
  *  Functions provided to SCDE by Module - for type operation (A-Z)
  */
-strTextMultiple_t* ESP32_TouchGUI1_Attribute(Common_Definition_t* Common_Definition, const uint8_t *attrCmdText, const size_t attrCmdTextLen, const uint8_t *attrNameText, const size_t attrNameTextLen, uint8_t **attrValTextPtr, size_t *attrValTextLenPtr);
+
+// Attribute Fn - called in case of attribute changes for this definition, to check them
+Entry_String_t* ESP32_TouchGUI1_Attribute (Common_Definition_t* p_entry_definition, const String_t attr_command, const String_t attr_name, const String_t attr_value);
 
 strTextMultiple_t* ESP32_TouchGUI1_Define(Common_Definition_t *Common_Definition);
 

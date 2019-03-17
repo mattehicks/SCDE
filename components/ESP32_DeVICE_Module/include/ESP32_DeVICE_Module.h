@@ -83,7 +83,9 @@ typedef struct ESP32_DeVICE_Definition_s {
 /*
  *  Functions provided to SCDE by Module - for type operation (A-Z)
  */
-strTextMultiple_t* ESP32_DeVICE_Attribute(Common_Definition_t* Common_Definition, const uint8_t *attrCmdText, const size_t attrCmdTextLen, const uint8_t *attrNameText, const size_t attrNameTextLen, uint8_t **attrValTextPtr, size_t *attrValTextLenPtr);
+
+// Attribute Fn - called in case of attribute changes for this definition, to check them
+Entry_String_t* ESP32_DeVICE_Attribute (Common_Definition_t* p_entry_definition, const String_t attr_command, const String_t attr_name, const String_t attr_value);
 
 strTextMultiple_t* ESP32_DeVICE_Define(Common_Definition_t *Common_Definition);
 

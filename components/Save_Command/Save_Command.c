@@ -236,10 +236,10 @@ Save_CommandFn (const uint8_t *argsText
 	// verify NameTextLen > 0, if still 0 -> try to get it from Attribute
 
 		// get attribute "global->configfile" value
-		strText_t attrConfigFNDefName = {(char*) "global", 6};
-		strText_t attrConfigFNAttrName = {(char*) "configfile", 10};
-		strText_t *attrConfigFNValueName =
-			SCDEFn->Get_attrVal_by_defName_and_attrNameFn(&attrConfigFNDefName, &attrConfigFNAttrName);
+		String_t attrConfigFNDefName = {(uint8_t*) "global", 6};
+		String_t attrConfigFNAttrName = {(uint8_t*) "configfile", 10};
+		String_t *attrConfigFNValueName =
+			SCDEFn->Get_Attr_Val_By_Def_Name_And_Attr_Name_Fn(&attrConfigFNDefName, &attrConfigFNAttrName);
 
 		// veryfy length > 0, NameTextLen still 0 -> get it from Attribute
 		if (fileNameTextLen == 0) {
@@ -247,18 +247,16 @@ Save_CommandFn (const uint8_t *argsText
 			// assigned Attribute found ?
 			if (attrConfigFNValueName) {
 
-				// with Value ?
-				if (attrConfigFNValueName->strText) {
 
-					// and its not an empty Value (has >0 chars) ?
-					if (attrConfigFNValueName->strTextLen) {
+				// and its not an empty Value (has >0 chars) ?
+				if (attrConfigFNValueName->len) {
 
-						// case: configfile attribute set, use it
-						fileNameTextLen =
-							attrConfigFNValueName->strTextLen;
-						fileNameText =
-							(uint8_t *) attrConfigFNValueName->strText;
-					}
+					// case: configfile attribute set, use it
+					fileNameTextLen =
+						attrConfigFNValueName->len;
+					fileNameText =
+						(uint8_t *) attrConfigFNValueName->p_char;
+					
 				}
 			}
 		}
@@ -288,8 +286,8 @@ Save_CommandFn (const uint8_t *argsText
 			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
 
 			// free attribute-data from Get_attrVal_by_defName_and_attrNameFn
-			if (attrConfigFNValueName->strText) free(attrConfigFNValueName->strText);	 
-			if (attrConfigFNValueName) free(attrConfigFNValueName);
+//			if (attrConfigFNValueName->strText) free(attrConfigFNValueName->strText);	 
+//			if (attrConfigFNValueName) free(attrConfigFNValueName);
  
 			// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
 			return headRetMsgMultiple;
@@ -323,8 +321,8 @@ Save_CommandFn (const uint8_t *argsText
 		free(configFile);
 
 		// free attribute-data from Get_attrVal_by_defName_and_attrNameFn
-		if (attrConfigFNValueName->strText) free(attrConfigFNValueName->strText);	 
-		if (attrConfigFNValueName) free (attrConfigFNValueName);
+//		if (attrConfigFNValueName->strText) free(attrConfigFNValueName->strText);	 
+//		if (attrConfigFNValueName) free (attrConfigFNValueName);
 
 		// insert retMsg in stail-queue
 		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
@@ -466,8 +464,8 @@ Save_CommandFn (const uint8_t *argsText
 		STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
 
 		// free attribute-data from Get_attrVal_by_defName_and_attrNameFn
-		if (attrConfigFNValueName->strText) free(attrConfigFNValueName->strText);	 
-		if (attrConfigFNValueName) free (attrConfigFNValueName);
+//		if (attrConfigFNValueName->strText) free(attrConfigFNValueName->strText);	 
+//		if (attrConfigFNValueName) free (attrConfigFNValueName);
 
 	// return STAILQ head, stores multiple retMsg, if STAILQ_EMPTY -> no retMsg-entries
 	return headRetMsgMultiple;

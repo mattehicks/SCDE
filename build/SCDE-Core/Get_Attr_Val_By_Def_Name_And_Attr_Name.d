@@ -435,3 +435,4 @@ Get_Attr_Val_By_Def_Name_And_Attr_Name.o: \
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h:
 
 /home/maikschulze/esp/SCDE/main/include/SCDE.h:
+/home/maikschulze/esp/SCDE/components/SCDE-Core/./Get_Attr_Val_By_Def_Name_And_Attr_Name.c:

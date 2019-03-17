@@ -432,27 +432,44 @@ int HdrFldValueLen;	// current HdrFldValueBuff length
 
 
 
+// --------------------------------------------------------------------------------------------------
+
+
 
 /*
  *  Functions provided to SCDE by Module - for type operation (A-Z)
  */
+
+//
 strTextMultiple_t* WebIf_Add(Common_Definition_t* Common_Definition, uint8_t *kvArgs, size_t kvArgsLen);
 
+//
 strTextMultiple_t* WebIf_Define(Common_Definition_t *Common_Definition);
 
-int WebIf_DirectRead(Common_Definition_t* Def);
+//
+int WebIf_Direct_Read(Common_Definition_t*  p_entry_definition);
 
-int WebIf_DirectWrite(Common_Definition_t* Def);
+//
+int WebIf_Direct_Write(Common_Definition_t*  p_entry_definition);
 
+//
 int WebIf_IdleCbX(Common_Definition_t *Common_Definition);
 
+//
 int WebIf_Initialize(SCDERoot_t* SCDERoot);
 
+//
 strTextMultiple_t* WebIf_Set(Common_Definition_t* Common_Definition, uint8_t *setArgs, size_t setArgsLen);
 
+//
 strTextMultiple_t* WebIf_Sub(Common_Definition_t* Common_Definition , uint8_t *kArgs, size_t kArgsLen);
 
+//
 strTextMultiple_t* WebIf_Undefine(Common_Definition_t* Common_Definition);
+
+
+
+// --------------------------------------------------------------------------------------------------
 
 
 

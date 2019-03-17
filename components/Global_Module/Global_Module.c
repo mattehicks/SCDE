@@ -180,7 +180,51 @@ Global_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 //  SCDEFn_at_Global_M->AnalyzeCommandFn((const uint8_t *) "attr global verbose 3", 21);
 //  SCDEFn_at_Global_M->AnalyzeCommandFn((const uint8_t *) "attr global logfile -", 21);
 
-  SCDEFn_at_Global_M->AnalyzeCommandFn((const uint8_t *) "attr global configfile maker", 28);
+
+  // for response msg from AnalyzeCommand
+  struct headRetMsgMultiple_s headRetMsgMultiple;
+
+  headRetMsgMultiple = SCDEFn_at_Global_M->AnalyzeCommandFn((const uint8_t *) "attr global configfile maker", 28);
+
+ // retMsgMultiple stailq filled ?
+  if (!STAILQ_EMPTY(&headRetMsgMultiple)) {
+
+	// for the retMsg elements
+	strTextMultiple_t *retMsg;
+
+	// get the entries till empty
+	while (!STAILQ_EMPTY(&headRetMsgMultiple)) {
+
+		retMsg = STAILQ_FIRST(&headRetMsgMultiple);
+/*
+		Log3( (const uint8_t*)"xxx"
+			 ,sizeof("xxx")
+			 ,1
+			 ,"result is:%.*s\n"
+			 ,retMsg->strTextLen
+			,retMsg->strText);
+*/ printf("an error occurws!!!!!!!!!!!!!!!!!!!1");
+		// done, remove this entry
+		STAILQ_REMOVE(&headRetMsgMultiple, retMsg, strTextMultiple_s, entries);
+
+		// free the msg-string
+		free(retMsg->strText);
+
+		// and the strTextMultiple_t
+		free(retMsg);
+	}
+  }
+
+
+
+
+
+
+
+
+
+
+
 //  SCDEFn_at_Global_M->AnalyzeCommandFn((const uint8_t *) "attr global statefile state", 27);
 //  SCDEFn_at_Global_M->AnalyzeCommandFn((const uint8_t *) "attr global port 1234", 21);
                                                        //|12

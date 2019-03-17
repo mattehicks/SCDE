@@ -29,9 +29,9 @@
 
 // Command logging verbose - override   0 1 2 3 4 5 6 7 8 9
 #define Add_Command_DBG                               7
-#define Attr_Command_DBG                              7
+#define Attr_Command_DBG                                  9
 #define Define_Command_DBG                            7
-#define Deleteattr_Command_DBG                        7
+#define Deleteattr_Command_DBG                            9
 #define Delete_Command_DBG                            7
 #define Help_Command_DBG                              7
 #define Include_Command_DBG                           7

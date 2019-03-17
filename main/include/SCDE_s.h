@@ -332,8 +332,7 @@ typedef struct headRetMsgMultiple_s (*WriteStatefileFn_t) ();
 // ----------------
 
 // added Fn (Perl -> C)
-typedef strText_t* (*Get_attrVal_by_defName_and_attrNameFn_t) (const strText_t *defName
-				,const strText_t *attrName);
+typedef String_t* (*Get_Attr_Val_By_Def_Name_And_Attr_Name_Fn_t) (const String_t* p_def_name, const String_t* p_attr_name);
 
 
 
@@ -374,7 +373,7 @@ typedef struct SCDEFn_s {
   TimeNowFn_t TimeNowFn;                                   // returns current system time (no TiSt)
   WriteStatefileFn_t WriteStatefileFn;                     // 
 // added Fn (Perl -> C)
-  Get_attrVal_by_defName_and_attrNameFn_t Get_attrVal_by_defName_and_attrNameFn;
+  Get_Attr_Val_By_Def_Name_And_Attr_Name_Fn_t Get_Attr_Val_By_Def_Name_And_Attr_Name_Fn;
 // not final
   CommandUndefineFn_t CommandUndefineFn;                   //
   ParseKVInputArgsFn_t ParseKVInputArgsFn;                 // parses Key=Value(@) input arguments into array
@@ -438,8 +437,8 @@ typedef struct SCDEFn_s {
 // typedef for AddFn - experimental - provided my module
 typedef strTextMultiple_t* (* AddFn_t)(Common_Definition_t *Common_Definition, uint8_t *kvArgs, size_t kvArgsLen);
 
-// typedef for AttributeFn - called in case of attribute changes for this definition, to check them - provided my module
-typedef strTextMultiple_t* (* AttributeFn_t)(Common_Definition_t* Common_Definition, const uint8_t *attrCmdText, const size_t attrCmdTextLen, const uint8_t *attrNameText, const size_t attrNameTextLen, uint8_t **attrValTextPtr, size_t *attrValTextLenPtr);
+// typedef for Attribute Fn - called in case of attribute changes for this definition, to check them
+typedef Entry_String_t* (*Attribute_Fn_t)(Common_Definition_t* p_entry_definition, const String_t attr_command, const String_t attr_name, const String_t attr_value);
 
 // typedef for DefineFn - called to create a new definition of this type - provided my module
 typedef strTextMultiple_t* (* DefineFn_t)(Common_Definition_t *Common_Definition);
@@ -523,7 +522,7 @@ struct ProvidedByModule_s {
   size_t typeNameLen;
 
   AddFn_t AddFn;		//
-  AttributeFn_t AttributeFn;	// verifyAttributeFn , called in case of attribute changes, to check them
+  Attribute_Fn_t Attribute_Fn;	// called in case of attribute changes, to check them
   DefineFn_t DefineFn;		// defineDefinitionFn, called to create a new definition of this type
   DeleteFn_t DeleteFn;		// deleteDefinitionFn, to cleanup (delete log), called by delete after UndefFn
   DirectReadFn_t DirectReadFn;	// readDirectFn      , called from select loop to read
@@ -695,7 +694,7 @@ struct bulkUpdateReadings2_s {
  * - instance of an loaded module. Values are initialized by the SCDE and finalized by the
  *   loaded module itself (defineFn).
  */
-struct Common_Definition_s {
+struct Common_Definition_s { //Entry_Definition_s
   STAILQ_ENTRY(Common_Definition_s) entries;			// Link to next Definition
  
   STAILQ_HEAD (stailhead8, common_Attribute_s) headAttributes;	//p_head_attribute	// Link to assigned Attributes
@@ -952,7 +951,7 @@ typedef struct Entry_Attr_Value_s Entry_Attr_Value_t;
  */
 struct Entry_Attr_Value_s {
   LIST_ENTRY(Entry_Attr_Value_s) entries;	// links to next list entries
-  Common_Definition_t* p_entry_definition;	// ptr to the definition-entry the attribute is assigned to
+//  Common_Definition_t* p_entry_definition;	// ptr to the definition-entry the attribute is assigned to
   Entry_Attr_Name_t* p_entry_attr_name;		// ptr to the attribute-name-entry the attribute is assigned to
   String_t attr_value;				// the assigned value MAY BE NULL IF NO VALUE!
 };
@@ -988,7 +987,7 @@ struct SCDERoot_s {
   STAILQ_HEAD (stailhead4, Command_s) headCommands;//head_command	// Link to available commands
 //use vars qw(%data);             # Hash for user data
 //use vars qw(%defaultattr);      # Default attributes, used by FHEM2FHEM
-  STAILQ_HEAD (stailhead2, Common_Definition_s) HeadCommon_Definitions;//head_common_definition// Link to Definitions (device, button, ...)
+  STAILQ_HEAD (stailhead2, Common_Definition_s) HeadCommon_Definitions;//head_definition// Link to Definitions (device, button, ...)
 //use vars qw(%inform);           # Used by telnet_ActivateInform
 //use vars qw(%intAt);            # Internal at timer hash, global for benchmark
 //use vars qw(%logInform);        # Used by FHEMWEB/Event-Monitor

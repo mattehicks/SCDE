@@ -748,6 +748,7 @@ SelectQueryTask(void *pvParameters)
   while(1) {
 
 	// list currently stored modules
+	printf("Selectloop: heap:%d\n",heap_caps_get_free_size(MALLOC_CAP_8BIT));
 
 	Common_Definition_t *Common_Definition;
 	STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries) {
@@ -1199,8 +1200,7 @@ app_main(void)
 
 //--------------------------------------------------------------------------------------------------
 
-//  vTaskDelay(1000 / portTICK_PERIOD_MS);
-
+  // vTaskDelay(1000 / portTICK_PERIOD_MS);
   Log("Plat_ESP32",10,"MainFn inits SCDE.");
 
   // Init / start SCDE Core ...

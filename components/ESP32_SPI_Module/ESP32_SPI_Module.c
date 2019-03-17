@@ -195,17 +195,6 @@ static const char* I2S_TAG = "I2S";
 
 
 
-// -------------------------------------------------------------------------------------------------
-
-// set default build verbose - if no external override
-#ifndef ESP32_SPI_Module_DBG  
-#define ESP32_SPI_Module_DBG  5	// 5 is default
-#endif 
-
-// -------------------------------------------------------------------------------------------------
-
-
-
 #include <WebIf_EspFSStdFileTX.h>
 #include <WebIf_EspFSAdvFileTX.h>
 
@@ -501,88 +490,53 @@ ESP32_SPI_ProvidedByModule_t ESP32_SPI_ProvidedByModule = {   // A-Z order
 
 
 /* -------------------------------------------------------------------------------------------------
- *  FName: ESP32_SPI_Attribute
- *  Desc: Informs an Definition of this Type for attribute activities (set/del)
- *  Info: 'attrCmd' is the command text for the activity: set, del
- *        'attrName' is the attribute name text
- *        'attrVal' is the attribute value text
- *        THE attrVal CAN BE MANIPULATED / CORRECTED
- *  Para: Common_Definition_t *Common_Definition -> the belonging definition for the attribute-activitie
- *	  const uint8_t *attrCmdText -> ptr to attribute-command text "attrCmd"
- *	  const size_t attrCmdTextLen -> length of attribute-command text "attrCmd"
- *	  const uint8_t *attrNameText -> ptr to attribute-name text "attrName"
- *	  const size_t attrNameTextLen -> length of attribute-name text "attrName"
- *	  uint8_t **attrValTextPtr -> ptr to ptr holding attribute-value text "attrValue" - manipulation possible
- *	  size_t *attrValLenTextPtr -> ptr to length of attribute-value text "attrValue" - manipulation possible
- *  Rets: strTextMultiple_t* -> veto = error-text-string in allocated mem, or NULL = OK - no veto
+ *  FName: Attribute Fn
+ *  Desc: Informs an 'definition' of this 'module' for 'attribute' activities (set/delete)
+ *  Info: 'attr_cmmand' is the command for the activity: set, delete
+ *        'attr_name' is the attribute name
+ *        'attr_value' is the attribute value
+ *  Para: Common_Definition_t* p_entry_definition -> the 'definition' identified for the activities
+ *	  const String_t attr_command -> the attribute-command
+ *	  const String_t attr_name -> the attribute-name
+ *	  const String_t attr_value -> the attribute-value
+ *  Rets: Entry_String_t* -> = SCDE_OK (no ret msg) or VETO (SLTQ Entry_String_t* with ret msg)
  * -------------------------------------------------------------------------------------------------
  */
-strTextMultiple_t* ICACHE_FLASH_ATTR
-ESP32_SPI_Attribute(Common_Definition_t *Common_Definition
-		,const uint8_t *attrCmdText
-		,const size_t attrCmdTextLen
-		,const uint8_t *attrNameText
-		,const size_t attrNameTextLen
-		,uint8_t **attrValTextPtr
-		,size_t *attrValTextLenPtr)
+Entry_String_t* ICACHE_FLASH_ATTR
+ESP32_SPI_Attribute(Common_Definition_t* p_entry_definition,
+	 const String_t attr_command,
+	 const String_t attr_name,
+	 const String_t attr_value)
 {
+  // make common ptr to modul specific ptr
+  ESP32_SPI_Definition_t* p_entry_esp32_spi_definition =
+		  (ESP32_SPI_Definition_t*) p_entry_definition;
 
-  // for Fn response msg
-  strTextMultiple_t *retMsg = NULL;
+  // to store the ret_msg. SCDE_OK = no msg 
+  Entry_String_t* p_entry_ret_msg = SCDE_OK;
 
-  uint8_t *attrValText = *attrValTextPtr;
-  size_t attrValTextLen = *attrValTextLenPtr;
-
-  printf("ESP32_SPI_AttributeFN for defName:%.*s -> attrCmd:%.*s attrName:%.*s attrVal:%.*s\n"
-	,Common_Definition->nameLen
-	,Common_Definition->name
-	,attrCmdTextLen
-	,attrCmdText
-  	,attrNameTextLen
-	,attrNameText
-	,(int) attrValTextLen
-	,attrValText);
-
-
-
-/*
-  // set start of possible def-Name
-  const uint8_t *defName = args;
-  // set start of possible attr-Name
-  const uint8_t *attrName = args;
-  // a seek-counter
-  int i = 0;
-  // seek to next space !'\32'
-  while( (i < argsLen) && (*attrName != ' ') ) {i++;attrName++;}
-  // length of def-Name
-  size_t defNameLen = i;
-  // seek to start position of attr-Name '\32'
-  while( (i < argsLen) && (*attrName == ' ') ) {i++;attrName++;}
-  // set start of possible attr-Val
-  const uint8_t *attrVal = attrName;
-  // a 2nd seek-counter
-  int j = 0;
-  // seek to next space !'\32'
-  while( (i < argsLen) && (*attrVal != ' ') ) {i++,j++;attrVal++;}
-  // length of attr-Name
-  size_t attrNameLen = j;
-  // start position of attr-Val
-  while( (i < argsLen) && (*attrVal == ' ') ) {i++;attrVal++;}
-  // length of attr-Val
-  size_t attrValLen = argsLen - i;
-  // veryfy lengths > 0, definition 0 allowed
-  if ( (defNameLen == 0) || (attrNameLen == 0) )
-		{
-		// response with error text
-		asprintf(&retMsg
-				,"Could not interpret command ''! Usage: Attr <defname> <attrname> [<attrval>]");
-		return retMsg;
-	//	}
 // -------------------------------------------------------------------------------------------------
-*/
 
-  return retMsg;
+  #if ESP32_SPI_Module_DBG >= 5
+  SCDEFn_at_ESP32_SPI_M->Log3Fn(p_entry_esp32_spi_definition->common.name,
+	p_entry_esp32_spi_definition->common.nameLen,
+	5,
+	"Attribute Fn (Module '%.*s') is called with args: "
+	"attr_command '%.*s' attr_name '%.*s' attr_value '%.*s'",
+	p_entry_esp32_spi_definition->common.module->provided->typeNameLen,
+	p_entry_esp32_spi_definition->common.module->provided->typeName,attr_command.len,
+	attr_command.p_char,
+  	attr_name.len,
+	attr_name.p_char,
+	attr_value.len,
+	attr_value.p_char);
+  #endif
+
+// ------------------------------------------------------------------------------------------------
+
+  return p_entry_ret_msg;
 }
+
 
 
 

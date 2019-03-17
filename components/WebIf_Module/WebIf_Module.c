@@ -9687,8 +9687,8 @@ const ProvidedByModule_t WebIf_ProvidedByModule = { // A-Z order
   ,NULL					// Attribute
   ,WebIf_Define				// Define
   ,NULL					// Delete
-  ,WebIf_DirectRead			// DirectRead
-  ,WebIf_DirectWrite			// DirectWrite
+  ,WebIf_Direct_Read			// Direct_Read
+  ,WebIf_Direct_Write			// Direct_Write
   ,NULL					// Except
   ,NULL					// Get
   ,WebIf_IdleCbX			// IdleCb
@@ -10273,27 +10273,34 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 /*
  * -------------------------------------------------------------------------------------------------
  *  FName: WebIf_DirectRead
- *  Desc: Called by the global select-loop when FD is in read-set
+ *  Desc: Called from the global select-loop when FD is in read-set
  *  Info: 
- *  Para: Common_Definition* Common_Definition -> XXX_Definition of the FD owners definition
+ *  Para: Common_Definition_t* p_entry_definition -> the FD owners definition
  *  Rets: ? - unused
  * -------------------------------------------------------------------------------------------------
  */
 int 
-WebIf_DirectRead(Common_Definition_t* Common_Definition)
-  {
+WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
+{
+  // make common ptr to modul specific ptr
+  WebIf_Definition_t* p_entry_webif_definition = 
+	(WebIf_Definition_t*) p_entry_definition;
 
-  #if SCDEH_DBG >= 5
-  printf("\n|WebIf_DirectReadFn, Name:%.*s>"
-	,Common_Definition->nameLen
-	,(char*)Common_Definition->name);
+// -------------------------------------------------------------------------------------------------
+
+  #if WebIf_Module_DBG >= 5
+  SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name,
+	p_entry_webif_definition->common.nameLen,
+	5,
+	"Direct Read Fn is called (module '%.*s').",
+	p_entry_webif_definition->common.module->provided->typeNameLen,
+	p_entry_webif_definition->common.module->provided->typeName);
   #endif
 
-  // make common ptr to modul specific ptr
-  WebIf_Definition_t* WebIf_Definition = (WebIf_Definition_t*) Common_Definition;
+// ------------------------------------------------------------------------------------------------
 
-  // ptr to receive buffer
-  char *RecvBuf;
+  // ptr to receive-buffer
+  char* recv_buffer;
 
   int32_t len;
 
@@ -10314,40 +10321,40 @@ WebIf_DirectRead(Common_Definition_t* Common_Definition)
 
   // Check Flag 'THIS_IS_SERVERSOCKET' in WebIf_CtrlRegA. This indicates a server-socket.
   // -> Manage a new connection.
-  if (WebIf_Definition->WebIf_CtrlRegA & F_THIS_IS_SERVERSOCKET) {
+  if (p_entry_webif_definition->WebIf_CtrlRegA & F_THIS_IS_SERVERSOCKET) {
 
 // -------------------------------------------------------------------------------------------------
 
 	// check slot availiability, get a slot no. or RETURN, mark slot as 'in use'
-	uint32_t SlotCtrlRegBF = WebIf_Definition->HTTPD_InstCfg->SlotCtrlRegBF;
+	uint32_t SlotCtrlRegBF = 
+		p_entry_webif_definition->HTTPD_InstCfg->SlotCtrlRegBF;
 
 	uint8_t NewSlotNo;
 
 	// MAX_SLOTS_PER_INSTANCE -> uint32_t BF used in code -> 32 64?
-	for (NewSlotNo = 0; NewSlotNo < 32; NewSlotNo++) {
+	for ( NewSlotNo = 0 ; NewSlotNo < 32 ; NewSlotNo++ ) {
 
-		if (!(SlotCtrlRegBF & (0b1 <<NewSlotNo) ))
+		if ( ! ( SlotCtrlRegBF & ( 0b1 << NewSlotNo ) ))
 			break;
-		}
+	}
 
-	// Check for no slots free error
-	if (NewSlotNo >= 32) {
+	// Check if we got a free slot? -> 'no slots free' error
+	if ( NewSlotNo >= 32 ) {
 
-		SCDEFn_at_WebIf_M->Log3Fn(WebIf_Definition->common.name
-			,WebIf_Definition->common.nameLen
+		SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name
+			,p_entry_webif_definition->common.nameLen
 			,1
 			,"WebIf_DirectRead Error no slots free...\n");
 
 		// do not accept new connection
 		return 0;//??
-
-		}
+	}
 
 	// mark found slot as used in Slot-Control-Register-Bitfield
 	SlotCtrlRegBF |= (0b1 << NewSlotNo);
 
 	// store Slot-Control-Register-Bitfield
-	WebIf_Definition->HTTPD_InstCfg->SlotCtrlRegBF = SlotCtrlRegBF;
+	p_entry_webif_definition->HTTPD_InstCfg->SlotCtrlRegBF = SlotCtrlRegBF;
 
 // -------------------------------------------------------------------------------------------------
 
@@ -10358,38 +10365,32 @@ WebIf_DirectRead(Common_Definition_t* Common_Definition)
 	len = sizeof(struct sockaddr_in);
 
 	// get FD from new connection and store remote address
-	NewClientFD = accept(WebIf_Definition->common.fd
-		,(struct sockaddr *) &remote_addr
-		,(socklen_t *) &len);
+	NewClientFD = accept(p_entry_webif_definition->common.fd,
+		(struct sockaddr *) &remote_addr, (socklen_t *) &len);
 
 	// check for error
-	if (NewClientFD < 0) {
+	if ( NewClientFD < 0 ) {
 
-		SCDEFn_at_WebIf_M->Log3Fn(WebIf_Definition->common.name
-				,WebIf_Definition->common.nameLen
+		SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name
+				,p_entry_webif_definition->common.nameLen
 				,1
 				,"WebIf_DirectRead Error! accept failed...\n");
 
 		// error, process next slot?
 		return 0;//??
-
-		}
+	}
 
 // -------------------------------------------------------------------------------------------------
 
 	// create a new WebIf Definition
-	WebIf_Definition_t* NewWebIf_Definition;
+	WebIf_Definition_t* p_new_entry_webif_definition;
 
 	// alloc mem for modul specific definition structure (Common_Definition_t + X)
-	NewWebIf_Definition = (WebIf_Definition_t*) malloc(sizeof(WebIf_Definition_t));
+	p_new_entry_webif_definition = 
+		(WebIf_Definition_t*) malloc(sizeof(WebIf_Definition_t));
 
 	// zero the struct
-	memset(NewWebIf_Definition, 0, sizeof (WebIf_Definition_t));
-
-	// store new WebIf Definition
-	STAILQ_INSERT_HEAD(&SCDERoot_at_WebIf_M->HeadCommon_Definitions
-		,(Common_Definition_t*) NewWebIf_Definition
-		, entries);
+	memset(p_new_entry_webif_definition, 0, sizeof (WebIf_Definition_t));
 
 // -------------------------------------------------------------------------------------------------
 				
@@ -10405,25 +10406,25 @@ WebIf_DirectRead(Common_Definition_t* Common_Definition)
   	setsockopt(NewClientFD, IPPROTO_TCP, TCP_KEEPCNT, (void *)&keepCount, sizeof(keepCount));
 			
  	// store clients FD to new WebIf Definition
- 	NewWebIf_Definition->common.fd = NewClientFD;
+ 	p_new_entry_webif_definition->common.fd = NewClientFD;
 
 	// copy link to HTTPD-Instance-Configuration
-	NewWebIf_Definition->HTTPD_InstCfg
-		= WebIf_Definition->HTTPD_InstCfg;
+	p_new_entry_webif_definition->HTTPD_InstCfg
+		= p_entry_webif_definition->HTTPD_InstCfg;
 
 	// copy ptr to associated module (this module)
-	NewWebIf_Definition->common.module
-		= WebIf_Definition->common.module;
+	p_new_entry_webif_definition->common.module
+		= p_entry_webif_definition->common.module;
 
 	// store Slot-Number
-	NewWebIf_Definition->SlotNo = NewSlotNo;
+	p_new_entry_webif_definition->SlotNo = NewSlotNo;
 
 	// clear Flag 'WANTS_WRITE' in new WebIf Definition
- 	NewWebIf_Definition->common.Common_CtrlRegA
+ 	p_new_entry_webif_definition->common.Common_CtrlRegA
 		&= ~F_WANTS_WRITE;
 
 	// clear Flag 'NEEDS_CLOSE' in new WebIf Definition
- 	NewWebIf_Definition->WebIf_CtrlRegA
+ 	p_new_entry_webif_definition->WebIf_CtrlRegA
 		&= ~F_NEEDS_CLOSE;
 
 	// get info about new client-conn (port, ip, ...)	
@@ -10447,40 +10448,45 @@ WebIf_DirectRead(Common_Definition_t* Common_Definition)
 		, sizeof(tcp->remote_ip));
 
 	// store TCP struct
-	NewWebIf_Definition->proto.tcp = tcp;
+	p_new_entry_webif_definition->proto.tcp = tcp;
 
-	NewWebIf_Definition->common.nameLen = asprintf((char**)&NewWebIf_Definition->common.name
+	// give definition a new unique name
+	p_new_entry_webif_definition->common.nameLen = asprintf((char**)&p_new_entry_webif_definition->common.name
 		,"%.*s.%d.%d.%d.%d.%u"
-		,WebIf_Definition->common.nameLen
-		,WebIf_Definition->common.name
-		,NewWebIf_Definition->proto.tcp->remote_ip[0]
-		,NewWebIf_Definition->proto.tcp->remote_ip[1]
-		,NewWebIf_Definition->proto.tcp->remote_ip[2]
-		,NewWebIf_Definition->proto.tcp->remote_ip[3]
-		,NewWebIf_Definition->proto.tcp->remote_port);
+		,p_entry_webif_definition->common.nameLen
+		,p_entry_webif_definition->common.name
+		,p_new_entry_webif_definition->proto.tcp->remote_ip[0]
+		,p_new_entry_webif_definition->proto.tcp->remote_ip[1]
+		,p_new_entry_webif_definition->proto.tcp->remote_ip[2]
+		,p_new_entry_webif_definition->proto.tcp->remote_ip[3]
+		,p_new_entry_webif_definition->proto.tcp->remote_port);
 
-  // assign an unique number
-  NewWebIf_Definition->common.nr = SCDERoot_at_WebIf_M->device_count++;
+  	// assign an unique number
+ 	 p_new_entry_webif_definition->common.nr = SCDERoot_at_WebIf_M->device_count++;
 
-  // make this definition temporary
-	NewWebIf_Definition->common.defCtrlRegA |= F_TEMPORARY;
+  	// make this definition temporary
+	p_new_entry_webif_definition->common.defCtrlRegA |= F_TEMPORARY;
+
+	// store new WebIf Definition
+	STAILQ_INSERT_HEAD(&SCDERoot_at_WebIf_M->HeadCommon_Definitions
+		,(Common_Definition_t*) p_new_entry_webif_definition
+		, entries);
 
 	// official log entry
-	SCDEFn_at_WebIf_M->Log3Fn(NewWebIf_Definition->common.name
-		,NewWebIf_Definition->common.nameLen
+	SCDEFn_at_WebIf_M->Log3Fn(p_new_entry_webif_definition->common.name
+		,p_new_entry_webif_definition->common.nameLen
 		,1
 		,"Created a new Definition for conn - Name:%.*s TypeName:%.*s Slot:%d FD:%d\n"
-		,NewWebIf_Definition->common.nameLen
-		,NewWebIf_Definition->common.name
-		,NewWebIf_Definition->common.module->provided->typeNameLen
-		,NewWebIf_Definition->common.module->provided->typeName
-		,NewWebIf_Definition->SlotNo
-		,NewWebIf_Definition->common.fd);
+		,p_new_entry_webif_definition->common.nameLen
+		,p_new_entry_webif_definition->common.name
+		,p_new_entry_webif_definition->common.module->provided->typeNameLen
+		,p_new_entry_webif_definition->common.module->provided->typeName
+		,p_new_entry_webif_definition->SlotNo
+		,p_new_entry_webif_definition->common.fd);
 
  	// execute WebIf Connect Callback to init
-	WebIf_ConnCb(NewWebIf_Definition);
-
-	}
+	WebIf_ConnCb(p_new_entry_webif_definition);
+  }
 
 // --------------------------------------------------------------------------------------------------
 
@@ -10492,64 +10498,59 @@ WebIf_DirectRead(Common_Definition_t* Common_Definition)
 	printf("|recv>");
 	#endif
 
-	RecvBuf = (char*) malloc(RECV_BUF_SIZE);
+	// malloc our receive buffer
+	recv_buffer = (char*) malloc(RECV_BUF_SIZE);
 
-	// error - got no buffer !
-	if (RecvBuf == NULL) {
+	// got no buffer ? Close / Cleanup connection
+	if ( recv_buffer == NULL ) {
 
 		os_printf("platHttpServerTask: memory exhausted!\n");
 
-		WebIf_DisconCb(WebIf_Definition);
+		WebIf_DisconCb(p_entry_webif_definition);
 
-		close(WebIf_Definition->common.fd);
+		close(p_entry_webif_definition->common.fd);
 
-		WebIf_Definition->common.fd = -1;
+		p_entry_webif_definition->common.fd = -1;
+	}
 
-		}
-
-	// receive the data
-	int32_t ret = recv(WebIf_Definition->common.fd
-		,RecvBuf
-		,RECV_BUF_SIZE
-		,0);
+	// receive the expected data
+	int32_t recv_len = recv(p_entry_webif_definition->common.fd,
+		recv_buffer, RECV_BUF_SIZE, 0);
 
 	// process, if received data
-	if (ret > 0) {
+	if ( recv_len > 0 ) {
 
 		// execute Received Callback
-		WebIf_RecvCb(WebIf_Definition, RecvBuf, ret);
-
-		}
+		WebIf_RecvCb(p_entry_webif_definition, recv_buffer, recv_len);
+	}
 
 	// or has remote closed the connection ?
-	else if (ret == 0) {
+	else if ( recv_len == 0 ) {
 
 		// execute Disconnect Callback
-		WebIf_DisconCb(WebIf_Definition);
+		WebIf_DisconCb(p_entry_webif_definition);
 
-		// undefinde this WebIf_Definition
-		WebIf_UndefineRaw(WebIf_Definition);
-
-		}
+		// undefinde this p_entry_webif_definition
+		WebIf_UndefineRaw(p_entry_webif_definition);
+	}
 
 
 	// else we got an error ...
-	else	{
+	else {
 
 		// execute Error Callback
-		WebIf_ReconCb(WebIf_Definition, ret);
+		WebIf_ReconCb(p_entry_webif_definition, recv_len);
 
-		// undefinde this WebIf_Definition
-		WebIf_UndefineRaw(WebIf_Definition);
-
-		}
-
+		// undefinde this p_entry_webif_definition
+		WebIf_UndefineRaw(p_entry_webif_definition);
 	}
 
-  // unused
-  return 0;
-
+ 	// free our receive buffer
+  	free(recv_buffer);
   }
+
+  return 0;
+}
 
 
 
@@ -10579,44 +10580,51 @@ WebIf_Connect(Common_Definition_t* Common_Definition)
 /*
  * --------------------------------------------------------------------------------------------------
  *  FName: WebIf_DirectWrite
- *  Desc: Called by the global select-loop when FD is in write-set
+ *  Desc: Called from the global select-loop when FD is in write-set
  *  Info: But ONLY if Flag 'Want_Write' in Common_CtrlRegA is set !!!
- *  Para: Common_Definition* Common_Definition -> XXX_Definition of the FD owners definition
+ *  Para: Common_Definition_t* p_entry_definition -> the FD owners definition
  *  Rets: ? - unused
  * --------------------------------------------------------------------------------------------------
  */
 int 
-WebIf_DirectWrite(Common_Definition_t* Common_Definition)
-  {
+WebIf_Direct_Write(Common_Definition_t* p_entry_definition)
+{
+  // make common ptr to modul specific ptr
+  WebIf_Definition_t* p_entry_webif_definition = 
+	(WebIf_Definition_t*) p_entry_definition;
 
-  #if SCDEH_DBG >= 5
-  printf("\n|WebIf_DirectWriteFn, Name:%.*s>"
-	,Common_Definition->nameLen
-	,(char*)Common_Definition->name);
+// -------------------------------------------------------------------------------------------------
+
+  #if WebIf_Module_DBG >= 5
+  SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name,
+	p_entry_webif_definition->common.nameLen,
+	5,
+	"Direct Write Fn is called (module '%.*s').",
+	p_entry_webif_definition->common.module->provided->typeNameLen,
+	p_entry_webif_definition->common.module->provided->typeName);
   #endif
 
-  // make common ptr to modul specific ptr
-  WebIf_Definition_t* WebIf_Definition = (WebIf_Definition_t*) Common_Definition;
+// ------------------------------------------------------------------------------------------------
 
-//  // clear Flag F_WANTS_WRITE, will be set again when more data is send
-//  WebIf_Definition->common.Common_CtrlRegA &= ~F_WANTS_WRITE;
+  // clear Flag F_WANT_WRITE, will be set again when more data is send
+//  p_entry_webif_definition->common.Common_CtrlRegA &= ~F_WANTS_WRITE;	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! in mainfn
 
 // --------------------------------------------------------------------------------------------------
 
+
   // execute disconnection (indicated by NEEDS_CLOSE flag) or send more data ...
-  if (WebIf_Definition->WebIf_CtrlRegA & F_NEEDS_CLOSE) {
+  if ( p_entry_webif_definition->WebIf_CtrlRegA & F_NEEDS_CLOSE ) {
 
 	// execute Disconnect Callback
-	WebIf_DisconCb(WebIf_Definition);
+	WebIf_DisconCb(p_entry_webif_definition);
 
 	// undefinde this WebIf_Definition
-	WebIf_UndefineRaw(WebIf_Definition);
+	WebIf_UndefineRaw(p_entry_webif_definition);
 
- #if SCDEH_DBG >= 5
- printf("|conn removed>");
- #endif
-
-	}
+	#if SCDEH_DBG >= 5
+	printf("|conn removed>");
+	#endif
+  }
 
 // --------------------------------------------------------------------------------------------------
 
@@ -10624,14 +10632,11 @@ WebIf_DirectWrite(Common_Definition_t* Common_Definition)
   else	{
 
 	// execute Sent Callback
-	WebIf_SentCb(WebIf_Definition);
-
-	}
-
+	WebIf_SentCb(p_entry_webif_definition);
+  }
 
   return 0;
-
-  }
+}
 
 
 

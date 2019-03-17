@@ -1,6 +1,7 @@
 ﻿/* #################################################################################################
  *
- *  Function: Deleteattr Command for SCDE (Smart Connected Device Engine)
+ *  Function: Deleteattr Command - for SCDE (Smart Connected Device Engine)
+ *            Deletes Attributes assigned to Definitions
  *
  *  ESP 8266EX & ESP32 SOC Activities ...
  *  Copyright by EcSUHA
@@ -34,10 +35,10 @@
 // -------------------------------------------------------------------------------------------------
 
 // make data root locally available
-static SCDERoot_t* SCDERoot;
+static SCDERoot_t* p_SCDERoot;
 
 // make locally available from data-root: the SCDEFn (Functions / callbacks) for operation
-static SCDEFn_t* SCDEFn;
+static SCDEFn_t* p_SCDEFn;
 
 // -------------------------------------------------------------------------------------------------
 
@@ -54,7 +55,7 @@ static SCDEFn_t* SCDEFn;
 
 // Command Help
 const uint8_t Deleteattr_helpText[] = 
-  "Usage: Deleteattr <devspec> <attrName>, to delete attribute for <devspec>";
+  "Usage: Deleteattr <def-spec> <attr-name>, to delete attributes from definitions";
 // CommandHelp (detailed)
 const uint8_t Deleteattr_helpDetailText[] = 
   "Usagebwrebwerb: DeleteAttr <name> <type> <options>, to Define a device";
@@ -72,27 +73,26 @@ ProvidedByCommand_t Deleteattr_ProvidedByCommand = {
 
 
 /* --------------------------------------------------------------------------------------------------
- *  FName: Deleteattr_Initialize
- *  Desc: Initializion of SCDE Function Callback of an new loaded command
- *  Info: Stores Command-Information (Function Callbacks) to SCDE-Root
- *  Para: SCDERoot_t* SCDERootptr -> ptr to SCDE Data Root
+ *  FName: Deleteattr - Initialize Command Funktion
+ *  Desc: Initializion of an (new loaded) SCDE-Command. Init p_SCDERoot and p_SCDE Function Callbacks.
+ *  Info: Called only once befor use!
+ *  Para: SCDERoot_t* p_SCDERoot_from_core -> ptr to SCDE Data Root from SCDE-Core
  *  Rets: ? unused
  *--------------------------------------------------------------------------------------------------
  */
 int 
-Deleteattr_InitializeCommandFn(SCDERoot_t* SCDERootptr)
-  {
-
+Deleteattr_InitializeCommandFn(SCDERoot_t* p_SCDERoot_from_core)
+{
   // make data root locally available
-  SCDERoot = SCDERootptr;
+  p_SCDERoot = p_SCDERoot_from_core;
 
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
-  SCDEFn = SCDERootptr->SCDEFn;
+  p_SCDEFn = p_SCDERoot->SCDEFn;
 
 // --------------------------------------------------------------------------------------------------
 
   #if Deleteattr_Command_DBG >= 3
-  SCDEFn->Log3Fn(Deleteattr_ProvidedByCommand.commandNameText
+  p_SCDEFn->Log3Fn(Deleteattr_ProvidedByCommand.commandNameText
 	,Deleteattr_ProvidedByCommand.commandNameTextLen
 	,3
 	,"InitializeFn called. Now useable.");
@@ -103,262 +103,445 @@ Deleteattr_InitializeCommandFn(SCDERoot_t* SCDERootptr)
   return 0;
 }
 
-/*
-Device specification (devspec)
-
-The commands attr, deleteattr, displayattr, delete, get, list, set, setreading, setstate, trigger can take a more complex device specification as argument, which will be expanded to a list of devices. A device specification (short devspec) can be:
-a single device name. This is the most common case.
-a list of devices, separated by comma (,)
-a regular expression
-a NAME=VALUE pair, where NAME can be an internal value like TYPE, a Reading-Name or an attribute. VALUE is a regexp. To negate the comparison, use NAME!=VALUE. To restrict the search, use i: as prefix for internal values, r: for readings and a: for attributes. See the example below.
-if the spec is followed by the expression :FILTER=NAME=VALUE, then the values found in the first round are filtered by the second expression.
-Examples:
-set lamp1 on
-set lamp1,lamp2,lamp3 on
-set lamp.* on
-set room=kitchen off
-set room=kitchen:FILTER=STATE=on off
-set room=kitchen:FILTER=STATE!=off off
-*/
-
 
 
 /* -------------------------------------------------------------------------------------------------
- *  FName: Deleteattr_CommandFn
- *  Desc: Tries to delete an attribute from an definition
- *        Calls modules AttributeFn with cmd=del, retMsg.strText != NULL -> module executes veto
- *  Info: 'defName' is definition name, for that the attribute should be deleted
- *        'attrName' is the attribute name
- *  Para: const uint8_t *argsText  -> prt to attr command args text "defName attrName"
- *        const size_t argsTextLen -> attr command args text length
- *  Rets: struct headRetMsgMultiple_s -> STAILQ head of multiple retMsg, if NULL -> no retMsg-entry
+ *  FName: Deleteattr - The Command main Fn
+ *  Desc: Tries to delete an attributes from definition-specification matching Definitions.
+ *        Then calls modules AttributeFn with cmd=del, retMsg.strText != NULL -> module sends veto.
+ *  Info: 'def_spec' is the definition specification which is the input for the definition names
+ *         matching query. For all matching Definitions this attribute will be deleted.
+ *  Para: const uint8_t* p_args  -> space seperated command args text string "def_spec"
+ *        const size_t args_len -> command args text length
+ * NPara: const String_t args -> space seperated command args string "def_spec attr_name"
+ *  Rets: struct headRetMsgMultiple_s -> STAILQ head of multiple retMsg, if NULL -> no retMsg
  * -------------------------------------------------------------------------------------------------
  */
-struct headRetMsgMultiple_s
-Deleteattr_CommandFn (const uint8_t *argsText
-		,const size_t argsTextLen)
+struct headRetMsgMultiple_s ICACHE_FLASH_ATTR //struct  Head_String_s
+Deleteattr_CommandFn (const uint8_t* p_args
+		,const size_t args_len)
 {
+
+  // temporary conversion to make ready -> const String_t args
+  String_t args;
+  args.p_char = p_args;
+  args.len = args_len;
+
+// -------------------------------------------------------------------------------------------------
+
   #if Deleteattr_Command_DBG >= 7
-  SCDEFn->Log3Fn(Deleteattr_ProvidedByCommand.commandNameText
+  p_SCDEFn->Log3Fn(Deleteattr_ProvidedByCommand.commandNameText
 	,Deleteattr_ProvidedByCommand.commandNameTextLen
 	,7
 	,"CommandFn called with args '%.*s'"
-	,argsTextLen
-	,argsText);
+	,args_len
+	,p_args);
   #endif
 
 // --------------------------------------------------------------------------------------------------
 
-  // prepare STAILQ head for multiple RetMsg storage
-  struct headRetMsgMultiple_s headRetMsgMultiple;
+  // prepare STAILQ head to store multiple 'ret_msg' elements
+  struct Head_String_s head_ret_msg;
 
   // Initialize the queue
-  STAILQ_INIT(&headRetMsgMultiple);
+  STAILQ_INIT(&head_ret_msg);
 
-  // set start of possible def-Name-Text
-  const uint8_t *defNameText = argsText;
+// --------------------------------------------------------------------------------------------------
 
-  // set start of possible attr-Name-Text
-  const uint8_t *attrNameText = argsText;
+  // expected argument #1
+  String_t def_spec;
 
-  // a seek-counter
+  // set * to start of possible def-spec text (seek-start-pos)
+  def_spec.p_char = args.p_char;
+
+  // the total seek-counter
   int i = 0;
+	
+  // seek * to start of  def-spec text ('\32' after space)
+  while( ( i < args.len ) && ( *def_spec.p_char == ' ' ) ) { i++ ; def_spec.p_char++ ; }
+
+  // 1 @ finnished
+
+  // expected argument #2
+  String_t attr_name;
+
+  // set * to start of possible attr-name text (seek-start-pos)
+  attr_name.p_char = def_spec.p_char;
+
+  // an element seek-counter
+  int j = 0;
 
   // seek to next space '\32'
-  while( (i < argsTextLen) && (*attrNameText != ' ') ) {i++;attrNameText++;}
+  while( ( i < args.len ) && ( *attr_name.p_char != ' ' ) ) { i++, j++ ; attr_name.p_char++ ; }
 
-  // length of def-Name-Text
-  size_t defNameTextLen = i;
+  // length of def-spec text determined
+  def_spec.len = j;
 
-  // seek to start position of attr-Name-Text '\32'
-  while( (i < argsTextLen) && (*attrNameText == ' ') ) {i++;attrNameText++;}
+  // seek * to start of attr-name text ('\32' after space)
+  while( ( i < args.len ) && ( *attr_name.p_char == ' ' ) ) { i++ ; attr_name.p_char++ ; }
 
-  // length of attr-Name-Text
-  size_t attrNameTextLen = argsTextLen - i;
+  // 2 @ finnished
+
+  // no further arguments expected - searching the end of text
+  String_t end_of_text;
+	
+  // set start * of possible 'end of text' seek-start-pos
+  end_of_text.p_char = attr_name.p_char;
+	
+  // clear element seek-counter
+  j = 0;
+
+  // seek to next space '\32'
+  while( ( i < args.len ) && ( *end_of_text.p_char != ' ' ) ) { i++ , j++ ; end_of_text.p_char++ ; }
+
+  // length of attr-Val text determined
+  attr_name.len = j;
+
+  // @ 'p_end_of_text' ! No further processing ...
 
 // -------------------------------------------------------------------------------------------------
 
-  // veryfy lengths > 0, definition 0 allowed
-  if ( (defNameTextLen == 0) || (attrNameTextLen == 0) ) {
+  // verify lengths > 0, ATTR_VAL_LEN = 0 ALLOWED!
+  if ( ( def_spec.len == 0 ) || ( attr_name.len == 0 ) ) {
 
 	// alloc mem for retMsg
-	strTextMultiple_t *retMsg =
-		 malloc(sizeof(strTextMultiple_t));
+	Entry_String_t* p_entry_ret_msg =
+		 malloc(sizeof(Entry_String_t));
 
 	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
-		,"Could not interpret command '%.*s'! Usage: Deleteattr <devspec> <attrName>"
-	   	,argsTextLen
-		,argsText);
+	p_entry_ret_msg->string.len = asprintf(&p_entry_ret_msg->string.p_char,
+		"Error! Could not interpret '%.*s'! Usage: Deleteattr <def-spec> <attr-name>",
+		args.len,
+		args.p_char);
 
-	// insert retMsg in stail-queue
-	STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+	// insert ret_msg as entry in stail-queue
+	STAILQ_INSERT_TAIL(&head_ret_msg, p_entry_ret_msg, entries);
 
-	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-	return headRetMsgMultiple;
+  	// return head of singly linked tail queue, which holds 'ret_msg' elements
 
+
+// temporary conversion to make ready ->  head_ret_msg
+struct headRetMsgMultiple_s x;
+STAILQ_INIT(&x);
+x.stqh_first =  head_ret_msg.stqh_first;
+x.stqh_last =  head_ret_msg.stqh_last;
+  	return x; // head_ret_msg;
   }
 
 // -------------------------------------------------------------------------------------------------
 
-  // search for the Common_Definition for the requested def-name-text
-  Common_Definition_t *Common_Definition = STAILQ_FIRST(&SCDERoot->HeadCommon_Definitions);
-  while (Common_Definition != NULL) {
-
-	if ( (Common_Definition->nameLen == defNameTextLen)
-		&& (!strncasecmp((const char*) Common_Definition->name, (const char*) defNameText, defNameTextLen)) ) {
-
-		// found, break and keep prt
-		break;
-
-	}
-
-	// get next Common_Definition for processing
-	Common_Definition = STAILQ_NEXT(Common_Definition, entries);
-  }
+  // get all 'definition' that match 'def_spec'. Result returned as SLTQ head.
+  struct Head_Definitions_s head_dev_spec_matching_definitions =
+	p_SCDEFn->Get_Definitions_That_Match_DefSpec_String_Fn(def_spec);
 
 // -------------------------------------------------------------------------------------------------
 
-  // Common_Definition for the requested def-name-text not found
-  if (Common_Definition == NULL) {
+  // start processing, load first returned entry 'definition'
+  Entry_Definitions_t* p_entry_dev_spec_matching_definitions = 
+	STAILQ_FIRST(&head_dev_spec_matching_definitions);
+
+  String_t attr_value = {(uint8_t*) NULL, 0};
+
+  // no entry for definitions that match requested 'def_spec' ? We should throw out an error!
+  if ( p_entry_dev_spec_matching_definitions == NULL ) {
 
 	// alloc mem for retMsg
-	strTextMultiple_t *retMsg =
-		 malloc(sizeof(strTextMultiple_t));
+	Entry_String_t* p_entry_ret_msg =
+		 malloc(sizeof(Entry_String_t));
 
 	// response with error text
-	retMsg->strTextLen = asprintf(&retMsg->strText
-		,"Error, could not find <defName>: %.*s!\r\n"
-		,defNameTextLen
-		,defNameText);
+	p_entry_ret_msg->string.len = asprintf(&p_entry_ret_msg->string.p_char,
+		"Could not find an <def-spec> matching definition! Check '%.*s'!",
+		def_spec.len,
+		def_spec.p_char);
 
-	// insert retMsg in stail-queue
-	STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
+	// insert ret_msg as entry in stail-queue
+	STAILQ_INSERT_TAIL(&head_ret_msg, p_entry_ret_msg, entries);
 
-	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-	return headRetMsgMultiple;
+  // temporary conversion to make ready ->  head_ret_msg
+struct headRetMsgMultiple_s x;
+STAILQ_INIT(&x);
+x.stqh_first =  head_ret_msg.stqh_first;
+x.stqh_last =  head_ret_msg.stqh_last;
+  	return x; // head_ret_msg;
   }
-
-  // Common_Definition for the requested definition-name found
-  else {
 
 // -------------------------------------------------------------------------------------------------
 
-	// call Attribute Fn to notify changes - if provided by Type
-	if (Common_Definition->module->provided->AttributeFn) {
+  // loop through the found 'definition' entrys - till the queue has no more entrys
+  while ( p_entry_dev_spec_matching_definitions != NULL ) {
 
-		// prepare a dummy for attributeFn (required?)
-		size_t dummyAttrValTextLen = 0;
-		uint8_t *dummyAttrValText = NULL;
+// -------------------------------------------------------------------------------------------------
 
-		// build attribute command text
-		uint8_t *attrCmdText;
-		size_t attrCmdTextLen = (size_t) asprintf((char **) &attrCmdText
+	// get the ptr to the current 'definition'
+	Common_Definition_t* p_entry_definition = 
+		p_entry_dev_spec_matching_definitions->p_entry_definition;
+
+	// to store the ret_msg from AttributeFn
+	Entry_String_t* p_entry_ret_msg = NULL;
+
+	// call 'module' 'Attribute_Fn' for this 'definition' to notify - if provided by Type
+	if (p_entry_definition->module->provided->Attribute_Fn) {
+
+		// build 'attr_command'
+		String_t attr_command;
+		attr_command.len = asprintf((char **) &attr_command.p_char
 			,"del");
 
-		printf("Calling AttributeFN of typeName:%.*s for defName:%.*s -> attrCmd:%.*s attrName:%.*s\n"
-			,Common_Definition->module->provided->typeNameLen
-			,Common_Definition->module->provided->typeName
-			,Common_Definition->nameLen
-			,Common_Definition->name
-			,attrCmdTextLen
-			,attrCmdText
-  			,attrNameTextLen
-			,attrNameText);
+		#if Deleteattr_Command_DBG >= 7
+		p_SCDEFn->Log3Fn(Deleteattr_ProvidedByCommand.commandNameText,
+			Deleteattr_ProvidedByCommand.commandNameTextLen,
+			7,
+			"Calling AttributeFN for definition '%.*s' (modul '%.*s') with args "
+			"attr_command '%.*s' attr_name '%.*s' attr_value '%.*s'",
+			p_entry_definition->nameLen,
+			p_entry_definition->name,
+			p_entry_definition->module->provided->typeNameLen,
+			p_entry_definition->module->provided->typeName,
+			attr_command.len,
+			attr_command.p_char,
+  			attr_name.len,
+			attr_name.p_char);
+		#endif
 
-		// call modules AttributeFn, if retMsg != NULL -> interpret as veto
-		strTextMultiple_t *retMsg = 
-			Common_Definition->module->provided->AttributeFn(Common_Definition
-			,attrCmdText
-			,attrCmdTextLen
-			,attrNameText
-			,attrNameTextLen
-			,&dummyAttrValText
-			,&dummyAttrValTextLen);
+		// call 'module' 'Attribute_Fn', if ret_msg != NULL -> an entry, interpret as veto
+		p_entry_ret_msg =
+			p_entry_definition->module->provided->Attribute_Fn(p_entry_definition,
+			attr_command,
+			attr_name,
+			attr_value);
 
-		// got an error msg?
-		if (retMsg) {
+		// free 'attr_command'
+		free (attr_command.p_char);
+	}
 
-			// insert retMsg in stail-queue
-			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-		}
+	else {
 
-		free(attrCmdText);
+		#if Deleteattr_Command_DBG >= 7
+		p_SCDEFn->Log3Fn(Deleteattr_ProvidedByCommand.commandNameText,
+			Deleteattr_ProvidedByCommand.commandNameTextLen,
+			7,
+			"No AttributeFN available for definition '%.*s' (modul '%.*s') "
+			" attr_name '%.*s' with attr_value '%.*s' will be assigned without check.",
+			p_entry_definition->nameLen,
+			p_entry_definition->name,
+			p_entry_definition->module->provided->typeNameLen,
+			p_entry_definition->module->provided->typeName,
+  			attr_name.len,
+			attr_name.p_char,
+			attr_value.len,
+			attr_value.p_char);
+		#endif
 	}
 
 // -------------------------------------------------------------------------------------------------
 
-	// veto from Types attributeFn? Do NOT del attribute
-	if (!STAILQ_EMPTY(&headRetMsgMultiple)) {
+	// 'ret_msg' as entry ? => veto from attributeFn! Add 'ret_msg' entry to queue, do NOT delete attribute !
+	if (p_entry_ret_msg) {
 
-		// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-		return headRetMsgMultiple;
+		// insert ret_msg as entry in stail-queue
+		STAILQ_INSERT_TAIL(&head_ret_msg, p_entry_ret_msg, entries);
+
+		#if Deleteattr_Command_DBG >= 7
+		p_SCDEFn->Log3Fn(Deleteattr_ProvidedByCommand.commandNameText,
+			Deleteattr_ProvidedByCommand.commandNameTextLen,
+			7,
+			"Got an veto msg from AttributeFN for definition '%.*s' (modul '%.*s'). "
+			"Attribute attr_name '%.*s' with attr_value '%.*s' NOT deleted!",
+			p_entry_definition->nameLen,
+			p_entry_definition->name,
+			p_entry_definition->module->provided->typeNameLen,
+			p_entry_definition->module->provided->typeName,
+  			attr_name.len,
+			attr_name.p_char,
+			attr_value.len,
+			attr_value.p_char);
+		#endif
+
+		// load next entry of 'def_spec' matching definitions
+		p_entry_dev_spec_matching_definitions = 
+			STAILQ_NEXT(p_entry_dev_spec_matching_definitions, entries);
+
+		// to continue loop without adding attributes
+		continue;
 	}
 
 // -------------------------------------------------------------------------------------------------
 
-	// loop through assigned attributes and try to find the existing attribute and delete it. Or add error-msg if not found.
-	attribute_t *attribute = STAILQ_FIRST(&SCDERoot->headAttributes);
-	while (true) {
+	// get first entry from our 'attr_name' list
+  	Entry_Attr_Name_t* p_entry_attr_name = 
+		LIST_FIRST(&p_SCDERoot->head_attr_name);
 
-		// no old attribute found ?
-		if (attribute == NULL) {
+	// get first entry from our 'attr_value' list
+  	Entry_Attr_Value_t* p_entry_attr_value = 
+		LIST_FIRST(&p_entry_definition->head_attr_value);
 
-			// alloc mem for retMsg
-			strTextMultiple_t *retMsg =
-				malloc(sizeof(strTextMultiple_t));
+  	// search the lists 'attr_name' entries for the requested 'attr_name'
+ 	while ( p_entry_attr_name != NULL ) {
 
-			// response with error text
-			retMsg->strTextLen = asprintf(&retMsg->strText
-				,"Error - attrName:%.*s not found!\r\n"
-				,attrNameTextLen
-				,attrNameText);
+		// compare no + length of characters. Matching list entry with requested 'attr_name' ?
+		if ( ( p_entry_attr_name->attr_name.len == attr_name.len )
+			&& ( !strncasecmp((const char*) p_entry_attr_name->attr_name.p_char,
+				(const char*) attr_name.p_char,
+				attr_name.len) ) ) {
 
-			// insert retMsg in stail-queue
-			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
-
-			// added error-text, break
+			// found matching 'attr_name', keep, break loop! 
 			break;
 		}
 
-		// is this an old value for this attribute?
-		if ( (attribute->attrAssignedDef == Common_Definition)
-			&& (attribute->attrNameTextLen == attrNameTextLen)
-			&& (!strncmp((const char*) attribute->attrNameText, (const char*) attrNameText, attrNameTextLen)) ) {
+		// load next 'attr_name' entry to process it
+		p_entry_attr_name = LIST_NEXT(p_entry_attr_name, entries);
+ 	 }
 
-			printf("Deleted attribute - defName:%.*s, attrName:%.*s, attrVal:%.*s\n"
-				,attribute->attrAssignedDef->nameLen
-				,attribute->attrAssignedDef->name
-				,attribute->attrNameTextLen
-				,attribute->attrNameText
-				,attribute->attrValTextLen
-				,attribute->attrValText);
+// -------------------------------------------------------------------------------------------------
 
-			// remove attribute
-			STAILQ_REMOVE(&SCDERoot->headAttributes, attribute, attribute_s, entries);
+	// We have an entry for requested 'attr_name' ? Search assigned 'attr_value' !
+  	if ( !p_entry_attr_name == NULL ) {
 
-			// free attribute name
-			if (attribute->attrNameText) free(attribute->attrNameText);
+  		// search this 'definition' list of assigned 'attr_value' entries
+ 		while ( p_entry_attr_value != NULL ) {
+
+			// check, if this entry 'attr_value' is for requested entry 'attr_name'
+			if ( p_entry_attr_name == p_entry_attr_value->p_entry_attr_name ) {
+
+				// found assigned 'attr_value', keep, break loop! 
+				break;
+			}
+
+			// load next 'attr_value' entry to process it
+			p_entry_attr_value = LIST_NEXT(p_entry_attr_value, entries);
+		}
+ 	 }
+
+// -------------------------------------------------------------------------------------------------
+
+	// no entry for requested 'attr_name' or 'attr_value' ? -> NO delete!
+  	if ( p_entry_attr_name == NULL || p_entry_attr_value == NULL ) {
+
+		// alloc mem for retMsg
+		Entry_String_t* p_entry_ret_msg =
+			 malloc(sizeof(Entry_String_t));
+
+		// response with error text
+		p_entry_ret_msg->string.len = asprintf(&p_entry_ret_msg->string.p_char,
+			"Deleting attr_value '%.*s' for definition '%.*s' (modul '%.*s') "
+			"failed! It is NOT assigned!",
+			attr_name.len,
+			attr_name.p_char,
+			p_entry_definition->nameLen,
+			p_entry_definition->name,
+			p_entry_definition->module->provided->typeNameLen,
+			p_entry_definition->module->provided->typeName);
+
+		// insert ret_msg as entry in stail-queue
+		STAILQ_INSERT_TAIL(&head_ret_msg, p_entry_ret_msg, entries);
+
+
+		// load next entry of 'def_spec' matching definitions
+		p_entry_dev_spec_matching_definitions = 
+			STAILQ_NEXT(p_entry_dev_spec_matching_definitions, entries);
+
+		// to continue loop without adding attributes
+		continue;
+	}
+
+// -------------------------------------------------------------------------------------------------
+
+	else {
+		// data is still there - log now ...
+
+		#if Deleteattr_Command_DBG >= 7
+		p_SCDEFn->Log3Fn(Deleteattr_ProvidedByCommand.commandNameText,
+			Deleteattr_ProvidedByCommand.commandNameTextLen,
+			7,
+			"Will delete attr_name '%.*s' with attr_value '%.*s' "
+			"from definition '%.*s' (modul '%.*s').",
+			p_entry_attr_name->attr_name.len,
+			p_entry_attr_name->attr_name.p_char,
+			p_entry_attr_value->attr_value.len,
+			p_entry_attr_value->attr_value.p_char,
+			p_entry_definition->nameLen,
+			p_entry_definition->name,
+			p_entry_definition->module->provided->typeNameLen,
+			p_entry_definition->module->provided->typeName);
+		#endif
+
+		// remove 'attr_value' entry from the 'attr_value' list
+		LIST_REMOVE(p_entry_attr_value, entries);
+
+		// free 'attr_value'.p_char
+		if (p_entry_attr_value->attr_value.p_char) 
+			free(p_entry_attr_value->attr_value.p_char);
+
+		// free old entry 'p_entry_attr_value'
+		if (p_entry_attr_value) 
+			free(p_entry_attr_value);
+
+// -------------------------------------------------------------------------------------------------
+
+		// check if current 'attr_name' entry is no longer in use (can be removed)
 	
-			// free attribute value
-			if (attribute->attrValText) free(attribute->attrValText);
+		// get first entry from our 'definition' list
+  		Common_Definition_t* p_entry_definition = 
+			STAILQ_FIRST(&p_SCDERoot->HeadCommon_Definitions);
 
-			// free attribute
-			if (attribute) free(attribute);
+ 		// search the lists 'definition' entries for the requested 'definition'
+ 		while ( p_entry_definition != NULL ) {
 
-			// found, break
-			break;
+			// get first entry from our 'attr_value' list
+  			Entry_Attr_Value_t* p_entry_attr_value = 
+				LIST_FIRST(&p_entry_definition->head_attr_value);
+
+  			// search the lists 'attr_value' entries for the requested 'attr_name'
+ 			while ( p_entry_attr_value != NULL ) {
+
+				// 'attr_name' used in this 'definition' 'attr_value' list ? -> in use!
+				if ( p_entry_attr_name == p_entry_attr_value->p_entry_attr_name ) {
+
+					// 'attr_name'in use, keep, break loop! 
+					break;
+				}
+
+				// load next 'attr_value' entry to process it
+				p_entry_attr_value = LIST_NEXT(p_entry_attr_value, entries);
+			}
+
+			// load next 'definition' entry to process it
+			p_entry_definition = STAILQ_NEXT(p_entry_definition, entries);
+ 		 }
+
+		// no entry for requested 'attr_name' or 'attr_value' ? 
+		// -> delete 'attr_name' entry, its not longer in use - fee it
+  		if ( p_entry_attr_value == NULL || p_entry_definition == NULL ) {
+
+			// remove 'attr_name' entry from the 'attr_name' list
+			LIST_REMOVE(p_entry_attr_name, entries);
+
+			// free 'attr_name'.p_char
+			free(p_entry_attr_name->attr_name.p_char);
+
+			// free old entry 'p_entry_attr_name'
+			free(p_entry_attr_name);
 		}
-
-		// get next attribute for processing
-		attribute = STAILQ_NEXT(attribute, entries);
 	}
 
-	// return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
-	return headRetMsgMultiple;
+// -------------------------------------------------------------------------------------------------
+
+  	// load next entry of def_spec matching definitions
+  	p_entry_dev_spec_matching_definitions = 
+		STAILQ_NEXT(p_entry_dev_spec_matching_definitions, entries);
   }
 
-}
+// -------------------------------------------------------------------------------------------------
 
+
+// temporary conversion to make ready ->  head_ret_msg
+struct headRetMsgMultiple_s x;
+STAILQ_INIT(&x);
+x.stqh_first =  head_ret_msg.stqh_first;
+x.stqh_last =  head_ret_msg.stqh_last;
+
+  return x; // head_ret_msg;
+}
 
 
