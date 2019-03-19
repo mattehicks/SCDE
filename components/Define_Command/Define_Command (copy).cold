@@ -1,4 +1,4 @@
-﻿/* #################################################################################################
+/* #################################################################################################
  *
  *  Function: Define Command - for SCDE (Smart Connected Device Engine)
  *            Creates an Definition, which is then called Device
@@ -435,5 +435,4 @@ Define_CommandFn (const uint8_t* p_args,
   // return STAILQ head, stores multiple retMsg, if NULL -> no retMsg-entries
   return headRetMsgMultiple;
 }
-
 

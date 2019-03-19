@@ -53,8 +53,8 @@
 #define ESP32_S0_Module_DBG                           7
 #define ESP32_SwITCH_Module_DBG                       7
 #define SSD1306_Module_DBG                            7
-#define Telnet_Module_DBG                             7
-#define Webif_Module_DBG                              7
+#define Telnet_Module_DBG                                 9
+#define Webif_Module_DBG                                  9
 
 
 

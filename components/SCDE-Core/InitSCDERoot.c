@@ -19,7 +19,7 @@ void
 InitSCDERoot(void) {
   SCDERoot.SCDEFn = &SCDEFn;
 
-  STAILQ_INIT(&SCDERoot.headAttributes);
+//  STAILQ_INIT(&SCDERoot.headAttributes);
 
 //new:
   LIST_INIT(&SCDERoot.head_attr_name);

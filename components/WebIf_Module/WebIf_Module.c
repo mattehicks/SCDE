@@ -3626,16 +3626,14 @@ WebIf_IdleCb(void *arg)
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR 
-WebIf_SentCb(void* arg)
-  {
-
+WebIf_SentCb (void* arg)
+{
   // the arg is a ptr to the platform specific conn
   //struct espconn   *platform_conn = arg;	// ESP 8266 NonOS
-  WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
+  WebIf_Definition_t* platform_conn = arg;	// ESP 32 RTOS
 
   // get assigned HTTPD-Connection-Slot-Data
-  WebIf_HTTPDConnSlotData_t *conn
-	= platform_conn->reverse;
+  WebIf_HTTPDConnSlotData_t *conn = platform_conn->reverse;
 
   # if SCDED_DBG >= 3
   printf("\nWebIf SentCb, slot:%d, remote:%d.%d.%d.%d:%d, local port:%d, mem:%d>"
@@ -3652,29 +3650,21 @@ WebIf_SentCb(void* arg)
 //--------------------------------------------------------------------------------------------------
 
   # if SCDED_DBG >= 1
-  if (!(conn->ConnCtrlFlags & F_TXED_CALLBACK_PENDING))
-	{
+  if (! (conn->ConnCtrlFlags & F_TXED_CALLBACK_PENDING) ) {
 	printf("|Err! TXedCbFlag missing>");
-	}
+  }
   #endif
-
-  // speed up cpu
-//  system_update_cpu_freq(SYS_CPU_160MHz);
 
   // Connection-Control Flags management for Sent-Callback
   // - CLEAR: F_TXED_CALLBACK_PENDING, because SentCb is fired. TXED_CALLBACK is no longer pending ...
   // - CLEAR: F_CALLED_BY_RXED_CALLBACK, because this is not RX-Callback ...
   // - CLEAR: F_GENERATE_IDLE_CALLBACK, because now we have a callback. No Idle Callback is needed ...
-  // clr flags
   conn->ConnCtrlFlags &= ~(F_TXED_CALLBACK_PENDING + F_CALLED_BY_RXED_CALLBACK + F_GENERATE_IDLE_CALLBACK);
 
 //--------------------------------------------------------------------------------------------------
 
-  // Response to open connection...
+  // Respond to open connection...
   SCDED_RespToOpenConn(conn);
-
-  // slow down cpu
- // system_update_cpu_freq(SYS_CPU_80MHz);
 }
 
 
@@ -9826,35 +9816,7 @@ WebIf_IdleCbX(Common_Definition_t *Common_Definition)
 
 
 
-/*
- * --------------------------------------------------------------------------------------------------
- *  FName: WebIf_Initialize
- *  Desc: Initializion of SCDE Function Callbacks of an new loaded module
- *  Info: Stores Module-Information (Function Callbacks) to SCDE-Root
- *  Para: SCDERoot_t* SCDERootptr -> ptr to SCDE Data Root
- *  Rets: ? unused
- * --------------------------------------------------------------------------------------------------
- */
-int 
-WebIf_Initialize(SCDERoot_t* SCDERootptr)
-  {
 
-  // make data root locally available
-  SCDERoot_at_WebIf_M = SCDERootptr;
-
-  // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
-  SCDEFn_at_WebIf_M = SCDERootptr->SCDEFn;
-
-  SCDEFn_at_WebIf_M->Log3Fn(WebIf_ProvidedByModule.typeName
-		  ,WebIf_ProvidedByModule.typeNameLen
-		  ,3
-		  ,"InitializeFn called. Type '%.*s' now useable.\n"
-		  ,WebIf_ProvidedByModule.typeNameLen
-		  ,WebIf_ProvidedByModule.typeName);
-
-  return 0;
-
-  }
 
 
 
@@ -9897,115 +9859,23 @@ WebIf_sent(WebIf_Definition_t *WebIf_Definition
  */
 void ICACHE_FLASH_ATTR
 WebIf_disconnect(WebIf_Definition_t *WebIf_Definition)
-  {
-
+{
   // select for disconnecting (F_NEEDS_CLOSE)
   WebIf_Definition->WebIf_CtrlRegA |= F_NEEDS_CLOSE;
 
   // select for want writing (F_WANTS_WRITE), because the real close is done in the write select of code
   WebIf_Definition->common.Common_CtrlRegA |= F_WANTS_WRITE;
-
-  }
-
-
-
-/*
- *--------------------------------------------------------------------------------------------------
- *FName: espconn_regist_recvcb
- * Desc: Platform conn - Register data received callback
- * Para: 
- * Rets: -/-
- *--------------------------------------------------------------------------------------------------
- */
-void ICACHE_FLASH_ATTR
-espconn_regist_recvcb(WebIf_Definition_t *conn
-			, espconn_recv_callback recv_callback)
-  {
-
-  conn->recv_callback 
-	= recv_callback;
-
-  }
-
-
-/*
- *--------------------------------------------------------------------------------------------------
- *FName: espconn_regist_Connectcb
- * Desc: Platform conn - Register disconnected callback
- * Para: 
- * Rets: -/-
- *--------------------------------------------------------------------------------------------------
- */
-void ICACHE_FLASH_ATTR
-espconn_regist_connectcb(WebIf_Definition_t *conn
-		, espconn_connect_callback connect_callback)
-
-  {
-
- conn->proto.tcp->connect_callback
-	= connect_callback;
-
-  }
+}
 
 
 
-/*
- *--------------------------------------------------------------------------------------------------
- *FName: espconn_regist_reconcb
- * Desc: Platform conn - Register error info callback
- * Para: 
- * Rets: -/-
- *--------------------------------------------------------------------------------------------------
- */
-void ICACHE_FLASH_ATTR
-espconn_regist_reconcb(WebIf_Definition_t *conn
-		, espconn_reconnect_callback reconnect_callback)
-  {
-
-  conn->proto.tcp->reconnect_callback
-	= reconnect_callback;
-
-  }
 
 
 
-/*
- *--------------------------------------------------------------------------------------------------
- *FName: espconn_regist_disconcb
- * Desc: Platform conn - Register disconnected callback
- * Para: 
- * Rets: -/-
- *--------------------------------------------------------------------------------------------------
- */
-void ICACHE_FLASH_ATTR
-espconn_regist_disconcb(WebIf_Definition_t *conn
-		, espconn_connect_callback disconnect_callback)
-  {
-
- conn->proto.tcp->disconnect_callback
-	= disconnect_callback;
-
-  }
 
 
 
-/*
- *--------------------------------------------------------------------------------------------------
- *FName: espconn_regist_sentcb
- * Desc: Platform conn - Register data sent callback
- * Para: 
- * Rets: -/-
- *--------------------------------------------------------------------------------------------------
- */
-void ICACHE_FLASH_ATTR
-espconn_regist_sentcb(WebIf_Definition_t *conn
-		, espconn_sent_callback send_callback)
-  {
 
-  conn->send_callback
-	= send_callback;
-
-  }
 
 
 
@@ -10019,8 +9889,7 @@ espconn_regist_sentcb(WebIf_Definition_t *conn
  */
 int 
 WebIf_UndefineRaw(WebIf_Definition_t* WebIf_Definition)
-  {
-
+{
   // connection close
   close(WebIf_Definition->common.fd);
 
@@ -10050,8 +9919,24 @@ WebIf_UndefineRaw(WebIf_Definition_t* WebIf_Definition)
   free(WebIf_Definition);
 
   return 0;
+}
 
-  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -10265,8 +10150,7 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 		  ,listenfd);
 
   return retMsg;
-
-  }
+}
 
 
 
@@ -10288,11 +10172,11 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 
 // -------------------------------------------------------------------------------------------------
 
-  #if WebIf_Module_DBG >= 5
+  #if WebIf_Module_DBG >= 7
   SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name,
 	p_entry_webif_definition->common.nameLen,
-	5,
-	"Direct Read Fn is called (module '%.*s').",
+	7,
+	"Direct Read Fn (module '%.*s'), entering.",
 	p_entry_webif_definition->common.module->provided->typeNameLen,
 	p_entry_webif_definition->common.module->provided->typeName);
   #endif
@@ -10351,7 +10235,7 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 	}
 
 	// mark found slot as used in Slot-Control-Register-Bitfield
-	SlotCtrlRegBF |= (0b1 << NewSlotNo);
+	SlotCtrlRegBF |= ( 0b1 << NewSlotNo );
 
 	// store Slot-Control-Register-Bitfield
 	p_entry_webif_definition->HTTPD_InstCfg->SlotCtrlRegBF = SlotCtrlRegBF;
@@ -10472,17 +10356,18 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 		,(Common_Definition_t*) p_new_entry_webif_definition
 		, entries);
 
-	// official log entry
-	SCDEFn_at_WebIf_M->Log3Fn(p_new_entry_webif_definition->common.name
-		,p_new_entry_webif_definition->common.nameLen
-		,1
-		,"Created a new Definition for conn - Name:%.*s TypeName:%.*s Slot:%d FD:%d\n"
-		,p_new_entry_webif_definition->common.nameLen
-		,p_new_entry_webif_definition->common.name
-		,p_new_entry_webif_definition->common.module->provided->typeNameLen
-		,p_new_entry_webif_definition->common.module->provided->typeName
-		,p_new_entry_webif_definition->SlotNo
-		,p_new_entry_webif_definition->common.fd);
+	#if Telnet_Module_DBG >= 7
+	SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name,
+		p_entry_webif_definition->common.nameLen,
+		7,
+		"Direct Read Fn (module '%.*s'), F_THIS_IS_SERVERSOCKET set for "
+		"this conn. Accepting a new conn. Using slot '%d', FD '%d'. "
+		"Creating a 'definition' with F_TEMPORARY set. Exec Conn_Cb Fn",
+		p_entry_webif_definition->common.module->provided->typeNameLen,
+		p_entry_webif_definition->common.module->provided->typeName,
+		p_new_entry_webif_definition->SlotNo,
+		p_new_entry_webif_definition->common.fd);
+	#endif
 
  	// execute WebIf Connect Callback to init
 	WebIf_ConnCb(p_new_entry_webif_definition);
@@ -10556,29 +10441,6 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 
 /*
  * --------------------------------------------------------------------------------------------------
- *  FName: WebIf_Connect
- *  Desc: Called from XXX_DirectRead when a new connection at the SERVERSOCKET is detected 
- *  Info: 
- *  Para: Common_Definition* Common_Definition -> XXX_Definition of the FD owners definition
- *  Rets: ? - unused
- * --------------------------------------------------------------------------------------------------
- */
-int 
-WebIf_Connect(Common_Definition_t* Common_Definition)
-  {
-
-  // make common ptr to modul specific ptr
-  WebIf_Definition_t* WebIf_Definition = (WebIf_Definition_t*) Common_Definition;
-
-  // unused
-  return 0;
-
-  }
-
-
-
-/*
- * --------------------------------------------------------------------------------------------------
  *  FName: WebIf_DirectWrite
  *  Desc: Called from the global select-loop when FD is in write-set
  *  Info: But ONLY if Flag 'Want_Write' in Common_CtrlRegA is set !!!
@@ -10595,11 +10457,11 @@ WebIf_Direct_Write(Common_Definition_t* p_entry_definition)
 
 // -------------------------------------------------------------------------------------------------
 
-  #if WebIf_Module_DBG >= 5
+  #if WebIf_Module_DBG >= 7
   SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name,
 	p_entry_webif_definition->common.nameLen,
-	5,
-	"Direct Write Fn is called (module '%.*s').",
+	7,
+	"Direct Write Fn (module '%.*s'), entering.",
 	p_entry_webif_definition->common.module->provided->typeNameLen,
 	p_entry_webif_definition->common.module->provided->typeName);
   #endif
@@ -10611,9 +10473,18 @@ WebIf_Direct_Write(Common_Definition_t* p_entry_definition)
 
 // --------------------------------------------------------------------------------------------------
 
-
   // execute disconnection (indicated by NEEDS_CLOSE flag) or send more data ...
   if ( p_entry_webif_definition->WebIf_CtrlRegA & F_NEEDS_CLOSE ) {
+
+	#if WebIf_Module_DBG >= 8
+  	SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name,
+		p_entry_webif_definition->common.nameLen,
+		8,
+		"Direct Write Fn (module '%.*s'), F_NEEDS_CLOSE set for "
+		"this conn. Exec Disconn_Cb Fn and Undefine_Raw Fn.",
+		p_entry_webif_definition->common.module->provided->typeNameLen,
+		p_entry_webif_definition->common.module->provided->typeName);
+ 	 #endif
 
 	// execute Disconnect Callback
 	WebIf_DisconCb(p_entry_webif_definition);
@@ -10621,19 +10492,63 @@ WebIf_Direct_Write(Common_Definition_t* p_entry_definition)
 	// undefinde this WebIf_Definition
 	WebIf_UndefineRaw(p_entry_webif_definition);
 
-	#if SCDEH_DBG >= 5
-	printf("|conn removed>");
-	#endif
+	// definition gone here ...
   }
 
 // --------------------------------------------------------------------------------------------------
 
-  // send more data ... by executing SendCb ...
+  // chance to send more data by SendCb ...
   else	{
+
+	#if WebIf_Module_DBG >= 8
+  	SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name,
+		p_entry_webif_definition->common.nameLen,
+		8,
+		"Direct Write Fn (module '%.*s'), this conn is ready to write, "
+		"exec Send_Cb Fn. "
+		p_entry_webif_definition->common.module->provided->typeNameLen,
+		p_entry_webif_definition->common.module->provided->typeName);
+ 	 #endif
 
 	// execute Sent Callback
 	WebIf_SentCb(p_entry_webif_definition);
   }
+
+  return 0;
+}
+
+
+/* rename
+Disconn_Cb
+Undefine_Raw
+
+*/
+
+/*
+ * --------------------------------------------------------------------------------------------------
+ *  FName: WebIf_Initialize
+ *  Desc: Initializion of SCDE Function Callbacks of an new loaded module
+ *  Info: Stores Module-Information (Function Callbacks) to SCDE-Root
+ *  Para: SCDERoot_t* SCDERootptr -> ptr to SCDE Data Root
+ *  Rets: ? unused
+ * --------------------------------------------------------------------------------------------------
+
+ */
+int 
+WebIf_Initialize(SCDERoot_t* SCDERootptr)
+{
+  // make data root locally available
+  SCDERoot_at_WebIf_M = SCDERootptr;
+
+  // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
+  SCDEFn_at_WebIf_M = SCDERootptr->SCDEFn;
+
+  SCDEFn_at_WebIf_M->Log3Fn(WebIf_ProvidedByModule.typeName
+		  ,WebIf_ProvidedByModule.typeNameLen
+		  ,3
+		  ,"InitializeFn called. Type '%.*s' now useable.\n"
+		  ,WebIf_ProvidedByModule.typeNameLen
+		  ,WebIf_ProvidedByModule.typeName);
 
   return 0;
 }
@@ -10655,8 +10570,7 @@ strTextMultiple_t*
 WebIf_Set(Common_Definition_t* Common_Definition
 	,uint8_t *setArgs
 	,size_t setArgsLen)
-  {
-
+{
   // for Fn response msg
   strTextMultiple_t *retMsg = NULL;
 
@@ -10685,8 +10599,7 @@ WebIf_Set(Common_Definition_t* Common_Definition
 	,setArgs);
 
   return retMsg;
-
-  }
+}
 
 
 
@@ -10702,7 +10615,6 @@ WebIf_Set(Common_Definition_t* Common_Definition
 strTextMultiple_t*
 WebIf_Undefine(Common_Definition_t* Common_Definition)
 {
-
   // for Fn response msg
   strTextMultiple_t *retMsg = NULL;
 
@@ -10716,16 +10628,7 @@ WebIf_Undefine(Common_Definition_t* Common_Definition)
   #endif
 
   return retMsg;
-
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -10744,8 +10647,7 @@ strTextMultiple_t*
 WebIf_Sub(Common_Definition_t* Common_Definition
 	,uint8_t *kArgs
 	,size_t kArgsLen)
-  {
-
+{
   // for Fn response msg
   strTextMultiple_t *retMsg = NULL;
 
@@ -10771,38 +10673,115 @@ WebIf_Sub(Common_Definition_t* Common_Definition
 	,kArgs);
 
   return retMsg;
-
-  }
-
+}
 
 
 
-//  SCDEFn_at_WebIf_M->HexDumpOutFn ("RX-HEX", conn, sizeof(WebIf_HTTPDConnSlotData_t));
+/*
+ *--------------------------------------------------------------------------------------------------
+ *FName: espconn_regist_recvcb
+ * Desc: Platform conn - Register data received callback
+ * Para: 
+ * Rets: -/-
+ *--------------------------------------------------------------------------------------------------
+ */
+void ICACHE_FLASH_ATTR
+espconn_regist_recvcb(WebIf_Definition_t *conn
+			, espconn_recv_callback recv_callback)
+{
+  conn->recv_callback = recv_callback;
+}
 
 
 
+/*
+ *--------------------------------------------------------------------------------------------------
+ *FName: espconn_regist_Connectcb
+ * Desc: Platform conn - Register disconnected callback
+ * Para: 
+ * Rets: -/-
+ *--------------------------------------------------------------------------------------------------
+ */
+void ICACHE_FLASH_ATTR
+espconn_regist_connectcb(WebIf_Definition_t *conn
+		, espconn_connect_callback connect_callback)
+{
+ conn->proto.tcp->connect_callback = connect_callback;
+}
 
 
 
+/*
+ *--------------------------------------------------------------------------------------------------
+
+ *FName: espconn_regist_reconcb
+ * Desc: Platform conn - Register error info callback
+ * Para: 
+ * Rets: -/-
+ *--------------------------------------------------------------------------------------------------
+ */
+void ICACHE_FLASH_ATTR
+espconn_regist_reconcb(WebIf_Definition_t *conn
+		, espconn_reconnect_callback reconnect_callback)
+{
+  conn->proto.tcp->reconnect_callback = reconnect_callback;
+}
 
 
 
+/*
+ *--------------------------------------------------------------------------------------------------
+ *FName: espconn_regist_disconcb
+ * Desc: Platform conn - Register disconnected callback
+ * Para: 
+ * Rets: -/-
+ *--------------------------------------------------------------------------------------------------
+ */
+void ICACHE_FLASH_ATTR
+espconn_regist_disconcb(WebIf_Definition_t *conn
+		, espconn_connect_callback disconnect_callback)
+{
+ conn->proto.tcp->disconnect_callback = disconnect_callback;
+}
 
 
 
+/*
+ *--------------------------------------------------------------------------------------------------
+ *FName: espconn_regist_sentcb
+ * Desc: Platform conn - Register data sent callback
+ * Para: 
+ * Rets: -/-
+ *--------------------------------------------------------------------------------------------------
+ */
+void ICACHE_FLASH_ATTR
+espconn_regist_sentcb(WebIf_Definition_t *conn
+		, espconn_sent_callback send_callback)
+{
+  conn->send_callback = send_callback;
+}
 
 
 
+/*
+ * --------------------------------------------------------------------------------------------------
+ *  FName: WebIf_Connect
+ *  Desc: Called from XXX_DirectRead when a new connection at the SERVERSOCKET is detected 
+ *  Info: 
+ *  Para: Common_Definition* Common_Definition -> XXX_Definition of the FD owners definition
+ *  Rets: ? - unused
+ * --------------------------------------------------------------------------------------------------
+ */
+/*
+int 
+WebIf_Connect(Common_Definition_t* Common_Definition)
+{
 
+  // make common ptr to modul specific ptr
+  WebIf_Definition_t* WebIf_Definition = (WebIf_Definition_t*) Common_Definition;
 
-
-
-
-
-
-
-
-
-
-
+  // unused
+  return 0;
+}
+*/
 

@@ -409,13 +409,12 @@ x.stqh_last =  head_ret_msg.stqh_last;
 
 // -------------------------------------------------------------------------------------------------
 
+	// start with 'no entry' for 'attr_value' -> may reach search loop - with matching entry
+	Entry_Attr_Value_t* p_entry_attr_value = NULL;
+
 	// get first entry from our 'attr_name' list
   	Entry_Attr_Name_t* p_entry_attr_name = 
 		LIST_FIRST(&p_SCDERoot->head_attr_name);
-
-	// get first entry from our 'attr_value' list
-  	Entry_Attr_Value_t* p_entry_attr_value = 
-		LIST_FIRST(&p_entry_definition->head_attr_value);
 
   	// search the lists 'attr_name' entries for the requested 'attr_name'
  	while ( p_entry_attr_name != NULL ) {
@@ -426,7 +425,7 @@ x.stqh_last =  head_ret_msg.stqh_last;
 				(const char*) attr_name.p_char,
 				attr_name.len) ) ) {
 
-			// load next 'attr_name' entry to process it
+			// found, keep 'attr_name' entry to process it
 			break;
 		}
 
@@ -436,7 +435,7 @@ x.stqh_last =  head_ret_msg.stqh_last;
 
 // -------------------------------------------------------------------------------------------------
 
-	// no entry for requested 'attr_name' ?
+	// no entry for requested 'attr_name' found ?
   	if ( p_entry_attr_name == NULL ) {
 
 		// alloc mem for new 'attr_name' entry (Entry_Attr_Name_s)
@@ -458,6 +457,8 @@ x.stqh_last =  head_ret_msg.stqh_last;
 // -------------------------------------------------------------------------------------------------
 
 	else {
+		// get first entry from our 'attr_value' list
+  		p_entry_attr_value = LIST_FIRST(&p_entry_definition->head_attr_value);
 
   		// search this 'definition' list of assigned 'attr_value' entries
  		while ( p_entry_attr_value != NULL ) {
