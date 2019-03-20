@@ -311,25 +311,25 @@ typedef struct WebIf_Definition_s {
  */
 typedef struct WebIf_HTTPDConnSlotData_s {
 
-  WebIf_Definition_t *conn;	// Link to lower level connection management
+  WebIf_Definition_t* conn;	// Link to lower level connection management
 
 //- V V V V V V V V V V V V V V V V V V // TX-Helper
 
-  char *sendBuff;			// Pointer to current allocated send buffer w. size [MAX_SB_LEN] (NULL=NO Send-Buffer)
-  int sendBuffLen; //SendBuffWritePos	// Send buffer, current write position (offset)
-  char *TrailingBuff;			// Pointer to a Trailing-Buffer (in case of an Send-Buffer overflow). Its prio for next transmission!
-  int TrailingBuffLen;			// Trailing-Buffer Length of (allocated) data, if any
+  char* send_buffer;			// Pointer to current allocated send buffer w. size [MAX_SB_LEN] (NULL=NO Send-Buffer)
+  int send_buffer_len; //SendBuffWritePos	// Send buffer, current write position (offset)
+  char* trailing_buffer;		// An temp buffer in case of Send-Buffer overflow. Its prio for next transmission!
+  int trailing_buffer_len;		// The Trailing-Buffer length of (allocated) data, if any
 
 
 //- V V V V V V V V V V V V V V V V V V // Helper
 
-  HTTPDConnSlotPrivData *priv;		// Opaque pointer to data for internal httpd housekeeping (currently unused)
+  HTTPDConnSlotPrivData* priv;		// Opaque pointer to data for internal httpd housekeeping (currently unused)
 
 //- V V V V V V V V V V V V V V V V V V // Procedure Callback Data
 
   PCallback cgi;			// Assigned Procedure Callback for Processing
-  const void *PCArg;			// Argument for Procedure-Callback-Processing
-  void *PCData;				// Data for PC Procedure-Callback-Operations (counting...)
+  const void* PCArg;			// Argument for Procedure-Callback-Processing
+  void* PCData;				// Data for PC Procedure-Callback-Operations (counting...)
 
 //- V V V V V V V V V V V V V V V V V V // General Connection Control
 
@@ -359,9 +359,9 @@ typedef struct WebIf_HTTPDConnSlotData_s {
 
 //tempörär. Idee fehlt
 // union je nach prozesschritt?
-char *HdrFldNameBuff;	// Pointer to Header Field Name Buffer
+char* HdrFldNameBuff;	// Pointer to Header Field Name Buffer
 int HdrFldNameLen;	// current HdrFldNameBuff length
-char *HdrFldValueBuff;	// Pointer to Header Field Value Buffer
+char* HdrFldValueBuff;	// Pointer to Header Field Value Buffer
 int HdrFldValueLen;	// current HdrFldValueBuff length
 
 //	};
@@ -417,15 +417,15 @@ int HdrFldValueLen;	// current HdrFldValueBuff length
 
 //-
 
-  char *url;				// FROM REQUEST ONLY - Ptr to allocated memory filled with PATH extracted from URI
-  char *AltFSFile;			// FROM REQUEST ONLY - (NULL = Filename from Path!) else Ptr. to alternative filename in FS
-  char *DestUrl;//MatchedUrl		// FROM REQUEST ONLY - Ptr to BuildInURL that matches (Active URL with Tokens for reconstruction)
-  char *getArgs;//Query			// FROM REQUEST ONLY - Ptr to allocated memory filled with QUERY (GETARGS) extracted from URI, if any
-  char *hostName;			// FROM REQUEST ONLY - content of host name field
+  char* url;				// FROM REQUEST ONLY - Ptr to allocated memory filled with PATH extracted from URI
+  char* AltFSFile;			// FROM REQUEST ONLY - (NULL = Filename from Path!) else Ptr. to alternative filename in FS
+  char* DestUrl;//MatchedUrl		// FROM REQUEST ONLY - Ptr to BuildInURL that matches (Active URL with Tokens for reconstruction)
+  char* getArgs;//Query			// FROM REQUEST ONLY - Ptr to allocated memory filled with QUERY (GETARGS) extracted from URI, if any
+  char* hostName;			// FROM REQUEST ONLY - content of host name field
 
 //-
 
-  char *postBuff; //BodyData		// REQUEST & RESPONSE - Pointer to BdyData Buffer
+  char* postBuff; //BodyData		// REQUEST & RESPONSE - Pointer to BdyData Buffer
   int postLen;	//BodyLen		// REQUEST & RESPONSE - length of stored body data
 //int postPos;	//BodyPos benötigt?	// counter for post position (contains whole post data len, not only buffer!)
 } WebIf_HTTPDConnSlotData_t;
@@ -590,9 +590,9 @@ typedef struct HeaderFieldInfo_s {
 enum ConnCtrlFlags
   { F_GENERATE_IDLE_CALLBACK	= 1 << 0	// Force one further callback (may be by generating one idle callback)
   , F_CONN_IS_AUTHENTICATED	= 1 << 1	// this connection is authenticated
-  , F_TXED_CALLBACK_PENDING	= 1 << 2	// something was sent. Sent Callback is pending. Do not send again.  
-  , F_CALLED_BY_RXED_CALLBACK	= 1 << 3	// processing was invoked by Received Callback
-  , F_RESA			= 1 << 4
+  , F_TXED_CALLBACK_PENDING	= 1 << 2 //data_sent_cb_pending	// something was sent. Sent Callback is pending. Do not send again.  
+  , F_CALLED_BY_RXED_CALLBACK	= 1 << 3 //in_recv_cb	// processing was invoked by Received Callback
+  , F_CALLED_BY_TXED_CALLBACK	= 1 << 4 //IN_sent_Cb
   , F_RESB			= 1 << 5
   , F_RESC			= 1 << 6
   , F_RESD			= 1 << 7

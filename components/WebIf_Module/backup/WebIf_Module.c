@@ -2430,7 +2430,7 @@ SCDED_GetMimeTypeID(char *url)
  * Desc: Adds start of an Response Header to TX Buffer
  * Para: WebIf_HTTPDConnSlotData_t *conn -> prt to connection slot
  *	 int code -> Response code
- * Rets: int -> bytes free in send_buffer
+ * Rets: int -> bytes free in sendbuff
  *--------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR 
@@ -2456,7 +2456,7 @@ SCDED_StartRespHeader(WebIf_HTTPDConnSlotData_t *conn
  * Desc: Adds start of an Response Header to TX Buffer. It includes external code and description.
  *       The code stored in 'conn->parser_http_errno' is used.
  * Para: WebIf_HTTPDConnSlotData_t *conn -> ptr to current connection slot
- * Rets: int -> amount of bytes free in send_buffer
+ * Rets: int -> amount of bytes free in sendbuff
  *--------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR 
@@ -2486,7 +2486,7 @@ SCDED_StartRespHeader2(WebIf_HTTPDConnSlotData_t *conn)
  *       const char *Field -> ptr to field str
  *       const char *Value -> ptr to value str
  *       int ValueLength -> length of value str (0 = unknown /autodetect)
- * Rets: int -> bytes free in send_buffer
+ * Rets: int -> bytes free in sendbuff
  *--------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR 
@@ -2513,7 +2513,7 @@ SCDED_AddHdrFld(WebIf_HTTPDConnSlotData_t *conn
  *FName: SCDED_EndHeader
  * Desc: Adds "end header mark" to TX buffer
  * Para: WebIf_HTTPDConnSlotData_t *conn -> ptr to connection slot
- * Rets: int -> bytes free in send_buffer
+ * Rets: int -> bytes free in sendbuff
  *--------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR 
@@ -2533,7 +2533,7 @@ SCDED_EndHeader(WebIf_HTTPDConnSlotData_t *conn)
  * Desc: Sends HTTP content that redirects browser to new location
  * Para: WebIf_HTTPDConnSlotData_t *conn -> ptr to connection slot
  *       char *newUrl -> new url string redirect destination
- * Rets: int -> bytes free in send_buffer
+ * Rets: int -> bytes free in sendbuff
  *--------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR 
@@ -2564,7 +2564,7 @@ SCDED_Redirect(WebIf_HTTPDConnSlotData_t *conn
  * Para: WebIf_HTTPDConnSlotData_t *conn -> ptr to connection slot
  *       const char *data -> ptr to the data to send 
  *       int len -> length of data. If -1 the data is seen as a C-string and len will be determined.
- * Rets: int bytes free in send_buffer
+ * Rets: int bytes free in sendbuff
  *--------------------------------------------------------------------------------------------------
  */
 /*
@@ -2576,79 +2576,79 @@ SCDED_Send(WebIf_HTTPDConnSlotData_t *conn
   // if len is -1 the data is seen as a C-string. Length will be determined ..
   if (len < 0) len = strlen(data);
 
-  // will data fit in send_buffer ?
-  if (conn->send_buffer_len + len <= MAX_SENDBUFF_LEN)
+  // will data fit in sendbuff ?
+  if (conn->sendBuffLen + len <= MAX_SENDBUFF_LEN)
 
-	// if data fits in send_buffer ...
+	// if data fits in sendbuff ...
 	{
 
 	// copy to sendbuf
-	SCDE_memcpy_plus(conn->send_buffer + conn->send_buffer_len, data, len);
-	conn->send_buffer_len += len;
+	SCDE_memcpy_plus(conn->sendBuff + conn->sendBuffLen, data, len);
+	conn->sendBuffLen += len;
 
-	// return free bytes in send_buffer
-	return (MAX_SENDBUFF_LEN - conn->send_buffer_len);
+	// return free bytes in sendbuff
+	return (MAX_SENDBUFF_LEN - conn->sendBuffLen);
 
 	}
 
   else
 
-	 // if data does NOT fit in send_buffer ...
+	 // if data does NOT fit in sendbuff ...
 	{
 
-	// Step 1: copy data to send_buffer till full
-	int send_buffer_free = MAX_SENDBUFF_LEN - conn->send_buffer_len;
+	// Step 1: copy data to sendbuff till full
+	int SendBufFree = MAX_SENDBUFF_LEN - conn->sendBuffLen;
 
-	if (send_buffer_free)
-
-		{
-
-		// copy to sendbuf
-		SCDE_memcpy_plus(conn->send_buffer + conn->send_buffer_len, data, send_buffer_free);
-		conn->send_buffer_len += send_buffer_free;
-
-		}
-
-	// Step 2: create/add rest of data to trailing_buffer
-	int trailing_buffer_len;
-
-	if (conn->trailing_buffer == NULL) trailing_buffer_len = len - send_buffer_free;
-
-	else trailing_buffer_len =
-		conn->trailing_buffer_len + len - send_buffer_free;
-
-	// alloc new trailing_buffer
-	char *new_trailing_buffer = (char*)malloc(trailing_buffer_len+1);
-
-	// Copy old trailing_buffer to new trailing_buffer, and dealloc old
-	if (conn->trailing_buffer != NULL)
+	if (SendBufFree)
 
 		{
 
 		// copy to sendbuf
-		memcpy (new_trailing_buffer, conn->trailing_buffer, conn->trailing_buffer_len);
-		free(conn->trailing_buffer);
+		SCDE_memcpy_plus(conn->sendBuff + conn->sendBuffLen, data, SendBufFree);
+		conn->sendBuffLen += SendBufFree;
 
 		}
 
-  else  conn->trailing_buffer_len =0; ///test
+	// Step 2: create/add rest of data to TrailingBuff
+	int NewTrailingBuffLen;
+
+	if (conn->TrailingBuff == NULL) NewTrailingBuffLen = len - SendBufFree;
+
+	else NewTrailingBuffLen =
+		conn->TrailingBuffLen + len - SendBufFree;
+
+	// alloc new TrailingBuff
+	char *NewTrailingBuff = (char*)malloc(NewTrailingBuffLen+1);
+
+	// Copy old TrailingBuff to new TrailingBuff, and dealloc old
+	if (conn->TrailingBuff != NULL)
+
+		{
+
+		// copy to sendbuf
+		memcpy (NewTrailingBuff, conn->TrailingBuff, conn->TrailingBuffLen);
+		free(conn->TrailingBuff);
+
+		}
+
+  else  conn->TrailingBuffLen =0; ///test
 
 
-	// Add new data to trailing_buffer and save
-	SCDE_memcpy_plus(new_trailing_buffer + conn->trailing_buffer_len, data + send_buffer_free, len - send_buffer_free);
+	// Add new data to TrailingBuff and save
+	SCDE_memcpy_plus(NewTrailingBuff + conn->TrailingBuffLen, data + SendBufFree, len - SendBufFree);
 
 	# if SCDED_DBG >= 3
-	printf("HTTPD %d Bytes to trailing_buffer\n",
-		trailing_buffer_len);
+	printf("HTTPD %d Bytes to TrailingBuff\n",
+		NewTrailingBuffLen);
 	#endif
 
 	// Store 
-	conn->trailing_buffer = new_trailing_buffer;
-	conn->trailing_buffer_len = trailing_buffer_len;
+	conn->TrailingBuff = NewTrailingBuff;
+	conn->TrailingBuffLen = NewTrailingBuffLen;
 
 	}
 
-  // 0 bytes free in send_buffer
+  // 0 bytes free in sendbuff
   return 0;
 
   }
@@ -2664,7 +2664,7 @@ SCDED_Send(WebIf_HTTPDConnSlotData_t *conn
  *  Para: WebIf_HTTPDConnSlotData_t *conn -> ptr to the connection slot
  *        const char *data -> ptr to the data to send 
  *        int len -> length of data. If -1 the data is seen as a C-string and len will be determined.
- *  Rets: int bytes free in send_buffer
+ *  Rets: int bytes free in sendbuff
  * --------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR 
@@ -2677,28 +2677,28 @@ SCDED_Send(WebIf_HTTPDConnSlotData_t *conn
   // if len is -1, the data is seen as a C-string. Determine length ..
   if (len < 0) len = strlen(data);
 
-  // in case we have nothing to send -> return free bytes in send_buffer
-  if (!len) return (MAX_SENDBUFF_LEN - conn->send_buffer_len);
+  // in case we have nothing to send -> return free bytes in sendbuff
+  if (!len) return (MAX_SENDBUFF_LEN - conn->sendBuffLen);
 
   // WE WILL DEFINITIVLY SEND DATA HERE - MAKE SEND REQUEST
   conn->conn->common.Common_CtrlRegA |= F_WANTS_WRITE;	//!!!!!!!!!!!!!!!!!!!!!!!problem!
 
   // alloc Send-Buffer, if not already done
-  if (conn->send_buffer == NULL)
-	conn->send_buffer = (char*) malloc(MAX_SENDBUFF_LEN);
+  if (conn->sendBuff == NULL)
+	conn->sendBuff = (char*) malloc(MAX_SENDBUFF_LEN);
 
   // will data fit in Send-Buffer? Then simply copy ...
-  if (conn->send_buffer_len + len <= MAX_SENDBUFF_LEN)
+  if (conn->sendBuffLen + len <= MAX_SENDBUFF_LEN)
 
 	// data fits, copy to Send-Buffer ...
 	{
 
 	// copy to Send-Buffer
-	SCDE_memcpy_plus(conn->send_buffer + conn->send_buffer_len, data, len);
-	conn->send_buffer_len += len;
+	SCDE_memcpy_plus(conn->sendBuff + conn->sendBuffLen, data, len);
+	conn->sendBuffLen += len;
 
 	// return free bytes in Send-Buffer
-	return (MAX_SENDBUFF_LEN - conn->send_buffer_len);
+	return (MAX_SENDBUFF_LEN - conn->sendBuffLen);
 
 	}
 
@@ -2708,60 +2708,60 @@ SCDED_Send(WebIf_HTTPDConnSlotData_t *conn
 	{
 
 	// Step 1: copy data to Send-Buffer till full
-	int send_buffer_free = MAX_SENDBUFF_LEN - conn->send_buffer_len;
+	int SendBufFree = MAX_SENDBUFF_LEN - conn->sendBuffLen;
 
-	if (send_buffer_free)
+	if (SendBufFree)
 
 		{
 
 		// copy to Send-Buffer
-		SCDE_memcpy_plus(conn->send_buffer + conn->send_buffer_len, data, send_buffer_free);
+		SCDE_memcpy_plus(conn->sendBuff + conn->sendBuffLen, data, SendBufFree);
 
-		conn->send_buffer_len += send_buffer_free;
+		conn->sendBuffLen += SendBufFree;
 
 		}
 
 	// Step 2: create / add the rest of data to Trailing-Buffer
-	int trailing_buffer_len;
+	int NewTrailingBuffLen;
 
 	// if there is no Trailing-Buffer / empty ... -> get new length
-	if (conn->trailing_buffer == NULL) trailing_buffer_len = len - send_buffer_free;
+	if (conn->TrailingBuff == NULL) NewTrailingBuffLen = len - SendBufFree;
 
 	// else if there was a Trailing-Buffer ... -> get new length
-	else trailing_buffer_len =
-		conn->trailing_buffer_len + len - send_buffer_free;
+	else NewTrailingBuffLen =
+		conn->TrailingBuffLen + len - SendBufFree;
 
 	// alloc new Trailing-Buffer
-	char *new_trailing_buffer = (char*) malloc(trailing_buffer_len+1);
+	char *NewTrailingBuff = (char*) malloc(NewTrailingBuffLen+1);
 
 	// copy old Trailing-Buffer to new Trailing-Buffer, and dealloc old
-	if (conn->trailing_buffer != NULL)
+	if (conn->TrailingBuff != NULL)
 
 		{
 
 		// copy old Trailing-Buffer to new Trailing-Buffer
-		memcpy (new_trailing_buffer, conn->trailing_buffer, conn->trailing_buffer_len);
+		memcpy (NewTrailingBuff, conn->TrailingBuff, conn->TrailingBuffLen);
 
 		// dealloc old Trailing-Buffer
-		free(conn->trailing_buffer);
+		free(conn->TrailingBuff);
 
 		}
 
 	// add the rest of the new data to the Trailing Buffer and save
-	SCDE_memcpy_plus(new_trailing_buffer + conn->trailing_buffer_len, data + send_buffer_free, len - send_buffer_free);
+	SCDE_memcpy_plus(NewTrailingBuff + conn->TrailingBuffLen, data + SendBufFree, len - SendBufFree);
 
 	# if SCDED_DBG >= 3
-	printf("|note: adding %d bytes to trailing_buffer>",
-		trailing_buffer_len);
+	printf("|note: adding %d bytes to TrailingBuff>",
+		NewTrailingBuffLen);
 	#endif
 
 	// Store 
-	conn->trailing_buffer = new_trailing_buffer;
-	conn->trailing_buffer_len = trailing_buffer_len;
+	conn->TrailingBuff = NewTrailingBuff;
+	conn->TrailingBuffLen = NewTrailingBuffLen;
 
 	}
 
-  // here 0 bytes free in send_buffer
+  // here 0 bytes free in sendbuff
   return 0;
 
   }
@@ -2773,7 +2773,7 @@ SCDED_Send(WebIf_HTTPDConnSlotData_t *conn
 /*
  *--------------------------------------------------------------------------------------------------
  *FName: SCDED_XmitSendBuff
- * Desc: Helper function to send any data in conn->send_buffer
+ * Desc: Helper function to send any data in conn->sendBuff
  * Para: WebIf_HTTPDConnSlotData_t *conn -> ptr to connection slot
  * Rets: -/-
  *--------------------------------------------------------------------------------------------------
@@ -2784,7 +2784,7 @@ SCDED_XmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 
   {
 
-  if (conn->send_buffer_len != 0)
+  if (conn->sendBuffLen != 0)
 
 	{
 
@@ -2797,19 +2797,19 @@ SCDED_XmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 		conn->conn->proto.tcp->remote_ip[3],
 		conn->conn->proto.tcp->remote_port,
 		conn->conn->proto.tcp->local_port,
-		conn->send_buffer_len,
+		conn->sendBuffLen,
 		system_get_free_heap_size());
 	# endif
 
 	# if SCDED_DBG >= 5
  	 SCDEFn_at_WebIf_M->HexDumpOutFn ("\nTX-HEX",
-		conn->send_buffer,
-		conn->send_buffer_len);
+		conn->sendBuff,
+		conn->sendBuffLen);
 	# endif
 
 	int8_t Result = WebIf_sent(conn->conn,
-		(uint8_t*) conn->send_buffer,
-		conn->send_buffer_len);
+		(uint8_t*) conn->sendBuff,
+		conn->sendBuffLen);
 
 	// show error on debug term...
  	if (Result)
@@ -2845,7 +2845,7 @@ SCDED_XmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 
 /* --------------------------------------------------------------------------------------------------
  *  FName: SCDED_TransmitSendBuff
- *  Desc: Function to finally transmit the data stored in the Send-Buffer (conn->send_buffer, if any)
+ *  Desc: Function to finally transmit the data stored in the Send-Buffer (conn->sendBuff, if any)
  *
  *  Para: SCDED_DConnSlotData_t *conn -> ptr to connection slot
  *  Rets: -/-
@@ -2856,11 +2856,10 @@ SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 {
 
   // do we have an allocated Send-Buffer -> there is something to send in the Send-Buffer !
- // if (conn->send_buffer_len && ( conn->ConnCtrlFlags &= F_CALLED_BY_TXED_CALLBACK ) ) {
-  if (conn->send_buffer_len) {
+  if (conn->sendBuff) {
 
 	# if SCDED_DBG >= 3
-	os_printf("|TX send_buffer, slot %d, to remote:%d.%d.%d.%d:%d from local port:%d, len=%d. mem:%d>",
+	os_printf("|TX SendBuff, slot %d, to remote:%d.%d.%d.%d:%d from local port:%d, len=%d. mem:%d>",
 		conn->SlotNo,
 		conn->conn->proto.tcp->remote_ip[0],
 		conn->conn->proto.tcp->remote_ip[1],
@@ -2868,19 +2867,19 @@ SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 		conn->conn->proto.tcp->remote_ip[3],
 		conn->conn->proto.tcp->remote_port,
 		conn->conn->proto.tcp->local_port,
-		conn->send_buffer_len,
+		conn->sendBuffLen,
 		system_get_free_heap_size());
 	# endif
 
 	# if SCDED_DBG >= 5
- 	 SCDEFn_at_WebIf_M->HexDumpOutFn ("\nTX-send_buffer",
-		conn->send_buffer,
-		conn->send_buffer_len);
+ 	 SCDEFn_at_WebIf_M->HexDumpOutFn ("\nTX-SendBuff",
+		conn->sendBuff,
+		conn->sendBuffLen);
 	# endif
 
 	int8_t Result = WebIf_sent(conn->conn,
-		(uint8_t*)conn->send_buffer,
-		(uint16_t)conn->send_buffer_len);
+		(uint8_t*)conn->sendBuff,
+		(uint16_t)conn->sendBuffLen);
 
 	// show error on debug term...
  	if (Result) {
@@ -2892,13 +2891,13 @@ SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 	}
 
 	// free Send-Buffer
-	free(conn->send_buffer);
+	free(conn->sendBuff);
 
 	// indicate -> no Send Buffer
-	conn->send_buffer = NULL;
+	conn->sendBuff = NULL;
 
 	// init length for next usage
-	conn->send_buffer_len = 0;
+	conn->sendBuffLen = 0;
 
 	// incompatibility? alter code ?
 	// We sent data. We are not allowed to send again till SentCb is fired.
@@ -2909,7 +2908,7 @@ SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
   else {
 
 	# if SCDED_DBG >= 3
-	os_printf("|no allocated send_buffer, no TX!>");
+	os_printf("|no allocated SendBuff, no TX!>");
 	# endif
   }
 }
@@ -3169,157 +3168,65 @@ SCDED_SetConCtrl(uint32_t CtrlBitfld)
  */
 void ICACHE_FLASH_ATTR 
 SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
-{
+  {
 
-  // Reset inactivity timer - because we had an callback ...
+  // Reset Inactivity Timer because we had an callback ...
   conn->InactivityTimer = 0;
 
-  // Clear / init Information Flags F_* (enum RespFlags from httpD.h) for response processing
+  // Clear / Init Information Flags F_* (enum RespFlags from httpD.h) for response processing.
   uint32_t ConnRespFlags = 0;
 
 // -------------------------------------------------------------------------------------------------
 
-  int trailing_buffer_len = conn->trailing_buffer_len;
-
-  // First: add data from 'trailing_buffer' to 'send_buffer' - if possible ..
-  if ( ( trailing_buffer_len ) &&	// is there an 'trailing_buffer'?
-	( conn->send_buffer_len < MAX_SENDBUFF_LEN ) ) { // 'send_buffer' not full?
-
-	// bytes we will move from 'trailing_buffer' to 'send_buffer'
-	int copy_to_sb_len;
-	int send_buffer_free = MAX_SENDBUFF_LEN - conn->send_buffer_len;
-
-	// we have already an allocated 'send_buffer' of size MAX_SENDBUFF_LEN ?
-	if (conn->send_buffer_len) {
-
-		// calculate 'copy_to_sb_len'
-		if ( send_buffer_free > trailing_buffer_len) copy_to_sb_len = trailing_buffer_len;
-		else copy_to_sb_len = send_buffer_free;
-
-		# if SCDED_DBG >= 3
-		printf("|RTOC adding %d bytes from trailing_buffer to existing send_buffer>",
-			copy_to_sb_len);
-		#endif
-
-		// copy the data from 'trailing_buffer' to 'send_buffer', and set 'send_buffer_len'
-		memcpy (conn->send_buffer + conn->send_buffer_len, conn->trailing_buffer, copy_to_sb_len);
-		conn->send_buffer_len += copy_to_sb_len;
-	}
-
-	// currently no allocated send_buffer. Allocate  
-	else {
-		// alloc new 'send_buffer'
-		conn->send_buffer = (char*) malloc(MAX_SENDBUFF_LEN);
-
-		// calculate  'copy_to_sb_len'
-		if ( MAX_SENDBUFF_LEN > trailing_buffer_len) copy_to_sb_len = trailing_buffer_len;
-		else copy_to_sb_len = MAX_SENDBUFF_LEN;
-
-		# if SCDED_DBG >= 3
-		printf("|RTOC adding %d bytes from trailing_buffer to new allocated send_buffer>",
-			copy_to_sb_len);
-		#endif
-
-		// copy the data from 'trailing_buffer' to beginning of 'send_buffer', and set 'send_buffer_len'
-		memcpy (conn->send_buffer, conn->trailing_buffer, copy_to_sb_len);
-		conn->send_buffer_len = copy_to_sb_len;
-	}
-
-	// 'trailing_buffer' is completely added to 'send_buffer' now? than cleanup!
-	if ( copy_to_sb_len == trailing_buffer_len ) {
-
-		free(conn->trailing_buffer);
-		conn->trailing_buffer = NULL;
-		conn->trailing_buffer_len = 0;
-
-		# if SCDED_DBG >= 3
-		printf("|trailing_buffer done>");
-		#endif
-	}
-
-	// seems that there will be still data in the 'trailing_buffer'
-	else {
-		int new_trailing_buffer_len = conn->trailing_buffer_len - copy_to_sb_len;
-
-		// alloc new trailing_buffer
-		char *new_trailing_buffer = (char*) malloc(new_trailing_buffer_len);
-
-		// add the rest of the data to the trailing_buffer
-		memcpy (new_trailing_buffer, conn->trailing_buffer + copy_to_sb_len, new_trailing_buffer_len);
-
-		// free old 'trailing_buffer', save 'new_trailing_buffer'
-		free(conn->trailing_buffer);
-		conn->trailing_buffer = new_trailing_buffer;
-		conn->trailing_buffer_len = new_trailing_buffer_len;
-
-		# if SCDED_DBG >= 3
-		printf("|trailing_buffer size now: %d>",
-			new_trailing_buffer_len);
-		#endif
-	}
-  }
-
-
-
-
-
-
-
-
-
-/*
-
-  // First: If 'trailing_buffer' is filled, copy it to send_buffer, to send it first
-  if ( conn->trailing_buffer != NULL ) {
+  // first: If Trailing-Buffer is filled, copy it to sendbuff, its prio to send it ...
+  if (conn->TrailingBuff != NULL) {
 
 	int TransmitLen;
-	char* new_trailing_buffer = NULL;
-	int trailing_buffer_len;
+	char *NewTrailingBuff = NULL;
+	int NewTrailingBuffLen;
 
-	// Step 1: Determine transmitlen. If more data then MAX_SENDBUFF_LEN -> save for next TX-Cb
-	if (conn->trailing_buffer_len <= MAX_SENDBUFF_LEN) {
+	// Step 1: Determine transmitlen.If more data then MAX_SENDBUFF_LEN -> save for next TX-Cb
+	if (conn->TrailingBuffLen <= MAX_SENDBUFF_LEN) {
 
-		TransmitLen = conn->trailing_buffer_len;
-	}
+		TransmitLen = conn->TrailingBuffLen;
+
+		}
 
 	// more data to transmit then send buff can take ...
 	else {
 
 		TransmitLen = MAX_SENDBUFF_LEN;
-		trailing_buffer_len = conn->trailing_buffer_len - MAX_SENDBUFF_LEN;
+		NewTrailingBuffLen = conn->TrailingBuffLen - MAX_SENDBUFF_LEN;
 
-		// alloc new trailing_buffer
-		char *new_trailing_buffer = (char*)malloc(trailing_buffer_len+1);
+		// alloc new TrailingBuff
+		char *NewTrailingBuff = (char*)malloc(NewTrailingBuffLen+1);
 
-		// add the rest of the data to the trailing_buffer
-		memcpy (new_trailing_buffer, conn->trailing_buffer + MAX_SENDBUFF_LEN, trailing_buffer_len);
-	}
+		// add the rest of the data to the TrailingBuff
+		memcpy (NewTrailingBuff, conn->TrailingBuff + MAX_SENDBUFF_LEN, NewTrailingBuffLen);
+		}
 
 	# if SCDED_DBG >= 3
-	printf("|TX %d bytes from trailing_buffer>",
+	printf("|TX %d bytes from TrailingBuff>",
 		TransmitLen);
 	#endif
 
-	// Step 2: send data from the trailing_buffer, but max MAX_SENDBUFF_LEN
-	SCDED_Send(conn, conn->trailing_buffer, TransmitLen);
+	// Step 2: send data from the TrailingBuff, but max MAX_SENDBUFF_LEN
+	SCDED_Send(conn, conn->TrailingBuff, TransmitLen);
 //SCENARIO: MAX_SENDBUFF_LEN reached here?
 
-	// free old trailing_buffer, save new Newtrailing_buffer
-	free(conn->trailing_buffer);
+	// free old TrailingBuff, save new NewTrailingBuff
+	free(conn->TrailingBuff);
 
-	if (new_trailing_buffer) {
+	if (NewTrailingBuff) {
 
-		conn->trailing_buffer = new_trailing_buffer;
-		conn->trailing_buffer_len = trailing_buffer_len;
+		conn->TrailingBuff = NewTrailingBuff;
+		conn->TrailingBuffLen = NewTrailingBuffLen;
+
+		}
+
+	else conn->TrailingBuff = NULL;
+
 	}
-
-	else conn->trailing_buffer = NULL;
-  }
-
-*/
-
-
-
 
 // -------------------------------------------------------------------------------------------------
 
@@ -3515,7 +3422,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
   // Now possible actions: 
   // Prio 1: If data is in send buff
   // -> Transmit, SentCb will be fired soon for further activities ...
-  if (conn->send_buffer_len) {
+  if (conn->sendBuffLen) {
 
 	SCDED_TransmitSendBuff(conn);
 
@@ -3695,17 +3602,18 @@ WebIf_IdleCb(void *arg)
 
 //--------------------------------------------------------------------------------------------------
 
-  // set Connection-Control Flags - for Idle-Callback
-  // CLR: F_GENERATE_IDLE_CALLBACK, because now we have Idle Callback and it is needed once ...
-  // CLR: F_CALLED_BY_RXED_CALLBACK, because this is not RX-Callback ...
-  // CLR: F_CALLED_BY_TXED_CALLBACK, because this is not TX-Callback ...
-  conn->ConnCtrlFlags &= ~(F_GENERATE_IDLE_CALLBACK + F_CALLED_BY_RXED_CALLBACK + F_CALLED_BY_TXED_CALLBACK);
+  // Connection-Control Flags management for Idle-Callback
+  // - CLEAR: F_CALLED_BY_RXED_CALLBACK, because this is not RX-Callback ...
+  // - CLEAR: F_GENERATE_IDLE_CALLBACK, because now we have Idle Callback and it is needed once ...
+  // clr flags
+  conn->ConnCtrlFlags &= ~(F_CALLED_BY_RXED_CALLBACK + F_GENERATE_IDLE_CALLBACK);
 
 //--------------------------------------------------------------------------------------------------
 
   // Response to open connection...
   SCDED_RespToOpenConn(conn);
-}
+
+  }
 
 
 
@@ -3747,13 +3655,11 @@ WebIf_SentCb (void* arg)
   }
   #endif
 
-  // set Connection-Control Flags - for Sent-Callback
-  // CLR: F_GENERATE_IDLE_CALLBACK, because now we have a callback. No Idle Callback is needed ...
-  // CLR: F_TXED_CALLBACK_PENDING, because SentCb is fired. TXED_CALLBACK is no longer pending ...
-  // CLR: F_CALLED_BY_RXED_CALLBACK, because this is not RX-Callback ...
-  conn->ConnCtrlFlags &= ~(F_GENERATE_IDLE_CALLBACK + F_TXED_CALLBACK_PENDING + F_CALLED_BY_RXED_CALLBACK);
-  // SET:   F_CALLED_BY_TXED_CALLBACK, because this is TX-Callback ...
-  conn->ConnCtrlFlags |= ~(F_CALLED_BY_TXED_CALLBACK);
+  // Connection-Control Flags management for Sent-Callback
+  // - CLEAR: F_TXED_CALLBACK_PENDING, because SentCb is fired. TXED_CALLBACK is no longer pending ...
+  // - CLEAR: F_CALLED_BY_RXED_CALLBACK, because this is not RX-Callback ...
+  // - CLEAR: F_GENERATE_IDLE_CALLBACK, because now we have a callback. No Idle Callback is needed ...
+  conn->ConnCtrlFlags &= ~(F_TXED_CALLBACK_PENDING + F_CALLED_BY_RXED_CALLBACK + F_GENERATE_IDLE_CALLBACK);
 
 //--------------------------------------------------------------------------------------------------
 
@@ -3777,7 +3683,7 @@ void ICACHE_FLASH_ATTR
 WebIf_RecvCb(void *arg,
 		char *recvdata,
 		unsigned short recvlen) 
-{
+  {
 
   // the arg is a ptr to the platform specific conn
   //struct espconn   *platform_conn = arg;	// ESP 8266 NonOS
@@ -3807,20 +3713,24 @@ WebIf_RecvCb(void *arg,
 
 //--------------------------------------------------------------------------------------------------
 
-  // set Connection-Control Flags - for Received-Callback
-  // CLR: F_GENERATE_IDLE_CALLBACK, because now we have Idle Callback and it is needed once ...
-  // CLR: F_CALLED_BY_TXED_CALLBACK, because this is not TX-Callback ...
-  conn->ConnCtrlFlags &= ~(F_GENERATE_IDLE_CALLBACK + F_CALLED_BY_TXED_CALLBACK);
-  // SET: F_CALLED_BY_RXED_CALLBACK, because this is RX-Callback ...
+  // speed up cpu
+//  system_update_cpu_freq(SYS_CPU_160MHz);
+
+  // Connection-Control Flags management for Received-Callback
+  // - CLEAR: F_GENERATE_IDLE_CALLBACK, because now we have Idle Callback and it is needed once ...
+  // - SET: F_CALLED_BY_RXED_CALLBACK, because this is RX-Callback ... ...
+  // clr flags
+  conn->ConnCtrlFlags &= ~(F_GENERATE_IDLE_CALLBACK);
+  // set flags
   conn->ConnCtrlFlags |= (F_CALLED_BY_RXED_CALLBACK);
 
 //--------------------------------------------------------------------------------------------------
 
   // always parse received data	
-  size_t nparsed = http_parser_execute (conn,
-	&conn->conn->HTTPD_InstCfg->HTTPDparser_settings,
-	recvdata,
-	(size_t) recvlen);
+  size_t nparsed = http_parser_execute (conn
+			,&conn->conn->HTTPD_InstCfg->HTTPDparser_settings
+			,recvdata
+			,(size_t) recvlen);
 
   # if SCDED_DBG >= 5
   printf("|Msg parsed, (%d from %d)>",
@@ -3831,7 +3741,8 @@ WebIf_RecvCb(void *arg,
 //---------------------------------------------------------------------------------------------------
 
   // continue or error ?
-  if (nparsed != (size_t)recvlen) {
+  if (nparsed != (size_t)recvlen)
+	{
 
 	# if SCDED_DBG >= 1
 	printf("|Err: %u (%s)>"
@@ -3844,12 +3755,15 @@ WebIf_RecvCb(void *arg,
 
 	// stop processing more data
 	conn->cgi = CGI_FINNISHED;
-  }
+
+	}
 
 //---------------------------------------------------------------------------------------------------
 
   // Upgrade connection to websockets?
-  else if (conn->parser_upgrade == 1) {
+  else if (conn->parser_upgrade == 1)
+
+	{
 
 	# if SCDED_DBG >= 3
 	printf("|Upgrade conn>");
@@ -3857,13 +3771,18 @@ WebIf_RecvCb(void *arg,
 
 	// can not answer..
 	conn->cgi = CGI_UPGRADE_WEBSOCKET;
-  }
+
+	}
 
 //---------------------------------------------------------------------------------------------------
 
   // Response to open connection now	
   SCDED_RespToOpenConn(conn);
-}
+
+  // slow down cpu
+//  system_update_cpu_freq(SYS_CPU_80MHz);
+
+  }
 
 
 
@@ -3879,7 +3798,7 @@ WebIf_RecvCb(void *arg,
 void ICACHE_FLASH_ATTR 
 WebIf_ReconCb(void *arg
 		,int8_t error)
-{
+  {
 
   // the arg is a ptr to the platform specific conn
   //struct espconn   *platform_conn = arg;	// ESP 8266 NonOS
@@ -3918,7 +3837,8 @@ ESPCONN_PROTO_MSG - SSL application invalid
 */
 
   WebIf_DisconCb(arg);
-}
+
+  }
 
 
 
@@ -3933,7 +3853,7 @@ ESPCONN_PROTO_MSG - SSL application invalid
  */
 void ICACHE_FLASH_ATTR
 WebIf_DisconCb(void *arg)
-{
+  {
 
   // the arg is a ptr to the platform specific conn
 //struct espconn     *platform_conn = arg;	// ESP 8266 NonOS
@@ -3969,10 +3889,10 @@ WebIf_DisconCb(void *arg)
   if (conn->cgi != NULL) conn->cgi(conn);
 
   // free allocated memory for the Send-Buffer, if any
-  if (conn->send_buffer != NULL) free(conn->send_buffer);
+  if (conn->sendBuff != NULL) free(conn->sendBuff);
 
   // free allocated memory for Trailing Buff, if any
-  if (conn->trailing_buffer != NULL) free(conn->trailing_buffer);
+  if (conn->TrailingBuff != NULL) free(conn->TrailingBuff);
 
   // nicht schön
   // init http parser for new conn (goal is to free allocated memory!)
@@ -3980,7 +3900,8 @@ WebIf_DisconCb(void *arg)
 
   // finally free allocated memory for this WebIf_HTTPDConnSlotData_t struct
   free(conn);
-}
+
+  }
 
 
 
@@ -3995,7 +3916,7 @@ WebIf_DisconCb(void *arg)
  */
 void ICACHE_FLASH_ATTR 
 WebIf_ConnCb(void *arg)
-{
+  {
   // the arg is a ptr to the platform specific conn
   //struct espconn   *platform_conn = arg;	// ESP 8266 NonOS
   WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
@@ -4050,7 +3971,8 @@ WebIf_ConnCb(void *arg)
 
   // init http parser for the new conn
   HTTPD_ParserInit(conn, HTTP_BOTH);
-}
+
+  }
 
 
 
@@ -4519,7 +4441,7 @@ General Function
                                                                                                                   B N
                                                                                                                     N
 HTTPD_RespondToOpenConnection                     
-1. send trailing_buffer (if any)                     // |0|0|0|0|0|0|0|0|0|0|1|1|1|1|1|1|1|1|1|1|2|2|2|2|2|2|2|2|2|2|3|3|
+1. send trailingbuff (if any)                     // |0|0|0|0|0|0|0|0|0|0|1|1|1|1|1|1|1|1|1|1|2|2|2|2|2|2|2|2|2|2|3|3|
                                                   // |0|1|2|3|4|5|6|7|8|9|0|1|2|3|4|5|6|7|8|9|0|1|2|3|4|5|6|7|8|9|0|1|
 2. preparing PC                                                                                                     
 |                                                 // | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | |
@@ -8629,57 +8551,57 @@ HTTPDSend(WebIf_HTTPDConnSlotData_t *conn, const char *data, int len)
   if (len < 0) len = strlen(data);
 
   // will data fit in sendbuff ?
-  if (conn->send_buffer_len + len <= MAX_SENDBUFF_LEN)
+  if (conn->sendBuffLen + len <= MAX_SENDBUFF_LEN)
 
 	// if data fits in sendbuff ...
 	{
-	memcpy (conn->sendBuff + conn->send_buffer_len, data, len); // copy to sendbuf
-	conn->send_buffer_len += len;
+	memcpy (conn->sendBuff + conn->sendBuffLen, data, len); // copy to sendbuf
+	conn->sendBuffLen += len;
 
 	// return free bytes in sendbuff
-	return (MAX_SENDBUFF_LEN - conn->send_buffer_len);
+	return (MAX_SENDBUFF_LEN - conn->sendBuffLen);
 	}
   else
 	 // if data does NOT fit in sendbuff ...
 	{
 	// Step 1: copy data to sendbuff till full
-	int send_buffer_free = MAX_SENDBUFF_LEN - conn->send_buffer_len;
-	if (send_buffer_free)
+	int SendBufFree = MAX_SENDBUFF_LEN - conn->sendBuffLen;
+	if (SendBufFree)
 		{
-		memcpy (conn->sendBuff + conn->send_buffer_len, data, send_buffer_free); // copy to sendbuf
-		conn->send_buffer_len += send_buffer_free;
+		memcpy (conn->sendBuff + conn->sendBuffLen, data, SendBufFree); // copy to sendbuf
+		conn->sendBuffLen += SendBufFree;
 		}
 
 
-	// Step 2: create/add rest of data to trailing_buffer
-	int trailing_buffer_len;
-	if (conn->trailing_buffer == NULL) trailing_buffer_len = len - send_buffer_free;
-	else trailing_buffer_len =
-		conn->trailing_buffer_len + len - send_buffer_free;
+	// Step 2: create/add rest of data to TrailingBuff
+	int NewTrailingBuffLen;
+	if (conn->TrailingBuff == NULL) NewTrailingBuffLen = len - SendBufFree;
+	else NewTrailingBuffLen =
+		conn->TrailingBuffLen + len - SendBufFree;
 
-	// alloc new trailing_buffer
-	char *new_trailing_buffer = (char*)malloc(trailing_buffer_len+1);
+	// alloc new TrailingBuff
+	char *NewTrailingBuff = (char*)malloc(NewTrailingBuffLen+1);
 
-	// Copy old trailing_buffer to new trailing_buffer, and dealloc old
-	if (conn->trailing_buffer != NULL)
+	// Copy old TrailingBuff to new TrailingBuff, and dealloc old
+	if (conn->TrailingBuff != NULL)
 		{
-		memcpy (new_trailing_buffer, conn->trailing_buffer, conn->trailing_buffer_len); // copy to sendbuf
-		free(conn->trailing_buffer);
+		memcpy (NewTrailingBuff, conn->TrailingBuff, conn->TrailingBuffLen); // copy to sendbuf
+		free(conn->TrailingBuff);
 		}
- else  conn->trailing_buffer_len =0; ///test
+ else  conn->TrailingBuffLen =0; ///test
 
 
-	// Add new data to trailing_buffer and save
-	memcpy (new_trailing_buffer + conn->trailing_buffer_len, data + send_buffer_free, len - send_buffer_free); // copy to sendbuf
+	// Add new data to TrailingBuff and save
+	memcpy (NewTrailingBuff + conn->TrailingBuffLen, data + SendBufFree, len - SendBufFree); // copy to sendbuf
 
 	# if SCDED_DBG >= 3
-	printf("HTTPD %d Bytes to trailing_buffer\n",
-		trailing_buffer_len);
+	printf("HTTPD %d Bytes to TrailingBuff\n",
+		NewTrailingBuffLen);
 	#endif
 
 	// Store 
-	conn->trailing_buffer = new_trailing_buffer;
-	conn->trailing_buffer_len = trailing_buffer_len;
+	conn->TrailingBuff = NewTrailingBuff;
+	conn->TrailingBuffLen = NewTrailingBuffLen;
 	}
   return 0; // 0 bytes free in sendbuff
 }
@@ -9408,7 +9330,7 @@ HTTPDStoreAddData(char *Buff,
 	free(Buff);
 	}
 
-  // Add new data to trailing_buffer and save
+  // Add new data to TrailingBuff and save
   memcpy (NewBuff + BuffLen, data, length); // copy to sendbuf
 
   // zero terminate, func is for string only !
