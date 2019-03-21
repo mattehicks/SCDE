@@ -315,10 +315,10 @@ typedef struct WebIf_HTTPDConnSlotData_s {
 
 //- V V V V V V V V V V V V V V V V V V // TX-Helper
 
-  char* send_buffer;			// Pointer to current allocated send buffer w. size [MAX_SB_LEN] (NULL=NO Send-Buffer)
-  int send_buffer_len; //SendBuffWritePos	// Send buffer, current write position (offset)
-  char* trailing_buffer;		// An temp buffer in case of Send-Buffer overflow. Its prio for next transmission!
-  int trailing_buffer_len;		// The Trailing-Buffer length of (allocated) data, if any
+  char* send_buffer;//uint8_t*			// Pointer to current allocated send buffer w. size [MAX_SB_LEN] (NULL=NO Send-Buffer)
+  int send_buffer_len; //uint16_t//SendBuffWritePos	// Send buffer, current write position (offset)
+  char* trailing_buffer;//uint8_t*		// An temp buffer in case of Send-Buffer overflow. Its prio for next transmission!
+  int trailing_buffer_len; //uint16_t	// The Trailing-Buffer length of (allocated) data, if any
 
 
 //- V V V V V V V V V V V V V V V V V V // Helper

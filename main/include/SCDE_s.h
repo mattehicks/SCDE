@@ -7,6 +7,22 @@
 
 
 
+// renamed during work
+#define Common_Definition_s  Entry_Definition_s
+#define Common_Definition_t  Entry_Definition_t
+#define HeadCommon_Definitions head_definition
+
+
+#define Command_s  Entry_Command_s
+#define Command_t  Entry_Command_t
+#define headCommands head_command
+
+#define Module_s  Entry_Module_s
+#define Module_t  Entry_Module_t
+#define HeadModules head_module
+
+
+
 // -------------------------------------------------------------------------------------------------
 // initial type definitions ...
 
@@ -24,10 +40,11 @@ typedef struct Module_s Module_t;
 typedef struct ProvidedByModule_s ProvidedByModule_t;
 
 // Command (type) stores commands made available for operation.
-typedef struct Command_s Command_t;
+typedef struct Entry_Command_s Entry_Command_t;
 
 // Common_Definition_t stores values (the common part) for operation of an definition
-typedef struct Common_Definition_s Common_Definition_t;
+//typedef struct Common_Definition_s Common_Definition_t;
+typedef struct Entry_Definition_s Entry_Definition_t;
 
 // ?
 typedef struct Common_StageXCHG_s Common_StageXCHG_t;
@@ -558,10 +575,10 @@ struct ProvidedByModule_s {
  * - data is associated when module is loaded
  * - done in InitializeFn (after module load)
  */
-struct Module_s {
-  STAILQ_ENTRY (Module_s) entries;		// Link to next loaded Module
+struct Entry_Module_s {
+  STAILQ_ENTRY (Entry_Module_s) entries;		// Link to next loaded Module
   ProvidedByModule_t *provided;				// Ptr to Provided by Module Info
-  void *LibHandle;				// Handle to this loaded Module
+  void* LibHandle;				// Handle to this loaded Module
 
  // place  Provided  FNS here direct ?
 };
@@ -688,14 +705,15 @@ struct bulkUpdateReadings2_s {
 
 
 
+
 /* 
- * Common Definition (struct)
+ * Entry Definition (struct)
  * - stores values for operation of an definition (device), common part,  valid only for the defined
  * - instance of an loaded module. Values are initialized by the SCDE and finalized by the
  *   loaded module itself (defineFn).
  */
-struct Common_Definition_s { //Entry_Definition_s
-  STAILQ_ENTRY(Common_Definition_s) entries;			// Link to next Definition
+struct Entry_Definition_s {
+  STAILQ_ENTRY(Entry_Definition_s) entries;			// Link to next Definition
  
   STAILQ_HEAD (stailhead8, common_Attribute_s) headAttributes;	//p_head_attribute	// Link to assigned Attributes
 
@@ -708,7 +726,7 @@ struct Common_Definition_s { //Entry_Definition_s
   uint8_t* name; //p_name;					// Ptr to the Name string (assigned by users declaration - in allocated mem)
   size_t nameLen; //name_len
 
-  Module_t* module;						// Ptr to the Module_t (assigned when module is loaded)
+  Entry_Module_t* module;					// Ptr to the Module_t (assigned when module is loaded)
 
 // the 'STATE' reading						// the STATE reading is obligatory for every definition !
 // strText_t reading_state_value; NEU
@@ -817,7 +835,9 @@ typedef struct headRetMsgMultiple_s (* CommandFn_t) (const uint8_t *args, const 
 // Provided by Command (type) - stores function callbacks and information needed for cmd operation
 typedef struct ProvidedByCommand_s ProvidedByCommand_t;
 
+
 //--------------------------------------------------------------------------------------------------
+
 
 /* 
  * Provided by Command (struct)
@@ -833,19 +853,19 @@ struct ProvidedByCommand_s {
 
   InitializeCommandFn_t InitializeCommandFn;	// returns module information (module_s)
   CommandFn_t CommandFn;			// the command Fn
-  const xString_t helpString; //help_string	// help text
+  const xString_t helpString; 	//help_string	// help text
   const xString_t helpDetailString; //help_detail_string	// detailed help text
 };
 
 //--------------------------------------------------------------------------------------------------
 
 /* 
- * Commands (struct)
+ * Entry_Commands (struct)
  * - stores commands made available for operation.
  * - some are buildin and initialized after start, others are loaded by user
  */
-struct Command_s {
-  STAILQ_ENTRY (Command_s) entries;		// link to next loaded command
+struct Entry_Command_s {
+  STAILQ_ENTRY (Entry_Command_s) entries;		// link to next loaded command
   ProvidedByCommand_t* provided; // p_provided		// ptr to provided-by-command Info
 };
 
@@ -854,7 +874,7 @@ struct Command_s {
 // -------------------------------------------------------------------------------------------------
 // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ typedefs and structs for Attribute operation ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 
-
+//löschen!
 
 // attribute_t holds attributes assigned to definitions, for operation and customization.
 typedef struct attribute_s attribute_t;
@@ -901,7 +921,7 @@ struct attribute_s { //Attribute_s
 
 
 // -------------------------------------------------------------------------------------------------
-
+//NAME DOOF!
 // Entry_Definitions_s to hold the result of ...multiple xString_t strings (in an singly linked tail queue)
 typedef struct Entry_Definitions_s Entry_Definitions_t;
 
@@ -912,7 +932,7 @@ typedef struct Entry_Definitions_s Entry_Definitions_t;
  */
 struct Entry_Definitions_s {
   STAILQ_ENTRY(Entry_Definitions_s) entries;	// link to next element of the singly linked tail queue
-  Common_Definition_t* p_entry_definition;	// the definition of this element
+  Entry_Definition_t* p_entry_definition;	// the definition of this element
 };
 
 /*
@@ -951,7 +971,6 @@ typedef struct Entry_Attr_Value_s Entry_Attr_Value_t;
  */
 struct Entry_Attr_Value_s {
   LIST_ENTRY(Entry_Attr_Value_s) entries;	// links to next list entries
-//  Common_Definition_t* p_entry_definition;	// ptr to the definition-entry the attribute is assigned to
   Entry_Attr_Name_t* p_entry_attr_name;		// ptr to the attribute-name-entry the attribute is assigned to
   String_t attr_value;				// the assigned value MAY BE NULL IF NO VALUE!
 };
@@ -965,15 +984,29 @@ struct Entry_Attr_Value_s {
  * - Smart Connected Devices Engine - root data
  */
 struct SCDERoot_s {
-  SCDEFn_t* SCDEFn; //p_scde_fn		// SCDEFn (Functions / callbacks) for faster operation
+  // SCDEFn (Functions / callbacks) for faster operation
+  SCDEFn_t* SCDEFn; //p_scde_fn
+
+
 //use vars qw($auth_refresh);
 //use vars qw($cmdFromAnalyze);   # used by the warnings-sub
 //use vars qw($cvsid);            # used in 98_version.pm
-  strText_t current_config_file;	//current_config_file
-  uint32_t device_count;		// Is used to store Definitions in the right order. 1st=1
-  uint32_t feature_level;		// for version management
-  uint32_t global_control_register_a;	// -> 'enum global_control_register_a'
-  time_t last_timestamp;		// to check if requested TiSt is unique (higher than last time)
+
+  // current_config_file
+  strText_t current_config_file;
+
+  // Is used to store Definitions in the right order. 1st=1
+  uint32_t device_count;
+
+  // for version management
+  uint32_t feature_level;
+
+  // -> 'enum global_control_register_a'
+  uint32_t global_control_register_a;
+
+// to check if requested TiSt is unique (higher than last time)
+  time_t last_timestamp;
+
 //use vars qw($fhem_started);     # used for uptime calculation
 //use vars qw($init_done);        #
 //use vars qw($internal_data);    # FileLog/DbLog -> SVG data transport
@@ -983,15 +1016,27 @@ struct SCDERoot_s {
 //use vars qw($reread_active);
 //use vars qw($selectTimestamp);  # used to check last select exit timestamp
 //use vars qw($winService);       # the Windows Service object
-  STAILQ_HEAD (stailhead3, attribute_s) headAttributes;//head_attribute	// Link to assigned attributes
-  STAILQ_HEAD (stailhead4, Command_s) headCommands;//head_command	// Link to available commands
+  STAILQ_HEAD (stailhead3, attribute_s) headAttributes;// will be deleted!!!!!!
+
+// List of assigned attr_names
+  LIST_HEAD (Head_Attr_Name_s, Entry_Attr_Name_s) head_attr_name;
+
+// Link to available commands
+  STAILQ_HEAD (stailhead4, Entry_Command_s) head_command;
+
 //use vars qw(%data);             # Hash for user data
 //use vars qw(%defaultattr);      # Default attributes, used by FHEM2FHEM
-  STAILQ_HEAD (stailhead2, Common_Definition_s) HeadCommon_Definitions;//head_definition// Link to Definitions (device, button, ...)
+
+// Link to Definitions (a.k.a. devices ...)
+  STAILQ_HEAD (stailhead2, Entry_Definition_s) head_definition;
+
 //use vars qw(%inform);           # Used by telnet_ActivateInform
 //use vars qw(%intAt);            # Internal at timer hash, global for benchmark
 //use vars qw(%logInform);        # Used by FHEMWEB/Event-Monitor
-  STAILQ_HEAD (stailhead1, Module_s) HeadModules;//head_module	// Link to loaded Modules
+
+// Link to loaded Modules
+  STAILQ_HEAD (stailhead1, Entry_Module_s) head_module;
+
 //use vars qw(%ntfyHash);         # hash of devices needed to be notified.
 //use vars qw(%oldvalue);         # Old values, see commandref.html
 //use vars qw(%readyfnlist);      # devices which want a "readyfn"
@@ -1000,17 +1045,15 @@ struct SCDERoot_s {
 //use vars qw(@authenticate);     # List of authentication devices
 //use vars qw(@authorize);        # List of authorization devices
 //use vars qw(@structChangeHist); # Contains the last 10 structural changes
-
-  LIST_HEAD (Head_Attr_Name_s, Entry_Attr_Name_s) head_attr_name;	// List of assigned attr_names
 };
 
-// global control register - some global flags - e.g. for Connection Control
-enum global_control_register_a
-{
+
+// global control register a - holds global flags - e.g. for connection control
+enum global_control_register_a {
 //NEU: GCRA_F lag ändern
-    F_RECEIVED_QUIT		= 1 << 0	// indicates: quit the include processing
-  , F_INIT_DONE			= 1 << 1	// indicates: the SCDE has fiinished the init process
-  , GCRA_F_weitere		= 1 << 2	//   
+  F_RECEIVED_QUIT		= 1 << 0,	// indicates: quit the include processing
+  F_INIT_DONE			= 1 << 1,	// indicates: the SCDE has fiinished the init process
+  GCRA_F_weitere		= 1 << 2	//   
 };
 
 

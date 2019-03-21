@@ -2670,82 +2670,70 @@ SCDED_Send(WebIf_HTTPDConnSlotData_t *conn
 int ICACHE_FLASH_ATTR 
 SCDED_Send(WebIf_HTTPDConnSlotData_t *conn
 //SCDED_SendToSendBuff(HTTPDConnSlotData_t *conn
-		,const char *data
+		,const char* data
 		,int len)
-  {
+{
 
   // if len is -1, the data is seen as a C-string. Determine length ..
-  if (len < 0) len = strlen(data);
+  if (len < 0) len = strlen (data);
 
   // in case we have nothing to send -> return free bytes in send_buffer
   if (!len) return (MAX_SENDBUFF_LEN - conn->send_buffer_len);
 
   // WE WILL DEFINITIVLY SEND DATA HERE - MAKE SEND REQUEST
-  conn->conn->common.Common_CtrlRegA |= F_WANTS_WRITE;	//!!!!!!!!!!!!!!!!!!!!!!!problem!
+//  conn->conn->common.Common_CtrlRegA |= F_WANTS_WRITE;	//!!!!!!!!!!!!!!!!!!!!!!!problem!
 
   // alloc Send-Buffer, if not already done
-  if (conn->send_buffer == NULL)
-	conn->send_buffer = (char*) malloc(MAX_SENDBUFF_LEN);
+  if (!conn->send_buffer_len)
+	conn->send_buffer = (char*) malloc (MAX_SENDBUFF_LEN);
 
-  // will data fit in Send-Buffer? Then simply copy ...
-  if (conn->send_buffer_len + len <= MAX_SENDBUFF_LEN)
+  // will data fit into 'send_buffer'? Then simply copy ...
+  if (conn->send_buffer_len + len <= MAX_SENDBUFF_LEN) {
 
-	// data fits, copy to Send-Buffer ...
-	{
-
-	// copy to Send-Buffer
+	// data fits, copy to 'send_buffer' ...
 	SCDE_memcpy_plus(conn->send_buffer + conn->send_buffer_len, data, len);
 	conn->send_buffer_len += len;
 
-	// return free bytes in Send-Buffer
+	// return free bytes in 'send_buffer'
 	return (MAX_SENDBUFF_LEN - conn->send_buffer_len);
-
-	}
+  }
 
   else
-
-	 // else data does NOT fit in Send-Buffer ...
+	 // else data does NOT fit into 'send_buffer' ...
 	{
 
-	// Step 1: copy data to Send-Buffer till full
+	// Step 1: copy data to 'send_buffer' till full
 	int send_buffer_free = MAX_SENDBUFF_LEN - conn->send_buffer_len;
 
-	if (send_buffer_free)
-
-		{
+	if (send_buffer_free) {
 
 		// copy to Send-Buffer
 		SCDE_memcpy_plus(conn->send_buffer + conn->send_buffer_len, data, send_buffer_free);
 
 		conn->send_buffer_len += send_buffer_free;
-
-		}
+	}
 
 	// Step 2: create / add the rest of data to Trailing-Buffer
 	int trailing_buffer_len;
 
-	// if there is no Trailing-Buffer / empty ... -> get new length
-	if (conn->trailing_buffer == NULL) trailing_buffer_len = len - send_buffer_free;
+	// if there is no 'trailing_buffer' get new length
+	if (!conn->trailing_buffer_len) trailing_buffer_len = len - send_buffer_free;
 
-	// else if there was a Trailing-Buffer ... -> get new length
-	else trailing_buffer_len =
-		conn->trailing_buffer_len + len - send_buffer_free;
+	// else if there was a 'trailing_buffer' ... -> get new length
+	else trailing_buffer_len = conn->trailing_buffer_len + len - send_buffer_free;
 
-	// alloc new Trailing-Buffer
-	char *new_trailing_buffer = (char*) malloc(trailing_buffer_len+1);
+	// alloc new 'trailing_buffer'
+	char* new_trailing_buffer = (char*) malloc (trailing_buffer_len + 1);
 
-	// copy old Trailing-Buffer to new Trailing-Buffer, and dealloc old
-	if (conn->trailing_buffer != NULL)
-
-		{
+	// copy old 'trailing_buffer' to new 'trailing_buffer', and dealloc old
+	if (conn->trailing_buffer != NULL) {
 
 		// copy old Trailing-Buffer to new Trailing-Buffer
 		memcpy (new_trailing_buffer, conn->trailing_buffer, conn->trailing_buffer_len);
 
 		// dealloc old Trailing-Buffer
 		free(conn->trailing_buffer);
-
-		}
+	}
 
 	// add the rest of the new data to the Trailing Buffer and save
 	SCDE_memcpy_plus(new_trailing_buffer + conn->trailing_buffer_len, data + send_buffer_free, len - send_buffer_free);
@@ -2758,13 +2746,11 @@ SCDED_Send(WebIf_HTTPDConnSlotData_t *conn
 	// Store 
 	conn->trailing_buffer = new_trailing_buffer;
 	conn->trailing_buffer_len = trailing_buffer_len;
-
-	}
+  }
 
   // here 0 bytes free in send_buffer
   return 0;
-
-  }
+}
 
 
 
@@ -2856,8 +2842,9 @@ SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 {
 
   // do we have an allocated Send-Buffer -> there is something to send in the Send-Buffer !
- // if (conn->send_buffer_len && ( conn->ConnCtrlFlags &= F_CALLED_BY_TXED_CALLBACK ) ) {
   if (conn->send_buffer_len) {
+
+	if (!( conn->ConnCtrlFlags & F_TXED_CALLBACK_PENDING ) ) {
 
 	# if SCDED_DBG >= 3
 	os_printf("|TX send_buffer, slot %d, to remote:%d.%d.%d.%d:%d from local port:%d, len=%d. mem:%d>",
@@ -2879,8 +2866,8 @@ SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 	# endif
 
 	int8_t Result = WebIf_sent(conn->conn,
-		(uint8_t*)conn->send_buffer,
-		(uint16_t)conn->send_buffer_len);
+		(uint8_t*) conn->send_buffer,
+		(uint16_t) conn->send_buffer_len);
 
 	// show error on debug term...
  	if (Result) {
@@ -2904,6 +2891,15 @@ SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 	// We sent data. We are not allowed to send again till SentCb is fired.
 	// Indicate this by F_TXED_CALLBACK_PENDING in ConCtrl
 	conn->ConnCtrlFlags |= F_TXED_CALLBACK_PENDING;
+  	}
+
+	else {
+
+	# if SCDED_DBG >= 3
+	os_printf("|F_TXED_CALLBACK_PENDING, no TX!>");
+	# endif
+
+	}
   }
 
   else {
@@ -3333,8 +3329,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 		conn->conn,
 		conn->SlotNo);
 	# endif
-
-	}
+  }
 
 // -------------------------------------------------------------------------------------------------
 
@@ -3351,8 +3346,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 
 	// set F_WAIT_CONN flag, expecting more RX
 	ConnRespFlags |= F_WAIT_CONN;
-
-	}
+  }
 
 // -------------------------------------------------------------------------------------------------
 
@@ -3435,16 +3429,16 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 		conn->cgi = CGI_FINNISHED;
 
 		}
-	}
+  }
 
 // -------------------------------------------------------------------------------------------------
 
   // Scenario 4 - Default CGI execution this time ...
-  else	{
+  else {
 
 	int r;
 
-	do	{
+	do {
 
 		# if SCDED_DBG >= 3
 		printf("|Conn %p, slot %d, Exec cgi at %p with PC-Arg: %p>",
@@ -3457,7 +3451,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 		// execute cgi fn.
 		r = conn->cgi(conn);
 
-		}
+	}
 
 	// Possible cgi result 1: HTTPD_CGI_REEXECUTE, for cgi switching
 	while (r == HTTPD_CGI_REEXECUTE);
@@ -3471,8 +3465,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 
 		// mark as finnished (next response invoked by SentCB will disconnect, if data to send)
 		conn->cgi = CGI_FINNISHED;
-
-		}
+	}
 
 // -------------------------------------------------------------------------------------------------
 
@@ -3486,8 +3479,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 
 		// set 'ETX_DISCONNECT_CONN' flag to force real disconnection for ETX-Slot
 		ConnRespFlags |= F_F_DISCONNECT_CONN;
-
-		}
+	}
 
 // -------------------------------------------------------------------------------------------------
 
@@ -3496,8 +3488,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 
 		// set 'F_WAIT_CONN_GET_IDLE_CB' flag + 'keep connection alive' flag
 		ConnRespFlags |= F_WAIT_CONN_GET_IDLE_CB + F_KEEP_CONN_ALIVE;
-
-		}
+	}
 
 // -------------------------------------------------------------------------------------------------
 
@@ -3521,8 +3512,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 
 	// Keep connection only for 10 Sec
 //	espconn_regist_time(conn->conn,10,1);	// MAX 10 Sec for answer (HTTPD_TIMEOUT ?)
-
-	}
+  }
 
   // Prio 2: NO data in send buff, conn wants further processing, enable fire of idle Cb in ConnCtrl
   // -> one IdleCb will be fired soon ...
@@ -3537,24 +3527,21 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 
 	// Keep connection if idle for 2h
 //	espconn_regist_time(conn->conn,257,1);	// MAX 256 Sec Longpoll
-
-	}
+  }
 
   // Prio 3 - NO data in send buff, conn wants NO further processing. Check if KEEP_CONN_ALIVE is requested?
   else if (ConnRespFlags & F_KEEP_CONN_ALIVE) {
 
 	// if yes do nothing ...
-
-	}
+  }
 
   // Prio 4 - NO data in send buff, conn wants NO further processing. No keep alive. Disconnect connection !
   else {
 	
 	// disconnect -> will fire DisconCb to free resources
 	WebIf_disconnect(conn->conn);
-
-	}
   }
+}
 
 
 
@@ -3700,6 +3687,8 @@ WebIf_IdleCb(void *arg)
   // CLR: F_CALLED_BY_RXED_CALLBACK, because this is not RX-Callback ...
   // CLR: F_CALLED_BY_TXED_CALLBACK, because this is not TX-Callback ...
   conn->ConnCtrlFlags &= ~(F_GENERATE_IDLE_CALLBACK + F_CALLED_BY_RXED_CALLBACK + F_CALLED_BY_TXED_CALLBACK);
+  // SET:  
+//conn->ConnCtrlFlags |=  (none);
 
 //--------------------------------------------------------------------------------------------------
 
@@ -3753,7 +3742,7 @@ WebIf_SentCb (void* arg)
   // CLR: F_CALLED_BY_RXED_CALLBACK, because this is not RX-Callback ...
   conn->ConnCtrlFlags &= ~(F_GENERATE_IDLE_CALLBACK + F_TXED_CALLBACK_PENDING + F_CALLED_BY_RXED_CALLBACK);
   // SET:   F_CALLED_BY_TXED_CALLBACK, because this is TX-Callback ...
-  conn->ConnCtrlFlags |= ~(F_CALLED_BY_TXED_CALLBACK);
+  conn->ConnCtrlFlags |=  (F_CALLED_BY_TXED_CALLBACK);
 
 //--------------------------------------------------------------------------------------------------
 
@@ -3969,14 +3958,20 @@ WebIf_DisconCb(void *arg)
   if (conn->cgi != NULL) conn->cgi(conn);
 
   // free allocated memory for the Send-Buffer, if any
-  if (conn->send_buffer != NULL) free(conn->send_buffer);
+//if (conn->send_buffer != NULL) free (conn->send_buffer);
+  if (conn->send_buffer_len) free (conn->send_buffer);
 
   // free allocated memory for Trailing Buff, if any
-  if (conn->trailing_buffer != NULL) free(conn->trailing_buffer);
+//if (conn->trailing_buffer != NULL) free (conn->trailing_buffer);
+  if (conn->trailing_buffer_len) free (conn->trailing_buffer);
 
   // nicht schön
   // init http parser for new conn (goal is to free allocated memory!)
-  HTTPD_ParserInit(conn, HTTP_BOTH);
+  HTTPD_ParserInit (conn, HTTP_BOTH);
+
+  # if SCDED_DBG >= 3
+  printf("\ndone, freeing conn>");
+  #endif
 
   // finally free allocated memory for this WebIf_HTTPDConnSlotData_t struct
   free(conn);
@@ -8445,7 +8440,7 @@ HTTPDUrlFoundCb(WebIf_HTTPDConnSlotData_t *conn,
   conn->SlotParserState = s_HTTPD_Url_Found;
 
   // New URI? Start with cleared F_CONN_IS_AUTHENTICATED flag in ConnCtrl
-  conn->ConnCtrlFlags &= ~F_CONN_IS_AUTHENTICATED;
+  conn->ConnCtrlFlags &= ~(F_CONN_IS_AUTHENTICATED);
 
   // alloc memory for struct http_parser_url
   struct http_parser_url *http_parser_url =
@@ -9938,10 +9933,16 @@ WebIf_sent(WebIf_Definition_t *WebIf_Definition
 void ICACHE_FLASH_ATTR
 WebIf_disconnect(WebIf_Definition_t *WebIf_Definition)
 {
+
+  # if SCDED_DBG >= 5
+  os_printf("\n|WebIf_Sdisconnect Fn>");
+  # endif
+
   // select for disconnecting (F_NEEDS_CLOSE)
   WebIf_Definition->WebIf_CtrlRegA |= F_NEEDS_CLOSE;
 
-  // select for want writing (F_WANTS_WRITE), because the real close is done in the write select of code
+  // select for want writing (F_WANTS_WRITE),
+  // because the real close is done in the write select of code
   WebIf_Definition->common.Common_CtrlRegA |= F_WANTS_WRITE;
 }
 
@@ -9968,6 +9969,8 @@ WebIf_disconnect(WebIf_Definition_t *WebIf_Definition)
 int 
 WebIf_UndefineRaw(WebIf_Definition_t* WebIf_Definition)
 {
+  printf("\n|WebIf_undefineraw enter>");
+
   // connection close
   close(WebIf_Definition->common.fd);
 
@@ -9995,6 +9998,8 @@ WebIf_UndefineRaw(WebIf_Definition_t* WebIf_Definition)
 
   // free WebIf_Definition
   free(WebIf_Definition);
+
+  printf("\n|WebIf_undefineraw exit>");
 
   return 0;
 }

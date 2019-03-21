@@ -655,12 +655,10 @@ static xQueueHandle SCDEMux;
  *  Rets: -/-
  * --------------------------------------------------------------------------------------------------
  */
-
 static void
 IdleCbTask(void *pvParameters)
-  {
-
-  Common_Definition_t *Common_Definition;
+{
+  Entry_Definition_t* p_entry_definition;
 
   // endless loop - blocked by an delay
   while(1) {
@@ -668,35 +666,30 @@ IdleCbTask(void *pvParameters)
 	printf("\nNow IdleCbs>");
 
 	// loop through definitions
-	STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries) {
+	STAILQ_FOREACH(p_entry_definition, &SCDERoot.HeadCommon_Definitions, entries) {
 
 		// check if F_WANTS_IDLE_TASK is set and IdleCbFn Fn is installed
-		if ( (Common_Definition->module->provided->IdleCbFn)
-			&& (Common_Definition->Common_CtrlRegA & F_WANTS_IDLE_TASK) ) {
+		if ( (p_entry_definition->module->provided->IdleCbFn)
+			&& (p_entry_definition->Common_CtrlRegA & F_WANTS_IDLE_TASK) ) {
 
-			 os_printf("SCDE: Exec IdleCbFn!! Type-Name:%.*s Def-Name:%.*s FD:%d\n"
-				,Common_Definition->module->provided->typeNameLen
-				,Common_Definition->module->provided->typeName
-				,Common_Definition->nameLen
-				,Common_Definition->name
-				,Common_Definition->fd);
+			 os_printf("SCDE: Exec IdleCbFn!! Type-Name:%.*s Def-Name:%.*s FD:%d\n",
+				p_entry_definition->module->provided->typeNameLen,
+				p_entry_definition->module->provided->typeName,
+				p_entry_definition->nameLen,
+				p_entry_definition->name,
+				p_entry_definition->fd);
 
 			// clear Flag F_WANTS_WRITE, should be set again when more data should be sended
-			Common_Definition->Common_CtrlRegA &= ~F_WANTS_IDLE_TASK;
-
+			p_entry_definition->Common_CtrlRegA &= ~F_WANTS_IDLE_TASK;
 
 			// execute the idle callback function
-			Common_Definition->module->provided->IdleCbFn((Common_Definition_t*) Common_Definition);
-
-			}
-
+			p_entry_definition->module->provided->IdleCbFn(p_entry_definition);
 		}
-
-	vTaskDelay(100 / portTICK_PERIOD_MS);
-
 	}
 
+	vTaskDelay(100 / portTICK_PERIOD_MS);
   }
+}
 
 
 
@@ -708,12 +701,10 @@ IdleCbTask(void *pvParameters)
  *  Rets: -/-
  * --------------------------------------------------------------------------------------------------
  */
-
 static void
 SelectQueryTask(void *pvParameters)
-  {
-
-  Common_Definition_t *Def;
+{
+  Entry_Definition_t* p_entry_definition;
   int sd;
 
   // helper to finding highest file descriptor
@@ -728,8 +719,9 @@ SelectQueryTask(void *pvParameters)
   // exception socket descriptors set
   fd_set exceptfds;
 
-  os_printf("debug1:%d  2:%d.\n"
-		  ,FD_SETSIZE, sizeof(readfds) );
+  os_printf("debug1:%d  2:%d.\n",
+	FD_SETSIZE,
+	sizeof(readfds) );
 
   struct timeval timeout;
   // Initialize the timeout data structure
@@ -750,16 +742,15 @@ SelectQueryTask(void *pvParameters)
 	// list currently stored modules
 	printf("Selectloop: heap:%d\n",heap_caps_get_free_size(MALLOC_CAP_8BIT));
 
-	Common_Definition_t *Common_Definition;
+	Entry_Definition_t *Common_Definition;
 	STAILQ_FOREACH(Common_Definition, &SCDERoot.HeadCommon_Definitions, entries) {
-		printf("L Module:%.*s Name:%.*s FD:%d\n"
-				,Common_Definition->module->provided->typeNameLen
-				,Common_Definition->module->provided->typeName
-				,Common_Definition->nameLen
-				,Common_Definition->name
-				,Common_Definition->fd);
-		}
-
+		printf("L Module:%.*s Name:%.*s FD:%d\n",
+			Common_Definition->module->provided->typeNameLen,
+			Common_Definition->module->provided->typeName,
+			Common_Definition->nameLen,
+			Common_Definition->name,
+			Common_Definition->fd);
+	}
 
 	// clear highest file descriptor
 	max_fdp = 0;
@@ -772,47 +763,45 @@ SelectQueryTask(void *pvParameters)
 
 	// clear the exception socket set
 	FD_ZERO(&exceptfds);
-   
 
 	// loop through definitions with a valid socket descriptor to add to FD to sets
-	STAILQ_FOREACH(Def, &SCDERoot.HeadCommon_Definitions, entries) {
+	STAILQ_FOREACH(p_entry_definition, &SCDERoot.HeadCommon_Definitions, entries) {
 
 		// file descriptor / socket descriptor of this definition
-		sd = Def->fd;
+		sd = p_entry_definition->fd;
 
 		// if valid socket descriptor then may be we need to add to sets
 		if (sd != -1) {
 
-			 os_printf("SCDE: adding %.*s fd:%d\n",Def->nameLen,Def->name,Def->fd);
+			 os_printf("SCDE: adding %.*s fd:%d\n",
+				p_entry_definition->nameLen,
+				p_entry_definition->name,
+				p_entry_definition->fd);
 
 			// select for reading, but only if an Fn is installed
-			if (Def->module->provided->DirectReadFn) {
+			if (p_entry_definition->module->provided->DirectReadFn) {
 
 				FD_SET(sd , &readfds);
-
-				}
+			}
 
 			// select for writing (if wants to write), but only if an Fn is installed
-			if  ( (Def->Common_CtrlRegA & F_WANTS_WRITE)
-				&& (Def->module->provided->DirectWriteFn) ) {
+			if  ( (p_entry_definition->Common_CtrlRegA & F_WANTS_WRITE)
+				&& (p_entry_definition->module->provided->DirectWriteFn) ) {
 
 				FD_SET(sd , &writefds);
-
-				}
+			}
 
 			// select for exceptions, but only if an Fn is installed
-			if (Def->module->provided->ExceptFn) {
+			if (p_entry_definition->module->provided->ExceptFn) {
 
 				FD_SET(sd , &exceptfds);
-
-				}
+			}
 
 			// find highest file descriptor number, need it for the select function
 			// calculation after each FD_SET?
 			if (sd > max_fdp) max_fdp = sd;
-
-			}
 		}
+	}
 
 	// execute the selection
 	ret = select(max_fdp + 1, &readfds, &writefds, &exceptfds, &timeout);
@@ -825,52 +814,48 @@ SelectQueryTask(void *pvParameters)
 		 os_printf("SCDE: got any fd from select\n");
 
 		// loop through definitions with a valid socket descriptor to check and execute callbacks
-		STAILQ_FOREACH(Def, &SCDERoot.HeadCommon_Definitions, entries) {
+		STAILQ_FOREACH(p_entry_definition, &SCDERoot.HeadCommon_Definitions, entries) {
 
 			 os_printf("SCDE: ok fnd select\n");
 
 			// file descriptor / socket descriptor of this definition
-			sd = Def->fd;
+			sd = p_entry_definition->fd;
 
 			// if valid socket descriptor then check and execute callbacks
 			if (sd != -1) {
 
 				// first check for write availability, but only if 'F_WANTS_WRITE' and 'DirectWriteFn' is installed
-				if ( (Def->Common_CtrlRegA & F_WANTS_WRITE)
-					&& (Def->module->provided->DirectWriteFn)
-					&& (FD_ISSET(sd , &writefds)) ) {
+				if ( ( p_entry_definition->Common_CtrlRegA & F_WANTS_WRITE ) &&
+					( p_entry_definition->module->provided->DirectWriteFn ) &&
+					( FD_ISSET(sd , &writefds) ) ) {
 
 					// clear Flag F_WANTS_WRITE, should be set again when more data should be sended
-					Def->Common_CtrlRegA &= ~F_WANTS_WRITE;
+					p_entry_definition->Common_CtrlRegA &= ~F_WANTS_WRITE;
 
 					// execute the write function
-					Def->module->provided->DirectWriteFn((Common_Definition_t*) Def);
-					
-					}
+					p_entry_definition->module->provided->DirectWriteFn(p_entry_definition);
+				}
 
 				// second check for read availability. But only if a function is installed
-				if ( (Def->module->provided->DirectReadFn)
-					&& (FD_ISSET(sd , &readfds)) ) {
+				if ( (p_entry_definition->module->provided->DirectReadFn) &&
+					(FD_ISSET(sd , &readfds)) ) {
 
 					// execute the read function
-					Def->module->provided->DirectReadFn((Common_Definition_t*) Def);
-
-					}
+					p_entry_definition->module->provided->DirectReadFn(p_entry_definition);
+				}
 
 				// third check for exceptions. But only if a function is installed
-				if ( (Def->module->provided->ExceptFn)
-					&& (FD_ISSET(sd , &exceptfds)) ) {
+				if ( (p_entry_definition->module->provided->ExceptFn) &&
+					(FD_ISSET(sd , &exceptfds)) ) {
 
 					// execute the exception function
-					Def->module->provided->ExceptFn((Common_Definition_t*) Def);
-
-					}
-
+					p_entry_definition->module->provided->ExceptFn(p_entry_definition);
 				}
 			}
 		}
 	}
   }
+}
 
 
 
