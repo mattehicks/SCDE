@@ -19,8 +19,8 @@
 #include <SCDE_Main.h>
 
 
-
-
+#define SCDEH_DBG 0
+#define  SCDED_DBG 3
 
 //----------------------- new stuff ------------------------
 

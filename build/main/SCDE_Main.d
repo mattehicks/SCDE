@@ -159,6 +159,7 @@ SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/sockets.h \
  /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/inet.h \
  /home/maikschulze/esp/SCDE/main/include/vfs.h \
+ /home/maikschulze/esp/esp-idf/components/esp32/include/esp_task_wdt.h \
  /home/maikschulze/esp/SCDE/main/include/SCDE_s.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/queue.h \
  /home/maikschulze/esp/SCDE/main/include/SCDE_Main.h \
@@ -489,6 +490,8 @@ SCDE_Main.o: /home/maikschulze/esp/SCDE/main/SCDE_Main.c \
 /home/maikschulze/esp/esp-idf/components/lwip/include/lwip/lwip/inet.h:
 
 /home/maikschulze/esp/SCDE/main/include/vfs.h:
+
+/home/maikschulze/esp/esp-idf/components/esp32/include/esp_task_wdt.h:
 
 /home/maikschulze/esp/SCDE/main/include/SCDE_s.h:
 

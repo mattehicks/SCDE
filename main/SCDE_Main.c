@@ -39,7 +39,7 @@
 
 
 
-
+#include "esp_task_wdt.h"
 
 
 #include "SCDE_s.h"
@@ -812,7 +812,7 @@ SelectQueryTask(void *pvParameters)
 	if (ret > 0) {
 
 		 os_printf("SCDE: got any fd from select\n");
-
+/*problem mit gelöschter definition?
 		// loop through definitions with a valid socket descriptor to check and execute callbacks
 		STAILQ_FOREACH(p_entry_definition, &SCDERoot.HeadCommon_Definitions, entries) {
 
@@ -853,6 +853,119 @@ SelectQueryTask(void *pvParameters)
 				}
 			}
 		}
+*/
+// --------------------------------------------------------------------------------------------------
+
+		Entry_Definition_t* p_next_entry_definition;
+
+		// first the write availability
+
+		p_entry_definition = STAILQ_FIRST(&SCDERoot.head_definition);
+
+		while (p_entry_definition != NULL) {
+
+			// load next, because current may be deleted during call
+			p_next_entry_definition = STAILQ_NEXT(p_entry_definition, entries);
+
+			os_printf("SCDE: select writeset?\n");
+
+			// file descriptor / socket descriptor of this definition
+			sd = p_entry_definition->fd;
+
+			// if valid socket descriptor then check and execute callbacks
+			if (sd != -1) {
+
+				// first check for write availability, but only if 'F_WANTS_WRITE' and 'DirectWriteFn' is installed
+				if ( ( p_entry_definition->Common_CtrlRegA & F_WANTS_WRITE ) &&
+					( p_entry_definition->module->provided->DirectWriteFn ) &&
+					( FD_ISSET(sd , &writefds) ) ) {
+
+					// clear Flag F_WANTS_WRITE, should be set again when more data should be sended
+					p_entry_definition->Common_CtrlRegA &= ~F_WANTS_WRITE;
+
+					// execute the write function
+					p_entry_definition->module->provided->DirectWriteFn(p_entry_definition);
+				}
+
+			}
+
+			esp_task_wdt_feed();
+
+			// nexi is already buffered
+			p_entry_definition = p_next_entry_definition;
+		}
+
+
+		// second the read availability
+
+		p_entry_definition = STAILQ_FIRST(&SCDERoot.head_definition);
+
+		while (p_entry_definition != NULL) {
+
+			// load next, because current may be deleted during call
+			p_next_entry_definition = STAILQ_NEXT(p_entry_definition, entries);
+
+			os_printf("SCDE: select writeset?\n");
+
+			// file descriptor / socket descriptor of this definition
+			sd = p_entry_definition->fd;
+
+			// if valid socket descriptor then check and execute callbacks
+			if (sd != -1) {
+
+				// second check for read availability. But only if a function is installed
+				if ( (p_entry_definition->module->provided->DirectReadFn) &&
+					(FD_ISSET(sd , &readfds)) ) {
+
+					// execute the read function
+					p_entry_definition->module->provided->DirectReadFn(p_entry_definition);
+				}
+
+
+			}
+
+			esp_task_wdt_feed();
+
+			// nexi is already buffered
+			p_entry_definition = p_next_entry_definition;
+		}
+
+		// third the write availability
+
+		p_entry_definition = STAILQ_FIRST(&SCDERoot.head_definition);
+
+		while (p_entry_definition != NULL) {
+
+			// load next, because current may be deleted during call
+			p_next_entry_definition = STAILQ_NEXT(p_entry_definition, entries);
+
+			os_printf("SCDE: select writeset?\n");
+
+			// file descriptor / socket descriptor of this definition
+			sd = p_entry_definition->fd;
+
+			// if valid socket descriptor then check and execute callbacks
+			if (sd != -1) {
+
+				// third check for exceptions. But only if a function is installed
+				if ( (p_entry_definition->module->provided->ExceptFn) &&
+
+					(FD_ISSET(sd , &exceptfds)) ) {
+
+					// execute the exception function
+					p_entry_definition->module->provided->ExceptFn(p_entry_definition);
+				}
+
+			}
+
+			esp_task_wdt_feed();
+
+			// nexi is already buffered
+			p_entry_definition = p_next_entry_definition;
+		}
+
+// --------------------------------------------------------------------------------------------------
+
 	}
   }
 }
