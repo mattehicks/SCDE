@@ -664,7 +664,7 @@ IdleCbTask(void *pvParameters)
   while(1) {
 
 	printf("\nNow IdleCbs>");
-
+/*
 	// loop through definitions
 	STAILQ_FOREACH(p_entry_definition, &SCDERoot.HeadCommon_Definitions, entries) {
 
@@ -686,7 +686,7 @@ IdleCbTask(void *pvParameters)
 			p_entry_definition->module->provided->IdleCbFn(p_entry_definition);
 		}
 	}
-
+*/
 	vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 }
@@ -802,10 +802,10 @@ SelectQueryTask(void *pvParameters)
 			if (sd > max_fdp) max_fdp = sd;
 		}
 	}
-
+esp_task_wdt_feed();
 	// execute the selection
 	ret = select(max_fdp + 1, &readfds, &writefds, &exceptfds, &timeout);
-
+esp_task_wdt_feed();
 	 os_printf("|SCDE: passed global select>");
 
 	// did we get any?
@@ -859,6 +859,7 @@ SelectQueryTask(void *pvParameters)
 		Entry_Definition_t* p_next_entry_definition;
 
 		// first the write availability
+		os_printf("SCDE: check: in writeset?\n");
 
 		p_entry_definition = STAILQ_FIRST(&SCDERoot.head_definition);
 
@@ -866,8 +867,6 @@ SelectQueryTask(void *pvParameters)
 
 			// load next, because current may be deleted during call
 			p_next_entry_definition = STAILQ_NEXT(p_entry_definition, entries);
-
-			os_printf("SCDE: select writeset?\n");
 
 			// file descriptor / socket descriptor of this definition
 			sd = p_entry_definition->fd;
@@ -886,7 +885,6 @@ SelectQueryTask(void *pvParameters)
 					// execute the write function
 					p_entry_definition->module->provided->DirectWriteFn(p_entry_definition);
 				}
-
 			}
 
 			esp_task_wdt_feed();
@@ -897,6 +895,7 @@ SelectQueryTask(void *pvParameters)
 
 
 		// second the read availability
+		os_printf("SCDE: check: in readset?\n");
 
 		p_entry_definition = STAILQ_FIRST(&SCDERoot.head_definition);
 
@@ -904,8 +903,6 @@ SelectQueryTask(void *pvParameters)
 
 			// load next, because current may be deleted during call
 			p_next_entry_definition = STAILQ_NEXT(p_entry_definition, entries);
-
-			os_printf("SCDE: select writeset?\n");
 
 			// file descriptor / socket descriptor of this definition
 			sd = p_entry_definition->fd;
@@ -920,8 +917,6 @@ SelectQueryTask(void *pvParameters)
 					// execute the read function
 					p_entry_definition->module->provided->DirectReadFn(p_entry_definition);
 				}
-
-
 			}
 
 			esp_task_wdt_feed();
@@ -931,6 +926,7 @@ SelectQueryTask(void *pvParameters)
 		}
 
 		// third the write availability
+		os_printf("SCDE: check: in exeptset?\n");
 
 		p_entry_definition = STAILQ_FIRST(&SCDERoot.head_definition);
 
@@ -938,8 +934,6 @@ SelectQueryTask(void *pvParameters)
 
 			// load next, because current may be deleted during call
 			p_next_entry_definition = STAILQ_NEXT(p_entry_definition, entries);
-
-			os_printf("SCDE: select writeset?\n");
 
 			// file descriptor / socket descriptor of this definition
 			sd = p_entry_definition->fd;
@@ -955,7 +949,6 @@ SelectQueryTask(void *pvParameters)
 					// execute the exception function
 					p_entry_definition->module->provided->ExceptFn(p_entry_definition);
 				}
-
 			}
 
 			esp_task_wdt_feed();
@@ -967,6 +960,37 @@ SelectQueryTask(void *pvParameters)
 // --------------------------------------------------------------------------------------------------
 
 	}
+
+
+
+
+//temp here 1sek cycle
+	printf("\nNow IdleCbs>");
+
+	// loop through definitions
+	STAILQ_FOREACH(p_entry_definition, &SCDERoot.HeadCommon_Definitions, entries) {
+
+		// check if F_WANTS_IDLE_TASK is set and IdleCbFn Fn is installed
+		if ( (p_entry_definition->module->provided->IdleCbFn)
+
+			&& (p_entry_definition->Common_CtrlRegA & F_WANTS_IDLE_TASK) ) {
+
+			 os_printf("SCDE: Exec IdleCbFn!! Type-Name:%.*s Def-Name:%.*s FD:%d\n",
+				p_entry_definition->module->provided->typeNameLen,
+				p_entry_definition->module->provided->typeName,
+				p_entry_definition->nameLen,
+				p_entry_definition->name,
+				p_entry_definition->fd);
+
+			// clear Flag F_WANTS_WRITE, should be set again when more data should be sended
+			p_entry_definition->Common_CtrlRegA &= ~F_WANTS_IDLE_TASK;
+
+			// execute the idle callback function
+			p_entry_definition->module->provided->IdleCbFn(p_entry_definition);
+		}
+	}
+//temp here
+
   }
 }
 

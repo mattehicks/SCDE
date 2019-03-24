@@ -262,12 +262,12 @@ enum {
 
 
 /* 
- * WebIf_Definition stores values for operation valid only for the defined instance of an
+ *WebIf Entry Definition (struct) stores values for operation valid only for the defined instance of an
  * loaded module. Values are initialized by HCTRLD an the loaded module itself.
  */
-typedef struct WebIf_Definition_s {
+typedef struct Entry_WebIf_Definition_s {
 
-  Common_Definition_t common;		// ... the common part of the definition
+  Entry_Definition_t common;		// ... the common part of the definition
 
 //---
 
@@ -284,14 +284,14 @@ typedef struct WebIf_Definition_s {
 
   uint8_t link_cnt;
 
-  void *reverse;			// the reverse link to application-conn-slot-data
+  void* reverse;			// the reverse link to application-conn-slot-data
 
   int WebIf_CtrlRegA;			// WebIf Control-Reg-A (enum WebIf_CtrlRegA from WEBIF.h)
 
   HTTPD_InstanceCfg_t* HTTPD_InstCfg;	// link to configuration of this HTTPD-Instance
 
-  uint8_t SlotNo;			// slot number in this instance
-} WebIf_Definition_t;
+  uint8_t slot_no;			// slot number in this instance
+} Entry_WebIf_Definition_t;
 
 
 
@@ -309,16 +309,16 @@ typedef struct WebIf_Definition_s {
  * Definition typedef stores values for operation valid only for the defined instance of an
  * loaded module. Values are initialized by HCTRLD an the loaded module itself.
  */
-typedef struct WebIf_HTTPDConnSlotData_s {
+typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
 
-  WebIf_Definition_t* conn;	// Link to lower level connection management
+  Entry_WebIf_Definition_t* conn;	// Link to lower level connection management
 
 //- V V V V V V V V V V V V V V V V V V // TX-Helper
 
-  char* send_buffer;//uint8_t*			// Pointer to current allocated send buffer w. size [MAX_SB_LEN] (NULL=NO Send-Buffer)
-  int send_buffer_len; //uint16_t//SendBuffWritePos	// Send buffer, current write position (offset)
-  char* trailing_buffer;//uint8_t*		// An temp buffer in case of Send-Buffer overflow. Its prio for next transmission!
-  int trailing_buffer_len; //uint16_t	// The Trailing-Buffer length of (allocated) data, if any
+  char* send_buffer;//uint8_t*		// Pointer to current allocated send buffer w. size [MAX_SB_LEN] (NULL=NO Send-Buffer)
+  int send_buffer_write_pos; //uint16_t	// Send buffer, current write position (offset), !> 0 = its allocated!
+  char* trailing_buffer;//uint8_t*	// An 'trailing_buffer' in case of 'send_buffer' overflow. Its prio for next transmission!
+  int trailing_buffer_len; //uint16_t	// The 'trailing_buffer' length of (allocated & stored) data, !> 0 = its allocated!
 
 
 //- V V V V V V V V V V V V V V V V V V // Helper
@@ -343,7 +343,7 @@ typedef struct WebIf_HTTPDConnSlotData_s {
 
 //- union 32Bit connspecific possible 
 
-  uint8_t SlotNo;			// helper to show slot number
+  uint8_t slot_no;			// helper to show slot number
   unsigned int SlotCgiState : 4;	// enum SlotCgiState
   unsigned int SlotParserState : 4;	// enum SlotParserState
   uint16_t LP10HzCounter;		// LongPoll 100ms/ 10Hz Counter (0.1-6553.6 Sec) for this conn
@@ -357,12 +357,11 @@ typedef struct WebIf_HTTPDConnSlotData_s {
 // int32_t HdrFldId;
 
 
-//tempörär. Idee fehlt
-// union je nach prozesschritt?
-char* HdrFldNameBuff;	// Pointer to Header Field Name Buffer
-int HdrFldNameLen;	// current HdrFldNameBuff length
-char* HdrFldValueBuff;	// Pointer to Header Field Value Buffer
-int HdrFldValueLen;	// current HdrFldValueBuff length
+// temporary fields for header field extraction
+  char* p_hdr_fld_name_buff;		// current Header Field Name Buffer ... during parsing
+  int hdr_fld_name_len;			// current HdrFldNameBuff length ... during parsing
+  char* p_hdr_fld_value_buff;		// Pointer to Header Field Value Buffer ... during parsing
+  int hdr_fld_value_len;		// current HdrFldValueBuff length ... during parsing
 
 //	};
 
@@ -413,7 +412,7 @@ int HdrFldValueLen;	// current HdrFldValueBuff length
 
 //-
 
-  STAILQ_HEAD (stailhead, HeaderFieldInfo_s) head; // REQUEST & RESPONSE - Selected Header-Fields extracted & cached (AvailHdrFlds[])
+  STAILQ_HEAD (stailhead, Entry_Header_Field_s) head_header_field;// REQUEST & RESPONSE - Stores Header-Fields in an SLTQ
 
 //-
 
@@ -476,13 +475,13 @@ strTextMultiple_t* WebIf_Undefine(Common_Definition_t* Common_Definition);
 /*
  *  helpers provided to module for type operation
  */
-void WebIf_disconnect(WebIf_Definition_t *WebIf_Definition);
-void espconn_regist_connectcb(WebIf_Definition_t *conn, espconn_connect_callback connectCb);
-void espconn_regist_disconcb(WebIf_Definition_t *conn, espconn_connect_callback DisconCb);
-void espconn_regist_sentcb(WebIf_Definition_t *conn, espconn_sent_callback SentCb);
-void espconn_regist_recvcb(WebIf_Definition_t *conn, espconn_recv_callback RecvCb);
-void espconn_regist_reconcb(WebIf_Definition_t *conn, espconn_reconnect_callback ReconCb);
-int  WebIf_sent(WebIf_Definition_t *WebIf_Definition, uint8_t *Buff, uint Len);
+void WebIf_disconnect(Entry_WebIf_Definition_t *WebIf_Definition);
+void espconn_regist_connectcb(Entry_WebIf_Definition_t *conn, espconn_connect_callback connectCb);
+void espconn_regist_disconcb(Entry_WebIf_Definition_t *conn, espconn_connect_callback DisconCb);
+void espconn_regist_sentcb(Entry_WebIf_Definition_t *conn, espconn_sent_callback SentCb);
+void espconn_regist_recvcb(Entry_WebIf_Definition_t *conn, espconn_recv_callback RecvCb);
+void espconn_regist_reconcb(Entry_WebIf_Definition_t *conn, espconn_reconnect_callback ReconCb);
+int  WebIf_sent(Entry_WebIf_Definition_t* p_entry_webif_definition, uint8_t* send_buffer, uint send_buffer_len);
 
 //----------------- old stuff ------------------------
 
@@ -576,14 +575,28 @@ do									\
   extern int SCDEETX_RcvNOKCNT;	// Error counter: retrys, ... ?
 
 
+//----------
 
-// Content-structure of Header-Field storage
-typedef struct HeaderFieldInfo_s {
-	STAILQ_ENTRY(HeaderFieldInfo_s) entries;// Link to next Header Field Storage
-	int8_t HdrFldID;			// Header field ID according to tab, -1 not implementet/ unknown
-	char HdrFldVal[1];			// Zero terminated string of header value
-} HeaderFieldInfo_t;
 
+/* 
+ * Entry_Header_Field (struct)
+ * - stores the value of an header field
+ */
+typedef struct Entry_Header_Field_s {
+  STAILQ_ENTRY(Entry_Header_Field_s) entries;	// link to next header field (SLTQ)
+  int8_t hdr_fld_id;  				// stores header field ID - from HTTPD Table
+  char* p_hdr_fld_val;				// stores the assigned value in allocated mem
+} Entry_Header_Field_t;
+
+/*
+ * Constructor for the singly linked tail queue (head), which can hold multiple linked strings
+ * SLTQ can be used for an FIFO queue by adding entries at the tail and fetching entries from the head
+ * SLTQ is inefficient when removing arbitrary elements
+ */
+STAILQ_HEAD(Head_Header_Field_s, Entry_Header_Field_s);
+
+
+//----------
 
 
 // Information Flags - for Connection Control
@@ -793,11 +806,19 @@ int GetTIST(void);
 int GetUniqueTIST(void);
 
 
-// SCDE-Daemon
+//---------------------
+
+
+// HTTPD-Helpers
+
+// Returns the ID of the header field (if in built in table).
+int HTTPD_Get_Hdr_Fld_ID(const char* p_at, size_t length);
+
+//Returns the header field value (char* to string) from ID (if stored)
+char* HTTPD_Get_Hdr_Val_From_ID(WebIf_HTTPDConnSlotData_t* p_conn, int hdr_fld_id);
+
 int SCDED_UrlDecode(char *val, int valLen, char *dst, int dstLen);
 void SCDED_UrlDecode2(char *dst, const char *src);
-int SCDED_GetHdrFldID(const char *at, size_t length);
-char* SCDED_GetHdrValFromID(WebIf_HTTPDConnSlotData_t *conn, int HdrFldID);
 int SCDED_HexVal(char c);
 int SCDED_ParseMimetype(char *ext);
 int SCDED_GetMimeTypeID(char *url);
@@ -1183,24 +1204,42 @@ int http_body_is_final(const WebIf_HTTPDConnSlotData_t *conn);
 // Analyzes the path from HTTP-Parser and tries to find + load a matching build in Resource
 void HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t *conn);
 
+
+
+//--------------
+
+
+
 // HTTPD parser integrated callbacks (installed in init) + Procs
 
 // Callback fired by HTTPDParser when message begins
-int HTTPDMsgBeginCb(WebIf_HTTPDConnSlotData_t *conn);
+int HTTPD_On_Message_Begin_Cb(WebIf_HTTPDConnSlotData_t *conn);
+
 // Callback fired by HTTPDParser when url is found, used for parsing URI into elements
-int HTTPDUrlFoundCb(WebIf_HTTPDConnSlotData_t *conn, const char *at, size_t length);
+int HTTPD_On_Url_Cb(WebIf_HTTPDConnSlotData_t *conn, const char *at, size_t length);
+
 // Callback fired by HTTPDParser when a header field is found
-int HTTPDHeaderFldCb(WebIf_HTTPDConnSlotData_t *conn, const char *at, size_t length);
+int HTTPD_On_Header_Field_Cb(WebIf_HTTPDConnSlotData_t* p_conn, const char* p_at, size_t length);
+
 // Callback fired by HTTPDParser when a header value is found
-int HTTPDHeaderValCb(WebIf_HTTPDConnSlotData_t *conn, const char *at, size_t length);
+int HTTPD_On_Header_Value_Cb(WebIf_HTTPDConnSlotData_t* p_conn, const char* p_at, size_t length);
+
 // Proc to process stored header field (name+value)
-void HTTPDProcHeaderFld(WebIf_HTTPDConnSlotData_t *conn);
+void HTTPD_Store_Header_Field(WebIf_HTTPDConnSlotData_t *conn);
+
 // Callback fired by HTTPDParser when header is complete parsed
-int HTTPDHeaderPrsdCompleteCb(WebIf_HTTPDConnSlotData_t *conn);
+int HTTPD_On_Headers_Complete_Cb(WebIf_HTTPDConnSlotData_t *conn);
+
 // Callback fired by HTTPDParser when body-data is found
-int HTTPDFndBodyDataCb(WebIf_HTTPDConnSlotData_t *conn, const char *at, size_t length);
+int HTTPD_On_Body_Cb(WebIf_HTTPDConnSlotData_t *conn, const char *at, size_t length);
+
 // Callback fired by HTTPDParser when message parsing is complete (after body data)
-int HTTPDMsgPrsdCompleteCb(WebIf_HTTPDConnSlotData_t *conn);
+int HTTPD_On_Message_Complete_Cb(WebIf_HTTPDConnSlotData_t *conn);
+
+
+
+//--------------
+
 
 
 // Helper

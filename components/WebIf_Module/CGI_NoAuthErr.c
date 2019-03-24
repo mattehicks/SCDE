@@ -49,7 +49,7 @@ NoAuthErr_cgi(WebIf_HTTPDConnSlotData_t *conn)
   # if SCDED_DBG >= 3
   os_printf("HTTPD Conn %p, slot %d CGI_NOAUTH for %s. TX 401!\n",
 	conn->conn,
-	conn->SlotNo,
+	conn->slot_no,
 	conn->url);
   # endif
 

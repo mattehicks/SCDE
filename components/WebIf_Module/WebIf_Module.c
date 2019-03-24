@@ -19,8 +19,12 @@
 #include <SCDE_Main.h>
 
 
-#define SCDEH_DBG 0
-#define  SCDED_DBG 3
+// deep prinf debugging HTTP Daemon
+//#define HTTPD_DBG 0
+
+//#define SCDEH_DBG 0
+//#define  SCDED_DBG 3
+
 
 //----------------------- new stuff ------------------------
 
@@ -284,7 +288,7 @@ HTTPDGetHeader(WebIf_HTTPDConnSlotData_t *conn, char *header, char *ret, int ret
 
 
 //  Mark job in load serializer as finnished (by deleting bit)
-//  LoadSerializer &= ~(1<<(conn->SlotNo));
+//  LoadSerializer &= ~(1<<(conn->slot_no));
 
 
 
@@ -2110,7 +2114,7 @@ int ICACHE_FLASH_ATTR
 GetTIST(void)
 {
   int NowTIST = 0; //sntp_get_current_timestamp();
-  if (UniqueTIST < NowTIST) UniqueTIST = NowTIST;
+  if ( UniqueTIST < NowTIST ) UniqueTIST = NowTIST;
   return UniqueTIST;
 }
 
@@ -2126,7 +2130,7 @@ int ICACHE_FLASH_ATTR
 GetUniqueTIST(void)
 {
   int NowTIST = 0;//spz sntp_get_current_timestamp();
-  if (UniqueTIST < NowTIST) UniqueTIST = NowTIST;
+  if ( UniqueTIST < NowTIST ) UniqueTIST = NowTIST;
   else UniqueTIST++;
   return UniqueTIST;
 }
@@ -2160,69 +2164,49 @@ GetUniqueTIST(void)
  *--------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR
-SCDED_UrlDecode(char *val, int valLen, char *dst, int dstLen) 
-
-  {
-
+SCDED_UrlDecode(char* val, int valLen, char* dst, int dstLen) 
+{
   int s=0, d=0;
 
   int esced=0, escVal=0;
 
-  while ( (s < valLen) && (d < dstLen) )
+  while ( (s < valLen) && (d < dstLen) ) {
 
-  	{
+	if ( esced == 1 ) {
 
-	if (esced==1)
-
-		{
-
-		escVal = SCDED_HexVal(val[s])<<4;
+		escVal = SCDED_HexVal(val[s]) << 4;
 		esced = 2;
+	} 
 
-		} 
-
-	else if (esced==2) 
-
-		{
+	else if ( esced == 2 ) {
 
 		escVal += SCDED_HexVal(val[s]);
 		dst[d++] = escVal;
 		esced = 0;
+	} 
 
-		} 
-
-	else if (val[s] == '%')
-
-		{
+	else if ( val[s] == '%' ) {
 
 		esced = 1;
+	}
 
-		}
-
-	else if (val[s] == '+')
-
-		{
+	else if ( val[s] == '+' ) {
 
 		dst[d++] = ' ';
+	}
 
-		}
-
-	else
-
-		{
+	else {
 
 		dst[d++] = val[s];
-
-		}
+	}
 
 	s++;
-
-	}
+  }
 
   if (d < dstLen) dst[d] = 0;
 
   return d;
-  }
+}
 
 
 
@@ -2241,20 +2225,14 @@ SCDED_UrlDecode(char *val, int valLen, char *dst, int dstLen)
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR 
-SCDED_UrlDecode2(char *dst, const char *src)
-
-  {
-
+SCDED_UrlDecode2(char* dst, const char* src)
+{
   uint8_t a, b;
 
-  while (*src)
+  while ( *src ) {
 
-	{
-
-	if ((*src == '%') && ((a = src[1]) &&
-		(b = src[2])) && (isxdigit(a) && isxdigit(b)))
-
-		{
+	if ( ( *src == '%' ) && ( ( a = src[1] ) &&
+		( b = src[2] ) ) && ( isxdigit(a) && isxdigit(b) ) ) {
 
 		if (a >= 'a')
 			a -= 'a'-'A';
@@ -2274,95 +2252,75 @@ SCDED_UrlDecode2(char *dst, const char *src)
 
 		*dst++ = 16*a+b;
 		src += 3;
-
-		}
-
-	else
-
-		{
-
-		*dst++ = *src++;
-
-		}
-
 	}
 
-	*dst++ = '\0';
+	else {
+
+		*dst++ = *src++;
+	}
+
   }
+
+  *dst++ = '\0';
+}
 
 
 
 /*
  *--------------------------------------------------------------------------------------------------
- *FName: SCDED_GetHdrFldID
- * Desc: Returns the ID of the header field at char* with specified length (NOT zero terminated!)
- * Para: char *url -> ptr to source string
+ *FName: HTTPD_Get_Hdr_Fld_ID
+ * Desc: Returns the ID of the header field (if in built in table)
+ * Info: at char* with specified length (NOT zero terminated!)
+ * Para: const char* p_at -> ptr to source string
  *       size_t length -> number of chars
  * Rets: int header field id (-1 if error / not found)
  *--------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR
-SCDED_GetHdrFldID(const char *at,
-			size_t length)
-  {
-
+HTTPD_Get_Hdr_Fld_ID(const char* p_at, size_t length)
+{
   int i = 0;
 
-  while (AvailHdrFlds[i].FldName != NULL)
+  while ( AvailHdrFlds[i].FldName != NULL ) {
 
-	{
-
-	if (memcmp(at, AvailHdrFlds[i].FldName, length) != 0) 
-
-		{
+	if ( memcmp (p_at, AvailHdrFlds[i].FldName, length) != 0 )  {
 
 		i++;
-
-		}
-
-	else 
-
-		{
-
-		return i;
-
-		}
-
 	}
 
-  return -1;
+	else {
 
+		return i;
+	}
   }
+
+  return -1;
+}
 
 
 
 /*
  *--------------------------------------------------------------------------------------------------
- *FName: SCDED_GetHdrValFromID
- * Desc: Returns the header field value (char* to string) from ID 
- * Para: WebIf_HTTPDConnSlotData_t *conn -> prt to connection slot
- *       int HdrFldID -> header field id
+ *FName: HTTPD_Get_Hdr_Val_From_ID
+ * Desc: Returns the header field value (char* to string) from ID (if stored)
+ * Para: WebIf_HTTPDConnSlotData_t* p_conn -> prt to connection slot
+ *       int hdr_fld_id -> header field id
  * Rets: char* -> header field value / NULL on error
  *--------------------------------------------------------------------------------------------------
  */
 char* ICACHE_FLASH_ATTR
-SCDED_GetHdrValFromID(WebIf_HTTPDConnSlotData_t *conn,
-			int HdrFldID)
-  {
+HTTPD_Get_Hdr_Val_From_ID(WebIf_HTTPDConnSlotData_t* p_conn, int hdr_fld_id)
+{
+  Entry_Header_Field_t* p_entry_header_field;
 
-  HeaderFieldInfo_t *n1;
+  STAILQ_FOREACH(p_entry_header_field, &p_conn->head_header_field, entries) {
 
-  STAILQ_FOREACH(n1, &conn->head, entries)
-
-	{
-
-	if (n1->HdrFldID == HdrFldID) return n1->HdrFldVal;
-
-	}
+	if ( p_entry_header_field->hdr_fld_id == hdr_fld_id ) 
+		return p_entry_header_field->p_hdr_fld_val;
+  }
 
   return NULL;
-
-  }
+}
 
 
 
@@ -2376,9 +2334,7 @@ SCDED_GetHdrValFromID(WebIf_HTTPDConnSlotData_t *conn,
  */
 int ICACHE_FLASH_ATTR 
 SCDED_HexVal(char c)
-
-  {
-
+{
   if (c>='0' && c<='9') return c-'0';
 
   if (c>='A' && c<='F') return c-'A'+10;
@@ -2386,8 +2342,7 @@ SCDED_HexVal(char c)
   if (c>='a' && c<='f') return c-'a'+10;
 
   return 0;
-
-  }
+}
 
 
 
@@ -2401,26 +2356,23 @@ SCDED_HexVal(char c)
  */
 int ICACHE_FLASH_ATTR
 SCDED_GetMimeTypeID(char *url)
-
-  {
-
-  int i=1;
+{
+  int i = 1;
 
   // Go find the extension
-  char *ext = url + (strlen(url)-1);
+  char* ext = url + (strlen (url) -1 );
 
-  while ( (ext != url) && (*ext != '.') ) ext--;
+  while ( ( ext != url ) && ( *ext != '.' ) ) ext--;
 
   // if we have no extension -> return value '0'
-  if (ext == url) return 0;
+  if ( ext == url ) return 0;
 
   ext++; //if (*ext=='.') ext++;
 
-  while ( (AvailMimes[i].ext != NULL) && (strcmp(ext, AvailMimes[i].ext) !=0) ) i++;
+  while ( ( AvailMimes[i].ext != NULL ) && ( strcmp (ext, AvailMimes[i].ext) !=0 ) ) i++;
 
   return i;
-
-  }
+}
 
 
 
@@ -2434,10 +2386,9 @@ SCDED_GetMimeTypeID(char *url)
  *--------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR 
-SCDED_StartRespHeader(WebIf_HTTPDConnSlotData_t *conn
+SCDED_StartRespHeader(WebIf_HTTPDConnSlotData_t* conn
 			,int code) 
-  {
-
+{
   char buff[128];
 
   int l;
@@ -2445,8 +2396,7 @@ SCDED_StartRespHeader(WebIf_HTTPDConnSlotData_t *conn
   l = sprintf(buff, "HTTP/1.0 %d OK\r\nSCD-Engine/0.1\r\n", code);
 
   return (SCDED_Send(conn, buff, l));
-
-  }
+}
 
 
 
@@ -2460,10 +2410,8 @@ SCDED_StartRespHeader(WebIf_HTTPDConnSlotData_t *conn
  *--------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR 
-SCDED_StartRespHeader2(WebIf_HTTPDConnSlotData_t *conn)
-
-  {
-
+SCDED_StartRespHeader2(WebIf_HTTPDConnSlotData_t* conn)
+{
   char buff[128];
 
   int l;
@@ -2473,8 +2421,7 @@ SCDED_StartRespHeader2(WebIf_HTTPDConnSlotData_t *conn)
 	,HTTPD_ErrnoDescription(conn->parser_http_errno));
 
   return (SCDED_Send(conn, buff, l));
-
-  }
+}
 
 
 
@@ -2490,11 +2437,11 @@ SCDED_StartRespHeader2(WebIf_HTTPDConnSlotData_t *conn)
  *--------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR 
-SCDED_AddHdrFld(WebIf_HTTPDConnSlotData_t *conn
+SCDED_AddHdrFld(WebIf_HTTPDConnSlotData_t* conn
 		,const char *Field
 		,const char *Value
 		,int ValueLength) 
-  {
+{
 
   SCDED_Send(conn, Field, -1);
 
@@ -2503,8 +2450,7 @@ SCDED_AddHdrFld(WebIf_HTTPDConnSlotData_t *conn
   SCDED_Send(conn,  Value, ValueLength);
 
   return (SCDED_Send(conn, "\r\n", 2));
-
-  }
+}
 
 
 
@@ -2518,12 +2464,9 @@ SCDED_AddHdrFld(WebIf_HTTPDConnSlotData_t *conn
  */
 int ICACHE_FLASH_ATTR 
 SCDED_EndHeader(WebIf_HTTPDConnSlotData_t *conn)
-
-  {
-
+{
   return (SCDED_Send(conn, "\r\n", 2));
-
-  }
+}
 
 
 
@@ -2537,10 +2480,8 @@ SCDED_EndHeader(WebIf_HTTPDConnSlotData_t *conn)
  *--------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR 
-SCDED_Redirect(WebIf_HTTPDConnSlotData_t *conn
-		,char *newUrl) 
-  {
-
+SCDED_Redirect(WebIf_HTTPDConnSlotData_t* conn, char *newUrl) 
+{
   char buff[512];
 
   int l;
@@ -2550,8 +2491,7 @@ SCDED_Redirect(WebIf_HTTPDConnSlotData_t *conn
 	newUrl);
 
   return (SCDED_Send(conn, buff, l));
-
-  }
+}
 
 
 
@@ -2577,17 +2517,17 @@ SCDED_Send(WebIf_HTTPDConnSlotData_t *conn
   if (len < 0) len = strlen(data);
 
   // will data fit in send_buffer ?
-  if (conn->send_buffer_len + len <= MAX_SENDBUFF_LEN)
+  if (conn->send_buffer_write_pos + len <= MAX_SENDBUFF_LEN)
 
 	// if data fits in send_buffer ...
 	{
 
 	// copy to sendbuf
-	SCDE_memcpy_plus(conn->send_buffer + conn->send_buffer_len, data, len);
-	conn->send_buffer_len += len;
+	SCDE_memcpy_plus(conn->send_buffer + conn->send_buffer_write_pos, data, len);
+	conn->send_buffer_write_pos += len;
 
 	// return free bytes in send_buffer
-	return (MAX_SENDBUFF_LEN - conn->send_buffer_len);
+	return (MAX_SENDBUFF_LEN - conn->send_buffer_write_pos);
 
 	}
 
@@ -2597,15 +2537,15 @@ SCDED_Send(WebIf_HTTPDConnSlotData_t *conn
 	{
 
 	// Step 1: copy data to send_buffer till full
-	int send_buffer_free = MAX_SENDBUFF_LEN - conn->send_buffer_len;
+	int send_buffer_free = MAX_SENDBUFF_LEN - conn->send_buffer_write_pos;
 
 	if (send_buffer_free)
 
 		{
 
 		// copy to sendbuf
-		SCDE_memcpy_plus(conn->send_buffer + conn->send_buffer_len, data, send_buffer_free);
-		conn->send_buffer_len += send_buffer_free;
+		SCDE_memcpy_plus(conn->send_buffer + conn->send_buffer_write_pos, data, send_buffer_free);
+		conn->send_buffer_write_pos += send_buffer_free;
 
 		}
 
@@ -2668,52 +2608,45 @@ SCDED_Send(WebIf_HTTPDConnSlotData_t *conn
  * --------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR 
-SCDED_Send(WebIf_HTTPDConnSlotData_t *conn
-//SCDED_SendToSendBuff(HTTPDConnSlotData_t *conn
-		,const char* data
-		,int len)
+SCDED_Send(WebIf_HTTPDConnSlotData_t* conn, const char* data, int len)
+//SCDED_SendToSendBuff(HTTPDConnSlotData_t *conn, const char* data, int len)
 {
-
   // if len is -1, the data is seen as a C-string. Determine length ..
   if (len < 0) len = strlen (data);
 
   // in case we have nothing to send -> return free bytes in send_buffer
-  if (!len) return (MAX_SENDBUFF_LEN - conn->send_buffer_len);
+  if ( !len ) return (MAX_SENDBUFF_LEN - conn->send_buffer_write_pos);
 
-  // WE WILL DEFINITIVLY SEND DATA HERE - MAKE SEND REQUEST
-//  conn->conn->common.Common_CtrlRegA |= F_WANTS_WRITE;	//!!!!!!!!!!!!!!!!!!!!!!!problem!
-
-  // alloc Send-Buffer, if not already done
-  if (!conn->send_buffer_len)
+  // alloc 'send_buffer', if not already done
+  if (!conn->send_buffer_write_pos)
 	conn->send_buffer = (char*) malloc (MAX_SENDBUFF_LEN);
 
   // will data fit into 'send_buffer'? Then simply copy ...
-  if (conn->send_buffer_len + len <= MAX_SENDBUFF_LEN) {
+  if (conn->send_buffer_write_pos + len <= MAX_SENDBUFF_LEN) {
 
 	// data fits, copy to 'send_buffer' ...
-	SCDE_memcpy_plus(conn->send_buffer + conn->send_buffer_len, data, len);
-	conn->send_buffer_len += len;
+	SCDE_memcpy_plus(conn->send_buffer + conn->send_buffer_write_pos, data, len);
+	conn->send_buffer_write_pos += len;
 
 	// return free bytes in 'send_buffer'
-	return (MAX_SENDBUFF_LEN - conn->send_buffer_len);
+	return (MAX_SENDBUFF_LEN - conn->send_buffer_write_pos);
   }
 
-  else
-	 // else data does NOT fit into 'send_buffer' ...
-	{
+  // else data does NOT fit into 'send_buffer' ...
+  else {
 
 	// Step 1: copy data to 'send_buffer' till full
-	int send_buffer_free = MAX_SENDBUFF_LEN - conn->send_buffer_len;
+	int send_buffer_free = MAX_SENDBUFF_LEN - conn->send_buffer_write_pos;
 
 	if (send_buffer_free) {
 
 		// copy to Send-Buffer
-		SCDE_memcpy_plus(conn->send_buffer + conn->send_buffer_len, data, send_buffer_free);
+		SCDE_memcpy_plus(conn->send_buffer + conn->send_buffer_write_pos, data, send_buffer_free);
 
-		conn->send_buffer_len += send_buffer_free;
+		conn->send_buffer_write_pos += send_buffer_free;
 	}
 
-	// Step 2: create / add the rest of data to Trailing-Buffer
+	// Step 2: create / add the rest of data to 'trailing_buffer'
 	int trailing_buffer_len;
 
 	// if there is no 'trailing_buffer' get new length
@@ -2770,32 +2703,32 @@ SCDED_XmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
 
   {
 
-  if (conn->send_buffer_len != 0)
+  if (conn->send_buffer_write_pos != 0)
 
 	{
 
 	# if SCDED_DBG >= 3
 	printf("\n|XmitSendBuff, slot %d, to remote:%d.%d.%d.%d:%d from local port:%d, len=%d. mem:%d>",
-		conn->SlotNo,
+		conn->slot_no,
 		conn->conn->proto.tcp->remote_ip[0],
 		conn->conn->proto.tcp->remote_ip[1],
 		conn->conn->proto.tcp->remote_ip[2],
 		conn->conn->proto.tcp->remote_ip[3],
 		conn->conn->proto.tcp->remote_port,
 		conn->conn->proto.tcp->local_port,
-		conn->send_buffer_len,
+		conn->send_buffer_write_pos,
 		system_get_free_heap_size());
 	# endif
 
 	# if SCDED_DBG >= 5
  	 SCDEFn_at_WebIf_M->HexDumpOutFn ("\nTX-HEX",
 		conn->send_buffer,
-		conn->send_buffer_len);
+		conn->send_buffer_write_pos);
 	# endif
 
 	int8_t Result = WebIf_sent(conn->conn,
 		(uint8_t*) conn->send_buffer,
-		conn->send_buffer_len);
+		conn->send_buffer_write_pos);
 
 	// show error on debug term...
  	if (Result)
@@ -2838,76 +2771,71 @@ SCDED_XmitSendBuff(WebIf_HTTPDConnSlotData_t *conn)
  * --------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR 
-SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t *conn) 
+SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t* conn) 
 {
+  // We MUST HAVE an allocated 'send_buffer' here, indicated by an 'send_buffer_write_pos' > 0 !
+  // And also 'F_TXED_CALLBACK_PENDING' MUST BE NOT set ,
 
-  // do we have an allocated Send-Buffer -> there is something to send in the Send-Buffer !
-  if (conn->send_buffer_len) {
+  // we need to get the ptr to the platform specific conn
+  //struct espconn   *platform_conn = arg;		// ESP 8266 NonOS
+  Entry_WebIf_Definition_t* platform_conn = conn->conn;	// ESP 32 RTOS
 
-	if (!( conn->ConnCtrlFlags & F_TXED_CALLBACK_PENDING ) ) {
+//---------------------------------------------------------------------------------------------------
 
-	# if SCDED_DBG >= 3
-	os_printf("|TX send_buffer, slot %d, to remote:%d.%d.%d.%d:%d from local port:%d, len=%d. mem:%d>",
-		conn->SlotNo,
-		conn->conn->proto.tcp->remote_ip[0],
-		conn->conn->proto.tcp->remote_ip[1],
-		conn->conn->proto.tcp->remote_ip[2],
-		conn->conn->proto.tcp->remote_ip[3],
-		conn->conn->proto.tcp->remote_port,
-		conn->conn->proto.tcp->local_port,
-		conn->send_buffer_len,
-		system_get_free_heap_size());
-	# endif
+ #if HTTPD_DBG >= 7
+  SCDEFn_at_WebIf_M->Log3Fn(platform_conn->common.name,
+	platform_conn->common.nameLen,
+	7,
+	"WebIf_Transmit_Send_Buffer (module '%.*s'), slot_no '%d', to "
+	"remote '%d.%d.%d.%d:%d' from local port '%d', len '%d', f-heap '%d'.",
+	platform_conn->common.module->provided->typeNameLen,
+	platform_conn->common.module->provided->typeName,
+	platform_conn->slot_no,
+	platform_conn->proto.tcp->remote_ip[0],
+	platform_conn->proto.tcp->remote_ip[1],
+	platform_conn->proto.tcp->remote_ip[2],
+	platform_conn->proto.tcp->remote_ip[3],
+	platform_conn->proto.tcp->remote_port,
+	platform_conn->proto.tcp->local_port,
+	conn->send_buffer_write_pos,
+	system_get_free_heap_size());
+  #endif
 
-	# if SCDED_DBG >= 5
- 	 SCDEFn_at_WebIf_M->HexDumpOutFn ("\nTX-send_buffer",
-		conn->send_buffer,
-		conn->send_buffer_len);
-	# endif
+//--------------------------------------------------------------------------------------------------
 
-	int8_t Result = WebIf_sent(conn->conn,
-		(uint8_t*) conn->send_buffer,
-		(uint16_t) conn->send_buffer_len);
+  #if SCDED_DBG >= 5
+  SCDEFn_at_WebIf_M->HexDumpOutFn ("\nTX-send_buffer",
+	conn->send_buffer,
+	conn->send_buffer_write_pos);
+  #endif
 
-	// show error on debug term...
- 	if (Result) {
+//--------------------------------------------------------------------------------------------------
 
-		# if SCDED_DBG >= 1
-		os_printf("\n|TX-Err:%d!>"
-			,Result);
-		# endif
-	}
+  int Result = WebIf_sent(conn->conn,
+	(uint8_t*) conn->send_buffer,
+	(uint) conn->send_buffer_write_pos);
 
-	// free Send-Buffer
-	free(conn->send_buffer);
+  // show error on debug term...
+   if (Result) {
 
-	// indicate -> no Send Buffer
-	conn->send_buffer = NULL;
-
-	// init length for next usage
-	conn->send_buffer_len = 0;
-
-	// incompatibility? alter code ?
-	// We sent data. We are not allowed to send again till SentCb is fired.
-	// Indicate this by F_TXED_CALLBACK_PENDING in ConCtrl
-	conn->ConnCtrlFlags |= F_TXED_CALLBACK_PENDING;
-  	}
-
-	else {
-
-	# if SCDED_DBG >= 3
-	os_printf("|F_TXED_CALLBACK_PENDING, no TX!>");
-	# endif
-
-	}
-  }
-
-  else {
-
-	# if SCDED_DBG >= 3
-	os_printf("|no allocated send_buffer, no TX!>");
+	# if SCDED_DBG >= 1
+	os_printf("\n|TX-Err:%d!>"
+		,Result);
 	# endif
   }
+
+  // free Send-Buffer
+  free(conn->send_buffer);
+
+  // old indicator for no Send Buffer
+  conn->send_buffer = NULL;
+
+  // init length for next usage, indicates -> no Send Buffer
+  conn->send_buffer_write_pos = 0;
+
+  // We sent data. We are not allowed to send again till Sent_Cb is fired.
+  // Indicate this by F_TXED_CALLBACK_PENDING in ConCtrl
+  conn->ConnCtrlFlags |= F_TXED_CALLBACK_PENDING;
 }
 
 
@@ -2928,14 +2856,14 @@ SCDED_LoadSerializer(WebIf_HTTPDConnSlotData_t *conn)
 {
 
   // if no load, mark this connection as "process"
-  if (!(conn->conn->HTTPD_InstCfg->LoadSerializer &= ~(1<<(conn->SlotNo))) ) {
+  if (!(conn->conn->HTTPD_InstCfg->LoadSerializer &= ~(1<<(conn->slot_no))) ) {
 
-	conn->conn->HTTPD_InstCfg->LoadSerializer |= 1 << (conn->SlotNo);
+	conn->conn->HTTPD_InstCfg->LoadSerializer |= 1 << (conn->slot_no);
 
 	#if SCDED_DBG >= 3
 	printf("|LS:%u, proc Slot %d>",
 		conn->conn->HTTPD_InstCfg->LoadSerializer,
-		conn->SlotNo);
+		conn->slot_no);
 	#endif
 
 	return false;
@@ -2946,7 +2874,7 @@ SCDED_LoadSerializer(WebIf_HTTPDConnSlotData_t *conn)
 	#if SCDED_DBG >= 3
 	printf("LS:%u, Slot %d delayed\n",
 		conn->conn->HTTPD_InstCfg->LoadSerializer,
-		conn->SlotNo);
+		conn->slot_no);
 	#endif
 
 	return true;
@@ -2967,27 +2895,19 @@ SCDED_LoadSerializer(WebIf_HTTPDConnSlotData_t *conn)
  */
 void ICACHE_FLASH_ATTR
 SCDED_ProcHdrFldAuth(WebIf_HTTPDConnSlotData_t *conn)
+{
+  Entry_Header_Field_t* p_entry_header_field;
 
-  {
+  STAILQ_FOREACH (p_entry_header_field, &conn->head_header_field, entries) {
 
-  HeaderFieldInfo_t *n1;
+	if ( p_entry_header_field->hdr_fld_id == 0 ) {
 
-  STAILQ_FOREACH(n1, &conn->head, entries)
+		char* at = p_entry_header_field->p_hdr_fld_val;
 
-	{
-
-	if (n1->HdrFldID == 0)
-
-		{
-
-		char *at = n1->HdrFldVal;
-
-		size_t length = strlen(n1->HdrFldVal);
+		size_t length = strlen(p_entry_header_field->p_hdr_fld_val);
 
 		// Field beginning with "Basic " ?
-		if (strncmp(at, "Basic ", 6) == 0)
-
-			{
+		if ( strncmp (at, "Basic ", 6) == 0 ) {
 
 			char userpass[AUTH_MAX_USER_LEN+AUTH_MAX_PASS_LEN+2];
 			int r;
@@ -3010,10 +2930,9 @@ SCDED_ProcHdrFldAuth(WebIf_HTTPDConnSlotData_t *conn)
 
  			// always OK
 			return;
-
-			}
 		}
 	}
+  }
 
   // no valid authorization found
   # if SCDED_DBG >= 4
@@ -3021,7 +2940,7 @@ SCDED_ProcHdrFldAuth(WebIf_HTTPDConnSlotData_t *conn)
   # endif
 
   return;	
-  }
+}
 
 
 
@@ -3179,14 +3098,14 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 
   // First: add data from 'trailing_buffer' to 'send_buffer' - if possible ..
   if ( ( trailing_buffer_len ) &&	// is there an 'trailing_buffer'?
-	( conn->send_buffer_len < MAX_SENDBUFF_LEN ) ) { // 'send_buffer' not full?
+	( conn->send_buffer_write_pos < MAX_SENDBUFF_LEN ) ) { // 'send_buffer' not full?
 
 	// bytes we will move from 'trailing_buffer' to 'send_buffer'
 	int copy_to_sb_len;
-	int send_buffer_free = MAX_SENDBUFF_LEN - conn->send_buffer_len;
+	int send_buffer_free = MAX_SENDBUFF_LEN - conn->send_buffer_write_pos;
 
 	// we have already an allocated 'send_buffer' of size MAX_SENDBUFF_LEN ?
-	if (conn->send_buffer_len) {
+	if (conn->send_buffer_write_pos) {
 
 		// calculate 'copy_to_sb_len'
 		if ( send_buffer_free > trailing_buffer_len) copy_to_sb_len = trailing_buffer_len;
@@ -3197,9 +3116,9 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 			copy_to_sb_len);
 		#endif
 
-		// copy the data from 'trailing_buffer' to 'send_buffer', and set 'send_buffer_len'
-		memcpy (conn->send_buffer + conn->send_buffer_len, conn->trailing_buffer, copy_to_sb_len);
-		conn->send_buffer_len += copy_to_sb_len;
+		// copy the data from 'trailing_buffer' to 'send_buffer', and set 'send_buffer_write_pos'
+		memcpy (conn->send_buffer + conn->send_buffer_write_pos, conn->trailing_buffer, copy_to_sb_len);
+		conn->send_buffer_write_pos += copy_to_sb_len;
 	}
 
 	// currently no allocated send_buffer. Allocate  
@@ -3216,9 +3135,9 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 			copy_to_sb_len);
 		#endif
 
-		// copy the data from 'trailing_buffer' to beginning of 'send_buffer', and set 'send_buffer_len'
+		// copy the data from 'trailing_buffer' to beginning of 'send_buffer', and set 'send_buffer_write_pos'
 		memcpy (conn->send_buffer, conn->trailing_buffer, copy_to_sb_len);
-		conn->send_buffer_len = copy_to_sb_len;
+		conn->send_buffer_write_pos = copy_to_sb_len;
 	}
 
 	// 'trailing_buffer' is completely added to 'send_buffer' now? than cleanup!
@@ -3327,7 +3246,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 	# if SCDED_DBG >= 3
 	printf("|Conn %p, slot %d, PC_FINNISHED_CLEANUP>",
 		conn->conn,
-		conn->SlotNo);
+		conn->slot_no);
 	# endif
   }
 
@@ -3341,7 +3260,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 	# if SCDED_DBG >= 3
 	printf("|Conn %p, slot %d, CGI_NOT_ASSIGNED>",
 		conn->conn,
-		conn->SlotNo);
+		conn->slot_no);
 	# endif
 
 	// set F_WAIT_CONN flag, expecting more RX
@@ -3357,12 +3276,12 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 	# if SCDED_DBG >= 3
 	printf("SCDED Conn %p, slot %d, Upgr.Req for WS res:%s\n",
 		conn->conn,
-		conn->SlotNo,
+		conn->slot_no,
 		conn->url);
 	# endif
 
 	// get ptr to zero terminated key from header field "Sec-WebSocket-Accept" (ID02)
-	char *SecWebSocketAcceptVal = SCDED_GetHdrValFromID(conn,02);
+	char *SecWebSocketAcceptVal = HTTPD_Get_Hdr_Fld_ID(conn,02);
 
 	if (SecWebSocketAcceptVal)
 	// initiate Web Socket Connection
@@ -3439,27 +3358,25 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 	int r;
 
 	do {
-
 		# if SCDED_DBG >= 3
 		printf("|Conn %p, slot %d, Exec cgi at %p with PC-Arg: %p>",
 			conn->conn,
-			conn->SlotNo,
+			conn->slot_no,
 			conn->cgi,
 			conn->PCArg);
 		# endif
 
 		// execute cgi fn.
 		r = conn->cgi(conn);
-
 	}
 
 	// Possible cgi result 1: HTTPD_CGI_REEXECUTE, for cgi switching
-	while (r == HTTPD_CGI_REEXECUTE);
+	while ( r == HTTPD_CGI_REEXECUTE );
 
 // -------------------------------------------------------------------------------------------------
 
 	// Possible cgi result 2: HTTPD_CGI_DISCONNECT_CONN, finnished, send rest of data, disconnect
-	if (r == HTTPD_CGI_DISCONNECT_CONN) {
+	if ( r == HTTPD_CGI_DISCONNECT_CONN ) {
 
 //call cleanup cgi?
 
@@ -3470,7 +3387,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 // -------------------------------------------------------------------------------------------------
 
 	// Possible cgi result 2: HTTPD_CGI_F_DISCONNECT_CONN - finnished, send rest of data, force a real disconnect (ETX-ONLY)
-	else if (r == HTTPD_CGI_F_DISCONNECT_CONN) {
+	else if ( r == HTTPD_CGI_F_DISCONNECT_CONN ) {
 
 //call cleanup cgi?
 
@@ -3484,7 +3401,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 // -------------------------------------------------------------------------------------------------
 
 	// Possible cgi result 3: HTTPD_CGI_PROCESS_CONN, not finnished, enable one callback (worst case an idle Cb)
-	else if (r == HTTPD_CGI_PROCESS_CONN) {
+	else if ( r == HTTPD_CGI_PROCESS_CONN ) {
 
 		// set 'F_WAIT_CONN_GET_IDLE_CB' flag + 'keep connection alive' flag
 		ConnRespFlags |= F_WAIT_CONN_GET_IDLE_CB + F_KEEP_CONN_ALIVE;
@@ -3493,7 +3410,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 // -------------------------------------------------------------------------------------------------
 
 	// Possible cgi result 4: HTTPD_CGI_WAITRX_CONN, not finnished, keep conn + wait for further RX
-	else if (r == HTTPD_CGI_WAITRX_CONN) {
+	else if ( r == HTTPD_CGI_WAITRX_CONN ) {
 
 		// set 'keep connection alive' flag
 		ConnRespFlags |= F_KEEP_CONN_ALIVE;
@@ -3504,14 +3421,29 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 // -------------------------------------------------------------------------------------------------
 
   // Now possible actions: 
-  // Prio 1: If data is in send buff
-  // -> Transmit, SentCb will be fired soon for further activities ...
-  if (conn->send_buffer_len) {
 
-	SCDED_TransmitSendBuff(conn);
+  // Prio 1: If 'send_buffer_write_pos' is > 0, data is in 'send_buffer', try to send it ...
+  if ( conn->send_buffer_write_pos ) {
 
-	// Keep connection only for 10 Sec
-//	espconn_regist_time(conn->conn,10,1);	// MAX 10 Sec for answer (HTTPD_TIMEOUT ?)
+	// -> Transmit it (if Sent-Cb is NOT pending), Sent_Cb will always be fired when data is sent out ...
+	if ( !( conn->ConnCtrlFlags & F_TXED_CALLBACK_PENDING ) ) {
+
+		// OK, transmit the 'send_buffer'
+		SCDED_TransmitSendBuff(conn);
+	
+		// Keep connection only for 10 Sec
+//		espconn_regist_time(conn->conn,10,1);	// MAX 10 Sec for answer (HTTPD_TIMEOUT ?)
+	}
+
+	// debug warning ->
+	else {
+
+		# if SCDED_DBG >= 1
+		printf("\nWebIf RespToOpenConn, can not send now, 'F_TXED_CALLBACK_PENDING' is set>");
+		#endif
+
+		// we are expecting a Sent_Cb soon !
+	}
   }
 
   // Prio 2: NO data in send buff, conn wants further processing, enable fire of idle Cb in ConnCtrl
@@ -3521,16 +3453,15 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 	// Force one callback (may be by generating one idle callback)
 	conn->ConnCtrlFlags |= F_GENERATE_IDLE_CALLBACK;
 
-	// WE WILL DEFINITIVLY SEND DATA HERE - MAKE SEND REQUEST
+	// WE WILL DEFINITIVLY SEND DATA HERE - MAKE SEND REQUEST ????????????????
 	conn->conn->common.Common_CtrlRegA |= F_WANTS_IDLE_TASK;
-
 
 	// Keep connection if idle for 2h
 //	espconn_regist_time(conn->conn,257,1);	// MAX 256 Sec Longpoll
   }
 
   // Prio 3 - NO data in send buff, conn wants NO further processing. Check if KEEP_CONN_ALIVE is requested?
-  else if (ConnRespFlags & F_KEEP_CONN_ALIVE) {
+  else if ( ConnRespFlags & F_KEEP_CONN_ALIVE ) {
 
 	// if yes do nothing ...
   }
@@ -3661,7 +3592,7 @@ WebIf_IdleCb(void *arg)
 
   // the arg is a ptr to the platform specific conn
   //struct espconn   *platform_conn = arg;	// ESP 8266 NonOS
-  WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
+  Entry_WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
 
   // get assigned HTTPD-Connection-Slot-Data
   WebIf_HTTPDConnSlotData_t *conn
@@ -3669,7 +3600,7 @@ WebIf_IdleCb(void *arg)
 
   # if SCDED_DBG >= 3
   printf("\nWebIf IdleCb, slot:%d, remote:%d.%d.%d.%d:%d, local port:%d, iat:%d, mem:%d>"
-	,conn->SlotNo
+	,conn->slot_no
 	,conn->conn->proto.tcp->remote_ip[0]
 	,conn->conn->proto.tcp->remote_ip[1]
 	,conn->conn->proto.tcp->remote_ip[2]
@@ -3702,30 +3633,38 @@ WebIf_IdleCb(void *arg)
  *--------------------------------------------------------------------------------------------------
  *FName: SCDED_SentCb
  * Desc: Data was sent callback is triggered when data was sent to a client conn of SCDED
- * Para: WebIf_Definition_t* WebIfDef ->ptr to the WebIf_Definition
+ * Para: Entry_WebIf_Definition_t* WebIfDef ->ptr to the WebIf_Definition
  * Rets: -/-
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR 
-WebIf_SentCb (void* arg)
+WebIf_SentCb (void* arg)  //HTTPD_Sent_Cb
 {
   // the arg is a ptr to the platform specific conn
-  //struct espconn   *platform_conn = arg;	// ESP 8266 NonOS
-  WebIf_Definition_t* platform_conn = arg;	// ESP 32 RTOS
+  //struct espconn   *platform_conn = arg;		// ESP 8266 NonOS
+  Entry_WebIf_Definition_t* platform_conn = arg;	// ESP 32 RTOS
 
   // get assigned HTTPD-Connection-Slot-Data
-  WebIf_HTTPDConnSlotData_t *conn = platform_conn->reverse;
+  WebIf_HTTPDConnSlotData_t* conn = platform_conn->reverse;
 
-  # if SCDED_DBG >= 3
-  printf("\nWebIf SentCb, slot:%d, remote:%d.%d.%d.%d:%d, local port:%d, mem:%d>"
-	,conn->SlotNo
-	,conn->conn->proto.tcp->remote_ip[0]
-	,conn->conn->proto.tcp->remote_ip[1]
-	,conn->conn->proto.tcp->remote_ip[2]
-	,conn->conn->proto.tcp->remote_ip[3]
-	,conn->conn->proto.tcp->remote_port
-	,conn->conn->proto.tcp->local_port
-	,system_get_free_heap_size());
+//---------------------------------------------------------------------------------------------------
+
+ #if HTTPD_DBG >= 7
+  SCDEFn_at_WebIf_M->Log3Fn(platform_conn->common.name,
+	platform_conn->common.nameLen,
+	7,
+	"WebIf_Sent_Cb Fn (module '%.*s'), slot_no '%d', from "
+	"remote '%d.%d.%d.%d:%d' to local port '%d', f-heap '%d'.",
+	platform_conn->common.module->provided->typeNameLen,
+	platform_conn->common.module->provided->typeName,
+	platform_conn->slot_no,
+	platform_conn->proto.tcp->remote_ip[0],
+	platform_conn->proto.tcp->remote_ip[1],
+	platform_conn->proto.tcp->remote_ip[2],
+	platform_conn->proto.tcp->remote_ip[3],
+	platform_conn->proto.tcp->remote_port,
+	platform_conn->proto.tcp->local_port,
+	system_get_free_heap_size());
   #endif
 
 //--------------------------------------------------------------------------------------------------
@@ -3763,32 +3702,38 @@ WebIf_SentCb (void* arg)
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-WebIf_RecvCb(void *arg,
-		char *recvdata,
-		unsigned short recvlen) 
+WebIf_RecvCb(void *arg, char *recvdata, unsigned short recvlen)  //HTTPD_Recv_Cb
 {
-
   // the arg is a ptr to the platform specific conn
-  //struct espconn   *platform_conn = arg;	// ESP 8266 NonOS
-  WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
+  //struct espconn   *platform_conn = arg;		// ESP 8266 NonOS
+  Entry_WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
 
   // get assigned HTTPD-Connection-Slot-Data
   WebIf_HTTPDConnSlotData_t *conn
 	= platform_conn->reverse;
 
-  # if SCDED_DBG >= 3
-  printf("\nWebIf RecvCb, slot %d, remote:%d.%d.%d.%d:%d,local port:%d, len:%d, mem:%d>"
-	,platform_conn->SlotNo
-	,platform_conn->proto.tcp->remote_ip[0]
-	,platform_conn->proto.tcp->remote_ip[1]
-	,platform_conn->proto.tcp->remote_ip[2]
-	,platform_conn->proto.tcp->remote_ip[3]
-	,platform_conn->proto.tcp->remote_port
-	,platform_conn->proto.tcp->local_port
-	,recvlen
-	,system_get_free_heap_size());
+//---------------------------------------------------------------------------------------------------
 
+ #if HTTPD_DBG >= 7
+  SCDEFn_at_WebIf_M->Log3Fn(platform_conn->common.name,
+	platform_conn->common.nameLen,
+	7,
+	"WebIf_Recv_Cb Fn (module '%.*s'), slot_no '%d', from "
+	"remote '%d.%d.%d.%d:%d' to local port '%d', len '%d', f-heap '%d'.",
+	platform_conn->common.module->provided->typeNameLen,
+	platform_conn->common.module->provided->typeName,
+	platform_conn->slot_no,
+	platform_conn->proto.tcp->remote_ip[0],
+	platform_conn->proto.tcp->remote_ip[1],
+	platform_conn->proto.tcp->remote_ip[2],
+	platform_conn->proto.tcp->remote_ip[3],
+	platform_conn->proto.tcp->remote_port,
+	platform_conn->proto.tcp->local_port,
+	recvlen,
+	system_get_free_heap_size());
   #endif
+
+//--------------------------------------------------------------------------------------------------
 
   # if SCDED_DBG >= 5
   SCDEFn_at_WebIf_M->HexDumpOutFn ("RX-HEX", recvdata, recvlen);
@@ -3872,7 +3817,7 @@ WebIf_ReconCb(void *arg
 
   // the arg is a ptr to the platform specific conn
   //struct espconn   *platform_conn = arg;	// ESP 8266 NonOS
-  WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
+  Entry_WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
 
   // get assigned HTTPD-Connection-Slot-Data
   WebIf_HTTPDConnSlotData_t *conn
@@ -3880,7 +3825,7 @@ WebIf_ReconCb(void *arg
 
   # if SCDED_DBG >= 3
   printf("\nWebIf ReconCb, slot %d, remote:%d.%d.%d.%d:%d,local port:%d, error:%d, mem:%d>"
-	,platform_conn->SlotNo
+	,platform_conn->slot_no
 	,platform_conn->proto.tcp->remote_ip[0]
 	,platform_conn->proto.tcp->remote_ip[1]
 	,platform_conn->proto.tcp->remote_ip[2]
@@ -3916,38 +3861,45 @@ ESPCONN_PROTO_MSG - SSL application invalid
  *FName: WebIf_DisconCb
  * Desc: Disconnected callback -> conn is disconnected -> clean up, free memory
  *       its unclear what to do in this cases ...
- * Para: WebIf_Definition_t* WebIfDef ->ptr to the WebIf_Definition
+ * Para: Entry_WebIf_Definition_t* WebIfDef ->ptr to the WebIf_Definition
  * Rets: -/-
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-WebIf_DisconCb(void *arg)
+WebIf_DisconCb(void *arg) //HTTPD_Disconn_Cb
 {
-
   // the arg is a ptr to the platform specific conn
-//struct espconn     *platform_conn = arg;	// ESP 8266 NonOS
-  WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
+//struct espconn     *platform_conn = arg;		// ESP 8266 NonOS
+  Entry_WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
 
   // get assigned HTTPD-Connection-Slot-Data
-  WebIf_HTTPDConnSlotData_t *conn
+  WebIf_HTTPDConnSlotData_t* conn
 	= platform_conn->reverse;
 
- # if SCDED_DBG >= 3
-  printf("\nWebIf DisconCb, slot %d, remote:%d.%d.%d.%d:%d, local port:%d, mem:%d>"
-	,platform_conn->SlotNo
-	,platform_conn->proto.tcp->remote_ip[0]
-	,platform_conn->proto.tcp->remote_ip[1]
-	,platform_conn->proto.tcp->remote_ip[2]
-	,platform_conn->proto.tcp->remote_ip[3]
-	,platform_conn->proto.tcp->remote_port
-	,platform_conn->proto.tcp->local_port
-	,system_get_free_heap_size());
+//---------------------------------------------------------------------------------------------------
+
+ #if HTTPD_DBG >= 7
+  SCDEFn_at_WebIf_M->Log3Fn(platform_conn->common.name,
+	platform_conn->common.nameLen,
+	7,
+	"WebIf_Disconn_Cb Fn (module '%.*s'), slot_no '%d', from "
+	"remote '%d.%d.%d.%d:%d' to local port '%d', f-heap '%d'.",
+	platform_conn->common.module->provided->typeNameLen,
+	platform_conn->common.module->provided->typeName,
+	platform_conn->slot_no,
+	platform_conn->proto.tcp->remote_ip[0],
+	platform_conn->proto.tcp->remote_ip[1],
+	platform_conn->proto.tcp->remote_ip[2],
+	platform_conn->proto.tcp->remote_ip[3],
+	platform_conn->proto.tcp->remote_port,
+	platform_conn->proto.tcp->local_port,
+	system_get_free_heap_size());
   #endif
 
 //---------------------------------------------------------------------------------------------------
 
   // mark connections job in load serializer as finnished (by deleting bit)
-  conn->conn->HTTPD_InstCfg->LoadSerializer &= ~(1<<(conn->SlotNo));
+  conn->conn->HTTPD_InstCfg->LoadSerializer &= ~( 1 << ( conn->slot_no ) );
 
   // remove the conn / mark that the connection is gone
   conn->conn = NULL;
@@ -3955,11 +3907,11 @@ WebIf_DisconCb(void *arg)
   // !!! CONN IS GONE FROM THIS POINT !!!
 
   // indicate cgi to clean up and dealloc
-  if (conn->cgi != NULL) conn->cgi(conn);
+  if ( conn->cgi != NULL ) conn->cgi(conn);
 
   // free allocated memory for the Send-Buffer, if any
 //if (conn->send_buffer != NULL) free (conn->send_buffer);
-  if (conn->send_buffer_len) free (conn->send_buffer);
+  if (conn->send_buffer_write_pos) free (conn->send_buffer);
 
   // free allocated memory for Trailing Buff, if any
 //if (conn->trailing_buffer != NULL) free (conn->trailing_buffer);
@@ -3984,62 +3936,67 @@ WebIf_DisconCb(void *arg)
  *FName: WebIf_ConnCb
  * Desc: Connected callback is triggered in case of new connections to WebIf-HTTP-Daemon
  * Info:
- * Para: WebIf_Definition_t* WebIfDef -> ptr to the WebIf_Definition
+ * Para: Entry_WebIf_Definition_t* WebIfDef -> ptr to the WebIf_Definition
  * Rets: int ->
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR 
-WebIf_ConnCb(void *arg)
+WebIf_ConnCb(void *arg) //HTTPD_Conn_Cb
 {
   // the arg is a ptr to the platform specific conn
-  //struct espconn   *platform_conn = arg;	// ESP 8266 NonOS
-  WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
+  //struct espconn   *platform_conn = arg;		// ESP 8266 NonOS
+  Entry_WebIf_Definition_t* platform_conn = arg;	// ESP 32 RTOS
 
 //--------------------------------------------------------------------------------------------------
 
-// # if SCDED_DBG >= 3
-  printf("\nWebIf ConCb, gets slot %d of %d, from remote:%d.%d.%d.%d:%d to local port:%d, mem:%d>"
-	,platform_conn->SlotNo
-	,MAX_SCDED_CONN
-	,platform_conn->proto.tcp->remote_ip[0]
-	,platform_conn->proto.tcp->remote_ip[1]
-	,platform_conn->proto.tcp->remote_ip[2]
-	,platform_conn->proto.tcp->remote_ip[3]
-	,platform_conn->proto.tcp->remote_port
-	,platform_conn->proto.tcp->local_port
-	,system_get_free_heap_size());
-
-//  #endif
+  #if HTTPD_Module_DBG >= 7
+  SCDEFn_at_WebIf_M->Log3Fn(platform_conn->common.name,
+	platform_conn->common.nameLen,
+	7,
+	"WebIf_Conn_Cb Fn (module '%.*s'), gets slot_no '%d' of '%d', from "
+	"remote '%d.%d.%d.%d:%d' to local port '%d', f-heap '%d'.",
+	platform_conn->common.module->provided->typeNameLen,
+	Platform_conn->common.module->provided->typeName,
+	platform_conn->slot_no,
+	MAX_SCDED_CONN,
+	platform_conn->proto.tcp->remote_ip[0],
+	platform_conn->proto.tcp->remote_ip[1],
+	platform_conn->proto.tcp->remote_ip[2],
+	platform_conn->proto.tcp->remote_ip[3],
+	platform_conn->proto.tcp->remote_port,
+	platform_conn->proto.tcp->local_port,
+	system_get_free_heap_size());
+  #endif
 
 //--------------------------------------------------------------------------------------------------
 
-  // alloc conn-slot memory
-  WebIf_HTTPDConnSlotData_t *conn
-	= (WebIf_HTTPDConnSlotData_t*) malloc(sizeof(WebIf_HTTPDConnSlotData_t));
+  // alloc HTTPD connection slot
+  WebIf_HTTPDConnSlotData_t* conn
+	= (WebIf_HTTPDConnSlotData_t*) malloc (sizeof(WebIf_HTTPDConnSlotData_t));
 
   // zero conn-slot memory
-  memset(conn, 0, sizeof(WebIf_HTTPDConnSlotData_t));
+  memset (conn, 0, sizeof (WebIf_HTTPDConnSlotData_t));
 
   // store current connection in created conn slot
   conn->conn = platform_conn;
 
  // Write slot number for identification
-  conn->SlotNo = conn->conn->SlotNo;
+  conn->slot_no = conn->conn->slot_no;
 
-  // store reverse reference
+  // store reverse link
   platform_conn->reverse = conn;
 
-  // Register data received callback
-  espconn_regist_recvcb(platform_conn, WebIf_RecvCb);
+  // register data received callback
+  espconn_regist_recvcb (platform_conn, WebIf_RecvCb);
 
-  // Register data reconnection / error info callback
-  espconn_regist_reconcb(platform_conn, WebIf_ReconCb);
+  // register data reconnection / error info callback
+  espconn_regist_reconcb (platform_conn, WebIf_ReconCb);
 
-  // Register disconnected callback
-  espconn_regist_disconcb(platform_conn, WebIf_DisconCb);
+  // register disconnected callback
+  espconn_regist_disconcb (platform_conn, WebIf_DisconCb);
 
-  // Register data sent callback
-  espconn_regist_sentcb(platform_conn, WebIf_SentCb);
+  // register data was sent callback
+  espconn_regist_sentcb (platform_conn, WebIf_SentCb);
 
 //--------------------------------------------------------------------------------------------------
 
@@ -4115,7 +4072,7 @@ AcETXQueueData = NULL;	// warum nicht immer aus der queue?
 //spz  pespconn->reverse = conn;
 
   // Write slot number for identification
-//  conn->SlotNo = (uint8) 0; // its cleared!
+//  conn->slot_no = (uint8) 0; // its cleared!
 
   // Register data received callback
 //spz  espconn_regist_recvcb(pespconn, SCDED_RecvCb);
@@ -5853,7 +5810,7 @@ http_parser_execute (WebIf_HTTPDConnSlotData_t *conn,
  	
   # if SCDED_DBG >= 4
   printf("HTTPD Slt:%d,StrtPrs>",
-	conn->SlotNo);
+	conn->slot_no);
   # endif
 
   for (p = data; p != data + len; p++)
@@ -7794,59 +7751,69 @@ http_method_str (enum http_method m)
 //###  Rets: -/-
 //##################################################################################################
 void ICACHE_FLASH_ATTR
-HTTPD_ParserInit (WebIf_HTTPDConnSlotData_t *conn,
-			enum http_parser_type pType)
+HTTPD_ParserInit (WebIf_HTTPDConnSlotData_t* conn, enum http_parser_type pType)
 {
- // free allocated memory for stored header fields
-  HeaderFieldInfo_t *n1;
-  while (!STAILQ_EMPTY(&conn->head))
-	{
-        n1 = STAILQ_FIRST(&conn->head);
+  // free stored header-fields
+  Entry_Header_Field_t* p_entry_header_field;
+
+  while ( !STAILQ_EMPTY (&conn->head_header_field) ) {
+
+        p_entry_header_field = 
+		STAILQ_FIRST (&conn->head_header_field);
+
 	# if SCDED_DBG >= 3
-	printf("|DeallocFldVal:\"%s\" (ID:%d)>",
-		n1->HdrFldVal,
-		n1->HdrFldID);
+	printf ("|DeallocFldVal:\"%s\" (ID:%d)>",
+		p_entry_header_field->p_hdr_fld_val,
+		p_entry_header_field->hdr_fld_id);
 	# endif
-        STAILQ_REMOVE_HEAD(&conn->head, entries);
-        free(n1);
-	}
+
+        STAILQ_REMOVE_HEAD (&conn->head_header_field, entries);
+
+	// free the value text
+	free (p_entry_header_field->p_hdr_fld_val);
+
+	// and the SLTQ entry
+        free (p_entry_header_field);
+  }
 
   // free allocated memory for Path
-  if (conn->url != NULL) 
-	{
-	free(conn->url);
+  if ( conn->url != NULL ) {
+
+	free (conn->url);
 	conn->url = NULL;
-	}
+  }
 
   // free allocated memory for Query
-  if (conn->getArgs != NULL)
-	{
-	free(conn->getArgs);
+  if ( conn->getArgs != NULL ) {
+
+	free (conn->getArgs);
 	conn->getArgs = NULL;
-	}
+  }
 
   // free allocated memory for Post Buff
-  if (conn->postBuff != NULL)
-	{
-	free(conn->postBuff);
+  if ( conn->postBuff != NULL ) {
+
+	free (conn->postBuff);
 	conn->postBuff = NULL;
-	}
+  }
 
 
 //temp this both, because code should be improved:
   // free allocated memory for Header Field Name Buffer (only in case of error)
-  if (conn->HdrFldNameBuff != NULL)
-	{
-	free(conn->HdrFldNameBuff);
-	conn->HdrFldNameBuff = NULL;
-	}
+  if ( conn->p_hdr_fld_name_buff != NULL ) {
+
+	free (conn->p_hdr_fld_name_buff);
+	conn->p_hdr_fld_name_buff = NULL;
+
+  }
 
   // free allocated memory for Header Field Value Buffer (only in case of error)
-  if (conn->HdrFldValueBuff != NULL)
-	{
-	free(conn->HdrFldValueBuff);
-	conn->HdrFldValueBuff = NULL;
-	}
+  if ( conn->p_hdr_fld_value_buff != NULL ) {
+
+	free(conn->p_hdr_fld_value_buff);
+	conn->p_hdr_fld_value_buff = NULL;
+
+  }
 
 
   // Step #1 Clear only
@@ -8370,6 +8337,7 @@ http_parser_pause(WebIf_HTTPDConnSlotData_t *conn,
 //###  Para: WebIf_HTTPDConnSlotData_t *conn -> connection slot in process
 //###  Rets: parser_state -> new parser state
 //##################################################################################################
+/*
 int ICACHE_FLASH_ATTR
 http_body_is_final(const WebIf_HTTPDConnSlotData_t *conn)
 {
@@ -8382,7 +8350,7 @@ http_body_is_final(const WebIf_HTTPDConnSlotData_t *conn)
 
   return conn->parser_state == s_message_done;
 }
-
+*/
 
 
 //##################################################################################################
@@ -8398,207 +8366,6 @@ http_parser_version(void)
          HTTP_PARSER_VERSION_MINOR * 0x00100 |
          HTTP_PARSER_VERSION_PATCH * 0x00001;
 }
-
-
-
-//##################################################################################################
-//### FName: HTTPDMsgBeginCb
-//###  Desc: Callback fired by HTTPDParser when starting parsing new incoming message from fresh connection
-//###  Para: 
-//###  Rets: Callbacks must return 0 on success. Returning a non-zero value indicates error to the
-//###        parser, making it exit immediately.
-//##################################################################################################
-int ICACHE_FLASH_ATTR
-HTTPDMsgBeginCb(WebIf_HTTPDConnSlotData_t *conn)
-{
-
-  # if SCDED_DBG >= 4
-  printf("|MsgBegCb>");
-  # endif
-
-  // set current slot-activity status
-  conn->SlotParserState = s_HTTPD_Msg_Begin;
-
-  return 0;
-}
-
-
-
-//##################################################################################################
-//### FName: HTTPDUrlFoundCb
-//###  Desc: Callback fired by HTTPDParser when url is found, used for parsing URI into elements
-//###  Para: 
-//###  Rets: Callbacks must return 0 on success. Returning a non-zero value indicates error to the
-//###        parser, making it exit immediately.
-//##################################################################################################
-int ICACHE_FLASH_ATTR
-HTTPDUrlFoundCb(WebIf_HTTPDConnSlotData_t *conn,
-			const char *at,
-			size_t length)
-{
-  // set current slot-activity status
-  conn->SlotParserState = s_HTTPD_Url_Found;
-
-  // New URI? Start with cleared F_CONN_IS_AUTHENTICATED flag in ConnCtrl
-  conn->ConnCtrlFlags &= ~(F_CONN_IS_AUTHENTICATED);
-
-  // alloc memory for struct http_parser_url
-  struct http_parser_url *http_parser_url =
-	(struct http_parser_url *) malloc(sizeof(struct http_parser_url));
-
-  // Zero struct http_parser_url
-  http_parser_url_init(http_parser_url);
-
-  // Parse url data to struct http_parser_url
-  http_parser_parse_url(at,
-			length,
-			0, // its not a connect request
-			http_parser_url);
-
-  # if SCDED_DBG >= 4
-  printf("|UrlFndCb,Parsed URI,BF:%d",	// URI Elements Bitfield
-	http_parser_url->field_set);
-  #endif
-//--------------------------------------------------------------------------------------------------
-  if (http_parser_url->field_set & (1 << UF_SCHEMA))
-	{
-	# if SCDED_DBG >= 4
-	printf(",SCHEMA:\"%s\",len:%d",
-		at+http_parser_url->field_data[UF_SCHEMA].off,
-		http_parser_url->field_data[UF_SCHEMA].len);
-	# endif
-	}
-//--------------------------------------------------------------------------------------------------
-  // have we found a SCHEMA in the URI ?
-  if (http_parser_url->field_set & (1 << UF_SCHEMA))
-	{
-	// get pos and len of NOT zero terminated SCHEMA from uri
-	const char *pos = at+http_parser_url->field_data[UF_SCHEMA].off;
-	int len = http_parser_url->field_data[UF_SCHEMA].len;
-
-	int i = 0;
-	while ( (AvailSchemes[i].SchemeName != NULL) &&
-		(strncasecmp(pos, AvailSchemes[i].SchemeName, len) != 0) )
-		{
-		i++;
-		}
-	conn->parser_scheme = i;
-
-	# if SCDED_DBG >= 4
-	printf(",SCHEMAX:\"%s\"",
-		pos);
-	# endif
-
-	}
-
-	# if SCDED_DBG >= 4
-	printf(",SCHEME:%d",
-		conn->parser_scheme);
-	# endif
-//--------------------------------------------------------------------------------------------------
-  if (http_parser_url->field_set & (1 << UF_USERINFO))
-	{
-	# if SCDED_DBG >= 4
-	printf(",UInfo:\"%s\",len:%d",
-		at+http_parser_url->field_data[UF_USERINFO].off,
-		http_parser_url->field_data[UF_USERINFO].len);
-	# endif
-
-	// Check User Info
-	SCDED_CheckHdrFldAuth(conn,
-		(char *) at+http_parser_url->field_data[UF_USERINFO].off,
-		http_parser_url->field_data[UF_USERINFO].len);
-	}
-//--------------------------------------------------------------------------------------------------
-  if (http_parser_url->field_set & (1 << UF_HOST))
-	{
-	# if SCDED_DBG >= 4
-	printf(",HOST:\"%s\",len:%d",
-		at+http_parser_url->field_data[UF_HOST].off,
-		http_parser_url->field_data[UF_HOST].len);
-	# endif
-	}
-//--------------------------------------------------------------------------------------------------
-  if (http_parser_url->field_set & (1 << UF_PORT))
-	{
-	# if SCDED_DBG >= 4
-	printf(",PORT:%d",
-		http_parser_url->port);
-	# endif
-	}
-//--------------------------------------------------------------------------------------------------
-  // have we found a PATH in the URI ?
-  if (http_parser_url->field_set & (1 << UF_PATH))
-	{
-	// get pos and len of NOT zero terminated path from uri
-	const char *pos = at+http_parser_url->field_data[UF_PATH].off;
-	int len = http_parser_url->field_data[UF_PATH].len;
-
-	// store the path
-	conn->url = malloc(len+1);
-	memcpy(conn->url, pos, len);
-	conn->url[len] = '\0';	// zero terminate
-
-	# if SCDED_DBG >= 4
-	printf(",PATH:\"%s\"",
-		conn->url);
-	# endif
-
-	// do not forget to dealloc !!
-	}
-//--------------------------------------------------------------------------------------------------
-  // have we found a QUERY in the URI ?
-  if (http_parser_url->field_set & (1 << UF_QUERY))
-	{
-	// get pos and len of NOT zero terminated query from uri
-	const char *pos = at+http_parser_url->field_data[UF_QUERY].off;
-	int len = http_parser_url->field_data[UF_QUERY].len;
-
-	// store the query
-	conn->getArgs = malloc(len+1);
-	memcpy(conn->getArgs, pos, len);
-	conn->getArgs[len] = '\0';	// zero terminate
-
-	# if SCDED_DBG >= 4
-	printf(",QUERY:\"%s\"",
-		conn->getArgs);
-	# endif
-
-	// do not forget to dealloc !!
-	}
-//--------------------------------------------------------------------------------------------------
-  // free memory reserved for struct http_parser_url
-  free(http_parser_url);
-
-
-
-  // fehler beim parsen? ->1 ?
-  return 0;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -8624,25 +8391,25 @@ HTTPDSend(WebIf_HTTPDConnSlotData_t *conn, const char *data, int len)
   if (len < 0) len = strlen(data);
 
   // will data fit in sendbuff ?
-  if (conn->send_buffer_len + len <= MAX_SENDBUFF_LEN)
+  if (conn->send_buffer_write_pos + len <= MAX_SENDBUFF_LEN)
 
 	// if data fits in sendbuff ...
 	{
-	memcpy (conn->sendBuff + conn->send_buffer_len, data, len); // copy to sendbuf
-	conn->send_buffer_len += len;
+	memcpy (conn->sendBuff + conn->send_buffer_write_pos, data, len); // copy to sendbuf
+	conn->send_buffer_write_pos += len;
 
 	// return free bytes in sendbuff
-	return (MAX_SENDBUFF_LEN - conn->send_buffer_len);
+	return (MAX_SENDBUFF_LEN - conn->send_buffer_write_pos);
 	}
   else
 	 // if data does NOT fit in sendbuff ...
 	{
 	// Step 1: copy data to sendbuff till full
-	int send_buffer_free = MAX_SENDBUFF_LEN - conn->send_buffer_len;
+	int send_buffer_free = MAX_SENDBUFF_LEN - conn->send_buffer_write_pos;
 	if (send_buffer_free)
 		{
-		memcpy (conn->sendBuff + conn->send_buffer_len, data, send_buffer_free); // copy to sendbuf
-		conn->send_buffer_len += send_buffer_free;
+		memcpy (conn->sendBuff + conn->send_buffer_write_pos, data, send_buffer_free); // copy to sendbuf
+		conn->send_buffer_write_pos += send_buffer_free;
 		}
 
 
@@ -8702,50 +8469,223 @@ HTTPDSend(WebIf_HTTPDConnSlotData_t *conn, const char *data, int len)
 
 
 
-
-
-
-
-
-
-
-
-
-
 //##################################################################################################
-//### FName: HTTPDHeaderFldCb
-//###  Desc: Callback fired by HTTPDParser when (part of!) a header field name is found.
-//###        values are stored/added to: conn->HdrFldNameBuff
-//###  Para: WebIf_HTTPDConnSlotData_t *conn ->
-//###        const char *at, -> ptr to field name string data (to add)
-//###        size_t length -> data length of header field (to add)
+//### FName: HTTPD_On_Message_Begin_Cb
+//###  Desc: Callback fired by HTTPDParser when starting parsing new incoming message from fresh connection
+//###  Para: 
 //###  Rets: Callbacks must return 0 on success. Returning a non-zero value indicates error to the
 //###        parser, making it exit immediately.
 //##################################################################################################
 int ICACHE_FLASH_ATTR
-HTTPDHeaderFldCb(WebIf_HTTPDConnSlotData_t *conn,
-			const char *at,
-			size_t length)
+HTTPD_On_Message_Begin_Cb(WebIf_HTTPDConnSlotData_t *conn)
 {
-  // Process header field name+value that is already stored?
-  HTTPDProcHeaderFld(conn);
+  # if SCDED_DBG >= 4
+  printf("|MsgBegCb>");
+  # endif
+
+  // set current slot-activity status
+  conn->SlotParserState = s_HTTPD_Msg_Begin;
+
+  return 0;
+}
+
+
+
+//##################################################################################################
+//### FName: HTTPD_On_Url_Cb
+//###  Desc: Callback fired by HTTPDParser when url is found, used for parsing URI into elements
+//###  Para: 
+//###  Rets: Callbacks must return 0 on success. Returning a non-zero value indicates error to the
+//###        parser, making it exit immediately.
+//##################################################################################################
+int ICACHE_FLASH_ATTR
+HTTPD_On_Url_Cb(WebIf_HTTPDConnSlotData_t *conn, const char *at, size_t length)
+{
+  // set current slot-activity status
+  conn->SlotParserState = s_HTTPD_Url_Found;
+
+  // New URI? Start with cleared F_CONN_IS_AUTHENTICATED flag in ConnCtrl
+  conn->ConnCtrlFlags &= ~(F_CONN_IS_AUTHENTICATED);
+
+  // alloc memory for struct http_parser_url
+  struct http_parser_url *http_parser_url =
+	(struct http_parser_url *) malloc(sizeof(struct http_parser_url));
+
+  // Zero struct http_parser_url
+  http_parser_url_init (http_parser_url);
+
+  // Parse url data to struct http_parser_url
+  http_parser_parse_url (at,
+			length,
+			0, // its not a connect request
+			http_parser_url);
+
+  # if SCDED_DBG >= 4
+  printf("|UrlFndCb,Parsed URI,BF:%d",	// URI Elements Bitfield
+	http_parser_url->field_set);
+  #endif
+
+//--------------------------------------------------------------------------------------------------
+
+  if ( http_parser_url->field_set & ( 1 << UF_SCHEMA ) ) {
+
+	# if SCDED_DBG >= 4
+	printf(",SCHEMA:\"%s\",len:%d",
+		at+http_parser_url->field_data[UF_SCHEMA].off,
+		http_parser_url->field_data[UF_SCHEMA].len);
+	# endif
+  }
+
+//--------------------------------------------------------------------------------------------------
+
+  // have we found a SCHEMA in the URI ?
+  if (http_parser_url->field_set & (1 << UF_SCHEMA)) {
+
+	// get pos and len of NOT zero terminated SCHEMA from uri
+	const char *pos = at+http_parser_url->field_data[UF_SCHEMA].off;
+	int len = http_parser_url->field_data[UF_SCHEMA].len;
+
+	int i = 0;
+	while ( (AvailSchemes[i].SchemeName != NULL) &&
+		(strncasecmp(pos, AvailSchemes[i].SchemeName, len) != 0) )
+		{
+		i++;
+		}
+	conn->parser_scheme = i;
+
+	# if SCDED_DBG >= 4
+	printf(",SCHEMAX:\"%s\"",
+		pos);
+	# endif
+
+	}
+
+	# if SCDED_DBG >= 4
+	printf(",SCHEME:%d",
+		conn->parser_scheme);
+	# endif
+//--------------------------------------------------------------------------------------------------
+  if (http_parser_url->field_set & (1 << UF_USERINFO))
+	{
+	# if SCDED_DBG >= 4
+	printf(",UInfo:\"%s\",len:%d",
+		at+http_parser_url->field_data[UF_USERINFO].off,
+		http_parser_url->field_data[UF_USERINFO].len);
+	# endif
+
+	// Check User Info
+	SCDED_CheckHdrFldAuth(conn,
+		(char *) at+http_parser_url->field_data[UF_USERINFO].off,
+		http_parser_url->field_data[UF_USERINFO].len);
+	}
+//--------------------------------------------------------------------------------------------------
+  if (http_parser_url->field_set & (1 << UF_HOST))
+	{
+	# if SCDED_DBG >= 4
+	printf(",HOST:\"%s\",len:%d",
+		at+http_parser_url->field_data[UF_HOST].off,
+		http_parser_url->field_data[UF_HOST].len);
+	# endif
+	}
+//--------------------------------------------------------------------------------------------------
+  if (http_parser_url->field_set & (1 << UF_PORT))
+	{
+	# if SCDED_DBG >= 4
+	printf(",PORT:%d",
+		http_parser_url->port);
+	# endif
+	}
+//--------------------------------------------------------------------------------------------------
+  // have we found a PATH in the URI ?
+  if (http_parser_url->field_set & (1 << UF_PATH)) {
+
+	// get pos and len of NOT zero terminated path from uri
+	const char *pos = at+http_parser_url->field_data[UF_PATH].off;
+	int len = http_parser_url->field_data[UF_PATH].len;
+
+	// store the path
+	conn->url = malloc(len+1);
+	memcpy(conn->url, pos, len);
+	conn->url[len] = '\0';	// zero terminate
+
+	# if SCDED_DBG >= 4
+	printf(",PATH:\"%s\"",
+		conn->url);
+	# endif
+
+	// do not forget to dealloc !!
+  }
+
+//--------------------------------------------------------------------------------------------------
+
+  // have we found a QUERY in the URI ?
+  if (http_parser_url->field_set & (1 << UF_QUERY))
+	{
+	// get pos and len of NOT zero terminated query from uri
+	const char *pos = at+http_parser_url->field_data[UF_QUERY].off;
+	int len = http_parser_url->field_data[UF_QUERY].len;
+
+	// store the query
+	conn->getArgs = malloc(len+1);
+	memcpy(conn->getArgs, pos, len);
+	conn->getArgs[len] = '\0';	// zero terminate
+
+	# if SCDED_DBG >= 4
+	printf(",QUERY:\"%s\"",
+		conn->getArgs);
+	# endif
+
+	// do not forget to dealloc !!
+	}
+
+//--------------------------------------------------------------------------------------------------
+
+  // free memory reserved for struct http_parser_url
+  free(http_parser_url);
+
+  // fehler beim parsen? ->1 ?
+  return 0;
+}
+
+
+
+/**
+ * --------------------------------------------------------------------------------------------------
+ *  FName: HTTPD_On_Header_Field_Cb
+ *  Desc: Callback, for use with HTTPD Parser. Such a callback is called by HTTPD-Parser (if installed) 
+ *        when (a part of!) a header field name is found.
+ *        The current header field name is stored / added to: conn->p_hdr_fld_name_buff
+ *  Info: When callback 'On_Header_Field' is called an Header-Field Name+Value may be complete in buffer.
+ *  Para: WebIf_HTTPDConnSlotData_t* p_conn -> Connection Slot that is parsed
+ *        const char* at -> ptr to the beginning of the header field name data (to add)
+ *        size_t setArgsLen -> data length of header field name data (to add)
+ *  Rets: int -> Callbacks must return 0 on success. Returning a non-zero value indicates error to 
+ *               the parser, making it exit immediately.
+ * --------------------------------------------------------------------------------------------------
+ */
+int ICACHE_FLASH_ATTR
+HTTPD_On_Header_Field_Cb(WebIf_HTTPDConnSlotData_t* p_conn, const char* p_at, size_t length)
+{
+  // Process last header field name + value that may be stored (indicated by an stored value)
+  HTTPD_Store_Header_Field(p_conn);
 
   // continue, check head field name data for max allowed length
-  if (conn->HdrFldNameBuff == NULL)
-	{
+  if ( p_conn->p_hdr_fld_name_buff == NULL ) {
+
 	if (length > MXHEADERFLDNAMELEN) return 1; // error
-	}
-  else
-	{
-	if (strlen(conn->HdrFldNameBuff) + length > MXHEADERFLDNAMELEN) return 1; // error
-	}
+  }
+
+  else {
+
+	if ( strlen (p_conn->p_hdr_fld_name_buff) + length > MXHEADERFLDNAMELEN ) return 1; // error
+  }
 
   // store header field name data
-  conn->HdrFldNameBuff = HTTPDStoreAddData(conn->HdrFldNameBuff,(const uint8_t*) at,length);
+  p_conn->p_hdr_fld_name_buff = HTTPDStoreAddData(p_conn->p_hdr_fld_name_buff, (const uint8_t*) p_at, length);
 
   # if SCDED_DBG >= 4
   printf("|HdrFldNameCb,Prs:\"%s\">",
-	conn->HdrFldNameBuff);
+	p_conn->p_hdr_fld_name_buff);
   #endif
 
   return 0;
@@ -8753,307 +8693,118 @@ HTTPDHeaderFldCb(WebIf_HTTPDConnSlotData_t *conn,
 
 
 
-
-
-
-/* 2. implem
-{
-  // get header field ID (if implemented)
-  int i = HTTPDGetHdrFldID(at,length);
-
-  # if SCDED_DBG >= 4
-  printf("|HdrFldCb%s,id:%d,len:%d>",
-	at,
-	i,
-	length);
-  #endif
-
-	conn->HdrFldId = i; //-1 do not store 
-
- return 0;
-*/
-
-
-
-
-/* 1. implem
-  // if implemented load callback
-  if (i >= 0)
-	{
-	conn->HdrFldFnCb = AvailHdrFlds[i].FldFnCb;
-	}
-  //  unknown, NULL prevents execution
-  else
-	{
-	conn->HdrFldFnCb = NULL;
-	}
- return 0;
-*/
-
-
-
-
-
-
-//##################################################################################################
-//### FName: HTTPDHeaderValCb
-//###  Desc: Callback fired by HTTPDParser when (part of!) a header field value is found.
-//###        values are stored/added to: conn->HdrFldValueBuff
-//###  Para: WebIf_HTTPDConnSlotData_t *conn ->
-//###        const char *at, -> ptr to field value string data (to add)
-//###        size_t length -> data length of header field value (to add)
-//###  Rets: Callbacks must return 0 on success. Returning a non-zero value indicates error to the
-//###        parser, making it exit immediately.
-//##################################################################################################
+/**
+ * --------------------------------------------------------------------------------------------------
+ *  FName: HTTPD_On_Header_Value_Cb
+ *  Desc: Callback, for use with HTTPD Parser. Such a callback is called by HTTPD-Parser (if installed) 
+ *        when (a part of!) a header field value is found.
+ *        The current header field value is stored / added to: conn->p_hdr_fld_value_buff
+ *  Info: When callback 'On_Header_Field' is called an Header-Field Name+Value may be complete in buffer.
+ *  Para: WebIf_HTTPDConnSlotData_t* p_conn -> Connection Slot that is parsed
+ *        const char* at -> ptr to the beginning of the header field name data (to add)
+ *        size_t setArgsLen -> data length of header field name data (to add)
+ *  Rets: int -> Callbacks must return 0 on success. Returning a non-zero value indicates error to 
+ *               the parser, making it exit immediately.
+ * --------------------------------------------------------------------------------------------------
+ */
 int ICACHE_FLASH_ATTR
-HTTPDHeaderValCb(WebIf_HTTPDConnSlotData_t *conn,
-			const char *at,
-			size_t length)
+HTTPD_On_Header_Value_Cb(WebIf_HTTPDConnSlotData_t* p_conn, const char* p_at, size_t length)
 {
   // check header field value for max allowed data length
-  if (conn->HdrFldValueBuff == NULL)
-	{
-	if (length > MXHEADERFLDVALUELEN) return 1; // error
-	}
-  else
-	{
-	if (strlen(conn->HdrFldValueBuff) + length > MXHEADERFLDVALUELEN) return 1; // error
-	}
+  if (p_conn->p_hdr_fld_value_buff == NULL) {
+
+	if ( length > MXHEADERFLDVALUELEN ) return 1; // error
+  }
+
+  else {
+
+	if ( strlen (p_conn->p_hdr_fld_value_buff) + length > MXHEADERFLDVALUELEN) return 1; // error
+  }
 
   // store header field data
-  conn->HdrFldValueBuff = HTTPDStoreAddData(conn->HdrFldValueBuff,(const uint8_t*) at,length);
+  p_conn->p_hdr_fld_value_buff = HTTPDStoreAddData(p_conn->p_hdr_fld_value_buff, (const uint8_t*) p_at, length);
 
-  # if SCDED_DBG >= 5
-  printf("|HdrFldValCb,Prs:\"%s\" for Name:\"%s\">",
-	conn->HdrFldValueBuff,
-	conn->HdrFldNameBuff);
-	#endif
+  #if SCDED_DBG >= 5
+  printf("|hdr_fld_valCb,Prs:\"%s\" for Name:\"%s\">",
+	p_conn->p_hdr_fld_value_buff,
+	p_conn->p_hdr_fld_name_buff);
+  #endif
 
   return 0;
 }
 
 
 
-
-/*
-int ICACHE_FLASH_ATTR
-HTTPDHeaderValCb(WebIf_HTTPDConnSlotData_t *conn,
-			const char *at,
-			size_t length)
-{
-  // data in header field buffer ?
-  if (conn->HdrFldBuff != NULL)
-	{
-	// get header field ID (if implemented)
-	int HdrFldId = HTTPDGetHdrFldID(conn->HdrFldBuff,strlen(conn->HdrFldBuff));
-
-	# if SCDED_DBG >= 4
-	printf("|HdrFldCb%s,id:%d,len:%d>",
-		at,
-		HdrFldId,
-		length);
-	#endif
-
-	// should we store value?
-	if (HdrFldId >= 0)
-		{
-		HeaderFieldInfo_t *n1;
-		// store int8_t ID+valuestring+zero Termination
-		n1 = malloc(4+4+length+1);//4+1+!!!!!
- 		n1->HdrFldID = conn->HdrFldId;
-		memcpy(&n1->HdrFldVal, at, length);
-		n1->HdrFldVal[length] = '\0';	// zero terminate
-		STAILQ_INSERT_HEAD(&conn->head, n1, entries);
-
-		# if SCDED_DBG >= 4
-		printf("|StorFldVal:%s,id:%d>",
-			n1->HdrFldVal,
-			n1->HdrFldID);
-		#endif
-		}
-	else
-		{
-		# if SCDED_DBG >= 4
-		printf("|SkpFldVal>");
-		#endif
-		}
-
-	// dealloc header field buffer
-	free(conn->HdrFldBuff);
-	}
-
-  // if no data in header field buffer something went wrong ...
-  else
-	{
-	# if SCDED_DBG >= 4
-	printf("|ERROR!HFB>");
-	#endif
-	return 1;
-	}
-
-  return 0;	// should return 1 f to many field-data or fields that are a no go!
-}
-*/
-
-
-
-/* working second ..
-{
-  if (conn->HdrFldId >= 0)
-	{
-	HeaderFieldInfo_t *n1;
-	// store int8_t ID+valuestring+zero Termination
-	n1 = malloc(4+4+length+1);//4+1+!!!!!
-        n1->HdrFldID = conn->HdrFldId;
-	memcpy(&n1->HdrFldVal, at, length);
-	n1->HdrFldVal[length] = '\0';	// zero terminate
-        STAILQ_INSERT_HEAD(&conn->head, n1, entries);
-
-	# if SCDED_DBG >= 4
-	printf("|StorFldVal:%s,id:%d>",
-		n1->HdrFldVal,
-		n1->HdrFldID);
-	#endif
-	}
-  else
-	{
-	# if SCDED_DBG >= 4
-	printf("|SkpFldVal>");
-	#endif
-	}
-
-  return 0;	// should return 1 f to many field-data or fields that are a no go!
-}
-*/
-
-
-
-
-
-
-
-/*
-		next_station = STAILQ_NEXT(station,next);
-		free(station);
-		station = next_station;
-*/
-
-/*
-        while (!STAILQ_EMPTY(&head)) {
-                n1 = STAILQ_LAST(&head, stailq_entry, entries);
-                STAILQ_REMOVE(&head, n1, stailq_entry, entries);
-                printf ("n2: %d\n", n1->value);
-                free(n1);
-
-# if SCDED_DBG >= 4
-	HeaderFieldInfo_t *n1;
-	while (!STAILQ_EMPTY(&conn->head))
-		{
-		n1 = STAILQ_LAST(&conn->head, stailq_entry, entries);
-		printf("|StorFldVal:%s,id:%d",
-	n1->HdrFldVal,
-	n1->HdrFldID);
-              }
-#endif
-
-*/
-
-
-/*
-	HeaderFieldInfo_t *n1;
-	while (!STAILQ_EMPTY(&conn->head))
-		{
-		n1 = STAILQ_LAST(&conn->head, HeaderFieldInfo_s, entries);
-
-        	n1 = STAILQ_FIRST(&conn->head);
-		printf("|DeallocFldVal:%s,id:%d",
-			n1->HdrFldVal,
-			n1->HdrFldID);
-        STAILQ_REMOVE_HEAD(&conn->head, entries);
-        free(n1);
-              }
-
-*/
-
-
-
-
-
-// to implement error if to much
-/*
-  int r = 0; // default -> no error
-
-  if (conn->HdrFldFnCb)
-	// if != NULL, Execute header field value processing function
-	{
-	r = conn->HdrFldFnCb(conn,
-			at,
-			length);
-	}
-
-  return r;
-}
-*/
-
-
-//##################################################################################################
-//### FName: HTTPDProcHeaderFld
-//###  Desc: Process Header field name and value (Store it for later use, if ID is >0)
-//###        And deallocs buffers !!!
-//###  Para: WebIf_HTTPDConnSlotData_t *conn ->
-//###  Rets: -/-
-//##################################################################################################
+/**
+ * --------------------------------------------------------------------------------------------------
+ *  FName: HTTPD_Store_Header_Field
+ *  Desc: Stores header-fields and assigned values for later use. Only if Header-Field is in built in
+ *        table. The ID from the table and the value string is stored in a SLT-Queue. Head is stored
+ *        in the parsed connection.
+ *  Info: fld_value_buff != NULL indicates that we may have an Header-Field name + value set to store.
+ *  Para: WebIf_HTTPDConnSlotData_t* p_conn -> Connection Slot that is parsed
+ *  Rets: -/- (may add an entry to the Header Fields queue)
+ * --------------------------------------------------------------------------------------------------
+ */
 void ICACHE_FLASH_ATTR
-HTTPDProcHeaderFld(WebIf_HTTPDConnSlotData_t *conn)
+HTTPD_Store_Header_Field(WebIf_HTTPDConnSlotData_t* p_conn)
 {
-  // do we need to process last header field name and value ?
-  if (conn->HdrFldNameBuff != NULL)
-	{
+  // should be called from 'on headerfield name', before processing it
+  // do we need to process last header field name and value ? (an filled value buffer indicates this)
+  if ( p_conn->p_hdr_fld_value_buff != NULL ) {
+
 	// do we have a value too?
-	if (conn->HdrFldValueBuff != NULL)
-		{
+	if ( p_conn->p_hdr_fld_name_buff != NULL ) {
+
 		// get header field ID (if implemented)
-		int HdrFldId = SCDED_GetHdrFldID(conn->HdrFldNameBuff,strlen(conn->HdrFldNameBuff));
+		int hdr_fld_id = HTTPD_Get_Hdr_Fld_ID (p_conn->p_hdr_fld_name_buff, strlen(p_conn->p_hdr_fld_name_buff) );
 
 		# if SCDED_DBG >= 4
 		printf("|HdrFldProc,name:\"%s\"(ID:%d),val:\"%s\"-",
-			conn->HdrFldNameBuff,
-			HdrFldId,
-			conn->HdrFldValueBuff);
+			p_conn->p_hdr_fld_name_buff,
+			hdr_fld_id,
+			p_conn->p_hdr_fld_value_buff);
 		#endif
 
-		// should we store value? (>0)
-		if (HdrFldId >= 0)
-			{
-			HeaderFieldInfo_t *n1;
-			// store int8_t ID+valuestring+zero Termination
-			n1 = malloc(4+4+strlen(conn->HdrFldValueBuff)+1);//4+1+!!!!!
- 			n1->HdrFldID = HdrFldId;
-			strcpy((char*) &n1->HdrFldVal, (char*) conn->HdrFldValueBuff);
-			STAILQ_INSERT_HEAD(&conn->head, n1, entries);
+		int hdr_fld_val_len = strlen (p_conn->p_hdr_fld_value_buff);
+
+		// is the field in the table? and value >0?
+		if ( ( hdr_fld_id >= 0 ) && ( hdr_fld_val_len ) ) {
+
+			Entry_Header_Field_t* p_entry_header_field;
+
+			// alloc entry
+			p_entry_header_field = malloc( sizeof (Entry_Header_Field_t) );
+
+ 			p_entry_header_field->hdr_fld_id = hdr_fld_id;
+			p_entry_header_field->p_hdr_fld_val = malloc(hdr_fld_val_len + 1);
+
+			strcpy ((char*) p_entry_header_field->p_hdr_fld_val, (char*) p_conn->p_hdr_fld_value_buff);
+
+			STAILQ_INSERT_HEAD(&p_conn->head_header_field, p_entry_header_field, entries);
 
 			# if SCDED_DBG >= 4
 			printf("(StoreFld)>");
 			#endif
-			}
-		else
-			{
+		}
+
+		else {
 			# if SCDED_DBG >= 4
 			printf("(SkipFld)>");
 			#endif
-			}
-
-		// dealloc header field value buffer
-		free(conn->HdrFldValueBuff);
-		conn->HdrFldValueBuff = NULL;
 		}
 
-	// dealloc header field name buffer
-	free(conn->HdrFldNameBuff);
-	conn->HdrFldNameBuff = NULL;
+		// dealloc header field name buffer
+		free(p_conn->p_hdr_fld_name_buff);
+		p_conn->p_hdr_fld_name_buff = NULL;
 	}
 
-// done, buffers freed
+	// dealloc header field value buffer
+	free(p_conn->p_hdr_fld_value_buff);
+	p_conn->p_hdr_fld_value_buff = NULL;
+  }
+
+// done, buffers freed if old valu
 }
 
 
@@ -9154,18 +8905,15 @@ HTTPDHdrFldHostFnCb(WebIf_HTTPDConnSlotData_t *conn,
 
 
 
-
-
-
 //##################################################################################################
-//### FName: HTTPDHeaderPrsdCompleteCb
+//### FName: HTTPD_On_Headers_Complete_Cb
 //###  Desc: Callback fired by HTTPDParser when Header is completely parsed
 //###  Para: WebIf_HTTPDConnSlotData_t *conn ->
 //###  Rets: Callbacks must return 0 on success. Returning a non-zero value indicates error to the
 //###        parser, making it exit immediately.
 //##################################################################################################
 int ICACHE_FLASH_ATTR
-HTTPDHeaderPrsdCompleteCb(WebIf_HTTPDConnSlotData_t *conn)
+HTTPD_On_Headers_Complete_Cb(WebIf_HTTPDConnSlotData_t *conn)
 {
   # if SCDED_DBG >= 4
   printf("HeComplCb>");
@@ -9173,23 +8921,30 @@ HTTPDHeaderPrsdCompleteCb(WebIf_HTTPDConnSlotData_t *conn)
 
   // set current slot-activity status
   conn->SlotParserState = s_HTTPD_Header_Prsd_Complete;
+
 //--------------------------------------------------------------------------------------------------
-  // Process last header field name+value that may be already stored?
-  HTTPDProcHeaderFld(conn);
+
+  // Process last header field name + value that may be stored
+  HTTPD_Store_Header_Field(conn);
+
 //--------------------------------------------------------------------------------------------------
+
   // list stored header fields, if debug
-  # if SCDED_DBG >= 4
+  #if SCDED_DBG >= 4
   printf("\nHTTPD stored HdrFlds:\n");
 
-  HeaderFieldInfo_t *n1;
-  STAILQ_FOREACH(n1, &conn->head, entries)
-	{
+  Entry_Header_Field_t* p_entry_header_field;
+
+  STAILQ_FOREACH(p_entry_header_field, &conn->head_header_field, entries) {
+
 	printf("ID:%d,Val:\"%s\"\n",
-		n1->HdrFldID,
-		n1->HdrFldVal);
-	}
-  # endif
+		p_entry_header_field->hdr_fld_id,
+		p_entry_header_field->p_hdr_fld_val);
+  }
+  #endif
+
 //--------------------------------------------------------------------------------------------------
+
   // list result of parsing process, if debug
   # if SCDED_DBG >= 2
   printf("HTTPD Parsed: V%d.%d,StCd:%d,Method:%d,Scheme:%d,Mime:%d,Flags:%d,Err:%d,Ud:%d,PostLen:%llu\n",
@@ -9203,17 +8958,20 @@ HTTPDHeaderPrsdCompleteCb(WebIf_HTTPDConnSlotData_t *conn)
 	conn->parser_http_errno,
 	conn->parser_upgrade,
 	conn->parser_content_length);
-  	# endif
+  # endif
+
 //--------------------------------------------------------------------------------------------------
+
   // is it an request ? Then do preprocessing ...
-  if (conn->parser_type == HTTP_REQUEST)
-	{
+  if (conn->parser_type == HTTP_REQUEST) {
+
 	// Authenticate remote for request
 	SCDED_ProcHdrFldAuth(conn);
 
 	// Analyze the path from HTTP-Parser and try to find + load a matching build in Resource
 	HTTPD_ParseUrl(conn);
-	}
+  }
+
 //--------------------------------------------------------------------------------------------------
 
   return 0;
@@ -9222,7 +8980,7 @@ HTTPDHeaderPrsdCompleteCb(WebIf_HTTPDConnSlotData_t *conn)
 
 
 //##################################################################################################
-//### FName: HTTPDFndBodyDataCb
+//### FName: HTTPD_On_Body_Cb
 //###  Desc: Callback fired by HTTPDParser when parser has found body-data
 //###  Para: WebIf_HTTPDConnSlotData_t *conn ->
 //###        const char *at, -> ptr to body data (to add)
@@ -9231,23 +8989,25 @@ HTTPDHeaderPrsdCompleteCb(WebIf_HTTPDConnSlotData_t *conn)
 //###        parser, making it exit immediately.
 //##################################################################################################
 int ICACHE_FLASH_ATTR
-HTTPDFndBodyDataCb(WebIf_HTTPDConnSlotData_t *conn,
+HTTPD_On_Body_Cb(WebIf_HTTPDConnSlotData_t *conn,
 			const char *at,
 			size_t length)
 {
   // set current slot-activity status
   conn->SlotParserState = s_HTTPD_Fnd_Body_Data;
+
 //--------------------------------------------------------------------------------------------------
 
   // check BodyBuff for max allowed data length
-  if (conn->postBuff == NULL)
-	{
+  if (conn->postBuff == NULL) {
+
 	if (length > MXBODYLEN) return 1; // error
-	}
-  else
-	{
+  }
+
+  else {
+
 	if (conn->postLen + length > MXBODYLEN) return 1; // error
-	}
+  }
 
   // store body data
   conn->postBuff = HTTPDStoreAddDataB(conn->postBuff,&conn->postLen,(const uint8_t*) at,length);
@@ -9261,19 +9021,21 @@ HTTPDFndBodyDataCb(WebIf_HTTPDConnSlotData_t *conn,
   # endif
 
 //--------------------------------------------------------------------------------------------------
+
   return 0;
 }
 
 
+
 //##################################################################################################
-//### FName: HTTPDMsgPrsdCompleteCb
+//### FName: HTTPD_On_Message_Complete_Cb
 //###  Desc: Callback fired by HTTPDParser when message parsing is complete (after body data)
 //###  Para: WebIf_HTTPDConnSlotData_t *conn ->
 //###  Rets: Callbacks must return 0 on success. Returning a non-zero value indicates error to the
 //###        parser, making it exit immediately.
 //##################################################################################################
 int ICACHE_FLASH_ATTR
-HTTPDMsgPrsdCompleteCb(WebIf_HTTPDConnSlotData_t *conn)
+HTTPD_On_Message_Complete_Cb(WebIf_HTTPDConnSlotData_t *conn)
 {
   # if SCDED_DBG >= 4
   printf("MsgPrsdComplCb>");
@@ -9281,6 +9043,7 @@ HTTPDMsgPrsdCompleteCb(WebIf_HTTPDConnSlotData_t *conn)
 
   // set current slot-activity status
   conn->SlotParserState = s_HTTPD_Msg_Prsd_Complete;
+
 //--------------------------------------------------------------------------------------------------
 
   return 0;
@@ -9377,34 +9140,35 @@ findArg: TIST=1460300394&fS0=1&lS0=10
 //###  Rets: char *Buff -> ptr to allocated space
 //##################################################################################################
 char * ICACHE_FLASH_ATTR
-HTTPDStoreAddData(char *Buff,
-			const uint8_t *data,
-			size_t length)
+HTTPDStoreAddData(char* Buff, const uint8_t* data, size_t length)
 {
   // determinate Buff len
   int BuffLen;
-  if (Buff == NULL) BuffLen = 0;
+
+  if ( Buff == NULL ) BuffLen = 0;
+
   else BuffLen = strlen(Buff);
 
   // determinate new Buff len
   int NewBuffLen;
-  if (Buff == NULL) NewBuffLen = length;
+  if ( Buff == NULL ) NewBuffLen = length;
   else NewBuffLen =
 
 		BuffLen + length;
 
   // alloc new Buff
-  char *NewBuff = (char*)malloc(NewBuffLen+1);
+  char* NewBuff = (char*) malloc (NewBuffLen + 1);
 
   // Copy old Buff to new Buff, and dealloc old
-  if (Buff != NULL)
-	{
-	memcpy (NewBuff, Buff, BuffLen); // copy to sendbuf
+  if ( Buff != NULL ) {
+
+	memcpy (NewBuff, Buff, BuffLen); // copy to new buf
+
 	free(Buff);
-	}
+  }
 
   // Add new data to trailing_buffer and save
-  memcpy (NewBuff + BuffLen, data, length); // copy to sendbuf
+  memcpy (NewBuff + BuffLen, data, length); // add
 
   // zero terminate, func is for string only !
   NewBuff[NewBuffLen] = '\0';
@@ -9418,32 +9182,33 @@ HTTPDStoreAddData(char *Buff,
 //### FName: HTTPDStoreAddData
 //###  Desc: Stores data (allocates a buffer for it), or adds data to allocated Buffer (with realloc)
 //###        !! Dont forget to dealloc !!
-//###  Para: char *Buff -> ptr to allocated space (NULL if empty)
+//###  Para: char* Buff -> ptr to allocated space (NULL if empty)
 //###        const char *at, -> ptr to data (to add) (not zero terminated!)
 //###        size_t length -> data length of data (to add)
 //###  Rets: char *Buff -> ptr to allocated space
 //##################################################################################################
 char * ICACHE_FLASH_ATTR
 HTTPDStoreAddDataB(char *Buff,
-			int *Len,
+			int* Len,
 			const uint8_t *data,
 			size_t length)
 {
   // determinate New Buff Len
   int NewBuffLen;
-  if (Buff == NULL) NewBuffLen = length;
-  else NewBuffLen =
-		Len[0] + length;
+
+  if ( Buff == NULL ) NewBuffLen = length;
+  else NewBuffLen = Len[0] + length;
 
   // alloc New Buff
-  char *NewBuff = (char*)malloc(NewBuffLen+1);
+  char *NewBuff = (char*) malloc (NewBuffLen + 1);
 
   // Copy old Buff to New Buff, and dealloc old
-  if (Buff != NULL)
-	{
+  if ( Buff != NULL ) {
+
 	memcpy (NewBuff, Buff, Len[0]);
+
 	free(Buff);
-	}
+  }
 
   // Add new data to New Buff
   memcpy (NewBuff + Len[0], data, length);
@@ -9768,7 +9533,7 @@ const ProvidedByModule_t WebIf_ProvidedByModule = { // A-Z order
   ,WebIf_Undefine			// Undefine
   ,NULL					// Write
   ,NULL					// FnProvided
-  ,sizeof(WebIf_Definition_t)		// Modul specific Size (Common_Definition_t + X)
+  ,sizeof(Entry_WebIf_Definition_t)		// Modul specific Size (Common_Definition_t + X)
 };
 
 
@@ -9823,7 +9588,7 @@ WebIf_Add(Common_Definition_t* Common_Definition
  *  FName: WebIf_IdleCb	
  *  Desc: Finalizes the defines a new "device" of 'WebIf' type. Contains devicespecific init code.
  *  Info: 
- *  Para: WebIf_Definition_t *WebIf_Definition -> prefilled WebIf Definition
+ *  Para: Entry_WebIf_Definition_t *WebIf_Definition -> prefilled WebIf Definition
  *        char *Definition -> the last part of the CommandDefine arg* 
  *  Rets: char* -> response text NULL=no text
  * --------------------------------------------------------------------------------------------------
@@ -9839,7 +9604,7 @@ WebIf_IdleCbX(Common_Definition_t *Common_Definition)
   #endif
 
   // make common ptr to modul specific ptr
-  WebIf_Definition_t* WebIf_Definition = (WebIf_Definition_t*) Common_Definition;
+  Entry_WebIf_Definition_t* WebIf_Definition = (Entry_WebIf_Definition_t*) Common_Definition;
 
 
 /*
@@ -9897,53 +9662,63 @@ WebIf_IdleCbX(Common_Definition_t *Common_Definition)
  * --------------------------------------------------------------------------------------------------
  *  FName: WebIf_sent (espconn_sent compatible Fn)
  *  Desc: Platform conn - Send data Fn
- *  Para: WebIf_Definition_t *WebIf_Definition -> WebIf Definition
+ *  Para: Entry_WebIf_Definition_t *WebIf_Definition -> WebIf Definition
  *        uint8_t *Buff -> buffer with data to send
  *        uint Len -> length of data to send
  *  Rets: int -> written data
  * --------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR
-WebIf_sent(WebIf_Definition_t *WebIf_Definition
-	,uint8_t *Buff
-	,uint Len)
+WebIf_sent(Entry_WebIf_Definition_t* p_entry_webif_definition, uint8_t* send_buffer, uint send_buffer_len)
 {
   # if SCDED_DBG >= 5
   os_printf("\n|WebIf_Sent len:%d!>"
-	,Len);
+	,send_buffer_len);
   # endif
 
   // select for want writing (F_WANTS_WRITE), because maybe we have more data to send ...
-  WebIf_Definition->common.Common_CtrlRegA |= F_WANTS_WRITE;
+  p_entry_webif_definition->common.Common_CtrlRegA |= F_WANTS_WRITE;
 
-  return (write(WebIf_Definition->common.fd, Buff, Len) >= 0);
+  int result = write(p_entry_webif_definition->common.fd, send_buffer, send_buffer_len);
+
+  // an error occured ?
+  if ( !( result >= 0 ) ) {
+
+	#if SCDED_DBG >= 5
+	os_printf("\n|WebIf_Send has error %d as result!>", result);
+	#endif
+
+	result = 0;
+  }
+
+ return result; 
+//  return (write(p_entry_webif_definition->common.fd, send_buffer, send_buffer_len) >= 0);
 }
 
 
 
 /*
  *--------------------------------------------------------------------------------------------------
- *FName: WebIf_disconnect (espconn_disconnect compatible Fn)
+ *FName: WebIf Disconnect (espconn_disconnect compatible Fn)
  * Desc: Platform conn - Disconnect Fn
  * Info: 
- * Para: WebIf_Definition_t *WebIf_Definition -> WebIf Definition
+ * Para: Entry_WebIf_Definition_t* p_entry_webif_definition -> WebIf Definition = WebIf Conn
  * Rets: -/-
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-WebIf_disconnect(WebIf_Definition_t *WebIf_Definition)
+WebIf_disconnect(Entry_WebIf_Definition_t* p_entry_webif_definition)
 {
-
   # if SCDED_DBG >= 5
   os_printf("\n|WebIf_Sdisconnect Fn>");
   # endif
 
   // select for disconnecting (F_NEEDS_CLOSE)
-  WebIf_Definition->WebIf_CtrlRegA |= F_NEEDS_CLOSE;
+  p_entry_webif_definition->WebIf_CtrlRegA |= F_NEEDS_CLOSE;
 
   // select for want writing (F_WANTS_WRITE),
   // because the real close is done in the write select of code
-  WebIf_Definition->common.Common_CtrlRegA |= F_WANTS_WRITE;
+  p_entry_webif_definition->common.Common_CtrlRegA |= F_WANTS_WRITE;
 }
 
 
@@ -9962,12 +9737,12 @@ WebIf_disconnect(WebIf_Definition_t *WebIf_Definition)
  *--------------------------------------------------------------------------------------------------
  *FName: WebIf_UndefineRaw
  * Desc: internal cleanup and WebIf_Definition delete
- * Para: WebIf_Definition_t *WebIf_Definition -> WebIf Definition that should be deleted
+ * Para: Entry_WebIf_Definition_t *WebIf_Definition -> WebIf Definition that should be deleted
  * Rets: -/-
  *--------------------------------------------------------------------------------------------------
  */
 int 
-WebIf_UndefineRaw(WebIf_Definition_t* WebIf_Definition)
+WebIf_UndefineRaw(Entry_WebIf_Definition_t* WebIf_Definition)
 {
   printf("\n|WebIf_undefineraw enter>");
 
@@ -9988,7 +9763,7 @@ WebIf_UndefineRaw(WebIf_Definition_t* WebIf_Definition)
 
   // mark slot as unused
   WebIf_Definition->HTTPD_InstCfg->SlotCtrlRegBF &= 
-	~(1<<WebIf_Definition->SlotNo);
+	~(1<<WebIf_Definition->slot_no);
 
   // free Name
   free(WebIf_Definition->common.name);
@@ -10033,7 +9808,7 @@ WebIf_UndefineRaw(WebIf_Definition_t* WebIf_Definition)
  *FName: WebIf_Define
  * Desc: Finalizes the defines a new "device" of 'WebIf' type. Contains devicespecific init code.
  * Info: 
- * Para: WebIf_Definition_t *WebIf_Definition -> prefilled WebIf Definition
+ * Para: Entry_WebIf_Definition_t *WebIf_Definition -> prefilled WebIf Definition
  *       char *Definition -> the last part of the CommandDefine arg* 
  * Rets: strTextMultiple_t* -> response text NULL=no text
  *--------------------------------------------------------------------------------------------------
@@ -10046,8 +9821,8 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
   strTextMultiple_t *retMsg = NULL;
 
   // make common ptr to modul specific ptr
-	WebIf_Definition_t* WebIf_Definition =
-		  (WebIf_Definition_t*) Common_Definition;
+	Entry_WebIf_Definition_t* WebIf_Definition =
+		  (Entry_WebIf_Definition_t*) Common_Definition;
 
   #if SCDEH_DBG >= 5
   printf("\n|WebIf_Def, Def:%.*s>"
@@ -10073,14 +9848,14 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
   // doppelt ?? HTTPD-Instance-Configuration -> assign the HTTPD Parser the settings
   http_parser_settings_init(HTTPDparser_settings);
 
-  HTTPDparser_settings->on_message_begin = HTTPDMsgBeginCb;
-  HTTPDparser_settings->on_url = HTTPDUrlFoundCb;
+  HTTPDparser_settings->on_message_begin = HTTPD_On_Message_Begin_Cb;
+  HTTPDparser_settings->on_url = HTTPD_On_Url_Cb;
 //HTTPDparser_settings->on_status ???
-  HTTPDparser_settings->on_header_field = HTTPDHeaderFldCb;
-  HTTPDparser_settings->on_header_value = HTTPDHeaderValCb;
-  HTTPDparser_settings->on_headers_complete = HTTPDHeaderPrsdCompleteCb;
-  HTTPDparser_settings->on_body = HTTPDFndBodyDataCb;
-  HTTPDparser_settings->on_message_complete = HTTPDMsgPrsdCompleteCb;
+  HTTPDparser_settings->on_header_field = HTTPD_On_Header_Field_Cb;
+  HTTPDparser_settings->on_header_value = HTTPD_On_Header_Value_Cb;
+  HTTPDparser_settings->on_headers_complete = HTTPD_On_Headers_Complete_Cb;
+  HTTPDparser_settings->on_body = HTTPD_On_Body_Cb;
+  HTTPDparser_settings->on_message_complete = HTTPD_On_Message_Complete_Cb;
 //HTTPDparser_settings->on_chunk_header ???
 //HTTPDparser_settings->on_chunk_complete ???
 
@@ -10239,19 +10014,19 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 
 /*
  * -------------------------------------------------------------------------------------------------
- *  FName: WebIf_DirectRead
+ *  FName: WebIf_Direct_Read
  *  Desc: Called from the global select-loop when FD is in read-set
  *  Info: 
- *  Para: Common_Definition_t* p_entry_definition -> the FD owners definition
+ *  Para: Entry_Definition_t* p_entry_definition -> the FD owners definition
  *  Rets: ? - unused
  * -------------------------------------------------------------------------------------------------
  */
 int 
-WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
+WebIf_Direct_Read(Entry_Definition_t* p_entry_definition)
 {
   // make common ptr to modul specific ptr
-  WebIf_Definition_t* p_entry_webif_definition = 
-	(WebIf_Definition_t*) p_entry_definition;
+  Entry_WebIf_Definition_t* p_entry_webif_definition = 
+	(Entry_WebIf_Definition_t*) p_entry_definition;
 
 // -------------------------------------------------------------------------------------------------
 
@@ -10272,7 +10047,7 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
   int32_t len;
 
   // FD of the new client connection
-  int32_t NewClientFD;
+  int32_t new_client_fd;
 
   // sockaddr_in, to get info about new client, contains port, ip-addr, family
   struct sockaddr_in remote_addr;
@@ -10296,17 +10071,17 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 	uint32_t SlotCtrlRegBF = 
 		p_entry_webif_definition->HTTPD_InstCfg->SlotCtrlRegBF;
 
-	uint8_t NewSlotNo;
+	uint8_t new_slot_no;
 
 	// MAX_SLOTS_PER_INSTANCE -> uint32_t BF used in code -> 32 64?
-	for ( NewSlotNo = 0 ; NewSlotNo < 32 ; NewSlotNo++ ) {
+	for ( new_slot_no = 0 ; new_slot_no < 32 ; new_slot_no++ ) {
 
-		if ( ! ( SlotCtrlRegBF & ( 0b1 << NewSlotNo ) ))
+		if ( ! ( SlotCtrlRegBF & ( 0b1 << new_slot_no ) ))
 			break;
 	}
 
 	// Check if we got a free slot? -> 'no slots free' error
-	if ( NewSlotNo >= 32 ) {
+	if ( new_slot_no >= 32 ) {
 
 		SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name
 			,p_entry_webif_definition->common.nameLen
@@ -10318,7 +10093,7 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 	}
 
 	// mark found slot as used in Slot-Control-Register-Bitfield
-	SlotCtrlRegBF |= ( 0b1 << NewSlotNo );
+	SlotCtrlRegBF |= ( 0b1 << new_slot_no );
 
 	// store Slot-Control-Register-Bitfield
 	p_entry_webif_definition->HTTPD_InstCfg->SlotCtrlRegBF = SlotCtrlRegBF;
@@ -10332,11 +10107,11 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 	len = sizeof(struct sockaddr_in);
 
 	// get FD from new connection and store remote address
-	NewClientFD = accept(p_entry_webif_definition->common.fd,
+	new_client_fd = accept(p_entry_webif_definition->common.fd,
 		(struct sockaddr *) &remote_addr, (socklen_t *) &len);
 
 	// check for error
-	if ( NewClientFD < 0 ) {
+	if ( new_client_fd < 0 ) {
 
 		SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name
 				,p_entry_webif_definition->common.nameLen
@@ -10350,14 +10125,14 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 // -------------------------------------------------------------------------------------------------
 
 	// create a new WebIf Definition
-	WebIf_Definition_t* p_new_entry_webif_definition;
+	Entry_WebIf_Definition_t* p_new_entry_webif_definition;
 
 	// alloc mem for modul specific definition structure (Common_Definition_t + X)
 	p_new_entry_webif_definition = 
-		(WebIf_Definition_t*) malloc(sizeof(WebIf_Definition_t));
+		(Entry_WebIf_Definition_t*) malloc(sizeof(Entry_WebIf_Definition_t));
 
 	// zero the struct
-	memset(p_new_entry_webif_definition, 0, sizeof (WebIf_Definition_t));
+	memset(p_new_entry_webif_definition, 0, sizeof (Entry_WebIf_Definition_t));
 
 // -------------------------------------------------------------------------------------------------
 				
@@ -10367,13 +10142,13 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
  	int keepInterval = 5;	//5s
  	int keepCount = 3;	//retry times
 
- 	setsockopt(NewClientFD, SOL_SOCKET, SO_KEEPALIVE, (void *)&keepAlive, sizeof(keepAlive));
-  	setsockopt(NewClientFD, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&keepIdle, sizeof(keepIdle));
-  	setsockopt(NewClientFD, IPPROTO_TCP, TCP_KEEPINTVL, (void *)&keepInterval, sizeof(keepInterval));
-  	setsockopt(NewClientFD, IPPROTO_TCP, TCP_KEEPCNT, (void *)&keepCount, sizeof(keepCount));
+ 	setsockopt(new_client_fd, SOL_SOCKET, SO_KEEPALIVE, (void *)&keepAlive, sizeof(keepAlive));
+  	setsockopt(new_client_fd, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&keepIdle, sizeof(keepIdle));
+  	setsockopt(new_client_fd, IPPROTO_TCP, TCP_KEEPINTVL, (void *)&keepInterval, sizeof(keepInterval));
+  	setsockopt(new_client_fd, IPPROTO_TCP, TCP_KEEPCNT, (void *)&keepCount, sizeof(keepCount));
 			
  	// store clients FD to new WebIf Definition
- 	p_new_entry_webif_definition->common.fd = NewClientFD;
+ 	p_new_entry_webif_definition->common.fd = new_client_fd;
 
 	// copy link to HTTPD-Instance-Configuration
 	p_new_entry_webif_definition->HTTPD_InstCfg
@@ -10384,49 +10159,49 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 		= p_entry_webif_definition->common.module;
 
 	// store Slot-Number
-	p_new_entry_webif_definition->SlotNo = NewSlotNo;
+	p_new_entry_webif_definition->slot_no = new_slot_no;
 
-	// clear Flag 'WANTS_WRITE' in new WebIf Definition
+	// clear Flag 'WANTS_WRITE' in new WebIf Definition (normally struct is cleared!)
  	p_new_entry_webif_definition->common.Common_CtrlRegA
 		&= ~F_WANTS_WRITE;
 
-	// clear Flag 'NEEDS_CLOSE' in new WebIf Definition
+	// clear Flag 'NEEDS_CLOSE' in new WebIf Definition (normally struct is cleared!)
  	p_new_entry_webif_definition->WebIf_CtrlRegA
 		&= ~F_NEEDS_CLOSE;
 
 	// get info about new client-conn (port, ip, ...)	
- 	socklen_t peerSockAddrLen = sizeof(peerName);
-  	getpeername(NewClientFD, &peerName, (socklen_t *) &peerSockAddrLen);
-  	struct sockaddr_in *peerSockAddr_in = (struct sockaddr_in *) &peerName;
+ 	socklen_t peerSockAddrLen = sizeof (peerName);
+  	getpeername(new_client_fd, &peerName, (socklen_t*) &peerSockAddrLen);
+  	struct sockaddr_in* peerSockAddr_in = (struct sockaddr_in*) &peerName;
 
 	// get info about our server-conn (port, ip, ...)	
- 	socklen_t sockSockAddrLen = sizeof(sockName);
-  	getsockname(NewClientFD, &sockName, (socklen_t *) &sockSockAddrLen);
-  	struct sockaddr_in *sockSockAddr_in = (struct sockaddr_in *) &sockName;
+ 	socklen_t sockSockAddrLen = sizeof (sockName);
+  	getsockname(new_client_fd, &sockName, (socklen_t *) &sockSockAddrLen);
+  	struct sockaddr_in* sockSockAddr_in = (struct sockaddr_in *) &sockName;
 
 	// using TCP, create struct
-	esp_tcp *tcp = (esp_tcp*) malloc (sizeof(esp_tcp));
+	esp_tcp *tcp = (esp_tcp*) malloc (sizeof (esp_tcp));
 
 	// using TCP, fill struct
-	tcp->local_port = ntohs(sockSockAddr_in->sin_port);	// server port
-	tcp->remote_port = ntohs(peerSockAddr_in->sin_port);	// client port
-	memcpy(&tcp->remote_ip				// client IP
+	tcp->local_port = ntohs (sockSockAddr_in->sin_port);	// server port
+	tcp->remote_port = ntohs (peerSockAddr_in->sin_port);	// client port
+	memcpy(&tcp->remote_ip					// client IP
 		, &peerSockAddr_in->sin_addr.s_addr
-		, sizeof(tcp->remote_ip));
+		, sizeof (tcp->remote_ip));
 
 	// store TCP struct
 	p_new_entry_webif_definition->proto.tcp = tcp;
 
 	// give definition a new unique name
-	p_new_entry_webif_definition->common.nameLen = asprintf((char**)&p_new_entry_webif_definition->common.name
-		,"%.*s.%d.%d.%d.%d.%u"
-		,p_entry_webif_definition->common.nameLen
-		,p_entry_webif_definition->common.name
-		,p_new_entry_webif_definition->proto.tcp->remote_ip[0]
-		,p_new_entry_webif_definition->proto.tcp->remote_ip[1]
-		,p_new_entry_webif_definition->proto.tcp->remote_ip[2]
-		,p_new_entry_webif_definition->proto.tcp->remote_ip[3]
-		,p_new_entry_webif_definition->proto.tcp->remote_port);
+	p_new_entry_webif_definition->common.nameLen = asprintf ((char**)&p_new_entry_webif_definition->common.name,
+		"%.*s.%d.%d.%d.%d.%u",
+		p_entry_webif_definition->common.nameLen,
+		p_entry_webif_definition->common.name,
+		p_new_entry_webif_definition->proto.tcp->remote_ip[0],
+		p_new_entry_webif_definition->proto.tcp->remote_ip[1],
+		p_new_entry_webif_definition->proto.tcp->remote_ip[2],
+		p_new_entry_webif_definition->proto.tcp->remote_ip[3],
+		p_new_entry_webif_definition->proto.tcp->remote_port);
 
   	// assign an unique number
  	 p_new_entry_webif_definition->common.nr = SCDERoot_at_WebIf_M->device_count++;
@@ -10435,9 +10210,9 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 	p_new_entry_webif_definition->common.defCtrlRegA |= F_TEMPORARY;
 
 	// store new WebIf Definition
-	STAILQ_INSERT_HEAD(&SCDERoot_at_WebIf_M->HeadCommon_Definitions
-		,(Common_Definition_t*) p_new_entry_webif_definition
-		, entries);
+	STAILQ_INSERT_HEAD(&SCDERoot_at_WebIf_M->head_definition,
+		(Entry_Definition_t*) p_new_entry_webif_definition,
+		entries);
 
 	#if Telnet_Module_DBG >= 7
 	SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name,
@@ -10448,7 +10223,7 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 		"Creating a 'definition' with F_TEMPORARY set. Exec Conn_Cb Fn",
 		p_entry_webif_definition->common.module->provided->typeNameLen,
 		p_entry_webif_definition->common.module->provided->typeName,
-		p_new_entry_webif_definition->SlotNo,
+		p_new_entry_webif_definition->slot_no,
 		p_new_entry_webif_definition->common.fd);
 	#endif
 
@@ -10460,7 +10235,7 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 
   // Flag 'THIS_IS_SERVERSOCKET' cleared. This indicates that this is not the server-socket.
   // -> Manage old connection.
-  else	{
+  else {
 
  	#if SCDEH_DBG >= 5
 	printf("|recv>");
@@ -10472,34 +10247,34 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 	// got no buffer ? Close / Cleanup connection
 	if ( recv_buffer == NULL ) {
 
-		os_printf("platHttpServerTask: memory exhausted!\n");
+		os_printf ("platHttpServerTask: memory exhausted!\n");
 
-		WebIf_DisconCb(p_entry_webif_definition);
+		WebIf_DisconCb (p_entry_webif_definition);
 
-		close(p_entry_webif_definition->common.fd);
+		close (p_entry_webif_definition->common.fd);
 
 		p_entry_webif_definition->common.fd = -1;
 	}
 
 	// receive the expected data
-	int32_t recv_len = recv(p_entry_webif_definition->common.fd,
+	int32_t recv_len = recv (p_entry_webif_definition->common.fd,
 		recv_buffer, RECV_BUF_SIZE, 0);
 
 	// process, if received data
 	if ( recv_len > 0 ) {
 
 		// execute Received Callback
-		WebIf_RecvCb(p_entry_webif_definition, recv_buffer, recv_len);
+		WebIf_RecvCb (p_entry_webif_definition, recv_buffer, recv_len);
 	}
 
 	// or has remote closed the connection ?
 	else if ( recv_len == 0 ) {
 
 		// execute Disconnect Callback
-		WebIf_DisconCb(p_entry_webif_definition);
+		WebIf_DisconCb (p_entry_webif_definition);
 
 		// undefinde this p_entry_webif_definition
-		WebIf_UndefineRaw(p_entry_webif_definition);
+		WebIf_UndefineRaw (p_entry_webif_definition);
 	}
 
 
@@ -10507,14 +10282,14 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 	else {
 
 		// execute Error Callback
-		WebIf_ReconCb(p_entry_webif_definition, recv_len);
+		WebIf_ReconCb (p_entry_webif_definition, recv_len);
 
 		// undefinde this p_entry_webif_definition
-		WebIf_UndefineRaw(p_entry_webif_definition);
+		WebIf_UndefineRaw (p_entry_webif_definition);
 	}
 
  	// free our receive buffer
-  	free(recv_buffer);
+  	free (recv_buffer);
   }
 
   return 0;
@@ -10524,35 +10299,30 @@ WebIf_Direct_Read(Common_Definition_t* p_entry_definition)
 
 /*
  * --------------------------------------------------------------------------------------------------
- *  FName: WebIf_DirectWrite
+ *  FName: WebIf Direct Write
  *  Desc: Called from the global select-loop when FD is in write-set
  *  Info: But ONLY if Flag 'Want_Write' in Common_CtrlRegA is set !!!
- *  Para: Common_Definition_t* p_entry_definition -> the FD owners definition
+ *  Para: Entry_Definition_t* p_entry_definition -> the FD owners definition
  *  Rets: ? - unused
  * --------------------------------------------------------------------------------------------------
  */
 int 
-WebIf_Direct_Write(Common_Definition_t* p_entry_definition)
+WebIf_Direct_Write (Entry_Definition_t* p_entry_definition)
 {
   // make common ptr to modul specific ptr
-  WebIf_Definition_t* p_entry_webif_definition = 
-	(WebIf_Definition_t*) p_entry_definition;
+  Entry_WebIf_Definition_t* p_entry_webif_definition = 
+	(Entry_WebIf_Definition_t*) p_entry_definition;
 
 // -------------------------------------------------------------------------------------------------
 
   #if WebIf_Module_DBG >= 7
-  SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name,
+  SCDEFn_at_WebIf_M->Log3Fn (p_entry_webif_definition->common.name,
 	p_entry_webif_definition->common.nameLen,
 	7,
 	"Direct Write Fn (module '%.*s'), entering.",
 	p_entry_webif_definition->common.module->provided->typeNameLen,
 	p_entry_webif_definition->common.module->provided->typeName);
   #endif
-
-// ------------------------------------------------------------------------------------------------
-
-  // clear Flag F_WANT_WRITE, will be set again when more data is send
-//  p_entry_webif_definition->common.Common_CtrlRegA &= ~F_WANTS_WRITE;	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! in mainfn
 
 // --------------------------------------------------------------------------------------------------
 
@@ -10570,10 +10340,10 @@ WebIf_Direct_Write(Common_Definition_t* p_entry_definition)
  	 #endif
 
 	// execute Disconnect Callback
-	WebIf_DisconCb(p_entry_webif_definition);
+	WebIf_DisconCb (p_entry_webif_definition);
 
 	// undefinde this WebIf_Definition
-	WebIf_UndefineRaw(p_entry_webif_definition);
+	WebIf_UndefineRaw (p_entry_webif_definition);
 
 	// definition gone here ...
   }
@@ -10594,7 +10364,7 @@ WebIf_Direct_Write(Common_Definition_t* p_entry_definition)
  	 #endif
 
 	// execute Sent Callback
-	WebIf_SentCb(p_entry_webif_definition);
+	WebIf_SentCb (p_entry_webif_definition);
   }
 
   return 0;
@@ -10658,8 +10428,8 @@ WebIf_Set(Common_Definition_t* Common_Definition
   strTextMultiple_t *retMsg = NULL;
 
   // make common ptr to modul specific ptr
-  WebIf_Definition_t* WebIf_Definition =
-	(WebIf_Definition_t*) Common_Definition;
+  Entry_WebIf_Definition_t* WebIf_Definition =
+	(Entry_WebIf_Definition_t*) Common_Definition;
 
   #if SCDEH_DBG >= 5
   printf("\n|WebIf_Set, Name:%.*s, got args:%.*s>"
@@ -10691,7 +10461,7 @@ WebIf_Set(Common_Definition_t* Common_Definition
  *FName: WebIf_Undefine
  * Desc: Removes the define of an "device" of 'WebIf' type. Contains devicespecific init code.
  * Info: Invoked by cmd-line 'Undefine WebIf_Definition.common.Name'
- * Para: WebIf_Definition_t *WebIf_Definition -> WebIf Definition that should be removed
+ * Para: Entry_WebIf_Definition_t *WebIf_Definition -> WebIf Definition that should be removed
  * Rets: strTextMultiple_t* -> response text NULL=no text
  *--------------------------------------------------------------------------------------------------
  */
@@ -10702,7 +10472,7 @@ WebIf_Undefine(Common_Definition_t* Common_Definition)
   strTextMultiple_t *retMsg = NULL;
 
   // make common ptr to modul specific ptr
-  WebIf_Definition_t* WebIf_Definition = (WebIf_Definition_t*) Common_Definition;
+  Entry_WebIf_Definition_t* WebIf_Definition = (Entry_WebIf_Definition_t*) Common_Definition;
 
 
   #if SCDEH_DBG >= 5
@@ -10769,7 +10539,7 @@ WebIf_Sub(Common_Definition_t* Common_Definition
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-espconn_regist_recvcb(WebIf_Definition_t *conn
+espconn_regist_recvcb(Entry_WebIf_Definition_t *conn
 			, espconn_recv_callback recv_callback)
 {
   conn->recv_callback = recv_callback;
@@ -10786,7 +10556,7 @@ espconn_regist_recvcb(WebIf_Definition_t *conn
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-espconn_regist_connectcb(WebIf_Definition_t *conn
+espconn_regist_connectcb(Entry_WebIf_Definition_t *conn
 		, espconn_connect_callback connect_callback)
 {
  conn->proto.tcp->connect_callback = connect_callback;
@@ -10804,7 +10574,7 @@ espconn_regist_connectcb(WebIf_Definition_t *conn
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-espconn_regist_reconcb(WebIf_Definition_t *conn
+espconn_regist_reconcb(Entry_WebIf_Definition_t *conn
 		, espconn_reconnect_callback reconnect_callback)
 {
   conn->proto.tcp->reconnect_callback = reconnect_callback;
@@ -10821,7 +10591,7 @@ espconn_regist_reconcb(WebIf_Definition_t *conn
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-espconn_regist_disconcb(WebIf_Definition_t *conn
+espconn_regist_disconcb(Entry_WebIf_Definition_t *conn
 		, espconn_connect_callback disconnect_callback)
 {
  conn->proto.tcp->disconnect_callback = disconnect_callback;
@@ -10838,7 +10608,7 @@ espconn_regist_disconcb(WebIf_Definition_t *conn
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-espconn_regist_sentcb(WebIf_Definition_t *conn
+espconn_regist_sentcb(Entry_WebIf_Definition_t *conn
 		, espconn_sent_callback send_callback)
 {
   conn->send_callback = send_callback;
@@ -10861,7 +10631,7 @@ WebIf_Connect(Common_Definition_t* Common_Definition)
 {
 
   // make common ptr to modul specific ptr
-  WebIf_Definition_t* WebIf_Definition = (WebIf_Definition_t*) Common_Definition;
+  Entry_WebIf_Definition_t* WebIf_Definition = (Entry_WebIf_Definition_t*) Common_Definition;
 
   // unused
   return 0;

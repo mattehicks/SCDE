@@ -57,6 +57,10 @@
 #define Webif_Module_DBG                                  9
 
 
+// Used X logging verbose - override    0 1 2 3 4 5 6 7 8 9
+#define HTTPD_DBG                                         9
+
+
 
 
 
