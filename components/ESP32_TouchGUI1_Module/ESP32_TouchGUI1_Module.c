@@ -1440,7 +1440,7 @@ ESP32_TouchGUI1_IdleCb(Common_Definition_t *p_Common_Definition)
 // ------------------------------------------------------------------------------------------------
 
   // redraw the time at bottom, if changed
- // Redraw_Time(p_ESP32_TouchGUI1_Definition);
+  Redraw_Time(p_ESP32_TouchGUI1_Definition);
 
 
   // set up next idle Callback
