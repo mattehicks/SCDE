@@ -262,8 +262,8 @@ enum {
 
 
 /* 
- *WebIf Entry Definition (struct) stores values for operation valid only for the defined instance of an
- * loaded module. Values are initialized by HCTRLD an the loaded module itself.
+ * Entry WebIf Definition (struct) stores values for operation valid only for the defined instance of an
+ * loaded module. Values are initialized by SCDE an the loaded module itself.
  */
 typedef struct Entry_WebIf_Definition_s {
 
@@ -291,6 +291,7 @@ typedef struct Entry_WebIf_Definition_s {
   HTTPD_InstanceCfg_t* HTTPD_InstCfg;	// link to configuration of this HTTPD-Instance
 
   uint8_t slot_no;			// slot number in this instance
+
 } Entry_WebIf_Definition_t;
 
 

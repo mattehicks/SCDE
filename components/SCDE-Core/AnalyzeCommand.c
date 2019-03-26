@@ -88,6 +88,9 @@ AnalyzeCommand(const uint8_t *args
 			struct headRetMsgMultiple_s headRetMsgMultipleFromFn
 				= command->provided->CommandFn(commandArgs, commandArgsLen);
 
+			// add the retMsg entrys
+			STAILQ_CONCAT(&headRetMsgMultiple, &headRetMsgMultipleFromFn);
+/*
 			// retMsgMultiple stailq from Fn filled ?
 			if (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
 
@@ -106,7 +109,7 @@ AnalyzeCommand(const uint8_t *args
 					STAILQ_REMOVE(&headRetMsgMultipleFromFn, retMsg, strTextMultiple_s, entries);
 				}
 			}
-
+*/
 			// return STAILQ head, it stores multiple RetMsg, if NULL -> no RetMsg-entries
 			return headRetMsgMultiple;
 		}

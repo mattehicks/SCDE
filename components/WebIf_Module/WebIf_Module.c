@@ -2819,13 +2819,13 @@ SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t* conn)
    if (Result) {
 
 	# if SCDED_DBG >= 1
-	os_printf("\n|TX-Err:%d!>"
+	printf("\n|TX-Err:%d!>"
 		,Result);
 	# endif
   }
 
   // free Send-Buffer
-  free(conn->send_buffer);
+  free (conn->send_buffer);
 
   // old indicator for no Send Buffer
   conn->send_buffer = NULL;
@@ -3811,13 +3811,11 @@ WebIf_RecvCb(void *arg, char *recvdata, unsigned short recvlen)  //HTTPD_Recv_Cb
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR 
-WebIf_ReconCb(void *arg
-		,int8_t error)
+WebIf_ReconCb(void *arg, int8_t error)
 {
-
   // the arg is a ptr to the platform specific conn
   //struct espconn   *platform_conn = arg;	// ESP 8266 NonOS
-  Entry_WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
+  Entry_WebIf_Definition_t* platform_conn = arg;	// ESP 32 RTOS
 
   // get assigned HTTPD-Connection-Slot-Data
   WebIf_HTTPDConnSlotData_t *conn
@@ -9672,7 +9670,7 @@ int ICACHE_FLASH_ATTR
 WebIf_sent(Entry_WebIf_Definition_t* p_entry_webif_definition, uint8_t* send_buffer, uint send_buffer_len)
 {
   # if SCDED_DBG >= 5
-  os_printf("\n|WebIf_Sent len:%d!>"
+  printf("\n|WebIf_Sent len:%d!>"
 	,send_buffer_len);
   # endif
 
@@ -9685,7 +9683,7 @@ WebIf_sent(Entry_WebIf_Definition_t* p_entry_webif_definition, uint8_t* send_buf
   if ( !( result >= 0 ) ) {
 
 	#if SCDED_DBG >= 5
-	os_printf("\n|WebIf_Send has error %d as result!>", result);
+	printf("\n|WebIf_Send has error %d as result!>", result);
 	#endif
 
 	result = 0;
@@ -9723,16 +9721,6 @@ WebIf_disconnect(Entry_WebIf_Definition_t* p_entry_webif_definition)
 
 
 
-
-
-
-
-
-
-
-
-
-
 /*
  *--------------------------------------------------------------------------------------------------
  *FName: WebIf_UndefineRaw
@@ -9744,8 +9732,6 @@ WebIf_disconnect(Entry_WebIf_Definition_t* p_entry_webif_definition)
 int 
 WebIf_UndefineRaw(Entry_WebIf_Definition_t* WebIf_Definition)
 {
-  printf("\n|WebIf_undefineraw enter>");
-
   // connection close
   close(WebIf_Definition->common.fd);
 
@@ -9754,27 +9740,24 @@ WebIf_UndefineRaw(Entry_WebIf_Definition_t* WebIf_Definition)
 
 // --- dealloc? non master conns?
 
-
   // remove WebIf Definition
-  STAILQ_REMOVE(&SCDERoot_at_WebIf_M->HeadCommon_Definitions
-	,(Common_Definition_t*) WebIf_Definition
-	,Common_Definition_s
-	,entries);
+  STAILQ_REMOVE(&SCDERoot_at_WebIf_M->HeadCommon_Definitions,
+	(Common_Definition_t*) WebIf_Definition,
+	Common_Definition_s,
+	entries);
 
   // mark slot as unused
   WebIf_Definition->HTTPD_InstCfg->SlotCtrlRegBF &= 
-	~(1<<WebIf_Definition->slot_no);
+	~( 1 << WebIf_Definition->slot_no);
 
   // free Name
-  free(WebIf_Definition->common.name);
+  free (WebIf_Definition->common.name);
 
   // free TCP struct
-  free(WebIf_Definition->proto.tcp);
+  free (WebIf_Definition->proto.tcp);
 
   // free WebIf_Definition
-  free(WebIf_Definition);
-
-  printf("\n|WebIf_undefineraw exit>");
+  free (WebIf_Definition);
 
   return 0;
 }
@@ -10083,10 +10066,10 @@ WebIf_Direct_Read(Entry_Definition_t* p_entry_definition)
 	// Check if we got a free slot? -> 'no slots free' error
 	if ( new_slot_no >= 32 ) {
 
-		SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name
-			,p_entry_webif_definition->common.nameLen
-			,1
-			,"WebIf_DirectRead Error no slots free...\n");
+		SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name,
+			p_entry_webif_definition->common.nameLen,
+			1,
+			"WebIf_DirectRead Error no slots free...\n");
 
 		// do not accept new connection
 		return 0;//??
@@ -10129,7 +10112,7 @@ WebIf_Direct_Read(Entry_Definition_t* p_entry_definition)
 
 	// alloc mem for modul specific definition structure (Common_Definition_t + X)
 	p_new_entry_webif_definition = 
-		(Entry_WebIf_Definition_t*) malloc(sizeof(Entry_WebIf_Definition_t));
+		(Entry_WebIf_Definition_t*) malloc (sizeof (Entry_WebIf_Definition_t));
 
 	// zero the struct
 	memset(p_new_entry_webif_definition, 0, sizeof (Entry_WebIf_Definition_t));
@@ -10137,15 +10120,15 @@ WebIf_Direct_Read(Entry_Definition_t* p_entry_definition)
 // -------------------------------------------------------------------------------------------------
 				
 	// set parameters for new connection 
-	int keepAlive = 1;	//enable keepalive
- 	int keepIdle = 60;	//60s
- 	int keepInterval = 5;	//5s
- 	int keepCount = 3;	//retry times
+	int keep_alive = 1;	//enable keepalive
+ 	int keep_idle = 60;	//60s
+ 	int keep_interval = 5;	//5s
+ 	int keep_count = 3;	//retry times
 
- 	setsockopt(new_client_fd, SOL_SOCKET, SO_KEEPALIVE, (void *)&keepAlive, sizeof(keepAlive));
-  	setsockopt(new_client_fd, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&keepIdle, sizeof(keepIdle));
-  	setsockopt(new_client_fd, IPPROTO_TCP, TCP_KEEPINTVL, (void *)&keepInterval, sizeof(keepInterval));
-  	setsockopt(new_client_fd, IPPROTO_TCP, TCP_KEEPCNT, (void *)&keepCount, sizeof(keepCount));
+ 	setsockopt(new_client_fd, SOL_SOCKET, SO_KEEPALIVE, (void *)&keep_alive, sizeof(keep_alive));
+  	setsockopt(new_client_fd, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&keep_idle, sizeof(keep_idle));
+  	setsockopt(new_client_fd, IPPROTO_TCP, TCP_KEEPINTVL, (void *)&keep_interval, sizeof(keep_interval));
+  	setsockopt(new_client_fd, IPPROTO_TCP, TCP_KEEPCNT, (void *)&keep_count, sizeof(keep_count));
 			
  	// store clients FD to new WebIf Definition
  	p_new_entry_webif_definition->common.fd = new_client_fd;
@@ -10193,7 +10176,8 @@ WebIf_Direct_Read(Entry_Definition_t* p_entry_definition)
 	p_new_entry_webif_definition->proto.tcp = tcp;
 
 	// give definition a new unique name
-	p_new_entry_webif_definition->common.nameLen = asprintf ((char**)&p_new_entry_webif_definition->common.name,
+	p_new_entry_webif_definition->common.nameLen = 
+		asprintf ((char**)&p_new_entry_webif_definition->common.name,
 		"%.*s.%d.%d.%d.%d.%u",
 		p_entry_webif_definition->common.nameLen,
 		p_entry_webif_definition->common.name,
@@ -10371,11 +10355,6 @@ WebIf_Direct_Write (Entry_Definition_t* p_entry_definition)
 }
 
 
-/* rename
-Disconn_Cb
-Undefine_Raw
-
-*/
 
 /*
  * --------------------------------------------------------------------------------------------------
@@ -10396,12 +10375,12 @@ WebIf_Initialize(SCDERoot_t* SCDERootptr)
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
   SCDEFn_at_WebIf_M = SCDERootptr->SCDEFn;
 
-  SCDEFn_at_WebIf_M->Log3Fn(WebIf_ProvidedByModule.typeName
-		  ,WebIf_ProvidedByModule.typeNameLen
-		  ,3
-		  ,"InitializeFn called. Type '%.*s' now useable.\n"
-		  ,WebIf_ProvidedByModule.typeNameLen
-		  ,WebIf_ProvidedByModule.typeName);
+  SCDEFn_at_WebIf_M->Log3Fn(WebIf_ProvidedByModule.typeName,
+		  WebIf_ProvidedByModule.typeNameLen,
+		  3,
+		  "InitializeFn called. Type '%.*s' now useable.",
+		  WebIf_ProvidedByModule.typeNameLen,
+		  WebIf_ProvidedByModule.typeName);
 
   return 0;
 }
@@ -10539,10 +10518,10 @@ WebIf_Sub(Common_Definition_t* Common_Definition
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-espconn_regist_recvcb(Entry_WebIf_Definition_t *conn
-			, espconn_recv_callback recv_callback)
+espconn_regist_recvcb(Entry_WebIf_Definition_t* p_conn,
+	espconn_recv_callback recv_callback)
 {
-  conn->recv_callback = recv_callback;
+  p_conn->recv_callback = recv_callback;
 }
 
 
@@ -10556,10 +10535,10 @@ espconn_regist_recvcb(Entry_WebIf_Definition_t *conn
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-espconn_regist_connectcb(Entry_WebIf_Definition_t *conn
-		, espconn_connect_callback connect_callback)
+espconn_regist_connectcb(Entry_WebIf_Definition_t* p_conn,
+	espconn_connect_callback connect_callback)
 {
- conn->proto.tcp->connect_callback = connect_callback;
+  p_conn->proto.tcp->connect_callback = connect_callback;
 }
 
 
@@ -10574,10 +10553,10 @@ espconn_regist_connectcb(Entry_WebIf_Definition_t *conn
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-espconn_regist_reconcb(Entry_WebIf_Definition_t *conn
-		, espconn_reconnect_callback reconnect_callback)
+espconn_regist_reconcb(Entry_WebIf_Definition_t* p_conn,
+	espconn_reconnect_callback reconnect_callback)
 {
-  conn->proto.tcp->reconnect_callback = reconnect_callback;
+  p_conn->proto.tcp->reconnect_callback = reconnect_callback;
 }
 
 
@@ -10591,10 +10570,10 @@ espconn_regist_reconcb(Entry_WebIf_Definition_t *conn
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-espconn_regist_disconcb(Entry_WebIf_Definition_t *conn
-		, espconn_connect_callback disconnect_callback)
+espconn_regist_disconcb(Entry_WebIf_Definition_t* p_conn,
+	espconn_connect_callback disconnect_callback)
 {
- conn->proto.tcp->disconnect_callback = disconnect_callback;
+  p_conn->proto.tcp->disconnect_callback = disconnect_callback;
 }
 
 
@@ -10608,10 +10587,10 @@ espconn_regist_disconcb(Entry_WebIf_Definition_t *conn
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-espconn_regist_sentcb(Entry_WebIf_Definition_t *conn
-		, espconn_sent_callback send_callback)
+espconn_regist_sentcb(Entry_WebIf_Definition_t* p_conn,
+	espconn_sent_callback send_callback)
 {
-  conn->send_callback = send_callback;
+  p_conn->send_callback = send_callback;
 }
 
 

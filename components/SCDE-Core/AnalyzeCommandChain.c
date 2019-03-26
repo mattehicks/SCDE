@@ -41,10 +41,10 @@ AnalyzeCommandChain(const uint8_t *argsString
   STAILQ_INIT(&headRetMsgMultiple);
 
   // set start of possible Command
-  const uint8_t *commandName = argsString;
+  const uint8_t* commandName = argsString;
 
   // set start of possible Command-Arguments
-  const uint8_t *commandArgs = argsString;
+  const uint8_t* commandArgs = argsString;
 
   // a seek-counter
   int i = 0;
@@ -69,7 +69,7 @@ AnalyzeCommandChain(const uint8_t *argsString
   if ( commandLen == 0 ) {
 
 	// alloc mem for retMsg
-	strTextMultiple_t *retMsg =
+	strTextMultiple_t* retMsg =
 		malloc(sizeof(strTextMultiple_t));
 
 	// fill retMsg with error text
@@ -88,7 +88,7 @@ AnalyzeCommandChain(const uint8_t *argsString
 // -------------------------------------------------------------------------------------------------
 
   // Command SLTQE
-  Command_t *command;
+  Command_t* command;
 
   // loop the implemented commands
   STAILQ_FOREACH(command, &SCDERoot.headCommands, entries) {
@@ -103,11 +103,14 @@ AnalyzeCommandChain(const uint8_t *argsString
 		struct headRetMsgMultiple_s headRetMsgMultipleFromFn
 			= command->provided->CommandFn(commandArgs, commandArgsLen);
 
+		// add the retMsg entrys
+		STAILQ_CONCAT(&headRetMsgMultiple, &headRetMsgMultipleFromFn);
+/*
 		// retMsgMultiple stailq from Fn filled ?
 		while (!STAILQ_EMPTY(&headRetMsgMultipleFromFn)) {
 
 			// for the retMsg elements
-			strTextMultiple_t *retMsg =
+			strTextMultiple_t* retMsg =
 				STAILQ_FIRST(&headRetMsgMultipleFromFn);
 
 			// first remove this entry from Fn ret queue
@@ -116,7 +119,7 @@ AnalyzeCommandChain(const uint8_t *argsString
 			// last insert entry in ret queue
 			STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
 		}
-
+*/
 	// return STAILQ head, it stores multiple RetMsg, if NULL -> no RetMsg-entries
 	return headRetMsgMultiple;
 	}
@@ -125,7 +128,7 @@ AnalyzeCommandChain(const uint8_t *argsString
 // -------------------------------------------------------------------------------------------------
 
   // alloc mem for retMsg
-  strTextMultiple_t *retMsg =
+  strTextMultiple_t* retMsg =
 	 malloc(sizeof(strTextMultiple_t));
 
   // fill retMsg with error text
