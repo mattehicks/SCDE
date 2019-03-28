@@ -21,6 +21,8 @@
 #define Module_t  Entry_Module_t
 #define HeadModules head_module
 
+//#define ESP32_SwITCH_Definition_s  Entry_ESP32_SwITCH_Definition_s
+//#define ESP32_SwITCH_Definition_t  Entry_ESP32_SwITCH_Definition_t
 
 
 // -------------------------------------------------------------------------------------------------
@@ -715,7 +717,7 @@ struct bulkUpdateReadings2_s {
 struct Entry_Definition_s {
   STAILQ_ENTRY(Entry_Definition_s) entries;			// Link to next Definition
  
-  STAILQ_HEAD (stailhead8, common_Attribute_s) headAttributes;	//p_head_attribute	// Link to assigned Attributes
+//  STAILQ_HEAD (stailhead8, common_Attribute_s) headAttributes;	//p_head_attribute	// Link to assigned Attributes
 
 //neu:
   LIST_HEAD (Head_Attr_Value_s, Entry_Attr_Value_s) head_attr_value;	// List of assigned / in use attr_names
@@ -726,7 +728,7 @@ struct Entry_Definition_s {
   uint8_t* name; //p_name;					// Ptr to the Name string (assigned by users declaration - in allocated mem)
   size_t nameLen; //name_len
 
-  Entry_Module_t* module;					// Ptr to the Module_t (assigned when module is loaded)
+  Entry_Module_t* module; //entry_module;			// Ptr to the Module_t (assigned when module is loaded)
 
 // the 'STATE' reading						// the STATE reading is obligatory for every definition !
 // strText_t reading_state_value; NEU
@@ -872,55 +874,8 @@ struct Entry_Command_s {
 
 
 // -------------------------------------------------------------------------------------------------
-// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ typedefs and structs for Attribute operation ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-
-//löschen!
-
-// attribute_t holds attributes assigned to definitions, for operation and customization.
-typedef struct attribute_s attribute_t;
-
-/*
- * attribute_s (struct)
- * - stores attributes assigned to definitions, for operation and customization.
- */
-struct attribute_s { //Attribute_s
-
-  STAILQ_ENTRY(attribute_s) entries;	// link to next attribute
-
-//  Common_Definition_t* assignedDef; NEU definition	
-  Common_Definition_t* attrAssignedDef;	//p_definition // ptr to the definition the attribute is assigned to
-
-// strText_t name; NEU name
-  uint8_t* attrNameText; //p_name_text		// ptr to the attribute name text (text in allocated mem!)
-  size_t   attrNameTextLen; //name_text_len
-
-// strText_t value; NEU value
-  uint8_t* attrValText; //p_value_text		// ptr to the attribute value text (text in allocated mem!)
-  size_t   attrValTextLen; //value_len
-};
 
 
-
-// -------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// -------------------------------------------------------------------------------------------------
 //NAME DOOF!
 // Entry_Definitions_s to hold the result of ...multiple xString_t strings (in an singly linked tail queue)
 typedef struct Entry_Definitions_s Entry_Definitions_t;
@@ -943,7 +898,10 @@ struct Entry_Definitions_s {
 STAILQ_HEAD(Head_Definitions_s, Entry_Definitions_s);
 
 
+
 // -------------------------------------------------------------------------------------------------
+// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ typedefs and structs for Attribute operation ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+
 
 
 // Entry_Attr_Name_t holds the name of an assigned attribute (attr_name). (linked list from queue.h)
@@ -976,7 +934,10 @@ struct Entry_Attr_Value_s {
 };
 
 
+
 // -------------------------------------------------------------------------------------------------
+// ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓        typedefs and structs of SCDE ROOT       ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+
 
 
 /* 
@@ -1016,7 +977,6 @@ struct SCDERoot_s {
 //use vars qw($reread_active);
 //use vars qw($selectTimestamp);  # used to check last select exit timestamp
 //use vars qw($winService);       # the Windows Service object
-  STAILQ_HEAD (stailhead3, attribute_s) headAttributes;// will be deleted!!!!!!
 
 // List of assigned attr_names
   LIST_HEAD (Head_Attr_Name_s, Entry_Attr_Name_s) head_attr_name;

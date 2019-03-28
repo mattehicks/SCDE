@@ -4668,15 +4668,15 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 					UrlSeekPtr++;
 				}
 
-				// Its different here -> Maybe next char at UrlSeekPtr is a token
+				// cmp is different here -> maybe next char at UrlSeekPtr is a token
 				// for active content. Call ExecActiveDirToken to check + execute.
 				// If Active-Content not matching -> Break the loop to stop compare
 				if (WebIf_ExecActiveDirToken(conn, Common_Definition,
 					&SrcPtr, &UrlSeekPtr, &tokenExecResult )) break;
 
-				// Matched! Continue compare loop!
+				// Matched here! Continue compare loop!
 				// conn->activeDirFndDefiniton, SrcPtr, UrlSeekPtr, tokenExecResult updated now !
-				// conn->activeDirFndDefiniton MAY contain an matching Definition
+				// conn->activeDirFndDefiniton MAY now contain an matching Definition
 				// tokenExecResult MUST contain result code of token execution
 				// RESULT CODES:
 				// #00 Token Error! No Match!

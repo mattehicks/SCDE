@@ -177,7 +177,12 @@ List_CommandFn (const uint8_t *args
 	strTextMultiple_t *retMsg = NULL;
 
 	// set write buffer start
-	char *wBufStart = NULL;
+	char* wBufStart = NULL;
+
+
+
+strBufferLen = 3000;
+
 
 	do {
 
@@ -188,9 +193,10 @@ List_CommandFn (const uint8_t *args
 			retMsg = malloc(sizeof(strTextMultiple_t));
 
 			// the buffer for the answer
+			retMsg->strText = wBufStart;
 			retMsg->strText = malloc(strBufferLen);
 			wBufStart = (char *) retMsg->strText;
-			retMsg->strTextLen = strBufferLen;
+//			retMsg->strTextLen = strBufferLen;
 
 		}
 
@@ -276,6 +282,8 @@ List_CommandFn (const uint8_t *args
 		strBufferLen = strBufferOffset;
 
 	} while (!retMsg);
+retMsg->strTextLen = strBufferLen;
+
 
 	// insert retMsg in stail-queue
 	STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);
@@ -295,7 +303,8 @@ List_CommandFn (const uint8_t *args
 	while (Common_Definition != NULL) {
 
 		if ( (Common_Definition->nameLen == listArgsLen)
-			&& (!strncasecmp((const char*) Common_Definition->name, (const char*) listArgs, listArgsLen)) ) {
+			&& (!strncasecmp((const char*) Common_Definition->name,
+				 (const char*) listArgs, listArgsLen)) ) {
 
 			// found, break and keep prt
 			break;
@@ -339,6 +348,13 @@ List_CommandFn (const uint8_t *args
 		// set write buffer start
 		char *wBufStart = NULL;
 
+
+
+
+
+	strBufferLen = 3000;	
+
+
 		do {
 
 			// do we have already a requested-buffer-length, then alloc
@@ -351,7 +367,6 @@ List_CommandFn (const uint8_t *args
 				retMsg->strText = malloc(strBufferLen);
 				wBufStart = (char *) retMsg->strText;
 				retMsg->strTextLen = strBufferLen;
-
 			}
 
 			// reset write buffer counter
@@ -530,6 +545,7 @@ Attributes:
 
 		} while (!retMsg);
 
+retMsg->strTextLen = strBufferLen;
 
 	// insert retMsg in stail-queue
 	STAILQ_INSERT_TAIL(&headRetMsgMultiple, retMsg, entries);

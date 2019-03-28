@@ -63,8 +63,8 @@ strText_t FmtTime(time_t tiSt);
 // returns ALL Readings of the Definition
 struct headRetMsgMultiple_s GetAllReadings (Common_Definition_t *Common_Definition);
 
-// returns the Definition line and the Attribute line
-struct headRetMsgMultiple_s GetDefAndAttr(Common_Definition_t *Common_Definition);
+// returns an SLTQ-head, containig the definition line and the attribute lines as entrys
+struct Head_String_s Get_Def_And_Attr (Entry_Definition_t* p_entry_definition);
 
 //
 Common_Definition_t* GetDefinitionPtrByName(const size_t definitionNameLen, const uint8_t *definitionName);

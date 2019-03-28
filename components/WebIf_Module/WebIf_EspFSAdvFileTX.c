@@ -69,6 +69,7 @@ typedef struct {
  */
 int ICACHE_FLASH_ATTR 
 WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn) 
+// dies ist eine cgi ! rename !EspFsTemplate_cgi
 {
 
   // RPCData stores pointer to template processing data
