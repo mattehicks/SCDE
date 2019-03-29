@@ -337,12 +337,12 @@ WebIf_ExecActiveDirToken(WebIf_HTTPDConnSlotData_t* conn,
 
 		// check: active directory content token -> Feature Number ?
 		// results: tokenExecResult -3 in case of ERROR
-		if (SpecFunc == ADC_FeatNr) conn->activeDirFndDefiniton =
+		if (SpecFunc == ADC_FeatNr) conn->p_entry_active_dir_matching_definition =
 			WebIf_ADirFeatureNr(Common_Definition, SrcPtr, UrlSeekPtr, tokenExecResult);
 
 		// check: active directory content token -> Feature Name ?
 		// results: tokenExecResult -3 in case of ERROR
-		if (SpecFunc == ADC_FeatureName) conn->activeDirFndDefiniton =
+		if (SpecFunc == ADC_FeatureName) conn->p_entry_active_dir_matching_definition =
 			WebIf_ADirFeatureName(Common_Definition, SrcPtr, UrlSeekPtr, tokenExecResult);
 		}
 

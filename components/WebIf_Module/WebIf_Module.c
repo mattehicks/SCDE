@@ -4516,7 +4516,7 @@ HTTPD_RespondToOpenConnection
 
 
 
-// tokenExecResult -> special states		// Result:
+// token_exec_result -> special states		// Result:
 #define TOKEN_ERROR_NO_MATCH		 0	// 00 Token Error! No Match!
 #define STATE_FOUND_WITHOUT_VALUE	 -1	// 00 found without value
 #define STATE_EMPTY_AND_NO_ERROR	-2	// -2 empty and no error
@@ -4552,11 +4552,12 @@ enum step				// #XX for debugging
 void
 HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 {
-  int rowCnt_B;				// to adress row in table Active-Dir-Url-Res-Data B
-  int DocMime;				// for mime matching requirements
+  int row_cnt_b;			// to adress row in table 'Active-Dir-Url-Res-Data B'
+  int doc_mime;				// index, for mime matching
 
-  const char* SrcPtr;			// Ptr to the source -> requested url
-  const char* UrlSeekPtr;		// Ptr to the url in Active-Dir-Url-Res-Data
+  const char* p_req_url;		// Ptr to the source -> the requested url
+  const char* p_bi_res_cmp;		// Ptr to compare with, the built-in url resources 
+					// in Active-Dir-Url-Res-Data
 
   enum step NextStep = s_cmp_with_built_in_resources;
 
@@ -4568,10 +4569,10 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 //--------------------------------------------------------------------------------------------------
 
   // holds current Definitions Active-Directory-Url-Resource-Data A
-  WebIf_ActiveResourcesDataA_t* ActiveDirUrlResDataA;
+  WebIf_ActiveResourcesDataA_t* active_dir_url_res_data_a;
 
   // holds current Definitions Active-Directory-Url-Resource-Data b
-  WebIf_ActiveResourcesDataB_t* ActiveDirUrlResDataB;	
+  WebIf_ActiveResourcesDataB_t* active_dir_url_res_data_b;	
 
 //--------------------------------------------------------------------------------------------------
 
@@ -4582,38 +4583,38 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
   
 //--------------------------------------------------------------------------------------------------
 
-  // Current Job: Loop through Common_Definitions to get WebIf provided data
-  Common_Definition_t* Common_Definition;
+  // Current Job: Loop through 'entry_definition's to get WebIf provided data
+  Entry_Definition_t* p_entry_definition;
 
-  STAILQ_FOREACH (Common_Definition, &SCDERoot_at_WebIf_M->HeadCommon_Definitions, entries) {
+  STAILQ_FOREACH (p_entry_definition, &SCDERoot_at_WebIf_M->head_definition, entries) {
 
-  // Current Job: Check if current Definition has Active-Dir-Url-Res-Data
-  // yes? -> continue - load them to loop the rows
+  // Current Job: Check if current 'entry_definition' has Active-Dir-Url-Res-Data
+  // yes? -> continue - load them, to loop the rows
   // no?  -> do nothing -> results in load next definition (STAILQ_FOREACH)
-  if (Common_Definition->ActiveResourcesDataA) {
+  if (p_entry_definition->ActiveResourcesDataA) {
 
 	// load Active-Resources-Data of current Definition
-	ActiveDirUrlResDataA =
-		(WebIf_ActiveResourcesDataA_t*) Common_Definition->ActiveResourcesDataA;
-	ActiveDirUrlResDataB =
-		(WebIf_ActiveResourcesDataB_t*) Common_Definition->ActiveResourcesDataB;
+	active_dir_url_res_data_a =
+		(WebIf_ActiveResourcesDataA_t*) p_entry_definition->ActiveResourcesDataA;
+	active_dir_url_res_data_b =
+		(WebIf_ActiveResourcesDataB_t*) p_entry_definition->ActiveResourcesDataB;
 
-		# if SCDED_DBG >= 4
-		printf("\n|Definition '%.*s' has Active-Dir-Url-Res-Data. Looping Rows>\n"
-			,Common_Definition->nameLen
-			,Common_Definition->name);
-  		# endif
+	# if SCDED_DBG >= 4
+	printf("\n|Definition '%.*s' has Active-Dir-Url-Res-Data. Looping Rows>\n"
+		,p_entry_definition->nameLen
+		,p_entry_definition->name);
+  	# endif
 
-	// Before loop: restart row count in table Active-Dir-Url-Res-Data A
-	int rowCnt_A = 0;
+	// Before loop: restart row count in table 'Active-Dir-Url-Res-Data A'
+	int row_cnt_a = 0;
 
 //--------------------------------------------------------------------------------------------------
 
-	// Current Job: Loop built in resources till we are at the end of the current definitions
+	// Current Job: Loop built in resources, till we are at the end of the current definitions
 	//              "built in resources" list
 	// Matched -> go to state "cmp_with_built_in_resources", will compare with built in resources
 	// Else -> end UrlResource-Row matching loop ("*" endmark reached)
-	while ( ActiveDirUrlResDataA[rowCnt_A].Url[0] != '*' ) {
+	while ( active_dir_url_res_data_a[row_cnt_a].Url[0] != '*' ) {
 
 		UPDATE_STEP(s_cmp_with_built_in_resources);
 
@@ -4623,8 +4624,7 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 		stepupdated:
 
  		# if SCDED_DBG >= 4
-		printf("|S%d>",
-			NextStep);
+		printf("|S%d>", NextStep);
   		# endif
 
   		switch (NextStep) {
@@ -4636,72 +4636,73 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 			case s_cmp_with_built_in_resources:
 			;
 			// stores + inits the result of token execution
-			int tokenExecResult = 0;	// RESULT 00 Token Error! No Match!
+			int token_exec_result = 0;	// RESULT 00 Token Error! No Match!
 
 			// ActiveID -> starting with 'we have no Definition'
-			conn->activeDirFndDefiniton = NULL;
+			conn->p_entry_active_dir_matching_definition = NULL;
 	
-			// An ptr to the source -> requested url
-			SrcPtr = conn->url;
+			// Set ptr to the source -> the requested url
+			p_req_url = conn->url;
 
-			// An ptr to the url in Active-Dir-Url-Res-Data
-			UrlSeekPtr = ActiveDirUrlResDataA[rowCnt_A].Url;
+			// An ptr to the built in url, in 'Active-Dir-Url-Res-Data'
+			p_bi_res_cmp = active_dir_url_res_data_a[row_cnt_a].Url;
 
 			#if SCDED_DBG >= 4
-			printf("\n|R-Row %d CMP:", rowCnt_A);
+			printf("\n|R-Row %d CMP:", row_cnt_a);
 			#endif
 
 			// Current Job: Check if Url from Active-Dir-Url-Res-Data matches 
 			// (\0 = string-end = 100% compared) !OR! is different. 
 			// If its different check + execute possible token for active content, too.
-			while (*UrlSeekPtr != '\0') {
+			while ( *p_bi_res_cmp != '\0' ) {
 
 				// Inner compare loop. Loops till source str is zero or different. 
-				while ( (*SrcPtr == *UrlSeekPtr) &&
-					(*SrcPtr != '\0') ) {
+				while ( ( *p_req_url == *p_bi_res_cmp ) &&
+					( *p_req_url != '\0' ) ) {
 
 					#if SCDED_DBG >= 4
-					printf("%c", *UrlSeekPtr);
+					printf("%c", *p_bi_res_cmp);
 					#endif
 
-					SrcPtr++;
-					UrlSeekPtr++;
+					p_req_url++;
+					p_bi_res_cmp++;
 				}
 
-				// cmp is different here -> maybe next char at UrlSeekPtr is a token
-				// for active content. Call ExecActiveDirToken to check + execute.
+				// cmp is different here -> maybe next char at p_bi_res_cmp is a token
+				// for active content. Call Exec_Active_Dir_Token to check.
 				// If Active-Content not matching -> Break the loop to stop compare
-				if (WebIf_ExecActiveDirToken(conn, Common_Definition,
-					&SrcPtr, &UrlSeekPtr, &tokenExecResult )) break;
+				if ( WebIf_ExecActiveDirToken (conn, p_entry_definition,
+					&p_req_url, &p_bi_res_cmp, &token_exec_result ) ) break;
 
 				// Matched here! Continue compare loop!
-				// conn->activeDirFndDefiniton, SrcPtr, UrlSeekPtr, tokenExecResult updated now !
-				// conn->activeDirFndDefiniton MAY now contain an matching Definition
-				// tokenExecResult MUST contain result code of token execution
+				// p_req_url, p_bi_res_cmp, token_exec_result - updated now !
+				// conn->p_entry_active_dir_matching_definition may be assigned
+
+				// 'token_exec_result' stores result code of token execution
 				// RESULT CODES:
-				// #00 Token Error! No Match!
+				// ???#00 Token Error! No Match!
 				// ??alllowed?? -2 init and no match no error //empty and no error
-				// -3 no match error from ExecActiveDirToken -> Start next Res-Row CMP
-				// -1 token executed ok, continue, no Definition, alt.filename requested
+				// #-3 no match result from Exec_Active_Dir_Token -> Continue at next Res-Row ...
+				// #-1 token executed ok-> alt.filename requested, but continue, no Definition 
 			}
 
-			// Current job: Analyze result of previous Url-match-check. If UrlSeekPtr
-			// is at string-end (\0) and 'tokenExecResult' holds NOT an error/no match (0)   
+			// Current job: Analyze result of previous Url-match-check. If 'p_bi_res_cmp'
+			// is at string-end (\0) and 'token_exec_result' holds NOT an error/no match (0)   
 			// Matched ->  continue Mime check at state: s_chk_if_mime_is_avail_for_res
 			// Else -> End UrlResource-Row matching loop (no match)
-			if ( (*UrlSeekPtr == '\0') && (!tokenExecResult) ) {
+			if ( (*p_bi_res_cmp == '\0') && ( token_exec_result != -3 ) ) { //(!token_exec_result) ) {
 
 				# if SCDED_DBG >= 4
-				if (tokenExecResult)
-					printf("|Url cmp result:%d>", tokenExecResult);
+				if (token_exec_result)
+					printf("|Url cmp result:%d>", token_exec_result);
 				
 				// the matching Definition name
-				if (conn->activeDirFndDefiniton) 
+				if (conn->p_entry_active_dir_matching_definition) 
 					printf(">Definition '%.*s' matched. Its Module '%.*s'>",
-					conn->activeDirFndDefiniton->nameLen,
-					conn->activeDirFndDefiniton->name,
-					conn->activeDirFndDefiniton->module->provided->typeNameLen,
-					conn->activeDirFndDefiniton->module->provided->typeName);
+					conn->p_entry_active_dir_matching_definition->nameLen,
+					conn->p_entry_active_dir_matching_definition->name,
+					conn->p_entry_active_dir_matching_definition->module->provided->typeNameLen,
+					conn->p_entry_active_dir_matching_definition->module->provided->typeName);
 				# endif
 
 				UPDATE_STEP(s_chk_if_mime_is_avail_for_res);
@@ -4717,41 +4718,41 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 			case s_chk_if_mime_is_avail_for_res:
 
 			// stores the identified mime. 0 = no mime
-			DocMime = 0;
+			doc_mime = 0;
 
 			// is there a mime? If not keep 0 -> no mime
-			if (*SrcPtr == '.') {
+			if (*p_req_url == '.') {
 
 				// skip the '.'
-				SrcPtr++;
+				p_req_url++;
 
 				// seek table - till found, or NULL (at least at pos 16)
-				while ( (AvailMimes[DocMime].ext != NULL) &&
-					(strcmp(SrcPtr, AvailMimes[DocMime].ext) !=0) )
-					DocMime++;
+				while ( (AvailMimes[doc_mime].ext != NULL) &&
+					(strcmp(p_req_url, AvailMimes[doc_mime].ext) !=0) )
+					doc_mime++;
 
 				// no valid doc mime found ?, break
-				if (AvailMimes[DocMime].ext == NULL) {
+				if (AvailMimes[doc_mime].ext == NULL) {
 
 					// valid mime not found, break ..
 					break;
 				}
 
-				SrcPtr += strlen(AvailMimes[DocMime].ext);
+				p_req_url += strlen(AvailMimes[doc_mime].ext);
 			}
 
 			# if SCDED_DBG >= 4
-			printf("|DocMimeBit:%d>",
-				DocMime);
+			printf("|'doc_mime' Bit:%d>",
+				doc_mime);
 			# endif
 
 			// Current Job: Check if a VALID (<16) mime is available for this resource
-			//              and check if SrcPtr is 100% compared
+			//              and check if p_req_url is 100% compared
 			// Matched -> continue at state: s_chk_scheme_avail_for_cont
 			// Else -> End UrlResource-Row matching loop (no match)
-			if ( (DocMime < 16) &&
-				(ActiveDirUrlResDataA[rowCnt_A].AllowedDocMimesBF &
-				 1 << DocMime) && (*SrcPtr == '\0') ) {	
+			if ( ( doc_mime < 16 ) &&
+				(active_dir_url_res_data_a[row_cnt_a].AllowedDocMimesBF &
+				 1 << doc_mime) && (*p_req_url == '\0') ) {	
 
 				UPDATE_STEP(s_chk_if_method_is_avail_for_res);
 				STEP_UPDATED()	
@@ -4768,7 +4769,7 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 			// Current Job: Check if method is available
 			// Matched -> continue at state: s_chk_if_scheme_is_avail_for_res
 			// Else -> End UrlResource-Row matching loop (no match)
-			if ( (ActiveDirUrlResDataA[rowCnt_A].AllowedMethodsBF &
+			if ( (active_dir_url_res_data_a[row_cnt_a].AllowedMethodsBF &
 				(1 << conn->parser_method) ) && (conn->parser_method <= 31) ) {
 
 				UPDATE_STEP(s_chk_if_scheme_is_avail_for_res);
@@ -4786,7 +4787,7 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 			// Current Job: Check if scheme is available
 			// Matched -> continue at state: s_chk_if_the_res_row_is_enabled
 			// Else -> End UrlResource-Row matching loop (no match)
-			if ( (ActiveDirUrlResDataA[rowCnt_A].AllowedSchemesBF &
+			if ( (active_dir_url_res_data_a[row_cnt_a].AllowedSchemesBF &
 				 1 << conn->parser_scheme) && (conn->parser_scheme <= 15) ) {
 
 				UPDATE_STEP(s_chk_if_the_res_row_is_enabled);
@@ -4804,9 +4805,9 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 			// Current Job: Check if Row is enabled
 			// Matched -> continue at state: s_get_match_in_table_b
 			// Else -> End UrlResource-Row matching loop (no match)
-			if ( (!ActiveDirUrlResDataA[rowCnt_A].EnaByBit) ||
+			if ( (!active_dir_url_res_data_a[row_cnt_a].EnaByBit) ||
 				(conn->conn->HTTPD_InstCfg->DirConEnaCtrlFB &
-				(1 << (ActiveDirUrlResDataA[rowCnt_A].EnaByBit - 1) ) ) ) {
+				(1 << (active_dir_url_res_data_a[row_cnt_a].EnaByBit - 1) ) ) ) {
 
 				UPDATE_STEP(s_get_match_in_table_b);
 				STEP_UPDATED()
@@ -4825,18 +4826,18 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 			; //need this
 
 			// temp value for ???
-			uint32_t RPCFucIDMask = 0xffff0000 | (1 << DocMime); // any docmime allowed is ok
+			uint32_t RPCFucIDMask = 0xffff0000 | (1 << doc_mime); // any doc_mime allowed is ok
 
 			// temp value for ???
-			int RPCFucID = ( (ActiveDirUrlResDataA[rowCnt_A].RPCNo << 16) |
-				(1 << DocMime) );
+			int RPCFucID = ( (active_dir_url_res_data_a[row_cnt_a].RPCNo << 16) |
+				(1 << doc_mime) );
 
 			// find and assign data in Active-Dir-Url-Res-Data B. We expect an match!
-			while ( (ActiveDirUrlResDataB[rowCnt_B].RPCFucID &
-				 RPCFucIDMask) != RPCFucID) rowCnt_B++;
+			while ( (active_dir_url_res_data_b[row_cnt_b].RPCFucID &
+				 RPCFucIDMask) != RPCFucID) row_cnt_b++;
 
 			# if SCDED_DBG >= 4
-			printf("|PC-Row:%d>", rowCnt_B);
+			printf("|PC-Row:%d>", row_cnt_b);
 			# endif
 
 			UPDATE_STEP(s_prepare_the_callback_data);
@@ -4855,21 +4856,21 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 			conn->PCData = NULL;
 
 			// Correct DestUrl pointer to real Filesystem url to get the right template "Switch.htm" ??????????? //conn->url;
-			conn->DestUrl = (char* volatile) conn->conn->HTTPD_InstCfg->BuiltInUrls[rowCnt_A].Url;	// DESTURL BENÖTIGT????????????????????????
+			conn->DestUrl = (char* volatile) conn->conn->HTTPD_InstCfg->BuiltInUrls[row_cnt_a].Url;	// DESTURL BENÖTIGT????????????????????????
 
-			// Current Job: Check if tokenExecResult >= -1. Then an alternative filename
+			// Current Job: Check if token_exec_result >= -1. Then an alternative filename
 			//              is assigned to load content from standard file system
 			// Matched -> find and use alternative filename for content load stored after the path "/\xfe/S0\x00 S0X.htm"
 			// Else -> use requested filename for content load
-			if (tokenExecResult >= -1) {
+			if ( token_exec_result == -1 || conn->p_entry_active_dir_matching_definition ) {//>= -1) {
 
 				// prepare conn->AltFSFile -> Alternative-File-System-File
-				UrlSeekPtr++; // \x00 to ' '
-				UrlSeekPtr++; //  ' ' to beginning of Alternative-File-System-File name
-				conn->AltFSFile = (char* volatile) UrlSeekPtr; // e.g. "SwITCH.htm";
+				p_bi_res_cmp++; // \x00 to ' '
+				p_bi_res_cmp++; //  ' ' to beginning of Alternative-File-System-File name
+				conn->AltFSFile = (char* volatile) p_bi_res_cmp; // e.g. "SwITCH.htm";
 
 				#if SCDED_DBG >= 4
-				printf("File-Name alternative: %s\n", conn->AltFSFile);
+				printf("Alt.Fn:%s>", conn->AltFSFile);
 				#endif
 
 			}
@@ -4878,10 +4879,10 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 			else conn->AltFSFile = conn->url;
 
 			// Store cgi CB Function
-			conn->cgi = ActiveDirUrlResDataB[rowCnt_B].PCb;
+			conn->cgi = active_dir_url_res_data_b[row_cnt_b].PCb;
 
 			// Store cgi CB data
-			conn->PCArg = ActiveDirUrlResDataB[rowCnt_B].PCArg;
+			conn->PCArg = active_dir_url_res_data_b[row_cnt_b].PCArg;
 
 			UPDATE_STEP(s_return_callback_is_prep);
 
@@ -4922,7 +4923,7 @@ HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t* conn)
 		}
 
 		// next urlResource-Row of current Definition
-		rowCnt_A++;	
+		row_cnt_a++;	
 
 	} // end of urlResource-Row matching loop (loops till "*" endmark)
 

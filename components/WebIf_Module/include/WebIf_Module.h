@@ -409,7 +409,7 @@ typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
   unsigned int parser_mime : 4;		// FROM REQUEST ONLY - mime extracted by uri-parsing (AvailContentTypes[] from ps.h)
   unsigned int freereserved1 : 8;	// 
   int16_t AxctiveDirID;			// FROM REQUEST ONLY - Active Directory ID (ADID) extracted by uri-parsing (0-32767 valid,-1,-2,-3
-  Common_Definition_t* activeDirFndDefiniton;			// FROM REQUEST ONLY - Active Directory ID (ADID) extracted by uri-parsing (0-32767 valid,-1,-2,-3 indicate special cases)
+  Entry_Definition_t* p_entry_active_dir_matching_definition;	// FROM REQUEST ONLY - Active Directory ID (ADID) extracted by uri-parsing (0-32767 valid,-1,-2,-3 indicate special cases)
 
 //-
 
