@@ -7,7 +7,7 @@ platform/ssl_pm.o: \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/config.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/ieeefp.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/features.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core-isa.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/xtensa/config/core-isa.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/reent.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_types.h \
@@ -22,14 +22,14 @@ platform/ssl_pm.o: \
  /home/maikschulze/esp/esp-idf/components/openssl/include/internal/tls1.h \
  /home/maikschulze/esp/esp-idf/components/openssl/include/internal/x509_vfy.h \
  /home/maikschulze/esp/esp-idf/components/openssl/include/platform/ssl_port.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/esp_types.h \
+ /home/maikschulze/esp/esp-idf/components/esp_common/include/esp_types.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdint.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_intsup.h \
  /home/maikschulze/esp/esp-idf/components/log/include/esp_log.h \
  /home/maikschulze/esp/SCDE/build/include/sdkconfig.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h \
+ /home/maikschulze/esp/esp-idf/components/esp_rom/include/esp32/rom/ets_sys.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/soc.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/esp_assert.h \
+ /home/maikschulze/esp/esp-idf/components/esp_common/include/esp_assert.h \
  /home/maikschulze/esp/esp-idf/components/newlib/platform_include/assert.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdlib.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/stdlib.h \
@@ -44,9 +44,11 @@ platform/ssl_pm.o: \
  /home/maikschulze/esp/esp-idf/components/openssl/include/platform/ssl_port.h \
  /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/platform.h \
  /home/maikschulze/esp/esp-idf/components/mbedtls/port/include/mbedtls/esp_config.h \
+ /home/maikschulze/esp/esp-idf/components/mbedtls/port/include/esp_mem.h \
  /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/check_config.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/limits.h \
  /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/platform_time.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/platform_include/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/types.h \
@@ -77,8 +79,8 @@ platform/ssl_pm.o: \
  /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/ctr_drbg.h \
  /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/aes.h \
  /home/maikschulze/esp/esp-idf/components/mbedtls/port/include/aes_alt.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/hwcrypto/aes.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/rom/aes.h \
+ /home/maikschulze/esp/esp-idf/components/mbedtls/port/include/esp32/aes.h \
+ /home/maikschulze/esp/esp-idf/components/esp_rom/include/esp32/rom/aes.h \
  /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/error.h \
  /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/certs.h
 
@@ -96,7 +98,7 @@ platform/ssl_pm.o: \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/features.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core-isa.h:
+/home/maikschulze/esp/esp-idf/components/newlib/include/xtensa/config/core-isa.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/reent.h:
 
@@ -126,7 +128,7 @@ platform/ssl_pm.o: \
 
 /home/maikschulze/esp/esp-idf/components/openssl/include/platform/ssl_port.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/esp_types.h:
+/home/maikschulze/esp/esp-idf/components/esp_common/include/esp_types.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/stdint.h:
 
@@ -136,11 +138,11 @@ platform/ssl_pm.o: \
 
 /home/maikschulze/esp/SCDE/build/include/sdkconfig.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h:
+/home/maikschulze/esp/esp-idf/components/esp_rom/include/esp32/rom/ets_sys.h:
 
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/soc.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/esp_assert.h:
+/home/maikschulze/esp/esp-idf/components/esp_common/include/esp_assert.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/platform_include/assert.h:
 
@@ -170,11 +172,15 @@ platform/ssl_pm.o: \
 
 /home/maikschulze/esp/esp-idf/components/mbedtls/port/include/mbedtls/esp_config.h:
 
+/home/maikschulze/esp/esp-idf/components/mbedtls/port/include/esp_mem.h:
+
 /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/check_config.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/limits.h:
 
 /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/platform_time.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/platform_include/time.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/time.h:
 
@@ -236,9 +242,9 @@ platform/ssl_pm.o: \
 
 /home/maikschulze/esp/esp-idf/components/mbedtls/port/include/aes_alt.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/hwcrypto/aes.h:
+/home/maikschulze/esp/esp-idf/components/mbedtls/port/include/esp32/aes.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/rom/aes.h:
+/home/maikschulze/esp/esp-idf/components/esp_rom/include/esp32/rom/aes.h:
 
 /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/error.h:
 

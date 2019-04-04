@@ -44,11 +44,8 @@
  *--------------------------------------------------------------------------------------------------
  */
 int ICACHE_FLASH_ATTR 
-Device_WEBIFtokens(WebIf_HTTPDConnSlotData_t *conn
-			,char *token
-			,void **arg) 
- {
-
+Device_WEBIFtokens(WebIf_HTTPDConnSlotData_t *conn, char *token, void **arg) 
+{
   // bytes free in send buff, -1 indicates that nothing was sent!
   int BytesFree = -1;
 
@@ -76,10 +73,8 @@ Device_WEBIFtokens(WebIf_HTTPDConnSlotData_t *conn
 
 	esp_wifi_get_config (WIFI_IF_AP, &wifi_ap_config);
 
-	BytesFree = SCDED_Send(conn
-		,(char*) &wifi_ap_config.ssid
-		,-1);
-
+	BytesFree = SCDED_Send(conn,
+		(char*) &wifi_ap_config.ssid, -1);
 	}
 
 	break;
@@ -164,9 +159,9 @@ Device_WEBIFtokens(WebIf_HTTPDConnSlotData_t *conn
 	"<a href=\"http://www.ecsuha.de/wishlist\">My Wishlist</a>"
 	"</div>";
 
-	BytesFree = SCDED_Send(conn
-		,(const char *)&WEBIFFooter
-		,sizeof(WEBIFFooter));
+	BytesFree = SCDED_Send(conn,
+		(const char *)&WEBIFFooter,
+		sizeof(WEBIFFooter));
 	}
 
 	break;
@@ -181,8 +176,7 @@ Device_WEBIFtokens(WebIf_HTTPDConnSlotData_t *conn
 	}
 
   return BytesFree;
-
-  }
+}
 
 
 

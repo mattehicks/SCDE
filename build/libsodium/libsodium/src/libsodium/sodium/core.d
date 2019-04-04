@@ -6,7 +6,7 @@ libsodium/src/libsodium/sodium/core.o: \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/config.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/ieeefp.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/features.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core-isa.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/xtensa/config/core-isa.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/reent.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_types.h \
@@ -15,6 +15,7 @@ libsodium/src/libsodium/sodium/core.o: \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/lock.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/cdefs.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/string.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/platform_include/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/types.h \
@@ -56,7 +57,7 @@ libsodium/src/libsodium/sodium/core.o: \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/features.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core-isa.h:
+/home/maikschulze/esp/esp-idf/components/newlib/include/xtensa/config/core-isa.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/reent.h:
 
@@ -73,6 +74,8 @@ libsodium/src/libsodium/sodium/core.o: \
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/cdefs.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/string.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/platform_include/time.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/time.h:
 

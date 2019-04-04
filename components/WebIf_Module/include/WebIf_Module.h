@@ -425,8 +425,8 @@ typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
 
 //-
 
-  char* postBuff; //BodyData		// REQUEST & RESPONSE - Pointer to BdyData Buffer
-  int postLen;	//BodyLen		// REQUEST & RESPONSE - length of stored body data
+  char* body_data;//postBuff; //BodyData		// REQUEST & RESPONSE - Pointer to BdyData Buffer
+  int body_data_len;//postLen;	//BodyLen		// REQUEST & RESPONSE - length of stored body data
 //int postPos;	//BodyPos benötigt?	// counter for post position (contains whole post data len, not only buffer!)
 } WebIf_HTTPDConnSlotData_t;
 
@@ -803,8 +803,8 @@ int  httpdFindArgUint8Sel(char *line, char *arg, uint8_t *buff);
 
 
 // Get Time Stamp functions for device
-int GetTIST(void);
-int GetUniqueTIST(void);
+//int GetTIST(void);
+//int GetUniqueTIST(void);
 
 
 //---------------------

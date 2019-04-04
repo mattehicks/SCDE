@@ -4,4 +4,5 @@ COMPONENT_LDFLAGS += -L$(BUILD_DIR_BASE)/Rename_Command -lRename_Command
 COMPONENT_LINKER_DEPS += 
 COMPONENT_SUBMODULES += 
 COMPONENT_LIBRARIES += Rename_Command
+COMPONENT_LDFRAGMENTS += 
 component-Rename_Command-build: 

@@ -23,6 +23,7 @@ libtelnet.o: \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/types.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/platform_include/errno.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/errno.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/errno.h \
  /home/maikschulze/esp/SCDE/components/TeLNET_Module/include/libtelnet.h
@@ -72,6 +73,8 @@ libtelnet.o: \
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/sched.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/stdio.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/platform_include/errno.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/errno.h:
 

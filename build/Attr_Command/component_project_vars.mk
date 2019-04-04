@@ -4,4 +4,5 @@ COMPONENT_LDFLAGS += -L$(BUILD_DIR_BASE)/Attr_Command -lAttr_Command
 COMPONENT_LINKER_DEPS += 
 COMPONENT_SUBMODULES += 
 COMPONENT_LIBRARIES += Attr_Command
+COMPONENT_LDFRAGMENTS += 
 component-Attr_Command-build: 

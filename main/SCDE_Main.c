@@ -46,7 +46,7 @@
 #include "SCDE_Main.h"
 #include "SCDE.h"
 
-#include "Espfs.h"
+//#include "Espfs.h"
 
 
 
@@ -662,9 +662,9 @@ IdleCbTask(void *pvParameters)
 
   // endless loop - blocked by an delay
   while(1) {
-
-	printf("\nNow IdleCbs>");
 /*
+	printf("\nNow IdleCbs>");
+
 	// loop through definitions
 	STAILQ_FOREACH(p_entry_definition, &SCDERoot.HeadCommon_Definitions, entries) {
 
@@ -725,8 +725,8 @@ SelectQueryTask(void *pvParameters)
 
   struct timeval timeout;
   // Initialize the timeout data structure
-    timeout.tv_sec = 1;//seconds;
-    timeout.tv_usec = 0;
+    timeout.tv_sec = 0;		// seconds;
+    timeout.tv_usec = 100000;	// microseconds
 
   // ???
   SCDEMux = xSemaphoreCreateRecursiveMutex();
@@ -738,7 +738,7 @@ SelectQueryTask(void *pvParameters)
 
   // endless loop - blocked by select (depends on sets)
   while(1) {
-
+/*
 	// list currently stored modules
 	printf("Selectloop: heap:%d\n",heap_caps_get_free_size(MALLOC_CAP_8BIT));
 
@@ -751,50 +751,50 @@ SelectQueryTask(void *pvParameters)
 			Common_Definition->name,
 			Common_Definition->fd);
 	}
-
+*/
 	// clear highest file descriptor
 	max_fdp = 0;
 
 	// clear the read socket set
-	FD_ZERO(&readfds);
+	FD_ZERO (&readfds);
 
 	// clear the write socket set
-	FD_ZERO(&writefds);
+	FD_ZERO (&writefds);
 
 	// clear the exception socket set
-	FD_ZERO(&exceptfds);
+	FD_ZERO (&exceptfds);
 
 	// loop through definitions with a valid socket descriptor to add to FD to sets
-	STAILQ_FOREACH(p_entry_definition, &SCDERoot.HeadCommon_Definitions, entries) {
+	STAILQ_FOREACH (p_entry_definition, &SCDERoot.HeadCommon_Definitions, entries) {
 
 		// file descriptor / socket descriptor of this definition
 		sd = p_entry_definition->fd;
 
 		// if valid socket descriptor then may be we need to add to sets
-		if (sd != -1) {
+		if ( sd != -1 ) {
 
-			 os_printf("SCDE: adding %.*s fd:%d\n",
+/*			 os_printf("SCDE: adding %.*s fd:%d\n",
 				p_entry_definition->nameLen,
 				p_entry_definition->name,
 				p_entry_definition->fd);
-
+*/
 			// select for reading, but only if an Fn is installed
 			if (p_entry_definition->module->provided->DirectReadFn) {
 
-				FD_SET(sd , &readfds);
+				FD_SET (sd , &readfds);
 			}
 
 			// select for writing (if wants to write), but only if an Fn is installed
 			if  ( (p_entry_definition->Common_CtrlRegA & F_WANTS_WRITE)
 				&& (p_entry_definition->module->provided->DirectWriteFn) ) {
 
-				FD_SET(sd , &writefds);
+				FD_SET (sd , &writefds);
 			}
 
 			// select for exceptions, but only if an Fn is installed
 			if (p_entry_definition->module->provided->ExceptFn) {
 
-				FD_SET(sd , &exceptfds);
+				FD_SET (sd , &exceptfds);
 			}
 
 			// find highest file descriptor number, need it for the select function
@@ -802,16 +802,16 @@ SelectQueryTask(void *pvParameters)
 			if (sd > max_fdp) max_fdp = sd;
 		}
 	}
-esp_task_wdt_feed();
+
 	// execute the selection
-	ret = select(max_fdp + 1, &readfds, &writefds, &exceptfds, &timeout);
-esp_task_wdt_feed();
-	 os_printf("|SCDE: passed global select>");
+	ret = select (max_fdp + 1, &readfds, &writefds, &exceptfds, &timeout);
+
+//	 os_printf("|SCDE: passed global select>");
 
 	// did we get any?
-	if (ret > 0) {
+	if ( ret > 0 ) {
 
-		 os_printf("SCDE: got any fd from select\n");
+//		 os_printf("SCDE: got any fd from select\n");
 /*problem mit gelöschter definition?
 		// loop through definitions with a valid socket descriptor to check and execute callbacks
 		STAILQ_FOREACH(p_entry_definition, &SCDERoot.HeadCommon_Definitions, entries) {
@@ -859,7 +859,7 @@ esp_task_wdt_feed();
 		Entry_Definition_t* p_next_entry_definition;
 
 		// first the write availability
-		os_printf("SCDE: check: in writeset?\n");
+//		os_printf("SCDE: check: in writeset?\n");
 
 		p_entry_definition = STAILQ_FIRST(&SCDERoot.head_definition);
 
@@ -895,7 +895,7 @@ esp_task_wdt_feed();
 
 
 		// second the read availability
-		os_printf("SCDE: check: in readset?\n");
+//		os_printf("SCDE: check: in readset?\n");
 
 		p_entry_definition = STAILQ_FIRST(&SCDERoot.head_definition);
 
@@ -926,7 +926,7 @@ esp_task_wdt_feed();
 		}
 
 		// third the write availability
-		os_printf("SCDE: check: in exeptset?\n");
+//		os_printf("SCDE: check: in exeptset?\n");
 
 		p_entry_definition = STAILQ_FIRST(&SCDERoot.head_definition);
 
@@ -950,8 +950,6 @@ esp_task_wdt_feed();
 					p_entry_definition->module->provided->ExceptFn(p_entry_definition);
 				}
 			}
-
-			esp_task_wdt_feed();
 
 			// nexi is already buffered
 			p_entry_definition = p_next_entry_definition;

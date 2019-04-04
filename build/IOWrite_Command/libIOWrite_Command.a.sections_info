@@ -1,0 +1,56 @@
+In archive /home/maikschulze/esp/SCDE/build/IOWrite_Command/libIOWrite_Command.a:
+
+IOWrite_Command.o:     file format elf32-xtensa-le
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .literal.IOWrite_InitializeCommandFn 00000010  00000000  00000000  00000034  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  1 .literal.IOWrite_CommandFn 00000038  00000000  00000000  00000044  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  2 .text         00000000  00000000  00000000  0000007c  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  3 .data         00000000  00000000  00000000  0000007c  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  4 .bss          00000000  00000000  00000000  0000007c  2**0
+                  ALLOC
+  5 .rodata.str1.4 00000111  00000000  00000000  0000007c  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  6 .text.IOWrite_InitializeCommandFn 00000024  00000000  00000000  00000190  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  7 .text.IOWrite_CommandFn 0000018d  00000000  00000000  000001b4  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  8 .data.IOWrite_ProvidedByCommand 0000003c  00000000  00000000  00000344  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, DATA
+  9 .rodata.IOWrite_helpDetailText 0000007e  00000000  00000000  00000380  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+ 10 .rodata.IOWrite_helpText 00000075  00000000  00000000  00000400  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+ 11 .bss.SCDEFn   00000004  00000000  00000000  00000478  2**2
+                  ALLOC
+ 12 .bss.SCDERoot 00000004  00000000  00000000  00000478  2**2
+                  ALLOC
+ 13 .debug_frame  00000040  00000000  00000000  00000478  2**2
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 14 .debug_info   0000187b  00000000  00000000  000004b8  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 15 .debug_abbrev 0000028c  00000000  00000000  00001d33  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 16 .debug_loc    0000018c  00000000  00000000  00001fbf  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 17 .debug_aranges 00000028  00000000  00000000  0000214b  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 18 .debug_ranges 00000018  00000000  00000000  00002173  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 19 .debug_line   00000465  00000000  00000000  0000218b  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 20 .debug_str    000012fe  00000000  00000000  000025f0  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 21 .comment      0000003b  00000000  00000000  000038ee  2**0
+                  CONTENTS, READONLY
+ 22 .xtensa.info  00000038  00000000  00000000  00003929  2**0
+                  CONTENTS, READONLY
+ 23 .xt.lit       00000010  00000000  00000000  00003961  2**0
+                  CONTENTS, RELOC, READONLY
+ 24 .xt.prop      00000180  00000000  00000000  00003971  2**0
+                  CONTENTS, RELOC, READONLY

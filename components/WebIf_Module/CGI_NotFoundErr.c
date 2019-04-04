@@ -46,13 +46,13 @@ static const char *httpNotFoundHeader="HTTP/1.0 404 Not Found\r\nServer: EcSUHA-
 int ICACHE_FLASH_ATTR 
 NotFoundErr_cgi(WebIf_HTTPDConnSlotData_t *conn)
 {
-   // Connection aborted? Nothing to clean up.
+  // Connection aborted? Nothing to clean up.
   if (conn->conn == NULL) return HTTPD_CGI_DISCONNECT_CONN;
 
 //--------------------------------------------------------------------------------------------------
 
   # if SCDED_DBG >= 3
-  os_printf("HTTPD Conn %p, slot %d CGI_NOT_FOUND for %s. TX 404!\n",
+  printf("HTTPD Conn %p, slot %d CGI_NOT_FOUND for %s. TX 404!\n",
 		conn->conn,
 		conn->slot_no,
 		conn->url);

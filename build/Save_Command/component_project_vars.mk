@@ -4,4 +4,5 @@ COMPONENT_LDFLAGS += -L$(BUILD_DIR_BASE)/Save_Command -lSave_Command
 COMPONENT_LINKER_DEPS += 
 COMPONENT_SUBMODULES += 
 COMPONENT_LIBRARIES += Save_Command
+COMPONENT_LDFRAGMENTS += 
 component-Save_Command-build: 

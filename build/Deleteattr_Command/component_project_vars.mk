@@ -4,4 +4,5 @@ COMPONENT_LDFLAGS += -L$(BUILD_DIR_BASE)/Deleteattr_Command -lDeleteattr_Command
 COMPONENT_LINKER_DEPS += 
 COMPONENT_SUBMODULES += 
 COMPONENT_LIBRARIES += Deleteattr_Command
+COMPONENT_LDFRAGMENTS += 
 component-Deleteattr_Command-build: 

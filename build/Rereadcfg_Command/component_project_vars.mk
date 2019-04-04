@@ -4,4 +4,5 @@ COMPONENT_LDFLAGS += -L$(BUILD_DIR_BASE)/Rereadcfg_Command -lRereadcfg_Command
 COMPONENT_LINKER_DEPS += 
 COMPONENT_SUBMODULES += 
 COMPONENT_LIBRARIES += Rereadcfg_Command
+COMPONENT_LDFRAGMENTS += 
 component-Rereadcfg_Command-build: 

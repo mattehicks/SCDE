@@ -4,4 +4,5 @@ COMPONENT_LDFLAGS += -L$(BUILD_DIR_BASE)/Setstate_Command -lSetstate_Command
 COMPONENT_LINKER_DEPS += 
 COMPONENT_SUBMODULES += 
 COMPONENT_LIBRARIES += Setstate_Command
+COMPONENT_LDFRAGMENTS += 
 component-Setstate_Command-build: 

@@ -4,4 +4,5 @@ COMPONENT_LDFLAGS += -L$(BUILD_DIR_BASE)/Global_Module -lGlobal_Module
 COMPONENT_LINKER_DEPS += 
 COMPONENT_SUBMODULES += 
 COMPONENT_LIBRARIES += Global_Module
+COMPONENT_LDFRAGMENTS += 
 component-Global_Module-build: 

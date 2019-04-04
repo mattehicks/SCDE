@@ -4,4 +4,5 @@ COMPONENT_LDFLAGS += -L$(BUILD_DIR_BASE)/Define_Command -lDefine_Command
 COMPONENT_LINKER_DEPS += 
 COMPONENT_SUBMODULES += 
 COMPONENT_LIBRARIES += Define_Command
+COMPONENT_LDFRAGMENTS += 
 component-Define_Command-build: 

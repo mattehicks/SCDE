@@ -11,7 +11,7 @@ libsodium/src/libsodium/crypto_onetimeauth/poly1305/onetimeauth_poly1305.o: \
  /home/maikschulze/esp/esp-idf/components/newlib/include/newlib.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/config.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/ieeefp.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core-isa.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/xtensa/config/core-isa.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/cdefs.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/reent.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h \
@@ -56,7 +56,7 @@ libsodium/src/libsodium/crypto_onetimeauth/poly1305/onetimeauth_poly1305.o: \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/machine/ieeefp.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core-isa.h:
+/home/maikschulze/esp/esp-idf/components/newlib/include/xtensa/config/core-isa.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/cdefs.h:
 

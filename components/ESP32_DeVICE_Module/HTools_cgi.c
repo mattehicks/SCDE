@@ -82,7 +82,7 @@ ReadFullFlash_cgi(WebIf_HTTPDConnSlotData_t *conn)
 	// all post data buffered? If not continue receiving all post data to buffer ...
 	if (conn->parser_content_length) return HTTPD_CGI_PROCESS_CONN;
 
-	Args = conn->postBuff;
+	Args = conn->body_data;
 	}
 
  // # if SCDE_WIFI_DBG >= 3

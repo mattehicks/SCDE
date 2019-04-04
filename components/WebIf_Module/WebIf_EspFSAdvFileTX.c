@@ -71,9 +71,8 @@ int ICACHE_FLASH_ATTR
 WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn) 
 // dies ist eine cgi ! rename !EspFsTemplate_cgi
 {
-
   // RPCData stores pointer to template processing data
-  TplData *tpd = conn->PCData;
+  TplData* tpd = conn->PCData;
 
   int len;
   int x, sp = 0;
@@ -81,76 +80,73 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
   char buff[MaxFsReadBlockSize];
 
    // Connection aborted? Clean up.
-  if (conn->conn == NULL) {
+  if ( conn->conn == NULL ) {
 
 	// inform cgi (NULL) about clean up
-	((TplCallback)(conn->PCArg))(conn, NULL, &tpd->tplArg);
+	( (TplCallback) (conn->PCArg) ) (conn, NULL, &tpd->tplArg);
 
-//	espFsClose(tpd->file);
-        fclose(tpd->file);
+        fclose (tpd->file);
 
 	// free memory reserved for template processing
-	free(tpd);
+	free (tpd);
 
 	return HTTPD_CGI_DISCONNECT_CONN;
-
-	}
+  }
 
   // Load management ?
-  if (SCDED_LoadSerializer(conn)) return HTTPD_CGI_PROCESS_CONN;
+  if ( SCDED_LoadSerializer(conn) ) return HTTPD_CGI_PROCESS_CONN;
 
 //--------------------------------------------------------------------------------------------------
 /*
   // Check for valid authorization (AUTH_GENERIC_RESSOURCE)
-  if (SCDED_AuthCheck(conn, AUTH_GENERIC_RESSOURCE)) {
+  if ( SCDED_AuthCheck (conn, AUTH_GENERIC_RESSOURCE) ) {
 
 	// set callback for "Not Authorized Error"
 	conn->cgi = NoAuthErr_cgi;
 
 	return HTTPD_CGI_REEXECUTE;
-
-	}	
+  }	
 */
 //--------------------------------------------------------------------------------------------------	
 
   // First call to this cgi. Open the file so we can read it.
-  if (tpd == NULL) {
+  if ( tpd == NULL ) {
 
 	// alloc memory for template processing data
-	tpd = (TplData *) malloc(sizeof(TplData));
+	tpd = (TplData *) malloc (sizeof (TplData));
 
 	// to prepare the filename (path corrections)
-	char *fileName;
+	char* fileName;
 
 	// Option to use alternative file from filesystem	
-	if (conn->AltFSFile != NULL) {
+	if ( conn->AltFSFile != NULL ) {
 
-		asprintf(&fileName
-			,"/spiffs/webif%s"
-			,conn->AltFSFile);
+		asprintf (&fileName,
+			"/spiffs/webif%s",
+			conn->AltFSFile);
 	}
 
 	else	{
 
-		asprintf(&fileName
-			,"/spiffs/webif%s"
-			,conn->url);
+		asprintf (&fileName,
+			"/spiffs/webif%s",
+			conn->url);
 	}
 
 	// open the file
-	tpd->file = fopen(fileName, "r");
+	tpd->file = fopen (fileName, "r");
 
 	// free prepared name
-	free(fileName);
+	free (fileName);
 
 	tpd->tplArg = NULL;
 	tpd->tokenPos = -1;
 
 	// file not found ?
-	if (tpd->file == NULL) {
+	if ( tpd->file == NULL ) {
 
 		// free memory for template processing data
-		free(tpd);
+		free (tpd);
 
 		// set callback for "Not Found Error"
 		conn->cgi = NotFoundErr_cgi;
@@ -161,15 +157,13 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 	// continue processing ...		
 	conn->PCData = tpd;
 
-	SCDED_StartRespHeader(conn, 200);
+	SCDED_StartRespHeader (conn, 200);
 
 	SCDED_AddHdrFld(conn, "Content-Type",
-		AvailMimes[SCDED_GetMimeTypeID(conn->url)].mimetype
-		,-1);
+		AvailMimes[SCDED_GetMimeTypeID(conn->url)].mimetype, -1);
 
 	SCDED_EndHeader(conn);
-
-	}
+  }
 
 // -------------------------------------------------------------------------------------------------
 

@@ -6,7 +6,7 @@ port/mbedtls_debug.o: \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/config.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/ieeefp.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/features.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core-isa.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/include/xtensa/config/core-isa.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/reent.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/_ansi.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_types.h \
@@ -20,9 +20,9 @@ port/mbedtls_debug.o: \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdint.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/_intsup.h \
  /home/maikschulze/esp/SCDE/build/include/sdkconfig.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h \
+ /home/maikschulze/esp/esp-idf/components/esp_rom/include/esp32/rom/ets_sys.h \
  /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/soc.h \
- /home/maikschulze/esp/esp-idf/components/esp32/include/esp_assert.h \
+ /home/maikschulze/esp/esp-idf/components/esp_common/include/esp_assert.h \
  /home/maikschulze/esp/esp-idf/components/newlib/platform_include/assert.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdlib.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/sys/cdefs.h \
@@ -32,9 +32,11 @@ port/mbedtls_debug.o: \
  /home/maikschulze/esp/esp-idf/components/log/include/esp_log_internal.h \
  /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/platform.h \
  /home/maikschulze/esp/esp-idf/components/mbedtls/port/include/mbedtls/esp_config.h \
+ /home/maikschulze/esp/esp-idf/components/mbedtls/port/include/esp_mem.h \
  /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/check_config.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/limits.h \
  /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/platform_time.h \
+ /home/maikschulze/esp/esp-idf/components/newlib/platform_include/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/machine/time.h \
  /home/maikschulze/esp/esp-idf/components/newlib/include/stdio.h \
@@ -70,7 +72,7 @@ port/mbedtls_debug.o: \
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/features.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/xtensa/config/core-isa.h:
+/home/maikschulze/esp/esp-idf/components/newlib/include/xtensa/config/core-isa.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/sys/reent.h:
 
@@ -98,11 +100,11 @@ port/mbedtls_debug.o: \
 
 /home/maikschulze/esp/SCDE/build/include/sdkconfig.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/rom/ets_sys.h:
+/home/maikschulze/esp/esp-idf/components/esp_rom/include/esp32/rom/ets_sys.h:
 
 /home/maikschulze/esp/esp-idf/components/soc/esp32/include/soc/soc.h:
 
-/home/maikschulze/esp/esp-idf/components/esp32/include/esp_assert.h:
+/home/maikschulze/esp/esp-idf/components/esp_common/include/esp_assert.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/platform_include/assert.h:
 
@@ -122,11 +124,15 @@ port/mbedtls_debug.o: \
 
 /home/maikschulze/esp/esp-idf/components/mbedtls/port/include/mbedtls/esp_config.h:
 
+/home/maikschulze/esp/esp-idf/components/mbedtls/port/include/esp_mem.h:
+
 /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/check_config.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/limits.h:
 
 /home/maikschulze/esp/esp-idf/components/mbedtls/mbedtls/include/mbedtls/platform_time.h:
+
+/home/maikschulze/esp/esp-idf/components/newlib/platform_include/time.h:
 
 /home/maikschulze/esp/esp-idf/components/newlib/include/time.h:
 

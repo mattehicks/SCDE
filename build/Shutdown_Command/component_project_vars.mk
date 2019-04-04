@@ -4,4 +4,5 @@ COMPONENT_LDFLAGS += -L$(BUILD_DIR_BASE)/Shutdown_Command -lShutdown_Command
 COMPONENT_LINKER_DEPS += 
 COMPONENT_SUBMODULES += 
 COMPONENT_LIBRARIES += Shutdown_Command
+COMPONENT_LDFRAGMENTS += 
 component-Shutdown_Command-build: 

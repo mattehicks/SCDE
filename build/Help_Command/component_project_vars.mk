@@ -4,4 +4,5 @@ COMPONENT_LDFLAGS += -L$(BUILD_DIR_BASE)/Help_Command -lHelp_Command
 COMPONENT_LINKER_DEPS += 
 COMPONENT_SUBMODULES += 
 COMPONENT_LIBRARIES += Help_Command
+COMPONENT_LDFRAGMENTS += 
 component-Help_Command-build: 
