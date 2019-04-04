@@ -64,7 +64,7 @@ Device_WEBIFtokens(WebIf_HTTPDConnSlotData_t *conn, char *token, void **arg)
 
 	wifi_softap_get_config (&softap_config);
 
-	BytesFree = SCDED_Send(conn
+	BytesFree = SCDED_Send_To_Send_Buffer(conn
 		,(char*) &softap_config.ssid
 		,-1);*/
 
@@ -73,7 +73,7 @@ Device_WEBIFtokens(WebIf_HTTPDConnSlotData_t *conn, char *token, void **arg)
 
 	esp_wifi_get_config (WIFI_IF_AP, &wifi_ap_config);
 
-	BytesFree = SCDED_Send(conn,
+	BytesFree = SCDED_Send_To_Send_Buffer(conn,
 		(char*) &wifi_ap_config.ssid, -1);
 	}
 
@@ -85,7 +85,7 @@ Device_WEBIFtokens(WebIf_HTTPDConnSlotData_t *conn, char *token, void **arg)
 
 	{
 /*spz
-	BytesFree = SCDED_Send(conn
+	BytesFree = SCDED_Send_To_Send_Buffer(conn
 		,SysCfgRamFlashMirrored->InfoWeCallIt
 		,-1);
 */
@@ -99,7 +99,7 @@ Device_WEBIFtokens(WebIf_HTTPDConnSlotData_t *conn, char *token, void **arg)
 
 	{
 /*spz
-	BytesFree = SCDED_Send(conn
+	BytesFree = SCDED_Send_To_Send_Buffer(conn
 		,SysCfgRamFlashMirrored->InfoEmbeddedFeat
 		,-1);
 */
@@ -136,7 +136,7 @@ Device_WEBIFtokens(WebIf_HTTPDConnSlotData_t *conn, char *token, void **arg)
 	"<li><a href=\"/UserManual.htm\">Read User Manual</a></li>"
 	"<li><a href=\"/RESTAPIRef.htm\">REST API Reference</a></li>"
 	"<li><a href=\"/SafetyWarning.htm\">Safety Warnings</a></li>";
-	BytesFree = SCDED_Send(conn
+	BytesFree = SCDED_Send_To_Send_Buffer(conn
 		,(const char *)&WEBIFMenu
 		,sizeof(WEBIFMenu));
 	}
@@ -159,7 +159,7 @@ Device_WEBIFtokens(WebIf_HTTPDConnSlotData_t *conn, char *token, void **arg)
 	"<a href=\"http://www.ecsuha.de/wishlist\">My Wishlist</a>"
 	"</div>";
 
-	BytesFree = SCDED_Send(conn,
+	BytesFree = SCDED_Send_To_Send_Buffer(conn,
 		(const char *)&WEBIFFooter,
 		sizeof(WEBIFFooter));
 	}

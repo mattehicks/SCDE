@@ -83,7 +83,7 @@ strText_t test = {"xx",2};
   # endif
 
   // Write response "not found" to send buf
-  SCDED_Send(conn, httpNotFoundHeader, -1);
+  SCDED_Send_To_Send_Buffer(conn, httpNotFoundHeader, -1);
 
 //--------------------------------------------------------------------------------------------------
 
@@ -109,10 +109,10 @@ FW_pO(WebIf_HTTPDConnSlotData_t *conn, strText_t out)
   if (!out.strText) return;
 
   // Write content to send buf
-  SCDED_Send(conn, out.strText, out.strTextLen);
+  SCDED_Send_To_Send_Buffer(conn, out.strText, out.strTextLen);
 
   // Write "\n"
-  SCDED_Send(conn, "\n", 1);
+  SCDED_Send_To_Send_Buffer(conn, "\n", 1);
 
   // free allocated
   free (out.strText);

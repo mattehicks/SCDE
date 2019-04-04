@@ -316,9 +316,9 @@ typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
 
 //- V V V V V V V V V V V V V V V V V V // TX-Helper
 
-  char* send_buffer;//uint8_t*		// Pointer to current allocated send buffer w. size [MAX_SB_LEN] (NULL=NO Send-Buffer)
+  char* p_send_buffer;//uint8_t*	// Pointer to current allocated send buffer w. size [MAX_SB_LEN] (NULL=NO Send-Buffer)
   int send_buffer_write_pos; //uint16_t	// Send buffer, current write position (offset), !> 0 = its allocated!
-  char* trailing_buffer;//uint8_t*	// An 'trailing_buffer' in case of 'send_buffer' overflow. Its prio for next transmission!
+  char* p_trailing_buffer;//uint8_t*	// An 'trailing_buffer' in case of 'send_buffer' overflow. Its prio for next transmission!
   int trailing_buffer_len; //uint16_t	// The 'trailing_buffer' length of (allocated & stored) data, !> 0 = its allocated!
 
 
@@ -357,8 +357,8 @@ typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
 //	HdrFldProcCb HdrFldFnCb;// Header Field processing Function Callback
 // int32_t HdrFldId;
 
-
-// temporary fields for header field extraction
+//  union { //parsing / processing
+// temporary data - during header field parsing
   char* p_hdr_fld_name_buff;		// current Header Field Name Buffer ... during parsing
   int hdr_fld_name_len;			// current HdrFldNameBuff length ... during parsing
   char* p_hdr_fld_value_buff;		// Pointer to Header Field Value Buffer ... during parsing
@@ -425,8 +425,8 @@ typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
 
 //-
 
-  char* body_data;//postBuff; //BodyData		// REQUEST & RESPONSE - Pointer to BdyData Buffer
-  int body_data_len;//postLen;	//BodyLen		// REQUEST & RESPONSE - length of stored body data
+  char* p_body_data;//uint8_t*		// REQUEST & RESPONSE - Pointer to BdyData Buffer
+  int body_data_len;//uint16_t		// REQUEST & RESPONSE - length of stored body data
 //int postPos;	//BodyPos benötigt?	// counter for post position (contains whole post data len, not only buffer!)
 } WebIf_HTTPDConnSlotData_t;
 
@@ -802,20 +802,17 @@ int  httpdFindArgUint8Sel(char *line, char *arg, uint8_t *buff);
 //int cgiRedirectApClientToHostname(WebIf_HTTPDConnSlotData_t *ConnSlotData);
 
 
-// Get Time Stamp functions for device
-//int GetTIST(void);
-//int GetUniqueTIST(void);
-
 
 //---------------------
 
-
-// HTTPD-Helpers
+/*
+ * HTTPD-Helpers
+ */
 
 // Returns the ID of the header field (if in built in table).
 int HTTPD_Get_Hdr_Fld_ID(const char* p_at, size_t length);
 
-//Returns the header field value (char* to string) from ID (if stored)
+// Returns the header field value (char* to string) from ID (if stored)
 char* HTTPD_Get_Hdr_Val_From_ID(WebIf_HTTPDConnSlotData_t* p_conn, int hdr_fld_id);
 
 int SCDED_UrlDecode(char *val, int valLen, char *dst, int dstLen);
@@ -831,8 +828,8 @@ int SCDED_EndHeader(WebIf_HTTPDConnSlotData_t *conn);
 int SCDED_Redirect(WebIf_HTTPDConnSlotData_t *conn, char *newUrl);
 void SCDED_RetireConn(WebIf_HTTPDConnSlotData_t *conn);
 WebIf_HTTPDConnSlotData_t * SCDED_FindConnSlot(void *arg);//struct espconn *pespconn); //void *arg);
-int SCDED_Send(WebIf_HTTPDConnSlotData_t *conn, const char *data, int len);
-void SCDED_TransmitSendBuff(WebIf_HTTPDConnSlotData_t *conn);
+
+
 bool SCDED_LoadSerializer(WebIf_HTTPDConnSlotData_t *conn);
 void SCDED_ProcHdrFldAuth(WebIf_HTTPDConnSlotData_t *conn);
 void SCDED_CheckHdrFldAuth(WebIf_HTTPDConnSlotData_t *conn, char* UserInfo, int len);
@@ -872,8 +869,20 @@ const char* SCDE_GetDesc(SelectAData *SAD, uint8_t SelID);
 
 
 
+//---------------------
 
+/*
+ * HTTPD-Main
+ */
 
+// Moves data from 'trailing_buffer' to 'send_buffer'. Transmitting this data has priority.
+void SCDED_Copy_Trailing_Buffer_to_Send_Buffer(WebIf_HTTPDConnSlotData_t* conn);
+
+// Sends / adds data to send buffer (conn->send_buffer), without doing the real transmission
+int SCDED_Send_To_Send_Buffer(WebIf_HTTPDConnSlotData_t* conn, const char* data, int len);
+
+// Finally transmits an allocated + filled 'send_buffer' (conn->send_buffer)
+void SCDED_Transmit_Send_Buffer(WebIf_HTTPDConnSlotData_t* conn);
 
 
 
@@ -1211,7 +1220,9 @@ void HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t *conn);
 
 
 
-// HTTPD parser integrated callbacks (installed in init) + Procs
+/*
+ * HTTPD parser integrated callbacks (installed in init) + Procs
+ */
 
 // Callback fired by HTTPDParser when message begins
 int HTTPD_On_Message_Begin_Cb(WebIf_HTTPDConnSlotData_t *conn);

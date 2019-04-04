@@ -60,7 +60,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
  27 .text.ESP32_S0_IdleCb 00000033  00000000  00000000  00002418  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 28 .rodata.__func__$9670 0000001c  00000000  00000000  0000244c  2**2
+ 28 .rodata.__func__$9672 0000001c  00000000  00000000  0000244c  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
  29 .data.ESP32_S0_ProvidedByModule 00000080  00000000  00000000  00002468  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, DATA
@@ -92,13 +92,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, RELOC, READONLY, DEBUGGING
  43 .debug_line   00000f83  00000000  00000000  00006f71  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 44 .debug_str    00002752  00000000  00000000  00007ef4  2**0
+ 44 .debug_str    00002758  00000000  00000000  00007ef4  2**0
                   CONTENTS, READONLY, DEBUGGING
- 45 .comment      0000003b  00000000  00000000  0000a646  2**0
+ 45 .comment      0000003b  00000000  00000000  0000a64c  2**0
                   CONTENTS, READONLY
- 46 .xtensa.info  00000038  00000000  00000000  0000a681  2**0
+ 46 .xtensa.info  00000038  00000000  00000000  0000a687  2**0
                   CONTENTS, READONLY
- 47 .xt.lit       00000060  00000000  00000000  0000a6b9  2**0
+ 47 .xt.lit       00000060  00000000  00000000  0000a6bf  2**0
                   CONTENTS, RELOC, READONLY
- 48 .xt.prop      000008e8  00000000  00000000  0000a719  2**0
+ 48 .xt.prop      000008e8  00000000  00000000  0000a71f  2**0
                   CONTENTS, RELOC, READONLY

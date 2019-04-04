@@ -456,7 +456,7 @@ ServAPCfg_tpl(WebIf_HTTPDConnSlotData_t *conn, char *token, void **arg)
 //--------------------------------------------------------------------------------------------------
 	}
 
-  SCDED_Send(conn, buff, -1);
+  SCDED_Send_To_Send_Buffer(conn, buff, -1);
 }
 
 

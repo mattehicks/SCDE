@@ -82,13 +82,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, RELOC, READONLY, DEBUGGING
  38 .debug_line   00000a7d  00000000  00000000  0000562f  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 39 .debug_str    00002837  00000000  00000000  000060ac  2**0
+ 39 .debug_str    0000283d  00000000  00000000  000060ac  2**0
                   CONTENTS, READONLY, DEBUGGING
- 40 .comment      0000003b  00000000  00000000  000088e3  2**0
+ 40 .comment      0000003b  00000000  00000000  000088e9  2**0
                   CONTENTS, READONLY
- 41 .xtensa.info  00000038  00000000  00000000  0000891e  2**0
+ 41 .xtensa.info  00000038  00000000  00000000  00008924  2**0
                   CONTENTS, READONLY
- 42 .xt.lit       00000048  00000000  00000000  00008956  2**0
+ 42 .xt.lit       00000048  00000000  00000000  0000895c  2**0
                   CONTENTS, RELOC, READONLY
- 43 .xt.prop      000003fc  00000000  00000000  0000899e  2**0
+ 43 .xt.prop      000003fc  00000000  00000000  000089a4  2**0
                   CONTENTS, RELOC, READONLY
