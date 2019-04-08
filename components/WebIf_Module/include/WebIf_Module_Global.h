@@ -10,7 +10,7 @@
 
 
 // Data 'Provided By Module' for the telnet module - we need this from SCDE
-const  ProvidedByModule_t WebIf_ProvidedByModule;
+//const  ProvidedByModule_t WebIf_ProvidedByModule;
 
 
 

@@ -936,6 +936,7 @@ int ESP32_SPI_get_freq_limit(bool gpio_is_used, int input_delay_ns);
  * typedefs of ESP32_SPI_Module Function Callbacks
  * This Fn are provided & made accessible for client modules - for operation
  */
+
 // typedef for ESP32_SPI_Module_spi_bus_add_deviceFn - adds an device to the definitions host
 typedef strTextMultiple_t*  (*ESP32_SPI_bus_add_deviceFn_t) (ESP32_SPI_Definition_t* ESP32_SPI_Definition, const ESP32_SPI_device_interface_config_t *dev_config, ESP32_SPI_device_handle_t *handle);
 

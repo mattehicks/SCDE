@@ -19,6 +19,7 @@ typedef int (* PCallback)(WebIf_HTTPDConnSlotData_t *connData);
 /*
  *  WebIf - Data Table A for Active Resources - The content of the Active Directory - PART A (Resource-Data-Row) 
  */
+/*
 typedef struct WebIf_ActiveResourcesDataA_s {
 
   uint32_t AllowedMethodsBF;		// Allowed (implemented) Methods for this resource (Bit-Field) (enum http_method from httpD.h)
@@ -73,12 +74,13 @@ typedef struct WebIf_ActiveResourcesDataA_s {
 
   const char *Url;			// Ptr to URL Name of this resource (that is verified and processed)
 } WebIf_ActiveResourcesDataA_t;
-
+*/
 
 
 /*
  *  WebIf - Data Table B for Active Resources - The content of the Active Directory - PART B (Procedure-Call-Data-Row) 
  */
+/*
 typedef struct WebIf_ActiveResourcesDataB_s {
 
   const uint32_t RPCFucID; //CgiFucID;	// const int CgiFucID;	Assigns the Cgi-Data-Row (Content Table B) for this resource
@@ -87,13 +89,37 @@ typedef struct WebIf_ActiveResourcesDataB_s {
 
   PCallback PCb; //cgiSendCallback cgiCb;	// Remote-Procedure-Call Callback which processes this active resource
 
-  const void  *PCArg; //*cgiArg;	// Argument (Data), accessible by the RPC-Callback Procedure for operations
+  const void  *PCArg; // *cgiArg;	// Argument (Data), accessible by the RPC-Callback Procedure for operations
 } WebIf_ActiveResourcesDataB_t;
+*/
 
 
 
 
+// -------------------------------------------------------------------------------------------------
 
+
+
+/*
+ * typedefs of WebIf_Module Function Callbacks
+ * This Fn are provided & made accessible for client modules - for operation
+ */
+
+// typedef for ESP32_SPI_Module_spi_bus_add_deviceFn - adds an device to the definitions host
+//typedef strTextMultiple_t*  (*ESP32_SPI_bus_add_deviceFn_t) (ESP32_SPI_Definition_t* ESP32_SPI_Definition, const ESP32_SPI_device_interface_config_t *dev_config, ESP32_SPI_device_handle_t *handle);
+
+
+/*
+ * WebIf provided Fn - table
+ * Stores common + custom functions this Module provides to the SCDE (and client Modules)
+
+ */
+typedef struct WebIf_ProvidedByModule_s {
+// --- first the provided common module functions ---
+  ProvidedByModule_t common;							// the common fn
+// --- now the provided custom module fuctions ---
+//  ESP32_SPI_bus_add_deviceFn_t ESP32_SPI_bus_add_deviceFn;			// adds an device to the definitions host
+} WebIf_ProvidedByModule_t;
 
 
 

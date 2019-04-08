@@ -151,7 +151,7 @@ typedef struct WebIf_ActiveResourcesDataB_s {
 
 
 
-
+// auslagern ???
 
 typedef void *espconn_handle;
 /** A callback prototype to inform about events for a espconn */
@@ -257,8 +257,7 @@ enum {
 
 
 
-
-
+// -------------------------------------------------------------------------------------------------
 
 
 /* 
@@ -831,11 +830,20 @@ WebIf_HTTPDConnSlotData_t * SCDED_FindConnSlot(void *arg);//struct espconn *pesp
 
 
 bool SCDED_LoadSerializer(WebIf_HTTPDConnSlotData_t *conn);
-void SCDED_ProcHdrFldAuth(WebIf_HTTPDConnSlotData_t *conn);
-void SCDED_CheckHdrFldAuth(WebIf_HTTPDConnSlotData_t *conn, char* UserInfo, int len);
-bool SCDED_AuthCheck(WebIf_HTTPDConnSlotData_t *conn, int ResAuthCheckEna);
+
+// Process header field authorization and sets flag F_CONN_IS_AUTHENTICATED 
+void SCDED_Process_Hdr_Fld_Authorization(WebIf_HTTPDConnSlotData_t* conn);
+
+// Checks the 'user information' string for "Basic Authorization", Sets F_CONN_IS_AUTHENTICATED
+void SCDED_Check_Hdr_Fld_Authorization(WebIf_HTTPDConnSlotData_t *conn, char* UserInfo, int len);
+
+// Checks authorization for ressource-type passed by "SecurityResCheck"
+bool SCDED_AuthCheck(WebIf_HTTPDConnSlotData_t* p_conn, int ResAuthCheckEna);
+
 void SCDED_SetConCtrl(uint32_t CtrlBitfld);
-void SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn);
+
+// Process an open connection (calls the callback procedure and holds or closes the connection)
+void SCDED_Process_Open_Connection(WebIf_HTTPDConnSlotData_t *conn);
 
 
 
@@ -853,13 +861,32 @@ void SCDEETX_DisconnTimeoutCb(void *arg);
 // no longer required
 void SCDED_IdleCbGen(void);
 
-// Platform dependent code should call these ...
-void SCDED_IdleCb(void *arg);
-void WebIf_SentCb(void *arg);
-void WebIf_RecvCb(void *arg, char *recvdata, unsigned short recvlen);
-void WebIf_ReconCb(void *arg, int8_t err);
-void WebIf_DisconCb(void *arg);
+
+//----------------------
+
+/*
+ * Platform dependent code should call these ...
+ */
+
+//
 void WebIf_ConnCb(void *arg);
+
+//
+void WebIf_DisconCb(void *arg);
+
+//
+void WebIf_ReconCb(void *arg, int8_t err);
+
+//
+void SCDED_IdleCb(void *arg);
+
+//
+void WebIf_SentCb(void *arg);
+
+//
+void WebIf_RecvCb(void *arg, char *recvdata, unsigned short recvlen);
+
+//----------------------
 
 int SCDED_ETXSlotConnCb(void *arg);
 

@@ -12,6 +12,7 @@
 #include "ProjectConfig.h"
 #include <esp8266.h>
 #include "WebIf_Module.h"
+#include "WebIf_Module_s.h"
 #include "WebIf_Module_Global.h"
 #include "Platform.h"
 #include "SCDED_Platform.h"
@@ -38,7 +39,12 @@
 
 #include "lwip/sockets.h"
 
+#include <WebIf_EspFSStdFileTX.h>
+#include <WebIf_EspFSAdvFileTX.h>
 
+#include <ServAPCfg_tpl.h>
+#include <CGI_Redirect.h>
+#include "HTools_cgi.h"
 
 //----------------------- new stuff ------------------------
 
@@ -127,7 +133,6 @@ listen www-https
 
 #include "WebIf_Module_Mimes.h"
 #include "WebIf_Module_Schemes.h"
-#include "WebIf_Module_ActiveDirectory.h"
 #include "WebIf_ActiveDirTokens.h"
 #include "Base64.h"
 #include "sha1.h"
@@ -2801,8 +2806,10 @@ SCDED_LoadSerializer(WebIf_HTTPDConnSlotData_t *conn)
 
 /*
  *--------------------------------------------------------------------------------------------------
- *FName: SCDED_ProcHdrFldAuth
- * Desc: Function searches for header field "Authorization" and parses it.
+ *FName: Process Hdr Fld Authorization
+ * Desc: Process header field authorization and set flag F_CONN_IS_AUTHENTICATED in
+ *       'connData->ConnCtrlFlags', if authorized.
+ * Info: Function searches for header field "Authorization" and parses it.
  *       Func will extract UI and call HTTPDCheckAuth with User Information and check Authorization
  *       Should be called after header-parsing is finnished.
  * Para: WebIf_HTTPDConnSlotData_t *conn -> ptr to connection slot
@@ -2810,7 +2817,7 @@ SCDED_LoadSerializer(WebIf_HTTPDConnSlotData_t *conn)
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-SCDED_ProcHdrFldAuth(WebIf_HTTPDConnSlotData_t *conn)
+SCDED_Process_Hdr_Fld_Authorization(WebIf_HTTPDConnSlotData_t *conn)
 {
   Entry_Header_Field_t* p_entry_header_field;
 
@@ -2840,7 +2847,7 @@ SCDED_ProcHdrFldAuth(WebIf_HTTPDConnSlotData_t *conn)
 			userpass[r]=0;
 
 			// Now check the Auth
-			SCDED_CheckHdrFldAuth(conn,
+			SCDED_Check_Hdr_Fld_Authorization(conn,
 				(char*) &userpass,
 				strlen(userpass));
 
@@ -2862,20 +2869,18 @@ SCDED_ProcHdrFldAuth(WebIf_HTTPDConnSlotData_t *conn)
 
 /*
  *--------------------------------------------------------------------------------------------------
- *FName: SCDED_CheckHdrFldAuth
- * Desc: Checks the user information string for "Basic Authorization", Sets F_CONN_IS_AUTHENTICATED
- *       Should be called during header field processing (->Auth field) or during URI parsing (UserInfo)
- * Para: WebIf_HTTPDConnSlotData_t *conn -> ptr to connection slot
+ *FName: Check Hdr Fld Authorization
+ * Desc: Checks the 'user information' string for "Basic Authorization", Sets F_CONN_IS_AUTHENTICATED
+ * Info: Should be called during header field processing (->Auth field) or during URI parsing (UserInfo)
+ * Para: WebIf_HTTPDConnSlotData_t* conn -> ptr to connection slot
  *       char* UserInfo -> pointer to user info str XXX:YYYY, NOT zero terminated! 
  *       int len -> length of user info
  * Rets: -/-
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR
-SCDED_CheckHdrFldAuth(WebIf_HTTPDConnSlotData_t *conn
-		,char* UserInfo
-		,int len)
- {
+SCDED_Check_Hdr_Fld_Authorization(WebIf_HTTPDConnSlotData_t *conn, char* UserInfo, int len)
+{
 
   # if SCDED_DBG >= 4
   printf("|ChkUI4Auth:\"%s\" len:%d,",
@@ -2919,7 +2924,7 @@ SCDED_CheckHdrFldAuth(WebIf_HTTPDConnSlotData_t *conn
 
 	}
 */
-  }
+}
 
 
 
@@ -2938,15 +2943,14 @@ SCDED_CheckHdrFldAuth(WebIf_HTTPDConnSlotData_t *conn
  *--------------------------------------------------------------------------------------------------
  */
 bool ICACHE_FLASH_ATTR 
-SCDED_AuthCheck(WebIf_HTTPDConnSlotData_t *connData
-		,int ResAuthCheckEna)
-  {
+SCDED_AuthCheck(WebIf_HTTPDConnSlotData_t* p_conn, int ResAuthCheckEna)
+{
 
   // check if the security auth. for resource type is enabled (in HTTPDSecurityCfg)
 //spz  if ( (SysCfgRamFlashMirrored->HTTPDSecurityCfg & ResAuthCheckEna) &&
   if ( (1) &&
 	// and auth. verification passed indicated by flag F_CONN_IS_AUTHENTICATED set during header processing?
-		(!(connData->ConnCtrlFlags & F_CONN_IS_AUTHENTICATED)) )
+		(!(p_conn->ConnCtrlFlags & F_CONN_IS_AUTHENTICATED)) )
 
 	{
 
@@ -2988,18 +2992,17 @@ SCDED_SetConCtrl(uint32_t CtrlBitfld)
 
 
 
-
-/* ------------------------------------------------------------------------------------------------
- *  @brief WebIF Respond to open connection
- *         Main element of SCDE. Responses to slots open connection, calls the processing callback
- *         procedure and holds or closes the connection, if finished
- *
- *  @param WebIf_HTTPDConnSlotData_t *conn : provide connection slot data
- *  @return -/-
- * ------------------------------------------------------------------------------------------------
+/*
+ *--------------------------------------------------------------------------------------------------
+ *FName: Process Open Connection
+ * Desc: Process an open connection (calls the callback procedure and holds or closes the connection,
+ *       if finished)
+ * Para: WebIf_HTTPDConnSlotData_t* conn -> the open connection
+ * Rets: -/-
+ *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR 
-SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
+SCDED_Process_Open_Connection(WebIf_HTTPDConnSlotData_t* conn)
 {
 
   // Reset inactivity timer - because we had an callback ...
@@ -3219,7 +3222,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 	else {
 
 		# if SCDED_DBG >= 1
-		printf("\nWebIf RespToOpenConn, can not send now, 'F_TXED_CALLBACK_PENDING' is set>");
+		printf("\nWebIf Process_Open_Connection, can not send now, 'F_TXED_CALLBACK_PENDING' is set>");
 		#endif
 
 		// we are expecting a Sent_Cb soon !
@@ -3258,7 +3261,7 @@ SCDED_RespToOpenConn(WebIf_HTTPDConnSlotData_t *conn)
 
 /*
  *--------------------------------------------------------------------------------------------------
- *FName: SCDED_RespToOpenConn
+ *FName: SCDED_Process_Open_Connection
  * Desc: Idle Callback Generator. Checks if conn slots requires idle Callback, and provides it.
  *       THIS GENERATOR CODE SHOULD BE CALLED FROM 10HZ TIMER
  *       Idle Cb request bit (BIT SET in ConnCtrl) must be renewed in every cycle to get an idleCb !!! 
@@ -3357,6 +3360,245 @@ SCDED_IdleCbGen(void)
 
 
 
+
+/*
+ *--------------------------------------------------------------------------------------------------
+ *FName: WebIf_ConnCb
+ * Desc: Connected callback is triggered in case of new connections to WebIf-HTTP-Daemon
+ * Info:
+ * Para: Entry_WebIf_Definition_t* WebIfDef -> ptr to the WebIf_Definition
+ * Rets: int ->
+ *--------------------------------------------------------------------------------------------------
+ */
+void ICACHE_FLASH_ATTR 
+WebIf_ConnCb (void *arg) //HTTPD_Conn_Cb
+{
+  // the arg is a ptr to the platform specific conn
+  //struct espconn   *platform_conn = arg;		// ESP 8266 NonOS
+  Entry_WebIf_Definition_t* platform_conn = arg;	// ESP 32 RTOS
+
+//--------------------------------------------------------------------------------------------------
+
+  #if HTTPD_Module_DBG >= 7
+  SCDEFn_at_WebIf_M->Log3Fn(platform_conn->common.name,
+	platform_conn->common.nameLen,
+	7,
+	"WebIf_Conn_Cb Fn (module '%.*s'), gets slot_no '%d' of '%d', from "
+	"remote '%d.%d.%d.%d:%d' to local port '%d', f-heap '%d'.",
+	platform_conn->common.module->provided->typeNameLen,
+	Platform_conn->common.module->provided->typeName,
+	platform_conn->slot_no,
+	MAX_SCDED_CONN,
+	platform_conn->proto.tcp->remote_ip[0],
+	platform_conn->proto.tcp->remote_ip[1],
+	platform_conn->proto.tcp->remote_ip[2],
+	platform_conn->proto.tcp->remote_ip[3],
+	platform_conn->proto.tcp->remote_port,
+	platform_conn->proto.tcp->local_port,
+	system_get_free_heap_size());
+  #endif
+
+//--------------------------------------------------------------------------------------------------
+
+  // alloc HTTPD connection slot
+  WebIf_HTTPDConnSlotData_t* conn
+	= (WebIf_HTTPDConnSlotData_t*) malloc (sizeof(WebIf_HTTPDConnSlotData_t));
+
+  // zero conn-slot memory
+  memset (conn, 0, sizeof (WebIf_HTTPDConnSlotData_t));
+
+  // store current connection in created conn slot
+  conn->conn = platform_conn;
+
+ // Write slot number for identification
+  conn->slot_no = conn->conn->slot_no;
+
+  // store reverse link
+  platform_conn->reverse = conn;
+
+  // register data received callback
+  espconn_regist_recvcb (platform_conn, WebIf_RecvCb);
+
+  // register data reconnection / error info callback
+  espconn_regist_reconcb (platform_conn, WebIf_ReconCb);
+
+  // register disconnected callback
+  espconn_regist_disconcb (platform_conn, WebIf_DisconCb);
+
+  // register data was sent callback
+  espconn_regist_sentcb (platform_conn, WebIf_SentCb);
+
+//--------------------------------------------------------------------------------------------------
+
+  // init http parser for the new conn
+  HTTPD_ParserInit(conn, HTTP_BOTH);
+}
+
+
+
+/*
+ *--------------------------------------------------------------------------------------------------
+ *FName: WebIf_DisconCb
+ * Desc: Disconnected callback -> conn is disconnected -> clean up, free memory
+ *       its unclear what to do in this cases ...
+ * Para: Entry_WebIf_Definition_t* WebIfDef ->ptr to the WebIf_Definition
+ * Rets: -/-
+ *--------------------------------------------------------------------------------------------------
+ */
+void ICACHE_FLASH_ATTR
+WebIf_DisconCb (void *arg) //HTTPD_Disconn_Cb
+{
+  // the arg is a ptr to the platform specific conn
+//struct espconn     *platform_conn = arg;		// ESP 8266 NonOS
+  Entry_WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
+
+  // get assigned HTTPD-Connection-Slot-Data
+  WebIf_HTTPDConnSlotData_t* conn
+	= platform_conn->reverse;
+
+//---------------------------------------------------------------------------------------------------
+
+ #if HTTPD_DBG >= 7
+  SCDEFn_at_WebIf_M->Log3Fn(platform_conn->common.name,
+	platform_conn->common.nameLen,
+	7,
+	"WebIf_Disconn_Cb Fn (module '%.*s'), slot_no '%d', from "
+	"remote '%d.%d.%d.%d:%d' to local port '%d', f-heap '%d'.",
+	platform_conn->common.module->provided->typeNameLen,
+	platform_conn->common.module->provided->typeName,
+	platform_conn->slot_no,
+	platform_conn->proto.tcp->remote_ip[0],
+	platform_conn->proto.tcp->remote_ip[1],
+	platform_conn->proto.tcp->remote_ip[2],
+	platform_conn->proto.tcp->remote_ip[3],
+	platform_conn->proto.tcp->remote_port,
+	platform_conn->proto.tcp->local_port,
+	system_get_free_heap_size());
+  #endif
+
+//---------------------------------------------------------------------------------------------------
+
+  // mark connections job in load serializer as finnished (by deleting bit)
+  conn->conn->HTTPD_InstCfg->LoadSerializer &= ~( 1 << ( conn->slot_no ) );
+
+  // remove the conn / mark that the connection is gone
+  conn->conn = NULL;
+
+  // !!! CONN IS GONE FROM THIS POINT !!!
+
+  // call and indicate cgi to clean up and dealloc
+  if ( conn->cgi != NULL ) conn->cgi(conn);
+
+  // free allocated memory for the Send-Buffer, if any
+//if (conn->p_send_buffer) free (conn->p_send_buffer);
+  if (conn->send_buffer_write_pos) free (conn->p_send_buffer);
+
+  // free allocated memory for Trailing Buff, if any
+//if (conn->p_trailing_buffer) free (conn->p_trailing_buffer);
+  if (conn->trailing_buffer_len) free (conn->p_trailing_buffer);
+
+  // free stored header-fields
+  Entry_Header_Field_t* p_entry_header_field;
+
+  while ( !STAILQ_EMPTY (&conn->head_header_field) ) {
+
+        p_entry_header_field = 
+		STAILQ_FIRST (&conn->head_header_field);
+
+	# if SCDED_DBG >= 3
+	printf ("|DeallocFldVal:\"%s\" (ID:%d)>",
+		p_entry_header_field->p_hdr_fld_val,
+		p_entry_header_field->hdr_fld_id);
+	# endif
+
+        STAILQ_REMOVE_HEAD (&conn->head_header_field, entries);
+
+	// free the value text
+	free (p_entry_header_field->p_hdr_fld_val);
+
+	// and the SLTQ entry
+        free (p_entry_header_field);
+  }
+
+  // free allocated memory for Path
+  if (conn->url) free (conn->url);
+
+  // free allocated memory for Query
+  if (conn->getArgs) free (conn->getArgs);
+
+  // free allocated memory for 'body_data'
+//  if (conn->p_body_data) free (conn->p_body_data);
+  if (conn->body_data_len) free (conn->p_body_data);
+
+  // free allocated memory for Header Field Name Buffer (only in case of error)
+  if (conn->p_hdr_fld_name_buff) free (conn->p_hdr_fld_name_buff);
+
+  // free allocated memory for Header Field Value Buffer (only in case of error)
+  if (conn->p_hdr_fld_value_buff) free(conn->p_hdr_fld_value_buff);
+
+  # if SCDED_DBG >= 3
+  printf("\ndone, freeing conn>");
+  #endif
+
+  // finally free allocated memory for this conn (WebIf_HTTPDConnSlotData_t struct)
+  free (conn);
+}
+
+
+
+/*
+ *--------------------------------------------------------------------------------------------------
+ *FName: WebIf_ReconCb
+ * Desc: Reconnect Info callback is triggered when the connection to client conn of SCDED is broken
+ *       its unclear what to do in this cases ...
+ * Para: void *arg -> struct espconn *conn
+ * Rets: -/-
+ *--------------------------------------------------------------------------------------------------
+ */
+void ICACHE_FLASH_ATTR 
+WebIf_ReconCb (void *arg, int8_t error)
+{
+  // the arg is a ptr to the platform specific conn
+  //struct espconn   *platform_conn = arg;	// ESP 8266 NonOS
+  Entry_WebIf_Definition_t* platform_conn = arg;	// ESP 32 RTOS
+
+  // get assigned HTTPD-Connection-Slot-Data
+  WebIf_HTTPDConnSlotData_t *conn
+	= platform_conn->reverse;
+
+  # if SCDED_DBG >= 3
+  printf("\nWebIf ReconCb, slot %d, remote:%d.%d.%d.%d:%d,local port:%d, error:%d, mem:%d>"
+	,platform_conn->slot_no
+	,platform_conn->proto.tcp->remote_ip[0]
+	,platform_conn->proto.tcp->remote_ip[1]
+	,platform_conn->proto.tcp->remote_ip[2]
+	,platform_conn->proto.tcp->remote_ip[3]
+	,platform_conn->proto.tcp->remote_port
+	,platform_conn->proto.tcp->local_port
+	,error
+	,system_get_free_heap_size());
+
+  #endif
+
+//---------------------------------------------------------------------------------------------------
+
+  // process error information here! 
+/*
+sint8 err : error code
+ESCONN_TIMEOUT - Timeout
+ESPCONN_ABRT - TCP connection aborted
+ESPCONN_RST - TCP connection abort
+ESPCONN_CLSD - TCP connection closed
+ESPCONN_CONN - TCP connection
+ESPCONN_HANDSHAKE - TCP SSL handshake fail
+ESPCONN_PROTO_MSG - SSL application invalid
+*/
+
+  WebIf_DisconCb(arg);
+}
+
+
+
 /*
  *--------------------------------------------------------------------------------------------------
  *FName: WebIf_IdleCb
@@ -3367,8 +3609,8 @@ SCDED_IdleCbGen(void)
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR 
-WebIf_IdleCb(void *arg)
-  {
+WebIf_IdleCb (void *arg)
+{
 
   // the arg is a ptr to the platform specific conn
   //struct espconn   *platform_conn = arg;	// ESP 8266 NonOS
@@ -3404,7 +3646,7 @@ WebIf_IdleCb(void *arg)
 //--------------------------------------------------------------------------------------------------
 
   // Response to open connection...
-  SCDED_RespToOpenConn(conn);
+  SCDED_Process_Open_Connection(conn);
 }
 
 
@@ -3466,7 +3708,7 @@ WebIf_SentCb (void* arg)  //HTTPD_Sent_Cb
 //--------------------------------------------------------------------------------------------------
 
   // Respond to open connection...
-  SCDED_RespToOpenConn(conn);
+  SCDED_Process_Open_Connection(conn);
 }
 
 
@@ -3576,246 +3818,12 @@ WebIf_RecvCb(void *arg, char *recvdata, unsigned short recvlen)  //HTTPD_Recv_Cb
 //---------------------------------------------------------------------------------------------------
 
   // Response to open connection now	
-  SCDED_RespToOpenConn(conn);
+  SCDED_Process_Open_Connection(conn);
 }
 
 
 
-/*
- *--------------------------------------------------------------------------------------------------
- *FName: WebIf_ReconCb
- * Desc: Reconnect Info callback is triggered when the connection to client conn of SCDED is broken
- *       its unclear what to do in this cases ...
- * Para: void *arg -> struct espconn *conn
- * Rets: -/-
- *--------------------------------------------------------------------------------------------------
- */
-void ICACHE_FLASH_ATTR 
-WebIf_ReconCb(void *arg, int8_t error)
-{
-  // the arg is a ptr to the platform specific conn
-  //struct espconn   *platform_conn = arg;	// ESP 8266 NonOS
-  Entry_WebIf_Definition_t* platform_conn = arg;	// ESP 32 RTOS
 
-  // get assigned HTTPD-Connection-Slot-Data
-  WebIf_HTTPDConnSlotData_t *conn
-	= platform_conn->reverse;
-
-  # if SCDED_DBG >= 3
-  printf("\nWebIf ReconCb, slot %d, remote:%d.%d.%d.%d:%d,local port:%d, error:%d, mem:%d>"
-	,platform_conn->slot_no
-	,platform_conn->proto.tcp->remote_ip[0]
-	,platform_conn->proto.tcp->remote_ip[1]
-	,platform_conn->proto.tcp->remote_ip[2]
-	,platform_conn->proto.tcp->remote_ip[3]
-	,platform_conn->proto.tcp->remote_port
-	,platform_conn->proto.tcp->local_port
-	,error
-	,system_get_free_heap_size());
-
-  #endif
-
-//---------------------------------------------------------------------------------------------------
-
-  // process error information here! 
-/*
-sint8 err : error code
-ESCONN_TIMEOUT - Timeout
-ESPCONN_ABRT - TCP connection aborted
-ESPCONN_RST - TCP connection abort
-ESPCONN_CLSD - TCP connection closed
-ESPCONN_CONN - TCP connection
-ESPCONN_HANDSHAKE - TCP SSL handshake fail
-ESPCONN_PROTO_MSG - SSL application invalid
-*/
-
-  WebIf_DisconCb(arg);
-}
-
-
-
-/*
- *--------------------------------------------------------------------------------------------------
- *FName: WebIf_DisconCb
- * Desc: Disconnected callback -> conn is disconnected -> clean up, free memory
- *       its unclear what to do in this cases ...
- * Para: Entry_WebIf_Definition_t* WebIfDef ->ptr to the WebIf_Definition
- * Rets: -/-
- *--------------------------------------------------------------------------------------------------
- */
-void ICACHE_FLASH_ATTR
-WebIf_DisconCb(void *arg) //HTTPD_Disconn_Cb
-{
-  // the arg is a ptr to the platform specific conn
-//struct espconn     *platform_conn = arg;		// ESP 8266 NonOS
-  Entry_WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
-
-  // get assigned HTTPD-Connection-Slot-Data
-  WebIf_HTTPDConnSlotData_t* conn
-	= platform_conn->reverse;
-
-//---------------------------------------------------------------------------------------------------
-
- #if HTTPD_DBG >= 7
-  SCDEFn_at_WebIf_M->Log3Fn(platform_conn->common.name,
-	platform_conn->common.nameLen,
-	7,
-	"WebIf_Disconn_Cb Fn (module '%.*s'), slot_no '%d', from "
-	"remote '%d.%d.%d.%d:%d' to local port '%d', f-heap '%d'.",
-	platform_conn->common.module->provided->typeNameLen,
-	platform_conn->common.module->provided->typeName,
-	platform_conn->slot_no,
-	platform_conn->proto.tcp->remote_ip[0],
-	platform_conn->proto.tcp->remote_ip[1],
-	platform_conn->proto.tcp->remote_ip[2],
-	platform_conn->proto.tcp->remote_ip[3],
-	platform_conn->proto.tcp->remote_port,
-	platform_conn->proto.tcp->local_port,
-	system_get_free_heap_size());
-  #endif
-
-//---------------------------------------------------------------------------------------------------
-
-  // mark connections job in load serializer as finnished (by deleting bit)
-  conn->conn->HTTPD_InstCfg->LoadSerializer &= ~( 1 << ( conn->slot_no ) );
-
-  // remove the conn / mark that the connection is gone
-  conn->conn = NULL;
-
-  // !!! CONN IS GONE FROM THIS POINT !!!
-
-  // call and indicate cgi to clean up and dealloc
-  if ( conn->cgi != NULL ) conn->cgi(conn);
-
-  // free allocated memory for the Send-Buffer, if any
-//if (conn->p_send_buffer) free (conn->p_send_buffer);
-  if (conn->send_buffer_write_pos) free (conn->p_send_buffer);
-
-  // free allocated memory for Trailing Buff, if any
-//if (conn->p_trailing_buffer) free (conn->p_trailing_buffer);
-  if (conn->trailing_buffer_len) free (conn->p_trailing_buffer);
-
-  // free stored header-fields
-  Entry_Header_Field_t* p_entry_header_field;
-
-  while ( !STAILQ_EMPTY (&conn->head_header_field) ) {
-
-        p_entry_header_field = 
-		STAILQ_FIRST (&conn->head_header_field);
-
-	# if SCDED_DBG >= 3
-	printf ("|DeallocFldVal:\"%s\" (ID:%d)>",
-		p_entry_header_field->p_hdr_fld_val,
-		p_entry_header_field->hdr_fld_id);
-	# endif
-
-        STAILQ_REMOVE_HEAD (&conn->head_header_field, entries);
-
-	// free the value text
-	free (p_entry_header_field->p_hdr_fld_val);
-
-	// and the SLTQ entry
-        free (p_entry_header_field);
-  }
-
-  // free allocated memory for Path
-  if (conn->url) free (conn->url);
-
-  // free allocated memory for Query
-  if (conn->getArgs) free (conn->getArgs);
-
-  // free allocated memory for 'body_data'
-//  if (conn->p_body_data) free (conn->p_body_data);
-  if (conn->body_data_len) free (conn->p_body_data);
-
-  // free allocated memory for Header Field Name Buffer (only in case of error)
-  if (conn->p_hdr_fld_name_buff) free (conn->p_hdr_fld_name_buff);
-
-  // free allocated memory for Header Field Value Buffer (only in case of error)
-  if (conn->p_hdr_fld_value_buff) free(conn->p_hdr_fld_value_buff);
-
-  # if SCDED_DBG >= 3
-  printf("\ndone, freeing conn>");
-  #endif
-
-  // finally free allocated memory for this conn (WebIf_HTTPDConnSlotData_t struct)
-  free (conn);
-}
-
-
-
-/*
- *--------------------------------------------------------------------------------------------------
- *FName: WebIf_ConnCb
- * Desc: Connected callback is triggered in case of new connections to WebIf-HTTP-Daemon
- * Info:
- * Para: Entry_WebIf_Definition_t* WebIfDef -> ptr to the WebIf_Definition
- * Rets: int ->
- *--------------------------------------------------------------------------------------------------
- */
-void ICACHE_FLASH_ATTR 
-WebIf_ConnCb(void *arg) //HTTPD_Conn_Cb
-{
-  // the arg is a ptr to the platform specific conn
-  //struct espconn   *platform_conn = arg;		// ESP 8266 NonOS
-  Entry_WebIf_Definition_t* platform_conn = arg;	// ESP 32 RTOS
-
-//--------------------------------------------------------------------------------------------------
-
-  #if HTTPD_Module_DBG >= 7
-  SCDEFn_at_WebIf_M->Log3Fn(platform_conn->common.name,
-	platform_conn->common.nameLen,
-	7,
-	"WebIf_Conn_Cb Fn (module '%.*s'), gets slot_no '%d' of '%d', from "
-	"remote '%d.%d.%d.%d:%d' to local port '%d', f-heap '%d'.",
-	platform_conn->common.module->provided->typeNameLen,
-	Platform_conn->common.module->provided->typeName,
-	platform_conn->slot_no,
-	MAX_SCDED_CONN,
-	platform_conn->proto.tcp->remote_ip[0],
-	platform_conn->proto.tcp->remote_ip[1],
-	platform_conn->proto.tcp->remote_ip[2],
-	platform_conn->proto.tcp->remote_ip[3],
-	platform_conn->proto.tcp->remote_port,
-	platform_conn->proto.tcp->local_port,
-	system_get_free_heap_size());
-  #endif
-
-//--------------------------------------------------------------------------------------------------
-
-  // alloc HTTPD connection slot
-  WebIf_HTTPDConnSlotData_t* conn
-	= (WebIf_HTTPDConnSlotData_t*) malloc (sizeof(WebIf_HTTPDConnSlotData_t));
-
-  // zero conn-slot memory
-  memset (conn, 0, sizeof (WebIf_HTTPDConnSlotData_t));
-
-  // store current connection in created conn slot
-  conn->conn = platform_conn;
-
- // Write slot number for identification
-  conn->slot_no = conn->conn->slot_no;
-
-  // store reverse link
-  platform_conn->reverse = conn;
-
-  // register data received callback
-  espconn_regist_recvcb (platform_conn, WebIf_RecvCb);
-
-  // register data reconnection / error info callback
-  espconn_regist_reconcb (platform_conn, WebIf_ReconCb);
-
-  // register disconnected callback
-  espconn_regist_disconcb (platform_conn, WebIf_DisconCb);
-
-  // register data was sent callback
-  espconn_regist_sentcb (platform_conn, WebIf_SentCb);
-
-//--------------------------------------------------------------------------------------------------
-
-  // init http parser for the new conn
-  HTTPD_ParserInit(conn, HTTP_BOTH);
-}
 
 
 
@@ -3930,9 +3938,9 @@ AcETXQueueData = NULL;	// warum nicht immer aus der queue?
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR 
-SCDED_Init(WebIf_ActiveResourcesDataA_t *fixedUrls
-		,WebIf_ActiveResourcesDataB_t *fixedActiveResources
-		,int Port) 
+SCDED_Init(WebIf_ActiveResourcesDataA_t* fixedUrls,
+	WebIf_ActiveResourcesDataB_t* fixedActiveResources,
+	int Port) 
   {
 /*
   // Init *ConnSlots[MAX_HTTPD_CONN] to NULL
@@ -7858,9 +7866,7 @@ http_parse_host_char(enum http_host_state s,
 //###  Rets: static int -> ?
 //##################################################################################################
 static int ICACHE_FLASH_ATTR
-http_parse_host(const char * buf,
-	struct http_parser_url *u,
-	int found_at)
+http_parse_host(const char* buf, struct http_parser_url* u, int found_at)
 {
 	assert(u->field_set & (1 << UF_HOST));
 	enum http_host_state s;
@@ -8389,7 +8395,7 @@ HTTPD_On_Url_Cb(WebIf_HTTPDConnSlotData_t *conn, const char *at, size_t length)
 	# endif
 
 	// Check User Info
-	SCDED_CheckHdrFldAuth(conn,
+	SCDED_Check_Hdr_Fld_Authorization(conn,
 		(char *) at+http_parser_url->field_data[UF_USERINFO].off,
 		http_parser_url->field_data[UF_USERINFO].len);
 	}
@@ -8781,7 +8787,7 @@ HTTPD_On_Headers_Complete_Cb(WebIf_HTTPDConnSlotData_t *conn)
   if (conn->parser_type == HTTP_REQUEST) {
 
 	// Authenticate remote for request
-	SCDED_ProcHdrFldAuth(conn);
+	SCDED_Process_Hdr_Fld_Authorization(conn);
 
 	// Analyze the path from HTTP-Parser and try to find + load a matching build in Resource
 	HTTPD_ParseUrl(conn);
@@ -9291,59 +9297,279 @@ CheckboxA(char *buff, SelectAData *SAD, uint8_t SelID, char *Name, char *CGI) //
 
 
 
-
-
-
-/**
- * ---------------------------------------------------------------------------------------------------
- *  DName: WebIf_Provided
- *  Desc: Data 'Provided By Module' for the Web IF module (functions + infos this module provides SCDE)
- *  Data:
- * ---------------------------------------------------------------------------------------------------
+/*
+ *--------------------------------------------------------------------------------------------------
+ *DName: BuiltInUrls
+ * Desc: Resource-Content-structure of active Directory - PART A (Resource-Row)
+ * Data: (struct HTTPDUrls from HttpD.h)
+ *       uint32_t AllowedMethodBF -> Allowed (implemented) Method for this resource (Bit-Field)
+ *       uint16_t AllowedDocMimeBF -> Allowed (implemented) DocMimes for this resource (Bit-Field)
+ *       uint16_t AllowedSchemeBF -> Allowed (implemented) Schemes for this resource (Bit-Field)
+ *       uint16_t free -> not used
+ *       uint8_t CgiNo -> Assigns the Cgi-Data-Row (Content Table B) for this resource
+ *       uint8_t EnaByBit -> Defines the bit (in HttpDDirEnaCtrl) that enables the entry for dir customization; 0 = always ena
+ *       const char Url -> Ptr to URL Name of this resource (that is verified and processed)
+ *--------------------------------------------------------------------------------------------------
  */
-WebIf_Provided_t WebIf_Provided = {
+/**
+ * -------------------------------------------------------------------------------------------------
+ *  DName: WebIf_ActiveResourcesDataA_forWebIf
+ *  Desc: Resource-Content-structure of active Directory - PART A (Resource-Data-Row)
+ *  Data: WebIf_ActiveResourcesDataA_t[X] from HttpD.h
+ * -------------------------------------------------------------------------------------------------
+ */
+// Content:   AllowedMethodBF          | AllowedDocMimeBF | AllowedSchemeBF  |free|CgiNo| EnaByBit | Url
+const WebIf_ActiveResourcesDataA_t WebIf_ActiveResourcesDataA_forWebIf[] = {  //ICACHE_RODATA_ATTR = 
 
-  NULL	//,WebIf_DirectWrite	// DirectWrite
+// Device Home Page
+  // Device-Feature Control
+  { 0b00000000000000000000000000001010, 0b0000000000000010, 0b0000000000000001,  0,  0, 0b00000000, "/CoNTROL_8S-1C-1ADC"}
+  // RENAMED Device-Feature Control
+ ,{ 0b00000000000000000000000000001010, 0b0000000000000010, 0b0000000000000001,  0,  0, 0b00000000, "/\xf0\x00 CoNTROL_8S-1C-1ADC.htm"}	// ADC_DevName
 
+  // Device-Feature Control - Home Automation SCDE:// access Resources
+ ,{ 0b00000000000000000000000000000110, 0b0000000000010001, 0b0000000000000010,  0,  0, 0b00000000, "/CoNTROL_8S-1C-1ADC"}
+  // RENAMED Device-Feature Control - Home Automation SCDE:// access Resources
+ ,{ 0b00000000000000000000000000000110, 0b0000000000010001, 0b0000000000000010,  0,  0, 0b00000000, "/\xf0"}	// ADC_DevName
+
+  // Switch-Feature Control
+ ,{ 0b00000000000000000000000000001010, 0b0000000000011110, 0b0000000000000001,  0,  1, 0b00000000, "/\xf1\x00\x08/SwITCH\x00 SwITCHX.htm"} // ADC_FeatNr
+  // RENAMED Switch-Feature Control
+ ,{ 0b00000000000000000000000000001010, 0b0000000000011110, 0b0000000000000001,  0,  1, 0b00000000, "/\xf3\x00\x08\x00 SwITCHX.htm"} // ADC_SwITCHFN
+  // Multi Switch(es)-Feature Control
+ ,{ 0b00000000000000000000000000001010, 0b0000000000001010, 0b0000000000000001,  0,  2, 0b00000000, "/SwITCH"}
+
+  // Switch-Feature Control - Home Automation Scheme SwITCH:// access Resources
+ ,{ 0b00000000000000000000000000000110, 0b0000000000010001, 0b0000000000001000,  0,  1, 0b00000000, "/\xf1\x00\x08"} // ADC_FeatNr
+  // RENAMED Switch-Feature Control - Home Automation SwITCH:// access Resources
+ ,{ 0b00000000000000000000000000000110, 0b0000000000010001, 0b0000000000001000,  0,  1, 0b00000000, "/\xf3\x00\x08"} // ADC_SwITCHFN
+
+  // Clima-Feature Control
+ ,{ 0b00000000000000000000000000001010, 0b0000000000011110, 0b0000000000000001,  0,  3, 0b00000000, "/\xf1\x00\x01/ClIMA\x00 ClIMAX.htm"} // ADC_FeatNr
+  // RENAMED Clima-Feature Control
+ ,{ 0b00000000000000000000000000001010, 0b0000000000011110, 0b0000000000000001,  0,  3, 0b00000000, "/\xf4\x00\x01\x00 ClIMAX.htm"} // ADC_ClIMAFN
+  // Multi ClIMA(s)-Feature Control
+ ,{ 0b00000000000000000000000000001010, 0b0000000000001010, 0b0000000000000001,  0,  4, 0b00000000, "/ClIMA"}
+
+  // ClIMA-Feature Control - Home Automation Scheme ClIMA:// access Resources
+ ,{ 0b00000000000000000000000000000110, 0b0000000000010001, 0b0000000000010000,  0,  3, 0b00000000, "/\xf1\x00\x01"} // ADC_FeatNr
+  // RENAMED ClIMA-Feature Control - Home Automation ClIMA:// access Resources
+ ,{ 0b00000000000000000000000000000110, 0b0000000000010001, 0b0000000000010000,  0,  3, 0b00000000, "/\xf4\x00\x01"} // ADC_ClIMAFN	
+
+  // ADC Feature-Control
+ ,{ 0b00000000000000000000000000001010, 0b0000000000011110, 0b0000000000000001,  0,  5, 0b00000000, "/\xf1\x00\x01/ADC\x00 ADCX.htm"} // ADC_FeatNr
+  // RENAMED ADC-Feature Control
+ ,{ 0b00000000000000000000000000001010, 0b0000000000011110, 0b0000000000000001,  0,  5, 0b00000000, "/\xf6\x00\x01\x00 ADCX.htm"} // ADC_ADCFN
+  // Multi ADC(s)-Feature Control
+ ,{ 0b00000000000000000000000000001010, 0b0000000000001010, 0b0000000000000001,  0,  6, 0b00000000, "/ADC"}
+
+  // ADC-Feature Control - Home Automation Scheme ADC:// access Resources
+ ,{ 0b00000000000000000000000000000110, 0b0000000000010001, 0b0000000001000000,  0,  5, 0b00000000, "/\xf1\x00\x01"} // ADC_FeatNr
+  // RENAMED ADC-Feature Control - Home Automation ADC:// access Resources
+ ,{ 0b00000000000000000000000000000110, 0b0000000000010001, 0b0000000001000000,  0,  5, 0b00000000, "/\xf6\x00\x01"} // ADC_ADCFN
+
+  // SERVICE PAGES
+ ,{ 0b00000000000000000000000000001010, 0b0000000000000110, 0b0000000000000001,  0,  7, 0b00000000, "/BasServ"}
+ ,{ 0b00000000000000000000000000001010, 0b0000000000000110, 0b0000000000000001,  0,  8, 0b00000000, "/AdvServ"}
+ ,{ 0b00000000000000000000000000001010, 0b0000000000000110, 0b0000000000000001,  0,  9, 0b00000000, "/SpcAttr"}
+ ,{ 0b00000000000000000000000000001010, 0b0000000000000110, 0b0000000000000001,  0, 10, 0b00000000, "/GenAttr"}
+
+  // Device Cfg
+ ,{ 0b00000000000000000000000000001010, 0b0000000000001110, 0b0000000000000001,  0, 11, 0b00000000, "/DeviceCfg"}
+
+  // SOC Hardware Cfg
+ ,{ 0b00000000000000000000000000001010, 0b0000000000001110, 0b0000000000000001,  0, 12, 0b00000000, "/SoCHWCfg"}
+
+  // WiFi Stations Cfg
+ ,{ 0b00000000000000000000000000001010, 0b0000000000001110, 0b0000000000000001,  0, 13, 0b00000000, "/WiFi/StationCfg"}
+
+  // WIFI Q-Connect PAGES
+ ,{ 0b00000000000000000000000000001010, 0b0000000000000010, 0b0000000000000001,  0, 14, 0b00000000, "/WiFi/QConnect"}
+ ,{ 0b00000000000000000000000000001010, 0b0000000000001000, 0b0000000000000001,  0, 15, 0b00000000, "/WiFi/WiFiScan"}
+ ,{ 0b00000000000000000000000000001010, 0b0000000000000100, 0b0000000000000001,  0, 16, 0b00000000, "/WiFi/Connect"}
+ ,{ 0b00000000000000000000000000001010, 0b0000000000000100, 0b0000000000000001,  0, 17, 0b00000000, "/WiFi/Setmode"}
+
+  // Service Access Point Cfg
+ ,{ 0b00000000000000000000000000001010, 0b0000000000001110, 0b0000000000000001,  0, 18, 0b00000000, "/WiFi/ServAPCfg"}
+
+  // TimeStamp Cfg
+ ,{ 0b00000000000000000000000000001010, 0b0000000000001110, 0b0000000000000001,  0, 19, 0b00000000, "/TiStCfg"}
+
+  // Firmware Update
+ ,{ 0b00000000000000000000000000001010, 0b0000000000001110, 0b0000000000000001,  0, 20, 0b00000000, "/Firmware"}
+
+  // Redirects
+ ,{ 0b00000000000000000000000000001010, 0b0000000000000001, 0b0000000000000001,  0, 21, 0b00000000, "/WiFi"}	// nomime
+ ,{ 0b00000000000000000000000000001010, 0b0000000000000001, 0b0000000000000001,  0, 21, 0b00000000, "/WiFi/"}	// nomime
+ ,{ 0b00000000000000000000000000001010, 0b0000000000000001, 0b0000000000000001,  0, 22, 0b00000000, "/"}	// nomime
+ ,{ 0b00000000000000000000000000001010, 0b0000000000000010, 0b0000000000000001,  0, 22, 0b00000000, "/index"}	// .htm
+
+  // Secret services
+ ,{ 0b00000000000000000000000000001010, 0b0000000000100000, 0b0000000000000001,  0, 23, 0b00000000, "/32MBitFlash"}
+ ,{ 0b00000000000000000000000000001010, 0b0000000000100000, 0b0000000000000001,  0, 24, 0b00000000, "/wfs"}
+
+ ,{0,0,0,0,0,0,"*"}
+};
+
+
+
+/*
+ *--------------------------------------------------------------------------------------------------
+ *DName: BuiltInActivePages
+ * Desc: Resource-Content-structure of active Directory - PART B (Cgi-Data-Row) 
+ * Data: (struct HTTPDActivePages from HttpD.h)
+ *       const uint32_t CgiFucID -> 	
+ *       cgiSendCallback cgiCb -> Callback Procedure which processes this active resource
+ *       const void *cgiArg -> Argument (Data), passed to / accessible by the Callback Procedure
+ *--------------------------------------------------------------------------------------------------
+ */
+/**
+ * -------------------------------------------------------------------------------------------------
+ *  DName: WebIf_ActiveResourcesDataB_forWebIf
+ *  Desc: Resource-Content-structure of active Directory - PART B (Procedure-Call-Data-Row) 
+ *  Data: WebIf_ActiveResourcesDataB_t[X] from HttpD.h
+ * -------------------------------------------------------------------------------------------------
+ */
+// CgiFucID=(No.<<16)+AllowedSchemeBF |      cgi            |     cgi_data
+const WebIf_ActiveResourcesDataB_t WebIf_ActiveResourcesDataB_forWebIf[] =  {  //ICACHE_RODATA_ATTR =
+
+//const WebIf_ActiveResourcesDataB_t BuiltInActiveResourcesX[] = //ICACHE_RODATA_ATTR =
+//  {
+
+  // Device-Feature Control
+  {(0<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	Device_tpl	}
+ ,{(0<<16) +	0b0000000000010001,	NULL,NULL}//	SCDE_set,		NULL		}//Device_set,
+
+  // Switch-Feature Control
+ ,{(1<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	SwITCH_tpl	}
+ ,{(1<<16) +	0b0000000000000100,	NULL,NULL}//	SwITCH_cgi,		NULL		}
+ ,{(1<<16) +	0b0000000000001000,	NULL,NULL}//	SwITCH_jso,		NULL		}
+ ,{(1<<16) +	0b0000000000010001,	NULL,NULL}//	SwITCH_set,		NULL		}
+
+  // Multi Switch(es)-Feature Control
+ ,{(2<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	SwITCH_tpl	}
+ ,{(2<<16) +	0b0000000000001000,	NULL,NULL}//	SwITCH_jso,		NULL		}
+
+  // Clima-Feature Control
+ ,{(3<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	ClIMA_tpl	}
+ ,{(3<<16) +	0b0000000000000100,	NULL,NULL}//	ClIMA_cgi,		NULL		}
+ ,{(3<<16) +	0b0000000000001000,	NULL,NULL}//	ClIMA_jso,		NULL		}
+ ,{(3<<16) +	0b0000000000010001,	NULL,NULL}//	ClIMA_set,		NULL		}
+
+  // Multi ClIMA(s)-Feature Control
+ ,{(4<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	ClIMA_tpl	}
+ ,{(4<<16) +	0b0000000000001000,	NULL,NULL}//	ClIMA_jso,		NULL		}
+
+  // ADC-Feature Control
+ ,{(5<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	ADC_tpl		}
+ ,{(5<<16) +	0b0000000000000100,	NULL,NULL}//	ADC_cgi,		NULL		}
+ ,{(5<<16) +	0b0000000000001000,	NULL,NULL}//	ADC_jso,		NULL		}
+ ,{(5<<16) +	0b0000000000010001,	NULL,NULL}//	ADC_set,		NULL		}
+
+  // Multi ADC(s)-Feature Control
+ ,{(6<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	ADC_tpl		}
+ ,{(6<<16) +	0b0000000000001000,	NULL,NULL}//	ADC_jso,		NULL		}
+
+  // ### SERVICE PAGES ###
+ ,{(7<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	BasServ_tpl	}
+ ,{(7<<16) +	0b0000000000000100,	NULL,NULL}//	BasServ_cgi,		NULL		}
+
+ ,{(8<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	AdvServ_tpl	}
+ ,{(8<<16) +	0b0000000000000100,	NULL,NULL}//	AdvServ_cgi,		NULL		}
+
+ ,{(9<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	SpcAttr_tpl	}
+ ,{(9<<16) +	0b0000000000000100,	NULL,NULL}//	SpcAttr_cgi,		NULL		}
+
+ ,{(10<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	GenAttr_tpl	}
+ ,{(10<<16) +	0b0000000000000100,	NULL,NULL}//	GenAttr_cgi,		NULL		}
+
+  // ### Device Cfg ###
+ ,{(11<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	DeviceCfg_tpl	}
+ ,{(11<<16) +	0b0000000000000100,	NULL,NULL}//	DeviceCfg_cgi,		NULL		}
+ ,{(11<<16) +	0b0000000000001000,	NULL,NULL}//	DeviceCfg_jso,		NULL		}
+
+  // ### SOC Hardware Cfg ###
+ ,{(12<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	SoCHWCfg_tpl	}
+ ,{(12<<16) +	0b0000000000000100,	NULL,NULL}//	SoCHWCfg_cgi,		NULL		}
+ ,{(12<<16) +	0b0000000000001000,	NULL,NULL}//	SoCHWCfg_jso,		NULL		}
+
+  // ### WiFi Station Cfg ###
+ ,{(13<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	StationCfg_tpl	}
+ ,{(13<<16) +	0b0000000000000100,	NULL,NULL}//	StationCfg_cgi,		NULL		}
+ ,{(13<<16) +	0b0000000000001000,	NULL,NULL}//	StationCfg_jso,		NULL		}
+
+  // ### WIFI Q-Connect PAGES ###
+ ,{(14<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	WifiQConnect_tpl}
+ ,{(15<<16) +	0b0000000000001000,	NULL,NULL}//	WiFiScan_jso,		NULL		}
+ ,{(16<<16) +	0b0000000000000100,	NULL,NULL}//	WiFiConnect_cgi,	NULL		}
+ ,{(17<<16) +	0b0000000000000100,	NULL,NULL}//	WifiSetMode_cgi,	NULL		}	
+
+  // ### Service Access Point Cfg ###
+ ,{(18<<16) +	0b0000000000000010,	WebIf_EspFSAdvFileTX,	ServAPCfg_tpl	}
+ ,{(18<<16) +	0b0000000000000100,	NULL,NULL}//	ServAPCfg_cgi,		NULL		}
+ ,{(18<<16) +	0b0000000000001000,	NULL,NULL}//	ServAPCfg_jso,		NULL		}
+
+  // ### TimeStamp Cfg ###
+ ,{(19<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	TiStCfg_tpl	}
+ ,{(19<<16) +	0b0000000000000100,	NULL,NULL}//	TiStCfg_cgi,		NULL		}
+ ,{(19<<16) +	0b0000000000001000,	NULL,NULL}//	TiStCfg_jso,		NULL		}
+
+  // ### Firmware Update ###
+ ,{(20<<16) +	0b0000000000000010,	NULL,NULL}//	EspFsTemplate_cgi,	FirmwareUd_tpl	}
+ ,{(20<<16) +	0b0000000000000100,	NULL,NULL}//	FirmwareUd_cgi,		NULL		}
+ ,{(20<<16) +	0b0000000000001000,	NULL,NULL}//	FirmwareUd_jso,		NULL		}
+
+  // ### Redirects ###
+ ,{(21<<16) +	0b0000000000000001,	cgiRedirect,	"/WiFi/QConnect.htm"		}
+ ,{(22<<16) +	0b0000000000000001,	cgiRedirect,	"/CoNTROL_8S-1C-1ADC.htm"	}
+ ,{(22<<16) +	0b0000000000000010,	cgiRedirect,	"/CoNTROL_8S-1C-1ADC.htm"	}
+
+  // ### Secret services ###
+ ,{(23<<16) +	0b0000000000100000,	ReadFullFlash_cgi,	NULL		}		//.bin
+ ,{(24<<16) +	0b0000000000100000,	NULL,NULL}//	WriteFileSystem_cgi,	NULL		}		//.bin
   };
 
 
 
-
 /**
- * ---------------------------------------------------------------------------------------------------
- *  DName: ModuleWebIf
- *  Desc: Data 'Provided By Module' for the Web IF module (functions + infos this module provides SCDE)
- *  Data:
- * ---------------------------------------------------------------------------------------------------
+ * -------------------------------------------------------------------------------------------------
+ *  DName: WebIf_provided_Fn
+ *  Desc: Assigns common + custom functions this Module provides to the SCDE (and client Modules)
+ *  Data: WebIf_provided_fn_t
+ * -------------------------------------------------------------------------------------------------
  */
-const ProvidedByModule_t WebIf_ProvidedByModule = { // A-Z order
-   "WebIf"			  	// Type-Name of module -> on Linux libfilename.so !
-  ,5					// size of Type-Name
+WebIf_ProvidedByModule_t WebIf_ProvidedByModule = {   // A-Z order
+{
+// --- first the common module functions ---
+  "WebIf",					// Type-Name of module -> on Linux libfilename.so !
+  5,						// size of Type-Name
 
-  ,WebIf_Add				// Add
-  ,NULL					// Attribute
-  ,WebIf_Define				// Define
-  ,NULL					// Delete
-  ,WebIf_Direct_Read			// Direct_Read
-  ,WebIf_Direct_Write			// Direct_Write
-  ,NULL					// Except
-  ,NULL					// Get
-  ,WebIf_IdleCbX			// IdleCb
-  ,WebIf_Initialize			// Initialize
-  ,NULL					// Notify
-  ,NULL					// Parse
-  ,NULL					// Read
-  ,NULL					// Ready
-  ,NULL					// Rename
-  ,NULL	//WebIf_Set			// Set
-  ,NULL					// Shutdown
-  ,NULL					// State
-  ,WebIf_Sub				// Sub
-  ,WebIf_Undefine			// Undefine
-  ,NULL					// Write
-  ,NULL					// FnProvided
-  ,sizeof(Entry_WebIf_Definition_t)		// Modul specific Size (Common_Definition_t + X)
+  WebIf_Add,					// Add
+  NULL,						// Attribute
+  WebIf_Define,					// Define
+  NULL, 					// Delete
+  WebIf_Direct_Read,				// Direct_Read
+  WebIf_Direct_Write,				// Direct_Write
+  NULL,						// Except
+  NULL,						// Get
+  WebIf_IdleCb,					// IdleCb
+  WebIf_Initialize,				// Initialize
+  NULL,						// Notify
+  NULL,						// Parse
+  NULL,						// Read
+  NULL,						// Ready
+  NULL,						// Rename
+  NULL,						// Set
+  NULL,						// Shutdown
+  NULL, 					// State
+  WebIf_Sub, 					// Sub
+  WebIf_Undefine,				// Undefine
+  NULL,						// Write
+  NULL,						// FnProvided
+  sizeof(Entry_WebIf_Definition_t)			// Modul specific Size (Common_Definition_t + X)
+},
+// --- now the custom module fuctions ---
+ //  ESP32_SPI_bus_add_device,			// adds an device to the definitions host
 };
 
 
@@ -9619,8 +9845,9 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
   memset(WebIf_Definition->HTTPD_InstCfg, 0, sizeof (HTTPD_InstanceCfg_t));
 
   // HTTPD-Instance-Configuration -> set content
-  WebIf_Definition->HTTPD_InstCfg->BuiltInUrls = (WebIf_ActiveResourcesDataA_t *) &BuiltInUrlsX;
-  WebIf_Definition->HTTPD_InstCfg->BuiltInActiveResources = (WebIf_ActiveResourcesDataB_t *) &BuiltInActiveResourcesX;
+  WebIf_Definition->HTTPD_InstCfg->BuiltInUrls = (WebIf_ActiveResourcesDataA_t *) &WebIf_ActiveResourcesDataA_forWebIf;
+  WebIf_Definition->HTTPD_InstCfg->BuiltInActiveResources = (WebIf_ActiveResourcesDataB_t *) &WebIf_ActiveResourcesDataB_forWebIf;
+
 
   // HTTPD-Instance-Configuration -> Set HTTPD Parser Fn callbacks
   http_parser_settings_t* HTTPDparser_settings = &WebIf_Definition->HTTPD_InstCfg->HTTPDparser_settings;
@@ -10172,12 +10399,12 @@ WebIf_Initialize(SCDERoot_t* SCDERootptr)
   // make locally available from data-root: SCDEFn (Functions / callbacks) for faster operation
   SCDEFn_at_WebIf_M = SCDERootptr->SCDEFn;
 
-  SCDEFn_at_WebIf_M->Log3Fn(WebIf_ProvidedByModule.typeName,
-		  WebIf_ProvidedByModule.typeNameLen,
-		  3,
-		  "InitializeFn called. Type '%.*s' now useable.",
-		  WebIf_ProvidedByModule.typeNameLen,
-		  WebIf_ProvidedByModule.typeName);
+  SCDEFn_at_WebIf_M->Log3Fn(WebIf_ProvidedByModule.common.typeName,
+		WebIf_ProvidedByModule.common.typeNameLen,
+		3,
+		"InitializeFn called. Type '%.*s' now useable.",
+		WebIf_ProvidedByModule.common.typeNameLen,
+		WebIf_ProvidedByModule.common.typeName);
 
   return 0;
 }
