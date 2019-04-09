@@ -171,6 +171,7 @@ HdrFlds AvailHdrFlds[]=
 
 //--------------------------------------------------------------------------------------------------
 
+/*
 // SCDE Event-TX-Connect-Control - State (enum) Monitoring
 enum ETXCC_State
   { s_idle = 0					// #000 idle state, !! no connection control !!
@@ -191,7 +192,7 @@ enum ETXCC_State
   int SCDEETX_RcvNOKCNT = 0;	// Error counter: retrys, ... ?
 
 //--------------------------------------------------------------------------------------------------
-
+*/
 
 
 
@@ -4162,16 +4163,17 @@ if (1)  //SPZ		if ( (SCDEETXQ_GetNumJobs() != 0) || (SysCfgRamFlashMirrored->MyS
 //###  Para: void *arg -> espconn *conn
 //###  Rets: NONE
 //##################################################################################################
+/*
 void ICACHE_FLASH_ATTR
 SCDEETX_DNSLookup(void *arg)
   {
-//spz  struct espconn *conn = (struct espconn *)arg;
+//spz  struct espconn *conn = (struct espconn *)arg;*/
 /*spz
   err_t Result = espconn_gethostbyname(conn,
 	(char *)SysCfgRamFlashMirrored->MySCDEETX_Cfg.Domain,
 	&SysCfgRamFlashMirrored->MySCDEETX_Cfg.ip,
 	SCDEETX_IPConnect);*/
-
+/*
   # if SCDEETX_DBG >= 3
   printf("SCDEETX DNS lookup: %s err:%d\n",
 	SysCfgRamFlashMirrored->MySCDEETX_Cfg.Domain,
@@ -4195,7 +4197,7 @@ SCDEETX_DNSLookup(void *arg)
   // Event-TX-Connect-Control new state: s_monitoring_dns_lookup (because we want to monitor DNSLookup func success)
   ETXCC_State = s_monitoring_dns_lookup;
 
-  }
+  }*/
 
 
 
@@ -4207,6 +4209,7 @@ SCDEETX_DNSLookup(void *arg)
 //###	     void *espconn    -> struct espconn *espconn
 //###  Rets: NONE
 //##################################################################################################
+/*
 void ICACHE_FLASH_ATTR
 SCDEETX_IPConnect(const char *name, ip_addr_t *ip, void *arg)
   {
@@ -4237,7 +4240,7 @@ SCDEETX_IPConnect(const char *name, ip_addr_t *ip, void *arg)
 	SysCfgRamFlashMirrored->MySCDEETX_Cfg.Dest_Port,
 	SysCfgRamFlashMirrored->MySCDEETX_Cfg.ESP_Port);
   # endif
-
+*/
   // prepare connection structure
 /*spz  pespconn->type = ESPCONN_TCP;
   pespconn->state = ESPCONN_NONE;
@@ -4269,11 +4272,11 @@ SCDEETX_IPConnect(const char *name, ip_addr_t *ip, void *arg)
 //espconn_set_opt(pespconn,0b1011); // free imediatly+disable nagle+TCP keep alive
 
   // Event-TX-Connect-Control new state: s_waked_up_monitoring_conn_proc_IP #02 (monitoring event conncb)
-  ETXCC_State = s_monitoring_conn_proc_IP;*/
+  ETXCC_State = s_monitoring_conn_proc_IP;
 
   }
 
-
+*/
 
 
 
@@ -9820,37 +9823,39 @@ WebIf_UndefineRaw(Entry_WebIf_Definition_t* WebIf_Definition)
  *--------------------------------------------------------------------------------------------------
  */
 strTextMultiple_t*
-WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
-  {
-
+WebIf_Define (Entry_Definition_t* p_entry_definition)
+{
   // for Fn response msg
-  strTextMultiple_t *retMsg = NULL;
+  strTextMultiple_t* retMsg = NULL;
 
   // make common ptr to modul specific ptr
-	Entry_WebIf_Definition_t* WebIf_Definition =
-		  (Entry_WebIf_Definition_t*) Common_Definition;
+  Entry_WebIf_Definition_t* p_entry_webif_definition =
+	(Entry_WebIf_Definition_t*) p_entry_definition;
 
   #if SCDEH_DBG >= 5
   printf("\n|WebIf_Def, Def:%.*s>"
-	,WebIf_Definition->common.definitionLen
-	,WebIf_Definition->common.definition);
+	,p_entry_webif_definition->common.definitionLen
+	,p_entry_webif_definition->common.definition);
   #endif
 
-//---
+//--------------------------------------------------------------------------------------------------
 
   // alloc memory for the HTTPD-Instance-Configuration
-  WebIf_Definition->HTTPD_InstCfg = (HTTPD_InstanceCfg_t*) malloc(sizeof(HTTPD_InstanceCfg_t));
+  p_entry_webif_definition->HTTPD_InstCfg = 
+	(HTTPD_InstanceCfg_t*) malloc (sizeof(HTTPD_InstanceCfg_t));
 
   // memclr the HTTPD-Instance-Configuration
-  memset(WebIf_Definition->HTTPD_InstCfg, 0, sizeof (HTTPD_InstanceCfg_t));
+  memset(p_entry_webif_definition->HTTPD_InstCfg, 0, sizeof (HTTPD_InstanceCfg_t));
 
   // HTTPD-Instance-Configuration -> set content
-  WebIf_Definition->HTTPD_InstCfg->BuiltInUrls = (WebIf_ActiveResourcesDataA_t *) &WebIf_ActiveResourcesDataA_forWebIf;
-  WebIf_Definition->HTTPD_InstCfg->BuiltInActiveResources = (WebIf_ActiveResourcesDataB_t *) &WebIf_ActiveResourcesDataB_forWebIf;
-
+  p_entry_webif_definition->HTTPD_InstCfg->BuiltInUrls =
+	(WebIf_ActiveResourcesDataA_t *) &WebIf_ActiveResourcesDataA_forWebIf;
+  p_entry_webif_definition->HTTPD_InstCfg->BuiltInActiveResources =
+	(WebIf_ActiveResourcesDataB_t *) &WebIf_ActiveResourcesDataB_forWebIf;
 
   // HTTPD-Instance-Configuration -> Set HTTPD Parser Fn callbacks
-  http_parser_settings_t* HTTPDparser_settings = &WebIf_Definition->HTTPD_InstCfg->HTTPDparser_settings;
+  http_parser_settings_t* HTTPDparser_settings = 
+	&p_entry_webif_definition->HTTPD_InstCfg->HTTPDparser_settings;
 
   // doppelt ?? HTTPD-Instance-Configuration -> assign the HTTPD Parser the settings
   http_parser_settings_init(HTTPDparser_settings);
@@ -9868,20 +9873,18 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 
 
   // ?? how to init !!!!!!!!!!!
-//WebIf_Definition->HTTPD_InstCfg->SCDED_DirConEnaCtrl = 0; cleared by memset ...
+//p_entry_webif_definition->HTTPD_InstCfg->SCDED_DirConEnaCtrl = 0; cleared by memset ...
 
   // reset Load-Serializer-Bitfield -> no heavy load tasks now!
-//WebIf_Definition->HTTPD_InstCfg->LoadSerializer = 0; cleared by memset ...
+//p_entry_webif_definition->HTTPD_InstCfg->LoadSerializer = 0; cleared by memset ...
 
   //reset Slot Control Register Bitfield -> no connections yet!
-//WebIf_Definition->HTTPD_InstCfg->SlotCtrlRegBF = 0; cleared by memset ...
+//p_entry_webif_definition->HTTPD_InstCfg->SlotCtrlRegBF = 0; cleared by memset ...
 
 //--------------------------------------------------------------------------------------------------
 
   // mark this as the server-socket
-  WebIf_Definition->WebIf_CtrlRegA |= F_THIS_IS_SERVERSOCKET;
-
-
+  p_entry_webif_definition->WebIf_CtrlRegA |= F_THIS_IS_SERVERSOCKET;
 
  // later from definition
   int Port = 80;
@@ -9892,7 +9895,7 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
   int ret;
 
   // master socket or listening fd
-  int listenfd;
+  int listen_fd;
 
   // server address structure
   struct sockaddr_in server_addr;
@@ -9904,59 +9907,48 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 
   // Create socket for incoming connections
   do {
-
-	listenfd = socket(AF_INET , SOCK_STREAM , IPPROTO_TCP);
+	listen_fd = socket (AF_INET , SOCK_STREAM , IPPROTO_TCP);
 
 	// socked created or error?
-	if (listenfd < 0)
+	if ( listen_fd < 0 ) {
 
-		{
+		SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name
+			,p_entry_webif_definition->common.nameLen
+			,1
+			,"WebIf_Define ERROR: failed to create sock! retriing\n");
 
-		SCDEFn_at_WebIf_M->Log3Fn(WebIf_Definition->common.name
-				,WebIf_Definition->common.nameLen
-				,1
-				,"WebIf_Define ERROR: failed to create sock! retriing\n");
+		vTaskDelay ( 1000 / portTICK_RATE_MS );
+	}
 
-		vTaskDelay(1000/portTICK_RATE_MS);
-
-		}
-
-	} while(listenfd < 0);
-
+  } while ( listen_fd < 0 );
 
   // set master socket to allow multiple connections , this is just a good habit, it will work without this
-  ret = setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt) );
-  if (ret < 0 )
+  ret = setsockopt (listen_fd, SOL_SOCKET, SO_REUSEADDR, (char*) &opt, sizeof (opt) );
 
-	{
+  if ( ret < 0 ) {
 
-	SCDEFn_at_WebIf_M->Log3Fn(WebIf_Definition->common.name
-			,WebIf_Definition->common.nameLen
-			,1
-			,"WebIf_Define ERROR: 'setsockopt' failed! error:%d\n"
-			,ret);
-
-	}
+	SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name
+		,p_entry_webif_definition->common.nameLen
+		,1
+		,"WebIf_Define ERROR: 'setsockopt' failed! error:%d\n"
+		,ret);
+  }
 
   // bind the socket to the local port
   do {
+	ret = bind(listen_fd, (struct sockaddr *) &server_addr, sizeof(server_addr));
 
-	ret = bind(listenfd, (struct sockaddr *) &server_addr, sizeof(server_addr));
+	if ( ret != 0 ) {
 
-	if (ret != 0)
-
-		{
-
-		SCDEFn_at_WebIf_M->Log3Fn(WebIf_Definition->common.name
-				,WebIf_Definition->common.nameLen
-				,1
-				,"WebIf_Define ERROR: 'bind' failed! retriing\n");
+		SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name
+			,p_entry_webif_definition->common.nameLen
+			,1
+			,"WebIf_Define ERROR: 'bind' failed! retriing\n");
 
 		vTaskDelay(1000/portTICK_RATE_MS);
-		}
+	}
 
-	} while(ret != 0);
-
+  } while ( ret != 0 );
 
 //  # if SCDED_DBG >= 3
  /* printf("|local at:%u.%u.%u.%u:%u,port:%u>"
@@ -9969,50 +9961,45 @@ WebIf_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
 //  #endif
 
 
-
-
 #define HTTPD_MAX_CONNECTIONS 16
 
   // listen to the local port
-  do	{
+  do {
+	ret = listen (listen_fd, HTTPD_MAX_CONNECTIONS);
 
-	ret = listen(listenfd, HTTPD_MAX_CONNECTIONS);
+	if ( ret != 0 ) {
 
-	if (ret != 0)
+		SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name
+			,p_entry_webif_definition->common.nameLen
+			,1
+			,"WebIf_Define ERROR: 'listen' failed! retriing\n");
 
-		{
+		vTaskDelay ( 1000 / portTICK_RATE_MS );
+	}
 
-		SCDEFn_at_WebIf_M->Log3Fn(WebIf_Definition->common.name
-				,WebIf_Definition->common.nameLen
-				,1
-				,"WebIf_Define ERROR: 'listen' failed! retriing\n");
-
-		vTaskDelay(1000/portTICK_RATE_MS);
-		}
-
-	} while(ret != 0);
+  } while ( ret != 0 );
 
   // store FD to Definition. Will than be processed in global loop ...
-  WebIf_Definition->common.fd = listenfd;
+  p_entry_webif_definition->common.fd = listen_fd;
 
   // using TCP, create, fill and store struct
-  esp_tcp *tcp = malloc (sizeof(esp_tcp));
+  esp_tcp* tcp = malloc (sizeof(esp_tcp));
 //  tcp->local_ip = server_addr.sin_addr.s_addr;
   tcp->local_port = server_addr.sin_port;
-  WebIf_Definition->proto.tcp = tcp;
+  p_entry_webif_definition->proto.tcp = tcp;
 
-  WebIf_Definition->type = ESPCONN_TCP;
-  WebIf_Definition->state = ESPCONN_NONE;
+  p_entry_webif_definition->type = ESPCONN_TCP;
+  p_entry_webif_definition->state = ESPCONN_NONE;
 
   // register the connect-callback - used ...
-  espconn_regist_connectcb(WebIf_Definition,
+  espconn_regist_connectcb(p_entry_webif_definition,
 	WebIf_ConnCb);
 
-  SCDEFn_at_WebIf_M->Log3Fn(WebIf_Definition->common.name
-		  ,WebIf_Definition->common.nameLen
-		  ,1
-		  ,"Defined a WebIf at X.X.X.X:YYYY, FD is:%d\n"
-		  ,listenfd);
+  SCDEFn_at_WebIf_M->Log3Fn(p_entry_webif_definition->common.name
+	  ,p_entry_webif_definition->common.nameLen
+	  ,1
+	  ,"Defined a WebIf at X.X.X.X:YYYY, FD is:%d\n"
+	  ,listen_fd);
 
   return retMsg;
 }

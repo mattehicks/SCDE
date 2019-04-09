@@ -555,40 +555,54 @@ EventTX_UndefineRaw(Entry_EventTX_Definition_t* EventTX_Definition)
  *--------------------------------------------------------------------------------------------------
  */
 strTextMultiple_t*
-EventTX_Define(Common_Definition_t *Common_Definition)//, const char *Definition)
-  {
-
+EventTX_Define (Entry_Definition_t* p_entry_definition)
+{
   // for Fn response msg
   strTextMultiple_t *retMsg = NULL;
 
   // make common ptr to modul specific ptr
-	Entry_EventTX_Definition_t* EventTX_Definition =
-		  (Entry_EventTX_Definition_t*) Common_Definition;
+  Entry_EventTX_Definition_t* p_entry_eventtx_definition =
+	(Entry_EventTX_Definition_t*) p_entry_definition;
 
   #if SCDEH_DBG >= 5
   printf("\n|EventTX_Def, Def:%.*s>"
-	,EventTX_Definition->common.definitionLen
-	,EventTX_Definition->common.definition);
+	,p_entry_eventtx_definition->common.definitionLen
+	,p_entry_eventtx_definition->common.definition);
   #endif
 
-//---
+//--------------------------------------------------------------------------------------------------
+
+// SCDE Event-TX-Connect-Control State
+  p_entry_eventtx_definition->ETXCC_State = s_delay_then_idle;	// delay after boot up ...
+
+// SCDE Event-TX - clear STATISTICS
+//p_entry_eventtx_definition->SCDEETX_ConnCNT = 0; cleared by memset ...
+//p_entry_eventtx_definition->SCDEETX_MsgCNT = 0; cleared by memset ...
+//p_entry_eventtx_definition->SCDEETX_RcvOKCNT = 0; cleared by memset ...
+//p_entry_eventtx_definition->SCDEETX_RcvNOKCNT = 0; cleared by memset ...
+
+//--------------------------------------------------------------------------------------------------
 
   // alloc memory for the HTTPD-Instance-Configuration
-  EventTX_Definition->HTTPD_InstCfg = (HTTPD_InstanceCfg_t*) malloc(sizeof(HTTPD_InstanceCfg_t));
+  p_entry_eventtx_definition->HTTPD_InstCfg = 
+	(HTTPD_InstanceCfg_t*) malloc (sizeof(HTTPD_InstanceCfg_t));
 
   // memclr the HTTPD-Instance-Configuration
-  memset(EventTX_Definition->HTTPD_InstCfg, 0, sizeof (HTTPD_InstanceCfg_t));
+  memset(p_entry_eventtx_definition->HTTPD_InstCfg, 0,
+	sizeof (HTTPD_InstanceCfg_t));
 
  // HTTPD-Instance-Configuration -> set content
-  EventTX_Definition->HTTPD_InstCfg->BuiltInUrls = (WebIf_ActiveResourcesDataA_t *) &EventTX_ActiveResourcesDataA_forWebIf;
-  EventTX_Definition->HTTPD_InstCfg->BuiltInActiveResources = (WebIf_ActiveResourcesDataB_t *) &EventTX_ActiveResourcesDataB_forWebIf;
-
+  p_entry_eventtx_definition->HTTPD_InstCfg->BuiltInUrls = 
+	(WebIf_ActiveResourcesDataA_t *) &EventTX_ActiveResourcesDataA_forWebIf;
+  p_entry_eventtx_definition->HTTPD_InstCfg->BuiltInActiveResources = 
+	(WebIf_ActiveResourcesDataB_t *) &EventTX_ActiveResourcesDataB_forWebIf;
 
   // HTTPD-Instance-Configuration -> Set HTTPD Parser Fn callbacks
-  http_parser_settings_t* HTTPDparser_settings = &EventTX_Definition->HTTPD_InstCfg->HTTPDparser_settings;
+  http_parser_settings_t* HTTPDparser_settings = 
+	&p_entry_eventtx_definition->HTTPD_InstCfg->HTTPDparser_settings;
 
   // doppelt ?? HTTPD-Instance-Configuration -> assign the HTTPD Parser the settings
-  http_parser_settings_init(HTTPDparser_settings);
+  http_parser_settings_init (HTTPDparser_settings);
 
   HTTPDparser_settings->on_message_begin = HTTPD_On_Message_Begin_Cb;
   HTTPDparser_settings->on_url = HTTPD_On_Url_Cb;
@@ -603,87 +617,79 @@ EventTX_Define(Common_Definition_t *Common_Definition)//, const char *Definition
 
 
   // ?? how to init !!!!!!!!!!!
-//EventTX_Definition->HTTPD_InstCfg->SCDED_DirConEnaCtrl = 0; cleared by memset ...
+//p_entry_eventtx_definition->HTTPD_InstCfg->SCDED_DirConEnaCtrl = 0; cleared by memset ...
 
   // reset Load-Serializer-Bitfield -> no heavy load tasks now!
-//EventTX_Definition->HTTPD_InstCfg->LoadSerializer = 0; cleared by memset ...
+//p_entry_eventtx_definition->HTTPD_InstCfg->LoadSerializer = 0; cleared by memset ...
 
   //reset Slot Control Register Bitfield -> no connections yet!
-//EventTX_Definition->HTTPD_InstCfg->SlotCtrlRegBF = 0; cleared by memset ...
+//p_entry_eventtx_definition->HTTPD_InstCfg->SlotCtrlRegBF = 0; cleared by memset ...
 
 //--------------------------------------------------------------------------------------------------
 
   // mark this as the server-socket
-  EventTX_Definition->EventTX_CtrlRegA |= F_THIS_IS_SERVERSOCKET;
-
-
+  p_entry_eventtx_definition->EventTX_CtrlRegA |= F_THIS_IS_SERVERSOCKET;
 
  // later from definition
-  int Port = 80;
+  int port = 3000;
 
   // ???
   int opt = true;
 
   int ret;
 
-  // master socket or listening fd
-  int listenfd;
+  // socket fd for event tx
+  int socket_fd;
 
   // server address structure
   struct sockaddr_in server_addr;
   memset(&server_addr, 0, sizeof(server_addr));
-  server_addr.sin_family = AF_INET;
-  server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  server_addr.sin_len = sizeof(server_addr);
-  server_addr.sin_port = htons(Port);
 
   // Create socket for incoming connections
   do {
-
-	listenfd = socket(AF_INET , SOCK_STREAM , IPPROTO_TCP);
+	socket_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	// socked created or error?
-	if (listenfd < 0)
+	if ( socket_fd < 0 ) {
 
-		{
-
-		SCDEFn_at_EventTX_M->Log3Fn(EventTX_Definition->common.name
-				,EventTX_Definition->common.nameLen
+		SCDEFn_at_EventTX_M->Log3Fn(p_entry_eventtx_definition->common.name
+				,p_entry_eventtx_definition->common.nameLen
 				,1
 				,"EventTX_Define ERROR: failed to create sock! retriing\n");
 
 		vTaskDelay(1000/portTICK_RATE_MS);
+	}
 
-		}
+  } while ( socket_fd < 0 );
 
-	} while(listenfd < 0);
-
+  // prepare struct 'sockaddr_in'
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_addr.s_addr = inet_addr("192.168.0.1");
+  server_addr.sin_port = htons (port);
+  server_addr.sin_len = sizeof (server_addr);
 
   // set master socket to allow multiple connections , this is just a good habit, it will work without this
-  ret = setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt) );
-  if (ret < 0 )
+  ret = setsockopt (socket_fd, SOL_SOCKET, SO_REUSEADDR, (char*) &opt, sizeof (opt) );
+  if ( ret < 0 ) {
 
-	{
-
-	SCDEFn_at_EventTX_M->Log3Fn(EventTX_Definition->common.name
-			,EventTX_Definition->common.nameLen
+	SCDEFn_at_EventTX_M->Log3Fn(p_entry_eventtx_definition->common.name
+			,p_entry_eventtx_definition->common.nameLen
 			,1
 			,"EventTX_Define ERROR: 'setsockopt' failed! error:%d\n"
 			,ret);
+  }
 
-	}
-
+/* server only
   // bind the socket to the local port
   do {
-
 	ret = bind(listenfd, (struct sockaddr *) &server_addr, sizeof(server_addr));
 
 	if (ret != 0)
 
 		{
 
-		SCDEFn_at_EventTX_M->Log3Fn(EventTX_Definition->common.name
-				,EventTX_Definition->common.nameLen
+		SCDEFn_at_EventTX_M->Log3Fn(p_entry_eventtx_definition->common.name
+				,p_entry_eventtx_definition->common.nameLen
 				,1
 				,"EventTX_Define ERROR: 'bind' failed! retriing\n");
 
@@ -691,7 +697,7 @@ EventTX_Define(Common_Definition_t *Common_Definition)//, const char *Definition
 		}
 
 	} while(ret != 0);
-
+*/
 
 //  # if SCDED_DBG >= 3
  /* printf("|local at:%u.%u.%u.%u:%u,port:%u>"
@@ -705,9 +711,8 @@ EventTX_Define(Common_Definition_t *Common_Definition)//, const char *Definition
 
 
 
-
+/* server only
 #define HTTPD_MAX_CONNECTIONS 16
-
   // listen to the local port
   do	{
 
@@ -717,8 +722,8 @@ EventTX_Define(Common_Definition_t *Common_Definition)//, const char *Definition
 
 		{
 
-		SCDEFn_at_EventTX_M->Log3Fn(EventTX_Definition->common.name
-				,EventTX_Definition->common.nameLen
+		SCDEFn_at_EventTX_M->Log3Fn(p_entry_eventtx_definition->common.name
+				,p_entry_eventtx_definition->common.nameLen
 				,1
 				,"EventTX_Define ERROR: 'listen' failed! retriing\n");
 
@@ -726,28 +731,29 @@ EventTX_Define(Common_Definition_t *Common_Definition)//, const char *Definition
 		}
 
 	} while(ret != 0);
+*/
 
-  // store FD to Definition. Will than be processed in global loop ...
-  EventTX_Definition->common.fd = listenfd;
+  // store FD to the Definition. Will than be processed in global loop ...
+  p_entry_eventtx_definition->common.fd = socket_fd;
 
   // using TCP, create, fill and store struct
-  esp_tcp *tcp = malloc (sizeof(esp_tcp));
+  esp_tcp* tcp = malloc (sizeof (esp_tcp));
 //  tcp->local_ip = server_addr.sin_addr.s_addr;
   tcp->local_port = server_addr.sin_port;
-  EventTX_Definition->proto.tcp = tcp;
+  p_entry_eventtx_definition->proto.tcp = tcp;
 
-  EventTX_Definition->type = ESPCONN_TCP;
-  EventTX_Definition->state = ESPCONN_NONE;
+  p_entry_eventtx_definition->type = ESPCONN_TCP;
+  p_entry_eventtx_definition->state = ESPCONN_NONE;
 
   // register the connect-callback - used ...
-  espconn_regist_connectcb(EventTX_Definition,
+  espconn_regist_connectcb(p_entry_eventtx_definition,
 	EventTX_Connect_Cb);
 
-  SCDEFn_at_EventTX_M->Log3Fn(EventTX_Definition->common.name
-		  ,EventTX_Definition->common.nameLen
+  SCDEFn_at_EventTX_M->Log3Fn(p_entry_eventtx_definition->common.name
+		  ,p_entry_eventtx_definition->common.nameLen
 		  ,1
-		  ,"Defined a WebIf at X.X.X.X:YYYY, FD is:%d\n"
-		  ,listenfd);
+		  ,"Defined a EventTX at X.X.X.X:YYYY, FD is:%d\n"
+		  ,socket_fd);
 
   return retMsg;
 }
@@ -1861,6 +1867,193 @@ EventTX_Received_Cb (void* arg, char* p_recv_data, unsigned short recv_data_len)
 
 
 
+/*
+ *--------------------------------------------------------------------------------------------------
+ *FName: SCDEETX_Connect
+ * Desc: Connects the SCDE-Event TX connection (should be called from 10Hz timer !)
+ *       conditions:
+ *       + SCDE-ETX enabled && not connected
+ *       + Queue filled || "TX Keep Alive to RX" is activated
+ *       includes Connect Control by status
+ * Para: -/-
+ * Rets: -/-
+ *--------------------------------------------------------------------------------------------------
+ */
+void ICACHE_FLASH_ATTR
+EventTX_Manage_Connection (Entry_EventTX_Definition_t* p_entry_eventtx_definition)
+{
+  // is the SCDE-Event TX activated ?
+  if (1) { //SPZ if (SysCfgRamFlashMirrored->MySCDEETX_Cfg.ETX_GenOpt & F_ENABLE_SCDE_EVENT_TX) {
 
+	// is the SCDE-Event TX Slot NOT connected ?
+  	if ( p_entry_eventtx_definition->reverse == NULL ) {
+
+		// is SCDE-E-TX-Queue filled or SCDE-E-TX "TX Keep Alive to RX" activated -> we need  a connection
+		if (1) { //SPZ		if ( (SCDEETXQ_GetNumJobs() != 0) || (SysCfgRamFlashMirrored->MySCDEETX_Cfg.ETX_GenOpt & F_TX_KEEP_CONN_ALIVE) )
+
+			# if SCDEETX_DBG >= 5
+			printf("\nSCDEETX CCS:%d",
+				p_entry_eventtx_definition->ETXCC_State);
+			# endif
+
+			switch ( p_entry_eventtx_definition->ETXCC_State ) {
+
+//---------------------------------------------------------------------------------------------------
+
+				// is E-TX-Connect-Control State > s_idle? -> Connect Control not active (do make new connection try)
+				case s_idle:
+
+				# if SCDEETX_DBG >= 3
+				printf("SCDEETX ConnTry\n");
+				# endif
+
+				# if SCDEETX_DBG >= 5
+				// Display SCDE-Event-TX Queue for debugging
+				SCDEETXQ_DisplayJobs();
+
+				printf("SCDEETX CCS:%d. Statistics:Conn=%d; Msg=%d;RcvOK=%d;RcvNOK=%d\n",
+					p_entry_eventtx_definition->ETXCC_State,
+					p_entry_eventtx_definition->SCDEETX_ConnCNT,
+					p_entry_eventtx_definition->SCDEETX_MsgCNT,
+					p_entry_eventtx_definition->SCDEETX_RcvOKCNT,
+					p_entry_eventtx_definition->SCDEETX_RcvNOKCNT);
+  				# endif
+
+				// Try to extract IP ...
+				if (1) /*spz			
+				if (UTILS_StrToIP((int8_t*) SysCfgRamFlashMirrored->MySCDEETX_Cfg.Domain,
+					&SysCfgRamFlashMirrored->MySCDEETX_Cfg.ip))*/
+
+					// we have IP! skipping DNS lookup...
+					{
+/*
+	/ spz				SCDEETX_IPConnect((char *)SysCfgRamFlashMirrored->MySCDEETX_Cfg.Domain,
+						(ip_addr_t*) &SysCfgRamFlashMirrored->MySCDEETX_Cfg.ip.addr,
+						&SCDEETXConn);/
+*/
+					}
+
+  				else
+
+					// we have NO IP! we need DNS lookup to get IP
+					{
+
+					//SCDEETX_DNSLookup(&SCDEETXConn);
+
+					}
+
+				break;
+
+//---------------------------------------------------------------------------------------------------
+
+				// is E-TX-Connect-Control State > s_dns_lookup_failed? -> Connect Control detects DNS lookup failure
+				case s_dns_lookup_failed:
+
+				# if SCDEETX_DBG >= 1
+				printf("SCDEETX DNS-Lookup TIMEOUT!\n");
+				# endif
+
+				// restart
+				p_entry_eventtx_definition->ETXCC_State = s_idle;
+
+				break;
+
+//---------------------------------------------------------------------------------------------------
+
+				// is E-TX-Connect-Control State > s_conn_proc_IP_failed? -> Connect Control detects connection to IP failed
+				case s_conn_proc_IP_failed:
+
+				# if SCDEETX_DBG >= 1
+				printf("SCDEETX ConnCb TIMEOUT!\n");
+				# endif
+
+				// restart
+				p_entry_eventtx_definition->ETXCC_State = s_idle;
+
+				break;
+
+//---------------------------------------------------------------------------------------------------
+
+				default:
+				p_entry_eventtx_definition->ETXCC_State--;
+			}
+		}
+	}
+  }
+}
+
+
+
+
+//##################################################################################################
+//### FName: SCDEETX_IPConnect
+//###  Desc: Connect with IP (->DNS Lookup complete) - starting Connection
+//###  Para: const char *name -> const char *DomainNameDestination
+//###        ip_addr_t *ip    -> ip_addr_t *IPDestination
+//###	     void *espconn    -> struct espconn *espconn
+//###  Rets: NONE
+//##################################################################################################
+void ICACHE_FLASH_ATTR
+EventTX_IPConnect(const char* name, ip_addr_t* ip, Entry_EventTX_Definition_t* p_entry_eventtx_definition)
+{
+
+//spz  static esp_tcp tcp;
+
+  //struct espconn *pespconn = (struct espconn *)arg;
+
+  if ( ip == NULL ) {
+
+	# if SCDEETX_DBG >= 1
+	printf("SCDEETX dest. IP inv.!\n");
+	# endif
+
+	// Event-TX-Connect-Control new state: s_delay_then_idle (because IP we got is invalid)
+	p_entry_eventtx_definition->ETXCC_State = s_delay_then_idle;
+
+	return;
+  }
+
+  # if SCDEETX_DBG >= 3
+  printf("SCDEETX conn. to remote:%d.%d.%d.%d:%d from local port:%d\n",
+	*((uint8 *)&ip->addr),
+	*((uint8 *)&ip->addr + 1),
+	*((uint8 *)&ip->addr + 2),
+	*((uint8 *)&ip->addr + 3),
+	SysCfgRamFlashMirrored->MySCDEETX_Cfg.Dest_Port,
+	SysCfgRamFlashMirrored->MySCDEETX_Cfg.ESP_Port);
+  # endif
+
+  // prepare connection structure
+  p_entry_eventtx_definition->type = ESPCONN_TCP;
+  p_entry_eventtx_definition->state = ESPCONN_NONE;
+//  p_entry_eventtx_definition->proto.tcp = &tcp; its there in allocated mem
+  p_entry_eventtx_definition->proto.tcp->local_port = 23;//SysCfgRamFlashMirrored->MySCDEETX_Cfg.ESP_Port;
+  p_entry_eventtx_definition->proto.tcp->remote_port = 66;//SysCfgRamFlashMirrored->MySCDEETX_Cfg.Dest_Port;
+  memcpy(p_entry_eventtx_definition->proto.tcp->remote_ip, &ip->addr, 4);
+
+  espconn_regist_connectcb(pespconn, SCDED_PlatformETXSlotConnCb);
+
+  int8_t Result = espconn_connect(pespconn);
+
+  if (Result) {
+
+	# if SCDEETX_DBG >= 1
+	printf("SCDEETX ConErr:%d!\n",
+		Result);
+	# endif
+
+	// Event-TX-Connect-Control new state: s_delay_then_idle (because connect func gives us an error)
+	ETXCC_State = s_delay_then_idle;
+
+	return;
+  }
+
+  // setup defaults for this conn 
+  espconn_set_opt(pespconn,0b11); // free imediatly+disable nagle
+//espconn_set_opt(pespconn,0b1011); // free imediatly+disable nagle+TCP keep alive
+
+  // Event-TX-Connect-Control new state: s_waked_up_monitoring_conn_proc_IP #02 (monitoring event conncb)
+  ETXCC_State = s_monitoring_conn_proc_IP;
+}
 
 

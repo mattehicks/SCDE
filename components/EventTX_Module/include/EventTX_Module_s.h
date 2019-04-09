@@ -60,7 +60,31 @@ typedef struct Entry_EventTX_Definition_s {
  
   uint8_t slot_no;			// slot number in this instance
 
+
+  int ETXCC_State;			// SCDE Event-TX-Connect-Control State
+
+  int SCDEETX_ConnCNT;			// STATISTICS - connections made counter
+  int SCDEETX_MsgCNT;			// STATISTICS - messages sent from queue counter
+  int SCDEETX_RcvOKCNT;			// STATISTICS - messages OK sent (determinated by response code)
+  int SCDEETX_RcvNOKCNT;		// STATISTICS - Error counter: retrys, ... ?
+
 } Entry_EventTX_Definition_t;
+
+
+
+// SCDE Event-TX-Connect-Control - State (enum) Monitoring
+enum ETXCC_State
+  { s_idle = 0					// #000 idle state, !! no connection control !!
+  , s_delay_then_idle = 8*10-1			// #079 connection control - delay idle state
+  , s_dns_lookup_failed	= 80			// #080 connection control - DNS lookup failed state
+  , s_monitoring_dns_lookup = 80+8*10-1		// #159 connection control - monitoring DNS lookup to get IP adress
+  , s_conn_proc_IP_failed = 160			// #160 connection control - connection process to IP failed state
+  , s_monitoring_conn_proc_IP = 160+8*10-1	// #239 connection control - monitoring connection process to an IP adress
+};
+
+
+
+
 
 
 // -------------------------------------------------------------------------------------------------
@@ -190,6 +214,14 @@ typedef struct EventTX_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
 } EventTX_HTTPDConnSlotData_t;
 
 
+
+// --------------------------------------------------------------------------------------------------
+
+//
+void EventTX_Manage_Connection (Entry_EventTX_Definition_t* p_entry_eventtx_definition);
+
+//
+void EventTX_IPConnect(const char* name, ip_addr_t* ip, Entry_EventTX_Definition_t* p_entry_eventtx_definition);
 
 // --------------------------------------------------------------------------------------------------
 
