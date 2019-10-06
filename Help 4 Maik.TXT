@@ -1,0 +1,30 @@
+git clone --recursive https://github.com/espressif/esp-idf.git
+
+
+
+Make FS
+./mkspiffs -c filesystem/ -b 4096 -p 256 -s 0x100000 spiffs.bin
+Write FS
+esptool --chip esp32 --port /dev/ttyUSB0 --baud 115200 write_flash -z 0x110000 spiffs.bin
+
+
+
+make
+
+make flash
+
+View debug output>
+picocom -b 115200 /dev/ttyUSB0
+(Note: to exit picocom ctrl+a+x)
+
+
+git add .
+git commit -m "adding 04.04.2019"
+git push -u origin master
+
+http://192.168.0.105/SwITCH.htm
+
+
+
+
+

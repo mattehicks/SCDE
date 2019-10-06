@@ -3005,7 +3005,6 @@ SCDED_SetConCtrl(uint32_t CtrlBitfld)
 void ICACHE_FLASH_ATTR 
 SCDED_Process_Open_Connection(WebIf_HTTPDConnSlotData_t* conn)
 {
-
   // Reset inactivity timer - because we had an callback ...
   conn->InactivityTimer = 0;
 
@@ -3014,7 +3013,7 @@ SCDED_Process_Open_Connection(WebIf_HTTPDConnSlotData_t* conn)
 
 // -------------------------------------------------------------------------------------------------
 
-  // First: move data from 'trailing_buffer' to 'send_buffer' - if any + possible ..
+  // First: move data from 'trailing_buffer' to 'send_buffer' - if any and possible ..
   if ( ( conn->trailing_buffer_len ) &&				// is data in 'trailing_buffer'?
 	( conn->send_buffer_write_pos < MAX_SENDBUFF_LEN ) ) {	// 'send_buffer' not full?
 
@@ -3605,16 +3604,15 @@ ESPCONN_PROTO_MSG - SSL application invalid
  *FName: WebIf_IdleCb
  * Desc: Idle-Callback is triggered when connection has requested an Idle-Callback by ConnCtrl register.
  *       (if F_GENERATE_IDLE_CALLBACK in ConnCtrl is set -> request must be renewed in every cycle!!!)  
- * Para: void *arg -> struct espconn *conn
+ * Para: void *arg -> ptr to the platform specific conn
  * Rets: -/-
  *--------------------------------------------------------------------------------------------------
  */
 void ICACHE_FLASH_ATTR 
 WebIf_IdleCb (void *arg)
 {
-
   // the arg is a ptr to the platform specific conn
-  //struct espconn   *platform_conn = arg;	// ESP 8266 NonOS
+  // struct espconn   *platform_conn = arg;		// ESP 8266 NonOS
   Entry_WebIf_Definition_t *platform_conn = arg;	// ESP 32 RTOS
 
   // get assigned HTTPD-Connection-Slot-Data
@@ -3647,7 +3645,7 @@ WebIf_IdleCb (void *arg)
 //--------------------------------------------------------------------------------------------------
 
   // Response to open connection...
-  SCDED_Process_Open_Connection(conn);
+  SCDED_Process_Open_Connection (conn);
 }
 
 

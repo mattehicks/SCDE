@@ -261,47 +261,52 @@ enum {
 
 
 /* 
+ * FNs WebIf, stellt ein Web Interface breit, ist der Module Name, es koennten mehrere definiert werden
+ * WebIf betreibt einen (1) HTTPD, hard coded
+ * FNs HTTPD, stellen einen HTTPD bereit, k;nnte mehrere geben
+ */
+
+
+/* 
  * Entry WebIf Definition (struct) stores values for operation valid only for the defined instance of an
  * loaded module. Values are initialized by SCDE an the loaded module itself.
  */
 typedef struct Entry_WebIf_Definition_s {
 
-  Entry_Definition_t common;		// ... the common part of the definition
+  Entry_Definition_t common;		// ... the common part of the SCDE V2 definition
 
 //---
 
+//- V V V V V V V V V V V V V V V V V V // Each WebIf definition sets up (1) HTTPD, data here 
+
   enum espconn_type type;		// type of the espconn (TCP, UDP)
+
   enum espconn_state state;		// current state of the espconn
+
   union {
 	esp_tcp *tcp;			// connection details IP,Ports, ...
 	esp_udp *udp;
   } proto;
-    
-  espconn_recv_callback recv_callback;	// A callback function for event: receive-data
 
-  espconn_sent_callback send_callback;	// a callback function for event: send-data
+//Platform_Recv_Callback_t p_recv_callback;	// A callback function for event: receive-data
+  espconn_recv_callback recv_callback;
 
-  uint8_t link_cnt;
+//Platform_Sent_Callback_t p_sent_callback;	// a callback function for event: send-data
+  espconn_sent_callback send_callback;
+
+  uint8_t link_cnt;			// 
 
   void* reverse;			// the reverse link to application-conn-slot-data
 
+//int WebIf_control_register_a;		// WebIf control-register-a (enum WebIf_CtrlRegA from WEBIF.h)
   int WebIf_CtrlRegA;			// WebIf Control-Reg-A (enum WebIf_CtrlRegA from WEBIF.h)
 
+//HTTPD_Instance_Cfg_t* HTTPD_inst_cfg;	// link to configuration of this HTTPD-Instance
   HTTPD_InstanceCfg_t* HTTPD_InstCfg;	// link to configuration of this HTTPD-Instance
 
   uint8_t slot_no;			// slot number in this instance
 
 } Entry_WebIf_Definition_t;
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -315,11 +320,17 @@ typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
 
 //- V V V V V V V V V V V V V V V V V V // TX-Helper
 
-  char* p_send_buffer;//uint8_t*	// Pointer to current allocated send buffer w. size [MAX_SB_LEN] (NULL=NO Send-Buffer)
-  int send_buffer_write_pos; //uint16_t	// Send buffer, current write position (offset), !> 0 = its allocated!
-  char* p_trailing_buffer;//uint8_t*	// An 'trailing_buffer' in case of 'send_buffer' overflow. Its prio for next transmission!
-  int trailing_buffer_len; //uint16_t	// The 'trailing_buffer' length of (allocated & stored) data, !> 0 = its allocated!
+  char* p_send_buffer;//uint8_t*	// Pointer to current allocated send buffer w. size [MAX_SB_LEN],
+					// (NULL = NO Send-Buffer)
 
+  int send_buffer_write_pos; //uint16_t	// Send buffer, current write position (offset),
+					// !> 0 = its allocated!
+
+  char* p_trailing_buffer;//uint8_t*	// An 'trailing_buffer' in case of 'send_buffer' overflow.
+					// Its prio for next transmission!
+
+  int trailing_buffer_len; //uint16_t	// The 'trailing_buffer' length of (allocated & stored) data,
+					// !> 0 = its allocated!
 
 //- V V V V V V V V V V V V V V V V V V // Helper
 
@@ -328,13 +339,18 @@ typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
 //- V V V V V V V V V V V V V V V V V V // Procedure Callback Data
 
   PCallback cgi;			// Assigned Procedure Callback for Processing
+
   const void* PCArg;			// Argument for Procedure-Callback-Processing
+
   void* PCData;				// Data for PC Procedure-Callback-Operations (counting...)
 
 //- V V V V V V V V V V V V V V V V V V // General Connection Control
 
-  uint16_t ConnCtrlFlags;		// Connection Control Register (enum ConnCtrlFlags from httpD.h)
-  int16_t InactivityTimer;		// 10HZ Timer counting up after any Callback to detect broken connections
+//uint16_t connection_control_register;	// Connection Control Register (enum ConnCtrlFlags from httpD.h)
+  uint16_t ConnCtrlFlags;
+
+//int16_t inactivity_timer; 		// 10HZ Timer counting up after any Callback to detect broken connections
+  int16_t InactivityTimer;
 
 //- V V V V V V V V V V V V V V V V V V // ?
 
@@ -344,9 +360,15 @@ typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
 //- union 32Bit connspecific possible 
 
   uint8_t slot_no;			// helper to show slot number
-  unsigned int SlotCgiState : 4;	// enum SlotCgiState
-  unsigned int SlotParserState : 4;	// enum SlotParserState
-  uint16_t LP10HzCounter;		// LongPoll 100ms/ 10Hz Counter (0.1-6553.6 Sec) for this conn
+
+//unsigned int slot_cgi_state : 4;	// enum SlotCgiState
+  unsigned int SlotCgiState : 4;
+
+//unsigned int slot_parser_state : 4;	// enum SlotParserState
+  unsigned int SlotParserState : 4;
+
+//uint16_t lp_10hz_counter;		// Long-Poll 100ms/ 10Hz Counter (0.1-6553.6 Sec) for this conn
+  uint16_t LP10HzCounter;
 
 //-
 
@@ -359,8 +381,11 @@ typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
 //  union { //parsing / processing
 // temporary data - during header field parsing
   char* p_hdr_fld_name_buff;		// current Header Field Name Buffer ... during parsing
+
   int hdr_fld_name_len;			// current HdrFldNameBuff length ... during parsing
+
   char* p_hdr_fld_value_buff;		// Pointer to Header Field Value Buffer ... during parsing
+
   int hdr_fld_value_len;		// current HdrFldValueBuff length ... during parsing
 
 //	};
