@@ -9,21 +9,28 @@
 [submodule "components/ESP32_Control_Module"]
 	path = components/ESP32_Control_Module
 	url = https://github.com/EcSUHA/ESP32_Control_Module.git
+	branch = master
 [submodule "components/ESP32_S0_Module"]
 	path = components/ESP32_S0_Module
 	url = https://github.com/EcSUHA/ESP32_S0_Module.git
+	branch = master
 [submodule "components/TeLNET_Module"]
 	path = components/TeLNET_Module
 	url = https://github.com/EcSUHA/TeLNET_Module
+	branch = master
 [submodule "components/SSD1306_Module"]
 	path = components/SSD1306_Module
 	url = https://github.com/EcSUHA/SSD1306_Module
+	branch = master
 [submodule "components/BH1750_Module"]
 	path = components/BH1750_Module
 	url = https://github.com/EcSUHA/BH1750_Module
+	branch = master
 [submodule "components/ESP32_I2C_Master_Module"]
 	path = components/ESP32_I2C_Master_Module
 	url = https://github.com/EcSUHA/ESP32_I2C_Master_Module
+	branch = master
 [submodule "components/BMP180_Module"]
 	path = components/BMP180_Module
 	url = https://github.com/EcSUHA/BMP180_Module
+	branch = master
