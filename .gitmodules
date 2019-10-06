@@ -5,6 +5,7 @@
 [submodule "components/ESP32_SwITCH_Module"]
 	path = components/ESP32_SwITCH_Module
 	url = https://github.com/EcSUHA/ESP32_SwITCH_Module.git
+	branch = master
 [submodule "components/ESP32_Control_Module"]
 	path = components/ESP32_Control_Module
 	url = https://github.com/EcSUHA/ESP32_Control_Module.git
