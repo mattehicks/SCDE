@@ -125,7 +125,7 @@ ReadFullFlash_cgi(WebIf_HTTPDConnSlotData_t *conn)
 	}
 
   // transfer next 1024 Byte Block
-  SCDED_Send_To_Send_Buffer(conn, (const char *)(*pos), 1024);
+  HTTPD_Send_To_Send_Buffer(conn, (const char *)(*pos), 1024);
 
   // increase TXed position
   *pos += 1024;

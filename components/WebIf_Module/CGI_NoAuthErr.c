@@ -60,7 +60,7 @@ NoAuthErr_cgi(WebIf_HTTPDConnSlotData_t *conn)
   SCDED_AddHdrFld(conn, "Content-Type", "text/plain",-1);
   SCDED_AddHdrFld(conn, "WWW-Authenticate", "Basic realm=\""HTTP_AUTH_REALM"\"",-1);
   SCDED_EndHeader(conn);
-  SCDED_Send_To_Send_Buffer(conn, forbidden, -1);
+  HTTPD_Send_To_Send_Buffer(conn, forbidden, -1);
 
 //--------------------------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-In archive /home/maikschulze/esp/SCDE/build/BMP180_Module/libBMP180_Module.a:
+In archive /home/maikschulze/ESP32/SCDE/build/BMP180_Module/libBMP180_Module.a:
 
 BMP180_Module.o:     file format elf32-xtensa-le
 
@@ -108,25 +108,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, RELOC, DATA
  51 .debug_frame  00000208  00000000  00000000  00001d08  2**2
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 52 .debug_info   0000405f  00000000  00000000  00001f10  2**0
+ 52 .debug_info   00004059  00000000  00000000  00001f10  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 53 .debug_abbrev 00000343  00000000  00000000  00005f6f  2**0
+ 53 .debug_abbrev 0000033a  00000000  00000000  00005f69  2**0
                   CONTENTS, READONLY, DEBUGGING
- 54 .debug_loc    00000cae  00000000  00000000  000062b2  2**0
+ 54 .debug_loc    00000cae  00000000  00000000  000062a3  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 55 .debug_aranges 000000c0  00000000  00000000  00006f60  2**0
+ 55 .debug_aranges 000000c0  00000000  00000000  00006f51  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 56 .debug_ranges 000000b0  00000000  00000000  00007020  2**0
+ 56 .debug_ranges 000000b0  00000000  00000000  00007011  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 57 .debug_line   00000eac  00000000  00000000  000070d0  2**0
+ 57 .debug_line   00000e8e  00000000  00000000  000070c1  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 58 .debug_str    0000293d  00000000  00000000  00007f7c  2**0
+ 58 .debug_str    00002935  00000000  00000000  00007f4f  2**0
                   CONTENTS, READONLY, DEBUGGING
- 59 .comment      0000003b  00000000  00000000  0000a8b9  2**0
+ 59 .comment      0000003b  00000000  00000000  0000a884  2**0
                   CONTENTS, READONLY
- 60 .xtensa.info  00000038  00000000  00000000  0000a8f4  2**0
+ 60 .xtensa.info  00000038  00000000  00000000  0000a8bf  2**0
                   CONTENTS, READONLY
- 61 .xt.lit       00000090  00000000  00000000  0000a92c  2**0
+ 61 .xt.lit       00000090  00000000  00000000  0000a8f7  2**0
                   CONTENTS, RELOC, READONLY
- 62 .xt.prop      0000078c  00000000  00000000  0000a9bc  2**0
+ 62 .xt.prop      0000078c  00000000  00000000  0000a987  2**0
                   CONTENTS, RELOC, READONLY

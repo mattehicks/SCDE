@@ -59,7 +59,7 @@ NotFoundErr_cgi(WebIf_HTTPDConnSlotData_t *conn)
   # endif
 
   // Write response "not found" to send buf
-  SCDED_Send_To_Send_Buffer(conn, httpNotFoundHeader, -1);
+  HTTPD_Send_To_Send_Buffer(conn, httpNotFoundHeader, -1);
 
 //--------------------------------------------------------------------------------------------------
 

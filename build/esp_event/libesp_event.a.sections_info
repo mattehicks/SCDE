@@ -1,4 +1,4 @@
-In archive /home/maikschulze/esp/SCDE/build/esp_event/libesp_event.a:
+In archive /home/maikschulze/ESP32/SCDE/build/esp_event/libesp_event.a:
 
 default_event_loop.o:     file format elf32-xtensa-le
 
@@ -48,213 +48,17 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, RELOC, READONLY, DEBUGGING
  21 .debug_ranges 00000030  00000000  00000000  00000816  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 22 .debug_line   00000346  00000000  00000000  00000846  2**0
+ 22 .debug_line   0000034f  00000000  00000000  00000846  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 23 .debug_str    000003e6  00000000  00000000  00000b8c  2**0
+ 23 .debug_str    000003ea  00000000  00000000  00000b95  2**0
                   CONTENTS, READONLY, DEBUGGING
- 24 .comment      0000003b  00000000  00000000  00000f72  2**0
+ 24 .comment      0000003b  00000000  00000000  00000f7f  2**0
                   CONTENTS, READONLY
- 25 .xtensa.info  00000038  00000000  00000000  00000fad  2**0
+ 25 .xtensa.info  00000038  00000000  00000000  00000fba  2**0
                   CONTENTS, READONLY
- 26 .xt.lit       00000028  00000000  00000000  00000fe5  2**0
+ 26 .xt.lit       00000028  00000000  00000000  00000ff2  2**0
                   CONTENTS, RELOC, READONLY
- 27 .xt.prop      000001b0  00000000  00000000  0000100d  2**0
-                  CONTENTS, RELOC, READONLY
-
-event_default_handlers.o:     file format elf32-xtensa-le
-
-Sections:
-Idx Name          Size      VMA       LMA       File off  Algn
-  0 .literal.system_event_sta_lost_ip_default 00000010  00000000  00000000  00000034  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  1 .literal.system_event_eth_got_ip_default 00000010  00000000  00000000  00000044  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  2 .literal.system_event_ap_stop_handle_default 00000020  00000000  00000000  00000054  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  3 .literal.system_event_sta_stop_handle_default 00000004  00000000  00000000  00000074  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  4 .literal.system_event_eth_stop_handle_default 00000004  00000000  00000000  00000078  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  5 .literal.system_event_ap_start_handle_default 00000038  00000000  00000000  0000007c  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  6 .literal.system_event_sta_got_ip_default 00000028  00000000  00000000  000000b4  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  7 .literal.system_event_sta_disconnected_handle_default 00000020  00000000  00000000  000000dc  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  8 .literal.system_event_eth_disconnected_handle_default 00000004  00000000  00000000  000000fc  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  9 .literal.system_event_sta_connected_handle_default 00000058  00000000  00000000  00000100  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 10 .literal.system_event_eth_connected_handle_default 00000024  00000000  00000000  00000158  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 11 .literal.system_event_sta_start_handle_default 00000024  00000000  00000000  0000017c  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 12 .literal.system_event_eth_start_handle_default 0000000c  00000000  00000000  000001a0  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 13 .literal.wifi_get_reason 00000008  00000000  00000000  000001ac  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 14 .literal.esp_system_event_debug 00000170  00000000  00000000  000001b4  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 15 .literal.esp_event_process_default 00000024  00000000  00000000  00000324  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 16 .literal.esp_event_set_default_wifi_handlers 0000002c  00000000  00000000  00000348  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 17 .literal.esp_event_set_default_eth_handlers 00000018  00000000  00000000  00000374  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 18 .text         00000000  00000000  00000000  0000038c  2**0
-                  CONTENTS, ALLOC, LOAD, READONLY, CODE
- 19 .data         00000000  00000000  00000000  0000038c  2**0
-                  CONTENTS, ALLOC, LOAD, DATA
- 20 .bss          00000000  00000000  00000000  0000038c  2**0
-                  ALLOC
- 21 .rodata.str1.4 00000c03  00000000  00000000  0000038c  2**2
-                  CONTENTS, ALLOC, LOAD, READONLY, DATA
- 22 .text.system_event_sta_lost_ip_default 00000020  00000000  00000000  00000f90  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 23 .text.system_event_eth_got_ip_default 00000059  00000000  00000000  00000fb0  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 24 .text.system_event_ap_stop_handle_default 00000048  00000000  00000000  0000100c  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 25 .text.system_event_sta_stop_handle_default 00000010  00000000  00000000  00001054  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 26 .text.system_event_eth_stop_handle_default 00000010  00000000  00000000  00001064  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 27 .text.system_event_ap_start_handle_default 00000094  00000000  00000000  00001074  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 28 .text.system_event_sta_got_ip_default 00000090  00000000  00000000  00001108  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 29 .text.system_event_sta_disconnected_handle_default 00000048  00000000  00000000  00001198  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 30 .text.system_event_eth_disconnected_handle_default 00000010  00000000  00000000  000011e0  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 31 .text.system_event_sta_connected_handle_default 0000010c  00000000  00000000  000011f0  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 32 .text.system_event_eth_connected_handle_default 00000078  00000000  00000000  000012fc  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 33 .text.system_event_sta_start_handle_default 00000058  00000000  00000000  00001374  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 34 .text.system_event_eth_start_handle_default 00000024  00000000  00000000  000013cc  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 35 .text.wifi_get_reason 00000029  00000000  00000000  000013f0  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 36 .text.esp_system_event_debug 000004bc  00000000  00000000  0000141c  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 37 .rodata.esp_system_event_debug 00000064  00000000  00000000  000018d8  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, DATA
- 38 .text.esp_event_process_default 00000066  00000000  00000000  0000193c  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 39 .text.esp_event_set_default_wifi_handlers 0000003a  00000000  00000000  000019a4  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 40 .text.esp_event_set_default_eth_handlers 00000026  00000000  00000000  000019e0  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 41 .rodata.__FUNCTION__$7708 00000026  00000000  00000000  00001a08  2**2
-                  CONTENTS, ALLOC, LOAD, READONLY, DATA
- 42 .rodata.__FUNCTION__$7717 0000002a  00000000  00000000  00001a30  2**2
-                  CONTENTS, ALLOC, LOAD, READONLY, DATA
- 43 .rodata.__FUNCTION__$7725 0000002d  00000000  00000000  00001a5c  2**2
-                  CONTENTS, ALLOC, LOAD, READONLY, DATA
- 44 .rodata.__FUNCTION__$7685 00000020  00000000  00000000  00001a8c  2**2
-                  CONTENTS, ALLOC, LOAD, READONLY, DATA
- 45 .rodata.__FUNCTION__$7695 00000025  00000000  00000000  00001aac  2**2
-                  CONTENTS, ALLOC, LOAD, READONLY, DATA
- 46 .rodata.__FUNCTION__$7701 00000024  00000000  00000000  00001ad4  2**2
-                  CONTENTS, ALLOC, LOAD, READONLY, DATA
- 47 .bss.default_event_handlers 00000064  00000000  00000000  00001af8  2**2
-                  ALLOC
- 48 .rodata.wifi_reason 000000e8  00000000  00000000  00001af8  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, DATA
- 49 .debug_frame  000001c0  00000000  00000000  00001be0  2**2
-                  CONTENTS, RELOC, READONLY, DEBUGGING
- 50 .debug_info   00001dd2  00000000  00000000  00001da0  2**0
-                  CONTENTS, RELOC, READONLY, DEBUGGING
- 51 .debug_abbrev 00000292  00000000  00000000  00003b72  2**0
-                  CONTENTS, READONLY, DEBUGGING
- 52 .debug_loc    0000073f  00000000  00000000  00003e04  2**0
-                  CONTENTS, RELOC, READONLY, DEBUGGING
- 53 .debug_aranges 000000a8  00000000  00000000  00004543  2**0
-                  CONTENTS, RELOC, READONLY, DEBUGGING
- 54 .debug_ranges 00000170  00000000  00000000  000045eb  2**0
-                  CONTENTS, RELOC, READONLY, DEBUGGING
- 55 .debug_line   00000a71  00000000  00000000  0000475b  2**0
-                  CONTENTS, RELOC, READONLY, DEBUGGING
- 56 .debug_str    00001232  00000000  00000000  000051cc  2**0
-                  CONTENTS, READONLY, DEBUGGING
- 57 .comment      0000003b  00000000  00000000  000063fe  2**0
-                  CONTENTS, READONLY
- 58 .xtensa.info  00000038  00000000  00000000  00006439  2**0
-                  CONTENTS, READONLY
- 59 .xt.lit       00000090  00000000  00000000  00006471  2**0
-                  CONTENTS, RELOC, READONLY
- 60 .xt.prop      000007f8  00000000  00000000  00006501  2**0
-                  CONTENTS, RELOC, READONLY
-
-event_loop.o:     file format elf32-xtensa-le
-
-Sections:
-Idx Name          Size      VMA       LMA       File off  Algn
-  0 .literal.esp_event_post_to_user 00000008  00000000  00000000  00000034  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  1 .literal.esp_event_loop_task 0000002c  00000000  00000000  0000003c  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  2 .literal.esp_event_loop_set_cb 00000008  00000000  00000000  00000068  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  3 .literal.esp_event_send 0000003c  00000000  00000000  00000070  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  4 .literal.esp_event_loop_get_queue 00000004  00000000  00000000  000000ac  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  5 .literal.esp_event_loop_init 00000024  00000000  00000000  000000b0  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
-  6 .text         00000000  00000000  00000000  000000d4  2**0
-                  CONTENTS, ALLOC, LOAD, READONLY, CODE
-  7 .data         00000000  00000000  00000000  000000d4  2**0
-                  CONTENTS, ALLOC, LOAD, DATA
-  8 .bss          00000000  00000000  00000000  000000d4  2**0
-                  ALLOC
-  9 .text.esp_event_post_to_user 0000001c  00000000  00000000  000000d4  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 10 .rodata.str1.4 00000122  00000000  00000000  000000f0  2**2
-                  CONTENTS, ALLOC, LOAD, READONLY, DATA
- 11 .text.esp_event_loop_task 00000060  00000000  00000000  00000214  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 12 .text.esp_event_loop_set_cb 00000013  00000000  00000000  00000274  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 13 .text.esp_event_send 000000c0  00000000  00000000  00000288  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 14 .text.esp_event_loop_get_queue 0000000a  00000000  00000000  00000348  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 15 .text.esp_event_loop_init 0000004e  00000000  00000000  00000354  2**2
-                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 16 .bss.s_event_ctx 00000004  00000000  00000000  000003a4  2**2
-                  ALLOC
- 17 .bss.s_event_handler_cb 00000004  00000000  00000000  000003a4  2**2
-                  ALLOC
- 18 .bss.s_event_queue 00000004  00000000  00000000  000003a4  2**2
-                  ALLOC
- 19 .bss.s_event_init_flag 00000001  00000000  00000000  000003a4  2**0
-                  ALLOC
- 20 .debug_frame  000000a0  00000000  00000000  000003a4  2**2
-                  CONTENTS, RELOC, READONLY, DEBUGGING
- 21 .debug_info   00000fa1  00000000  00000000  00000444  2**0
-                  CONTENTS, RELOC, READONLY, DEBUGGING
- 22 .debug_abbrev 000002d1  00000000  00000000  000013e5  2**0
-                  CONTENTS, READONLY, DEBUGGING
- 23 .debug_loc    0000018f  00000000  00000000  000016b6  2**0
-                  CONTENTS, RELOC, READONLY, DEBUGGING
- 24 .debug_aranges 00000048  00000000  00000000  00001845  2**0
-                  CONTENTS, RELOC, READONLY, DEBUGGING
- 25 .debug_ranges 00000038  00000000  00000000  0000188d  2**0
-                  CONTENTS, RELOC, READONLY, DEBUGGING
- 26 .debug_line   000004f0  00000000  00000000  000018c5  2**0
-                  CONTENTS, RELOC, READONLY, DEBUGGING
- 27 .debug_str    00001175  00000000  00000000  00001db5  2**0
-                  CONTENTS, READONLY, DEBUGGING
- 28 .comment      0000003b  00000000  00000000  00002f2a  2**0
-                  CONTENTS, READONLY
- 29 .xtensa.info  00000038  00000000  00000000  00002f65  2**0
-                  CONTENTS, READONLY
- 30 .xt.lit       00000030  00000000  00000000  00002f9d  2**0
-                  CONTENTS, RELOC, READONLY
- 31 .xt.prop      000001ec  00000000  00000000  00002fcd  2**0
+ 27 .xt.prop      000001b0  00000000  00000000  0000101a  2**0
                   CONTENTS, RELOC, READONLY
 
 esp_event.o:     file format elf32-xtensa-le
@@ -305,83 +109,83 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, DATA
  21 .bss          00000000  00000000  00000000  00000318  2**0
                   ALLOC
- 22 .rodata.str1.4 00000538  00000000  00000000  00000318  2**2
+ 22 .rodata.str1.4 0000053c  00000000  00000000  00000318  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 23 .text.handler_execute 0000003f  00000000  00000000  00000850  2**2
+ 23 .text.handler_execute 0000003f  00000000  00000000  00000854  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 24 .text.handler_instances_add 00000061  00000000  00000000  00000890  2**2
+ 24 .text.handler_instances_add 00000061  00000000  00000000  00000894  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 25 .text.base_node_add_handler 000000b2  00000000  00000000  000008f4  2**2
+ 25 .text.base_node_add_handler 000000b2  00000000  00000000  000008f8  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 26 .text.loop_node_add_handler 000000d4  00000000  00000000  000009a8  2**2
+ 26 .text.loop_node_add_handler 000000d4  00000000  00000000  000009ac  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 27 .text.post_instance_delete 0000000e  00000000  00000000  00000a7c  2**2
+ 27 .text.post_instance_delete 0000000e  00000000  00000000  00000a80  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 28 .text.handler_instances_remove_all 00000032  00000000  00000000  00000a8c  2**2
+ 28 .text.handler_instances_remove_all 00000032  00000000  00000000  00000a90  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 29 .text.base_node_remove_all_handler 00000044  00000000  00000000  00000ac0  2**2
+ 29 .text.base_node_remove_all_handler 00000044  00000000  00000000  00000ac4  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 30 .text.loop_node_remove_all_handler 00000044  00000000  00000000  00000b04  2**2
+ 30 .text.loop_node_remove_all_handler 00000044  00000000  00000000  00000b08  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 31 .text.handler_instances_remove 00000041  00000000  00000000  00000b48  2**2
+ 31 .text.handler_instances_remove 00000041  00000000  00000000  00000b4c  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 32 .text.base_node_remove_handler 00000061  00000000  00000000  00000b8c  2**2
+ 32 .text.base_node_remove_handler 00000061  00000000  00000000  00000b90  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 33 .text.loop_node_remove_handler 0000006d  00000000  00000000  00000bf0  2**2
+ 33 .text.loop_node_remove_handler 0000006d  00000000  00000000  00000bf4  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 34 .text.post_instance_create 0000007e  00000000  00000000  00000c60  2**2
+ 34 .text.post_instance_create 0000007e  00000000  00000000  00000c64  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 35 .text.esp_event_loop_create 0000014e  00000000  00000000  00000ce0  2**2
+ 35 .text.esp_event_loop_create 0000014e  00000000  00000000  00000ce4  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 36 .text.esp_event_loop_run 00000152  00000000  00000000  00000e30  2**2
+ 36 .text.esp_event_loop_run 00000152  00000000  00000000  00000e34  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 37 .text.esp_event_loop_run_task 0000004f  00000000  00000000  00000f84  2**2
+ 37 .text.esp_event_loop_run_task 0000004f  00000000  00000000  00000f88  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 38 .text.esp_event_loop_delete 000000be  00000000  00000000  00000fd4  2**2
+ 38 .text.esp_event_loop_delete 000000be  00000000  00000000  00000fd8  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 39 .text.esp_event_handler_register_with 0000011a  00000000  00000000  00001094  2**2
+ 39 .text.esp_event_handler_register_with 0000011a  00000000  00000000  00001098  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 40 .text.esp_event_handler_unregister_with 000000c9  00000000  00000000  000011b0  2**2
+ 40 .text.esp_event_handler_unregister_with 000000c9  00000000  00000000  000011b4  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 41 .text.esp_event_post_to 0000011d  00000000  00000000  0000127c  2**2
+ 41 .text.esp_event_post_to 0000011d  00000000  00000000  00001280  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 42 .text.esp_event_dump 00000007  00000000  00000000  0000139c  2**2
+ 42 .text.esp_event_dump 00000007  00000000  00000000  000013a0  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
- 43 .rodata.__func__$6981 00000012  00000000  00000000  000013a4  2**2
+ 43 .rodata.__func__$6994 00000012  00000000  00000000  000013a8  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 44 .rodata.__func__$6961 00000022  00000000  00000000  000013b8  2**2
+ 44 .rodata.__func__$6974 00000022  00000000  00000000  000013bc  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 45 .rodata.__func__$6945 00000020  00000000  00000000  000013dc  2**2
+ 45 .rodata.__func__$6958 00000020  00000000  00000000  000013e0  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 46 .rodata.__func__$6922 00000016  00000000  00000000  000013fc  2**2
+ 46 .rodata.__func__$6935 00000016  00000000  00000000  00001400  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 47 .rodata.__func__$6887 00000013  00000000  00000000  00001414  2**2
+ 47 .rodata.__func__$6900 00000013  00000000  00000000  00001418  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 48 .rodata.__func__$6878 00000016  00000000  00000000  00001428  2**2
+ 48 .rodata.__func__$6891 00000016  00000000  00000000  0000142c  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
- 49 .debug_frame  000001f0  00000000  00000000  00001440  2**2
+ 49 .debug_frame  000001f0  00000000  00000000  00001444  2**2
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 50 .debug_info   000024d2  00000000  00000000  00001630  2**0
+ 50 .debug_info   000024d2  00000000  00000000  00001634  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 51 .debug_abbrev 00000357  00000000  00000000  00003b02  2**0
+ 51 .debug_abbrev 00000357  00000000  00000000  00003b06  2**0
                   CONTENTS, READONLY, DEBUGGING
- 52 .debug_loc    0000113c  00000000  00000000  00003e59  2**0
+ 52 .debug_loc    0000113c  00000000  00000000  00003e5d  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 53 .debug_aranges 000000b8  00000000  00000000  00004f95  2**0
+ 53 .debug_aranges 000000b8  00000000  00000000  00004f99  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 54 .debug_ranges 00000108  00000000  00000000  0000504d  2**0
+ 54 .debug_ranges 00000108  00000000  00000000  00005051  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 55 .debug_line   000010bc  00000000  00000000  00005155  2**0
+ 55 .debug_line   000010cb  00000000  00000000  00005159  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 56 .debug_str    00000d95  00000000  00000000  00006211  2**0
+ 56 .debug_str    00000d99  00000000  00000000  00006224  2**0
                   CONTENTS, READONLY, DEBUGGING
- 57 .comment      0000003b  00000000  00000000  00006fa6  2**0
+ 57 .comment      0000003b  00000000  00000000  00006fbd  2**0
                   CONTENTS, READONLY
- 58 .xtensa.info  00000038  00000000  00000000  00006fe1  2**0
+ 58 .xtensa.info  00000038  00000000  00000000  00006ff8  2**0
                   CONTENTS, READONLY
- 59 .xt.lit       00000098  00000000  00000000  00007019  2**0
+ 59 .xt.lit       00000098  00000000  00000000  00007030  2**0
                   CONTENTS, RELOC, READONLY
- 60 .xt.prop      00000ce4  00000000  00000000  000070b1  2**0
+ 60 .xt.prop      00000ce4  00000000  00000000  000070c8  2**0
                   CONTENTS, RELOC, READONLY
 
 esp_event_private.o:     file format elf32-xtensa-le
@@ -410,15 +214,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, RELOC, READONLY, DEBUGGING
  10 .debug_ranges 00000010  00000000  00000000  00000834  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 11 .debug_line   0000032e  00000000  00000000  00000844  2**0
+ 11 .debug_line   0000033a  00000000  00000000  00000844  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 12 .debug_str    000004b4  00000000  00000000  00000b72  2**0
+ 12 .debug_str    000004b8  00000000  00000000  00000b7e  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .comment      0000003b  00000000  00000000  00001026  2**0
+ 13 .comment      0000003b  00000000  00000000  00001036  2**0
                   CONTENTS, READONLY
- 14 .xtensa.info  00000038  00000000  00000000  00001061  2**0
+ 14 .xtensa.info  00000038  00000000  00000000  00001071  2**0
                   CONTENTS, READONLY
- 15 .xt.lit       00000008  00000000  00000000  00001099  2**0
+ 15 .xt.lit       00000008  00000000  00000000  000010a9  2**0
                   CONTENTS, RELOC, READONLY
- 16 .xt.prop      00000138  00000000  00000000  000010a1  2**0
+ 16 .xt.prop      00000138  00000000  00000000  000010b1  2**0
                   CONTENTS, RELOC, READONLY

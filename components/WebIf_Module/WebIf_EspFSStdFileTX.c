@@ -129,7 +129,7 @@ WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn)
   }
 
   // get the initial number of bytes free in send buff
-  int CurrTXBufFree = SCDED_Send_To_Send_Buffer(conn, NULL, 0);
+  int CurrTXBufFree = HTTPD_Send_To_Send_Buffer(conn, NULL, 0);
   int NextTXBufFree = 0;
 
   // free space in TX buffer?
@@ -154,7 +154,7 @@ WebIF_EspFSStdFileTX(WebIf_HTTPDConnSlotData_t *conn)
 	# endif
 
 	// yes we read some data. Send it to TX buf and get new free bytes
-	if (len > 0) NextTXBufFree = SCDED_Send_To_Send_Buffer(conn, buff, len);
+	if (len > 0) NextTXBufFree = HTTPD_Send_To_Send_Buffer(conn, buff, len);
 
 	// indicator that file read is complete
 //	if (len == 0) //!= CurrTXBufFree) // CurrTXBufFree cant be 0!

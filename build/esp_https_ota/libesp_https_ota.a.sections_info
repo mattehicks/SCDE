@@ -1,4 +1,4 @@
-In archive /home/maikschulze/esp/SCDE/build/esp_https_ota/libesp_https_ota.a:
+In archive /home/maikschulze/ESP32/SCDE/build/esp_https_ota/libesp_https_ota.a:
 
 esp_https_ota.o:     file format elf32-xtensa-le
 
@@ -32,15 +32,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, RELOC, READONLY, DEBUGGING
  13 .debug_ranges 00000018  00000000  00000000  00001a44  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 14 .debug_line   000004f7  00000000  00000000  00001a5c  2**0
+ 14 .debug_line   00000502  00000000  00000000  00001a5c  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 15 .debug_str    00000c53  00000000  00000000  00001f53  2**0
+ 15 .debug_str    00000c57  00000000  00000000  00001f5e  2**0
                   CONTENTS, READONLY, DEBUGGING
- 16 .comment      0000003b  00000000  00000000  00002ba6  2**0
+ 16 .comment      0000003b  00000000  00000000  00002bb5  2**0
                   CONTENTS, READONLY
- 17 .xtensa.info  00000038  00000000  00000000  00002be1  2**0
+ 17 .xtensa.info  00000038  00000000  00000000  00002bf0  2**0
                   CONTENTS, READONLY
- 18 .xt.lit       00000010  00000000  00000000  00002c19  2**0
+ 18 .xt.lit       00000010  00000000  00000000  00002c28  2**0
                   CONTENTS, RELOC, READONLY
- 19 .xt.prop      000001bc  00000000  00000000  00002c29  2**0
+ 19 .xt.prop      000001bc  00000000  00000000  00002c38  2**0
                   CONTENTS, RELOC, READONLY

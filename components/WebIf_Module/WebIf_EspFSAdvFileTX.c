@@ -168,7 +168,7 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 // -------------------------------------------------------------------------------------------------
 
   // get the initial number of bytes free in send buff (1 - x)
-  int CurrTXBufFree = SCDED_Send_To_Send_Buffer(conn, NULL, 0);
+  int CurrTXBufFree = HTTPD_Send_To_Send_Buffer(conn, NULL, 0);
   int NextTXBufFree = 0;
 
   // free space in TX buffer?
@@ -210,7 +210,7 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 				if (buff[x] == '%') {
 
 					// Send raw data up to now
-					if (sp != 0) NextTXBufFree = SCDED_Send_To_Send_Buffer(conn, e, sp);
+					if (sp != 0) NextTXBufFree = HTTPD_Send_To_Send_Buffer(conn, e, sp);
 
 					sp = 0;
 
@@ -234,7 +234,7 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 
 						// This is the second % of a %% escape string.
 						// Send a single % and resume with the normal program flow.
-						NextTXBufFree = SCDED_Send_To_Send_Buffer(conn, "%", 1);
+						NextTXBufFree = HTTPD_Send_To_Send_Buffer(conn, "%", 1);
 					}
 
 					// token end '%' detected, executen token replacement
@@ -254,7 +254,7 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 								,tpd->token
 								,&tpd->tplArg);
 
-							NextTXBufFree = SCDED_Send_To_Send_Buffer(conn, NULL, 0);
+							NextTXBufFree = HTTPD_Send_To_Send_Buffer(conn, NULL, 0);
 						}
 					}
 
@@ -275,7 +275,7 @@ WebIf_EspFSAdvFileTX(WebIf_HTTPDConnSlotData_t *conn)
 	}
 
 	// Send remaining data ..
-	if (sp != 0) NextTXBufFree = SCDED_Send_To_Send_Buffer(conn, e, sp);
+	if (sp != 0) NextTXBufFree = HTTPD_Send_To_Send_Buffer(conn, e, sp);
 
 	// indicator that file read is complete (read len != requested len)
 //	if (len == 0) //!= CurrTXBufFree) // CurrTXBufFree cant be 0!

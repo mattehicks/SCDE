@@ -314,7 +314,7 @@ typedef struct Entry_WebIf_Definition_s {
  * Definition typedef stores values for operation valid only for the defined instance of an
  * loaded module. Values are initialized by HCTRLD an the loaded module itself.
  */
-typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
+typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot // General TCP connection data
 
   Entry_WebIf_Definition_t* conn;	// Link to lower level connection management
 
@@ -334,7 +334,7 @@ typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
 
 //- V V V V V V V V V V V V V V V V V V // Helper
 
-  HTTPDConnSlotPrivData* priv;		// Opaque pointer to data for internal httpd housekeeping (currently unused)
+  HTTPDConnSlotPrivData* p_priv;	// Opaque pointer to data for internal httpd housekeeping (currently unused)
 
 //- V V V V V V V V V V V V V V V V V V // Procedure Callback Data
 
@@ -391,13 +391,11 @@ typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
 //	};
 
 
-
-
 //- V V V V V V V V V V V V V V V V V V // SCD-Engine STAGE 1 processing -> parsing HTTP
 
   uint32_t parser_nread;          	// # bytes read in various scenarios
-  uint64_t parser_content_length;	// Content-Length of Body from Headerfield ; -1 = not specified ; (counts down while parsed?)
-
+  uint64_t parser_content_length;	// Content-Length of Body from Headerfield ; -1 = not specified ;
+					// (counts down while parsed?)
 //-
 
   unsigned int parser_type : 2;         // Parser type cfg  AND result after parse (enum http_parser_type from httpD.h)
@@ -422,22 +420,27 @@ typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
 
 //-	
 
-  uint16_t parser_status_code;		// FROM RESPONSE ONLY - extracted status code (0-999 valid)		// unsigned int parser_status_code : 16;
+  uint16_t parser_status_code;		// FROM RESPONSE ONLY - extracted status code (0-999 valid)		
+					// unsigned int parser_status_code : 16;
   unsigned int parser_method : 8;	// FROM REQUEST ONLY - extracted method (enum http_method from httpD.h)
   unsigned int parser_http_errno : 7;	// internal error number in various operations
-  unsigned int parser_upgrade : 1;	// FROM REQUEST ONLY - upgrade header was present. Check when http_parser_execute() returns
+  unsigned int parser_upgrade : 1;	// FROM REQUEST ONLY - upgrade header was present. 
+					// Check when http_parser_execute() returns
 
 //- Extracted values in case of an request ...
 
   unsigned int parser_scheme : 4;	// FROM REQUEST ONLY - scheme extracted by uri-parsing (AvailSchemes[] from ps.h)
   unsigned int parser_mime : 4;		// FROM REQUEST ONLY - mime extracted by uri-parsing (AvailContentTypes[] from ps.h)
   unsigned int freereserved1 : 8;	// 
-  int16_t AxctiveDirID;			// FROM REQUEST ONLY - Active Directory ID (ADID) extracted by uri-parsing (0-32767 valid,-1,-2,-3
+  int16_t AxctiveDirID;			// FROM REQUEST ONLY - Active Directory ID (ADID) extracted by uri-parsing
+					// (0-32767 valid,-1,-2,-3
+//-
+
   Entry_Definition_t* p_entry_active_dir_matching_definition;	// FROM REQUEST ONLY - Active Directory ID (ADID) extracted by uri-parsing (0-32767 valid,-1,-2,-3 indicate special cases)
 
 //-
 
-  STAILQ_HEAD (stailhead, Entry_Header_Field_s) head_header_field;// REQUEST & RESPONSE - Stores Header-Fields in an SLTQ
+  STAILQ_HEAD (stailhead, Entry_Header_Field_s) head_header_field; // REQUEST & RESPONSE - Stores Header-Fields in an SLTQ
 
 //-
 
@@ -452,6 +455,7 @@ typedef struct WebIf_HTTPDConnSlotData_s { //HTTPD_Conn_Slot
   char* p_body_data;//uint8_t*		// REQUEST & RESPONSE - Pointer to BdyData Buffer
   int body_data_len;//uint16_t		// REQUEST & RESPONSE - length of stored body data
 //int postPos;	//BodyPos benötigt?	// counter for post position (contains whole post data len, not only buffer!)
+
 } WebIf_HTTPDConnSlotData_t;
 
 
@@ -868,7 +872,7 @@ bool SCDED_AuthCheck(WebIf_HTTPDConnSlotData_t* p_conn, int ResAuthCheckEna);
 void SCDED_SetConCtrl(uint32_t CtrlBitfld);
 
 // Process an open connection (calls the callback procedure and holds or closes the connection)
-void SCDED_Process_Open_Connection(WebIf_HTTPDConnSlotData_t *conn);
+void HTTPD_Process_Open_Connection(WebIf_HTTPDConnSlotData_t* p_conn);
 
 
 
@@ -928,13 +932,13 @@ const char* SCDE_GetDesc(SelectAData *SAD, uint8_t SelID);
  */
 
 // Moves data from 'trailing_buffer' to 'send_buffer'. Transmitting this data has priority.
-void SCDED_Copy_Trailing_Buffer_to_Send_Buffer(WebIf_HTTPDConnSlotData_t* conn);
+void HTTPD_Copy_Trailing_Buffer_to_Send_Buffer(WebIf_HTTPDConnSlotData_t* p_conn);
 
 // Sends / adds data to send buffer (conn->send_buffer), without doing the real transmission
-int SCDED_Send_To_Send_Buffer(WebIf_HTTPDConnSlotData_t* conn, const char* data, int len);
+int HTTPD_Send_To_Send_Buffer(WebIf_HTTPDConnSlotData_t* p_conn, const char* p_data, int len);
 
 // Finally transmits an allocated + filled 'send_buffer' (conn->send_buffer)
-void SCDED_Transmit_Send_Buffer(WebIf_HTTPDConnSlotData_t* conn);
+void HTTPD_Transmit_Send_Buffer(WebIf_HTTPDConnSlotData_t* p_conn);
 
 
 
@@ -1277,10 +1281,10 @@ void HTTPD_ParseUrl(WebIf_HTTPDConnSlotData_t *conn);
  */
 
 // Callback fired by HTTPDParser when message begins
-int HTTPD_On_Message_Begin_Cb(WebIf_HTTPDConnSlotData_t *conn);
+int HTTPD_On_Message_Begin_Cb(WebIf_HTTPDConnSlotData_t* p_conn);
 
 // Callback fired by HTTPDParser when url is found, used for parsing URI into elements
-int HTTPD_On_Url_Cb(WebIf_HTTPDConnSlotData_t *conn, const char *at, size_t length);
+int HTTPD_On_Url_Cb(WebIf_HTTPDConnSlotData_t* p_conn, const char* p_at, size_t length);
 
 // Callback fired by HTTPDParser when a header field is found
 int HTTPD_On_Header_Field_Cb(WebIf_HTTPDConnSlotData_t* p_conn, const char* p_at, size_t length);
@@ -1289,16 +1293,27 @@ int HTTPD_On_Header_Field_Cb(WebIf_HTTPDConnSlotData_t* p_conn, const char* p_at
 int HTTPD_On_Header_Value_Cb(WebIf_HTTPDConnSlotData_t* p_conn, const char* p_at, size_t length);
 
 // Proc to process stored header field (name+value)
-void HTTPD_Store_Header_Field(WebIf_HTTPDConnSlotData_t *conn);
+void HTTPD_Store_Header_Field(WebIf_HTTPDConnSlotData_t* p_conn);
 
 // Callback fired by HTTPDParser when header is complete parsed
-int HTTPD_On_Headers_Complete_Cb(WebIf_HTTPDConnSlotData_t *conn);
+int HTTPD_On_Headers_Complete_Cb(WebIf_HTTPDConnSlotData_t* p_conn);
 
 // Callback fired by HTTPDParser when body-data is found
-int HTTPD_On_Body_Cb(WebIf_HTTPDConnSlotData_t *conn, const char *at, size_t length);
+int HTTPD_On_Body_Cb(WebIf_HTTPDConnSlotData_t* p_conn, const char* p_at, size_t length);
 
 // Callback fired by HTTPDParser when message parsing is complete (after body data)
-int HTTPD_On_Message_Complete_Cb(WebIf_HTTPDConnSlotData_t *conn);
+int HTTPD_On_Message_Complete_Cb(WebIf_HTTPDConnSlotData_t* p_conn);
+
+
+/*
+ * HTTPD parser special case header field parse callbacks
+ */
+
+// Callback is fired when a value for header field "Authorization" is found, to parse it
+int HTTPD_On_Header_Field_Auth_Cb(WebIf_HTTPDConnSlotData_t* p_conn, const char* p_at, size_t length);
+
+// Callback is fired when a value for header field "Host" is found, to parse it
+int HTTPD_On_Header_Field_Host_Cb(WebIf_HTTPDConnSlotData_t* p_conn, const char* p_at, size_t length);
 
 
 
@@ -1318,11 +1333,7 @@ void RadioA(char *buff, SelectAData *SAD, uint8_t SelID, char *Name, char *CGI);
 void CheckboxA(char *buff, SelectAData *SAD, uint8_t SelID, char *Name, char *CGI);
 
 
-// Header field parse callbacks
-// Callback is fired when a value for header field "Authorization" is found, to parse it
-int HTTPDHdrFldAuthFnCb(WebIf_HTTPDConnSlotData_t *conn, const char *at, size_t length);
-// Callback is fired when a value for header field "Host" is found, to parse it
-int HTTPDHdrFldHostFnCb(WebIf_HTTPDConnSlotData_t *conn, const char *at, size_t length);
+
 
 
 

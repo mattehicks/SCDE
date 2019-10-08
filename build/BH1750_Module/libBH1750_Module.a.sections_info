@@ -1,4 +1,4 @@
-In archive /home/maikschulze/esp/SCDE/build/BH1750_Module/libBH1750_Module.a:
+In archive /home/maikschulze/ESP32/SCDE/build/BH1750_Module/libBH1750_Module.a:
 
 BH1750_Module.o:     file format elf32-xtensa-le
 
@@ -64,25 +64,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, RELOC, DATA
  29 .debug_frame  000000e8  00000000  00000000  00000f2c  2**2
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 30 .debug_info   0000316b  00000000  00000000  00001014  2**0
+ 30 .debug_info   00003165  00000000  00000000  00001014  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 31 .debug_abbrev 00000329  00000000  00000000  0000417f  2**0
+ 31 .debug_abbrev 00000320  00000000  00000000  00004179  2**0
                   CONTENTS, READONLY, DEBUGGING
- 32 .debug_loc    000004f1  00000000  00000000  000044a8  2**0
+ 32 .debug_loc    000004f1  00000000  00000000  00004499  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 33 .debug_aranges 00000060  00000000  00000000  00004999  2**0
+ 33 .debug_aranges 00000060  00000000  00000000  0000498a  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 34 .debug_ranges 00000050  00000000  00000000  000049f9  2**0
+ 34 .debug_ranges 00000050  00000000  00000000  000049ea  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 35 .debug_line   0000089b  00000000  00000000  00004a49  2**0
+ 35 .debug_line   0000087b  00000000  00000000  00004a3a  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 36 .debug_str    000027d2  00000000  00000000  000052e4  2**0
+ 36 .debug_str    000027ca  00000000  00000000  000052b5  2**0
                   CONTENTS, READONLY, DEBUGGING
- 37 .comment      0000003b  00000000  00000000  00007ab6  2**0
+ 37 .comment      0000003b  00000000  00000000  00007a7f  2**0
                   CONTENTS, READONLY
- 38 .xtensa.info  00000038  00000000  00000000  00007af1  2**0
+ 38 .xtensa.info  00000038  00000000  00000000  00007aba  2**0
                   CONTENTS, READONLY
- 39 .xt.lit       00000040  00000000  00000000  00007b29  2**0
+ 39 .xt.lit       00000040  00000000  00000000  00007af2  2**0
                   CONTENTS, RELOC, READONLY
- 40 .xt.prop      00000318  00000000  00000000  00007b69  2**0
+ 40 .xt.prop      00000318  00000000  00000000  00007b32  2**0
                   CONTENTS, RELOC, READONLY

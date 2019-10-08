@@ -1,4 +1,4 @@
-In archive /home/maikschulze/esp/SCDE/build/log/liblog.a:
+In archive /home/maikschulze/ESP32/SCDE/build/log/liblog.a:
 
 log.o:     file format elf32-xtensa-le
 
@@ -48,7 +48,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
  21 .text.esp_log_buffer_hexdump_internal 000001da  00000000  00000000  00000820  2**2
                   CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
- 22 .bss.base$5532 00000004  00000000  00000000  000009fc  2**2
+ 22 .bss.base$5531 00000004  00000000  00000000  000009fc  2**2
                   ALLOC
  23 .bss.s_log_mutex 00000004  00000000  00000000  000009fc  2**2
                   ALLOC
@@ -76,15 +76,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, RELOC, READONLY, DEBUGGING
  35 .debug_ranges 00000050  00000000  00000000  00002931  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 36 .debug_line   00000894  00000000  00000000  00002981  2**0
+ 36 .debug_line   000008a3  00000000  00000000  00002981  2**0
                   CONTENTS, RELOC, READONLY, DEBUGGING
- 37 .debug_str    0000067e  00000000  00000000  00003215  2**0
+ 37 .debug_str    00000682  00000000  00000000  00003224  2**0
                   CONTENTS, READONLY, DEBUGGING
- 38 .comment      0000003b  00000000  00000000  00003893  2**0
+ 38 .comment      0000003b  00000000  00000000  000038a6  2**0
                   CONTENTS, READONLY
- 39 .xtensa.info  00000038  00000000  00000000  000038ce  2**0
+ 39 .xtensa.info  00000038  00000000  00000000  000038e1  2**0
                   CONTENTS, READONLY
- 40 .xt.lit       00000048  00000000  00000000  00003906  2**0
+ 40 .xt.lit       00000048  00000000  00000000  00003919  2**0
                   CONTENTS, RELOC, READONLY
- 41 .xt.prop      00000654  00000000  00000000  0000394e  2**0
+ 41 .xt.prop      00000654  00000000  00000000  00003961  2**0
                   CONTENTS, RELOC, READONLY
